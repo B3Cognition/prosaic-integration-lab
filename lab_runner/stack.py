@@ -28,19 +28,21 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
             raise ValueError('unsupported engine/PostgreSQL major')
         self.engine, self.major = engine, postgres_major
+        self.candidate = candidate
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
         self.directory.mkdir(parents=True, mode=0o700)
         self.secrets = self.directory / 'secrets'
         self.secrets.mkdir(mode=0o700)
         self.manifest = {'owner': self.owner, 'engine': engine, 'postgres_major': postgres_major,
-                         'resources': [], 'endpoints': {}, 'images': {}}
+                         'resources': [], 'endpoints': {}, 'images': {},
+                         'dependency_mode': 'candidate' if candidate else 'released'}
         self._save()
 
     def _save(self):
@@ -106,6 +108,17 @@ class OwnedStack:
 
     def start(self):
         command(self.engine, 'info')
+        image_name = 'prosaic-integration-lab:candidate' if self.candidate else 'prosaic-integration-lab:dev'
+        image = json.loads(command(self.engine, 'image', 'inspect', image_name))[0]
+        if self.candidate:
+            import hashlib
+            manifest = ROOT / 'dependencies/accounting-candidate.json'
+            expected = hashlib.sha256(manifest.read_bytes()).hexdigest()
+            if (image['Config'].get('Labels') or {}).get('io.prosaic.lab.candidate-manifest') != expected:
+                raise EngineError('candidate image provenance mismatch')
+            self.manifest['candidate_manifest_sha256'] = expected
+        self.manifest['images']['consumer'] = image['Id']
+        self._save()
         images = json.loads((ROOT / 'dependencies/images.json').read_text())
         pg_image = images[f'postgres{self.major}']
         command(self.engine, 'pull', pg_image)
@@ -126,8 +139,6 @@ class OwnedStack:
         self.manifest['database_id'] = db
         self.manifest['network_id'] = network
         self.manifest['images']['postgres'] = pg_image
-        self.manifest['images']['consumer'] = command(self.engine, 'image', 'inspect',
-            'prosaic-integration-lab:dev', '--format', '{{.Id}}')
         self._save()
         deadline = time.monotonic() + 60
         while True:

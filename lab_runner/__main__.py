@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
+    parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
     args = parser.parse_args()
     if args.command == 'watch':
         if not args.directory or not os.path.isdir(args.directory):
@@ -38,13 +39,14 @@ def main():
         parser.error(str(error))
     if args.open_report and args.command != 'demo':
         parser.error('--open-report requires demo')
-    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command == 'run' else 3)
+    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command == 'run' else 3, candidate=args.candidate)
     events = workload.Events(stack.directory) if args.command == 'run' else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
     started = time.monotonic()
     result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run'} else args.mode, 'host_architecture': platform.machine(),
-              'python': platform.python_version(), 'passed': False, 'cleanup': 'pending'}
+              'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
+              'dependency_mode': 'candidate' if args.candidate else 'released'}
     try:
         stack.start()
         if args.command in {'demo', 'run'} or args.mode != 'provisioning':
@@ -100,6 +102,8 @@ def main():
             result['passed'] = False
         result['seconds'] = round(time.monotonic() - started, 2)
         result['images'] = stack.manifest['images']
+        if args.candidate:
+            result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
         if events:
             events.finish(result)
         (stack.directory / 'result.json').write_text(json.dumps(result, indent=2) + '\n')

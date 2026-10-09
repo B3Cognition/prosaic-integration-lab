@@ -27,12 +27,9 @@ class Metadata:
                                options='-c statement_timeout=5000 -c lock_timeout=1000')
 
     def check_ready(self):
+        from .app_schema import check_ready
         with self.connection() as conn:
-            if conn.execute('SELECT version FROM lab_app.schema_version').fetchall() != [{'version': 2}]:
-                raise ValueError('incompatible app schema')
-            conn.execute('''SELECT run_id,tenant_id,actor_id,billing_account_id,idempotency_key,
-                request_hash,request,workflow,assets_hash,phase,namespace,environment
-                FROM lab_app.runs LIMIT 0''')
+            check_ready(conn)
 
     def reserve(self, principal, key, payload, assets_hash, *, namespace, environment):
         request_hash = hashlib.sha256(canonical_request(payload).encode()).hexdigest()

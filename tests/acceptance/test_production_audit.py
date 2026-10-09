@@ -247,6 +247,26 @@ def test_missing_application_uniqueness_fails_readiness_without_repair(lab):
             conn.execute('ALTER TABLE lab_app.runs ADD CONSTRAINT runs_tenant_id_actor_id_idempotency_key_key UNIQUE(tenant_id,actor_id,idempotency_key)')
 
 
+def test_wrong_application_payload_type_fails_readiness_without_repair(lab):
+    with psycopg.connect(lab['migration_dsn']) as conn:
+        conn.execute('ALTER TABLE lab_app.runs ALTER COLUMN request TYPE json USING request::json')
+    try:
+        assert httpx.get(lab['a'] + '/readyz', timeout=5).status_code == 503
+    finally:
+        with psycopg.connect(lab['migration_dsn']) as conn:
+            conn.execute('ALTER TABLE lab_app.runs ALTER COLUMN request TYPE jsonb USING request::jsonb')
+
+
+def test_missing_application_phase_grant_fails_readiness_without_repair(lab):
+    with psycopg.connect(lab['migration_dsn']) as conn:
+        conn.execute('REVOKE UPDATE(phase) ON lab_app.runs FROM app_runtime')
+    try:
+        assert httpx.get(lab['a'] + '/readyz', timeout=5).status_code == 503
+    finally:
+        with psycopg.connect(lab['migration_dsn']) as conn:
+            conn.execute('GRANT UPDATE(phase) ON lab_app.runs TO app_runtime')
+
+
 def test_lost_http_response_does_not_authorize_duplicate_dispatch(lab):
     key = uuid.uuid4().hex
     before = count(lab)
