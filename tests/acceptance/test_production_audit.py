@@ -74,6 +74,23 @@ def test_service_assets_are_on_readonly_root_filesystem(lab):
     assert state['HostConfig']['ReadonlyRootfs'] is True, 'workflow assets live on a writable container root'
 
 
+def test_service_secret_delivery_is_private_and_runtime_only(lab):
+    manifest,identifier,state = replica_state(lab)
+    inspected = json.loads(command(manifest['engine'],'exec',identifier,'python','-c',
+        'import json,os,stat; p="/run/secrets/service.json"; s=os.stat(p); '
+        'print(json.dumps({"uid":s.st_uid,"mode":stat.S_IMODE(s.st_mode),"keys":sorted(json.load(open(p)))}))'))
+    assert inspected['uid'] == 10001
+    assert inspected['mode'] == 0o400
+    assert 'migration_dsn' not in inspected['keys']
+    assert 'provision.json' not in json.dumps(state['Mounts'])
+    assert state['HostConfig']['CapDrop'] == ['ALL']
+    assert 'no-new-privileges' in ' '.join(state['HostConfig']['SecurityOpt'])
+    assert state['HostConfig']['Memory'] > 0 and state['HostConfig']['PidsLimit'] > 0
+    secrets_dir = Path(lab['fixture_manifest']).parent/'secrets'
+    assert secrets_dir.stat().st_mode & 0o777 == 0o700
+    assert (secrets_dir/'service.json').stat().st_mode & 0o777 == 0o600
+
+
 @pytest.mark.parametrize('payload', [[], None, {'task': 7}, {'task': 'x', 'workflow': '../private'},
     {'task': 'x', 'billingAccountId': 'spoof'}, {'task': 'x', 'retry_interrupted': True}])
 def test_bad_start_input_never_dispatches(lab, payload):

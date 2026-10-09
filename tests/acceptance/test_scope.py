@@ -5,6 +5,15 @@ import httpx
 from test_approval import headers, start
 from test_accounting import count
 from test_recovery import mutate_replica, wait_for
+from lab_runner.stack import command
+from lab_runner.manifest import validate_resource
+
+def deliver_owned_config(lab):
+    manifest = json.loads(Path(lab['fixture_manifest']).read_text())
+    identifier = manifest['runtime_config_job']
+    state = json.loads(command(manifest['engine'],'inspect',identifier))[0]
+    validate_resource(state,identifier,manifest['owner'])
+    command(manifest['engine'],'start','-a',identifier)
 
 
 def test_replica_namespace_drift_cannot_turn_measured_usage_into_zero(lab):
@@ -19,6 +28,7 @@ def test_replica_namespace_drift_cannot_turn_measured_usage_into_zero(lab):
     config['namespace'] += '-drift'
     try:
         service.write_text(json.dumps(config))
+        deliver_owned_config(lab)
         mutate_replica(lab, 'kill', 'b')
         mutate_replica(lab, 'start', 'b')
         wait_for(lambda: httpx.get(lab['b'] + '/readyz', timeout=2).status_code == 200)
@@ -29,6 +39,7 @@ def test_replica_namespace_drift_cannot_turn_measured_usage_into_zero(lab):
         assert count(lab) == before
     finally:
         service.write_text(contents)
+        deliver_owned_config(lab)
         mutate_replica(lab, 'kill', 'b')
         mutate_replica(lab, 'start', 'b')
         wait_for(lambda: httpx.get(lab['b'] + '/readyz', timeout=2).status_code == 200)

@@ -170,10 +170,26 @@ class OwnedStack:
         self._secret('host.json', json.dumps(host_config))
         provision_name = name + '-provision'
         provision = self._create('container', provision_name, 'create', '--name', provision_name, '--label',
-            f'io.prosaic.lab.owner={self.owner}', '--network', network, '-v',
+            f'io.prosaic.lab.owner={self.owner}', '--network', network,
+            '--user','0','--read-only','--cap-drop','ALL','--cap-add','DAC_OVERRIDE',
+            '--security-opt','no-new-privileges','--pids-limit','128','--memory','512m','-v',
             f'{self.secrets / "provision.json"}:/run/secrets/provision.json:ro',
             self.manifest['images']['consumer'], 'python', 'scripts/provision.py')
         command(self.engine, 'start', '-a', provision)
+        runtime_name = name+'-runtime-config'
+        runtime_volume = self._create('volume',runtime_name,'volume','create','--label',
+            f'io.prosaic.lab.owner={self.owner}',runtime_name)
+        delivery_name = name+'-deliver-config'
+        delivery = self._create('container',delivery_name,'create','--name',delivery_name,'--label',
+            f'io.prosaic.lab.owner={self.owner}','--network','none','--user','0','--read-only',
+            '--cap-drop','ALL','--cap-add','CHOWN','--cap-add','DAC_OVERRIDE',
+            '--security-opt','no-new-privileges','--memory','128m','--pids-limit','32',
+            '-v',f'{self.secrets / "service.json"}:/run/secrets/service.json:ro',
+            '-v',f'{runtime_volume}:/run/runtime',self.manifest['images']['consumer'],
+            'python','-m','lab_runner.secret_delivery')
+        command(self.engine,'start','-a',delivery)
+        self.manifest['runtime_config_volume'] = runtime_volume
+        self.manifest['runtime_config_job'] = delivery
         self._save()
         return self.manifest
 
@@ -181,7 +197,10 @@ class OwnedStack:
         replica_name = f'prosaic-lab-{self.owner}-replica-{name}'
         identifier = self._create('container', replica_name, 'run', '-d', '--name', replica_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', self.manifest['network_id'],
-            '-p', '127.0.0.1::8080', '-v', f'{self.secrets / "service.json"}:/run/secrets/service.json:ro',
+            '--user','10001:10001','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges',
+            '--memory','512m','--cpus','2','--pids-limit','128',
+            '--tmpfs','/tmp:rw,noexec,nosuid,size=64m,mode=1777',
+            '-p', '127.0.0.1::8080', '-v', f'{self.manifest["runtime_config_volume"]}:/run/secrets:ro',
             '-e', 'LAB_CONFIG=/run/secrets/service.json', self.manifest['images']['consumer'],
             'python', '-m', 'uvicorn', 'prosaic_integration_lab.app:create_app', '--factory',
             '--host', '0.0.0.0', '--port', '8080', '--no-access-log',
@@ -208,6 +227,9 @@ class OwnedStack:
         model_name = f'prosaic-lab-{self.owner}-model'
         identifier = self._create('container', model_name, 'run', '-d', '--name', model_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', self.manifest['network_id'], '--network-alias', 'model',
+            '--user','10001:10001','--read-only','--cap-drop','ALL','--security-opt','no-new-privileges',
+            '--memory','256m','--cpus','2','--pids-limit','128',
+            '--tmpfs','/tmp:rw,noexec,nosuid,size=32m,mode=1777',
             '-p', '127.0.0.1::8000', self.manifest['images']['consumer'], 'python', '-m', 'uvicorn',
             'lab_runner.model:app', '--host', '0.0.0.0', '--port', '8000', '--no-access-log')
         port = json.loads(command(self.engine, 'inspect', identifier))[0]['NetworkSettings']['Ports']['8000/tcp'][0]['HostPort']

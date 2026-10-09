@@ -10,7 +10,7 @@ push, library publication or production deployment is implied.
 | 2 | [Lab 2](https://github.com/B3Cognition/prosaic-integration-lab/issues/2) | Application readiness | Locally verified |
 | 3 | [Lab 3](https://github.com/B3Cognition/prosaic-integration-lab/issues/3) | Bounded metadata admission | Locally verified; Harness candidate dependency |
 | 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Locally verified |
-| 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Queued |
+| 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Locally verified |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Queued |
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | Queued; configurable OIDC, Keycloak reference |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Queued |
@@ -127,3 +127,34 @@ only root/writable-root failures remain on both majors; zero skips, cleanup
 verified (`06bcb3041d5449578e1d8f3507db0779` /
 `f13a79592f4f4324955a64f9cda2b393`). Image:
 `sha256:2f4c3f518a5322ae125b3dc61ed6c5440b7a1cd7e1e30aca88f067b73c273f8d`.
+
+## Immutable deployment verification
+
+Replicas and model fixture run as UID/GID 10001, with read-only root, dropped
+capabilities, no-new-privileges, bounded private tmpfs scratch and CPU/memory/pid
+limits. The migration job remains separately privileged, without replica access
+to migration credentials. An exact-owned offline delivery job copies only
+runtime config to a private named volume (directory 0700, file 0400 owned by
+10001); replicas mount it read-only. Host secrets remain directory 0700/file 0600.
+Explicit job restart atomically replaces credentials; service restart loads them.
+The scope fault test uses this delivery path rather than the obsolete host bind.
+
+Initial delivery permission-order failures retained receipts
+`0070fc9df6d5414693c61a5706b6e579` / `d38ac9e68c7947e3923c6e78ac9875e8`.
+After correcting permission-before-ownership transfer, the first full runs only
+failed the obsolete drift injection (`6c2ad859432741989e28ebf16f1df212` /
+`49ac812282d1456da4349ed76188ffcd`). All failed fixtures verified cleanup.
+
+Local suite: 62 passed. Current audit: **64/64 passed on PostgreSQL 16 and 18**,
+zero skips, cleanup verified (`aa8863ec5d724995905c867345aaeb14` /
+`101b593776274dacaef54238ab1ca3d8`). Recovery, cross-replica approval/accounting,
+effective UID, read-only root and private secret delivery all pass. Image:
+`sha256:40fc5daf9af6aea241fe5cf0dcf396fa607e8253a403ff4558f78f1ad4ac94b2`.
+Independent read-only review found no critical/important defect. It noted that
+a killed delivery process can leave `.next`, blocking rotation; interrupted
+delivery recovery coverage is assigned to issue 9 rather than silently deleting
+an unexplained staging file.
+
+Green synthetic candidate audit does not complete wider adoption issues 6–14
+or publish the upstream adapter fixes. Released-package accounting readiness
+remains dependent on their eventual publication.

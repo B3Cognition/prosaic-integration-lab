@@ -15,4 +15,6 @@ RUN python -m pip install --no-deps /srv/wheels/prosaic_runtime_postgres-*.whl /
 RUN python scripts/audit_install.py dependencies/releases.json /srv/wheels
 ENV PYTHONPATH=/srv/lab/src:/srv/lab
 ENV PYTHONDONTWRITEBYTECODE=1
+RUN groupadd --gid 10001 lab && useradd --uid 10001 --gid 10001 --no-create-home lab
+USER 10001:10001
 CMD ["python", "-m", "prosaic_integration_lab", "--version"]
