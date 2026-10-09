@@ -63,6 +63,42 @@ def test_authenticated_partial_post_has_deadline_without_reservation(lab):
     assert count(lab) == before
 
 
+def test_owner_reviews_schema_approved_output_bound_to_revision(lab):
+    before = count(lab)
+    run = start(lab,workflow='synthetic').json()
+    path = '/runs/'+run['run_id']
+    review = run['review']
+    assert review == {'revision':run['revision'],'question':'Approve this fixture output?',
+        'result':{'result':'synthetic fixture output'}}
+    assert httpx.get(lab['b']+path,headers=headers(lab),timeout=5).json()['review'] == review
+    assert httpx.get(lab['b']+path,headers=headers(lab,'bob'),timeout=5).status_code == 404
+    response = httpx.post(lab['b']+path+'/resume',headers=headers(lab),
+        json={'expected_revision':review['revision'],'choice':'reject'},timeout=10)
+    assert response.status_code == 200
+    stale = httpx.post(lab['a']+path+'/resume',headers=headers(lab),
+        json={'expected_revision':review['revision'],'choice':'approve'},timeout=10)
+    assert stale.status_code == 409
+    assert count(lab) == before+1
+
+
+def test_changed_result_requires_its_own_review_revision(lab):
+    original = start(lab,workflow='synthetic').json()
+    try:
+        response = httpx.post(lab['model']+'/control',json={'result_text':'Changed fixture material'},timeout=5)
+        assert response.status_code == 200
+        changed = start(lab,workflow='synthetic').json()
+        assert changed['review']['result'] != original['review']['result']
+        path = '/runs/'+changed['run_id']+'/resume'
+        stale = httpx.post(lab['b']+path,headers=headers(lab),
+            json={'choice':'approve','expected_revision':original['review']['revision']},timeout=10)
+        assert stale.status_code == 409
+        accepted = httpx.post(lab['b']+path,headers=headers(lab),
+            json={'choice':'approve','expected_revision':changed['review']['revision']},timeout=10)
+        assert accepted.status_code == 200
+    finally:
+        httpx.post(lab['model']+'/control',json={'scenario':'normal'},timeout=5).raise_for_status()
+
+
 def test_service_container_runs_as_nonroot(lab):
     manifest, identifier, _ = replica_state(lab)
     effective_uid = command(manifest['engine'], 'exec', identifier, 'python', '-c', 'import os; print(os.geteuid())')

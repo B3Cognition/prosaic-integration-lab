@@ -62,7 +62,7 @@ class Execution:
             snapshot = self.harness(reservation).status()
         except RunNotFound:
             return uncertain_run(reservation['run_id'])
-        return public_run(reservation['run_id'], snapshot.state, snapshot.revision)
+        return public_run(reservation['run_id'], snapshot.state, snapshot.revision,workflow=reservation['workflow'])
 
     def start(self, reservation):
         with stage('harness_config'):
@@ -89,6 +89,10 @@ class Execution:
         return self.start(reservation)
 
     def resume(self, reservation, revision, choice, retry):
+        if choice is not None:
+            reviewed = self.status(reservation)
+            if reviewed.get('status') == 'waiting' and not reviewed.get('review'):
+                raise HTTPException(409,'approval_view_unavailable')
         self.harness(reservation).resume(choice=choice, expected_revision=revision, retry_interrupted=retry)
         return self.status(reservation)
 

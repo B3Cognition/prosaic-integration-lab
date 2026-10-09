@@ -11,7 +11,7 @@ push, library publication or production deployment is implied.
 | 3 | [Lab 3](https://github.com/B3Cognition/prosaic-integration-lab/issues/3) | Bounded metadata admission | Locally verified; Harness candidate dependency |
 | 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Locally verified |
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Locally verified |
-| 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Queued |
+| 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Locally verified |
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | Queued; configurable OIDC, Keycloak reference |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Queued |
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Queued |
@@ -158,3 +158,21 @@ an unexplained staging file.
 Green synthetic candidate audit does not complete wider adoption issues 6–14
 or publish the upstream adapter fixes. Released-package accounting readiness
 remains dependent on their eventual publication.
+
+## Approval review verification
+
+Only explicit approval/synthetic workflows expose a `review` while at their
+approval pause: trusted fixed question, exact revision and schema-approved
+author result (`result` string, max 256, no extra properties). Other inputs,
+outputs, history and raw question remain private. Invalid output removes choices
+and the HTTP resume boundary rejects approval before invoking Harness. Result
+text is JSON data; a UI must render it as text, never HTML. The HTTP test verifies
+application/json for script-like text without exposing operator state.
+
+Projection regressions failed before implementation. Local suite: 70 passed.
+Owner-only cross-replica review, stale post-decision approval and an old review
+revision against different result material all pass using real SDK fencing.
+Candidate audits: 66/66 passed on both database majors, zero skips and verified
+cleanup (`ea916cce168d4020be76576ec8c5da7c` /
+`cfc369b22d9747d0b446c65a190a01f1`). Image:
+`sha256:27ce0d15f0f63403aad3db0415c1f5c7158d65e6a16ff696a18157cbd9a5f761`.
