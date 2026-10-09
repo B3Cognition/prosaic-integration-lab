@@ -5,12 +5,14 @@ Harness workflows, shared PostgreSQL persistence and customer usage accounting.
 
 ## Current status
 
-The first working consumer and synthetic acceptance lanes are implemented.
+Version **0.2.0** combines the hardened multiuser blueprint and Lago metering.
 Two identical HTTP replicas use shared PostgreSQL, separate restricted roles,
 owner-only views, durable idempotency and installed release wheels. Default
-tests make no paid or local real-model calls. Verified on Docker Desktop
-Linux/arm64 with PostgreSQL 16 and 18. CI, amd64 and non-sticky proxy routing
-are not certified.
+tests make no paid or local real-model calls. Configurable Keycloak/OIDC and
+Auth0, verified TLS ingress, bounded load, recovery and protected metrics are
+implemented. Read the [release ledger](docs/verification/release-train-2026-10-09.md)
+for the actual native matrix and published dependency evidence. Deployment
+identity/TLS/HA/capacity qualification and customer invoicing remain separate.
 
 Start with the [approved design](docs/superpowers/specs/2026-10-09-prosaic-integration-lab-design.md),
 [Codex handoff](docs/handoff.md) and [tracking issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1).
@@ -53,6 +55,10 @@ Podman is accepted by the runner but has not been verified here.
 ## Run the lab
 
 From this checkout:
+
+Use the Git checkout or complete release source archive for runner scripts,
+fixtures and configuration. The wheel contains the Python application/runner
+modules; the terminal stack runner also requires those repository assets.
 
 ```sh
 uv venv --python 3.12 .venv
@@ -166,28 +172,20 @@ defects, adoption requirements and features that can remain disabled.
 
 This lane includes existing recovery/load cases plus adversarial HTTP inputs,
 schema/privilege corruption, accounting conflicts/quarantine, token budgets,
-private-response/log sentinels and production deployment checks. It currently
-exits **1**: 49 test cases pass and 9 fail on each database major, with zero skips
-and verified cleanup. Those are visible production gates; they are not expected
-failures or changes to the existing green deterministic/recovery/load contracts.
+private-response/log sentinels and production deployment checks. The original
+49-pass/9-fail report is preserved. Its fourteen blocker groups have local fixes
+and regression coverage; see the [follow-up](docs/verification/production-follow-up-2026-10-09.md)
+and current released-package verification in the release ledger.
 
 ## Optional local model smoke
 
 The sequential production fix ledger is
-[production-fixes.md](docs/verification/production-fixes.md). Accounting adapter
-and Harness adapters 0.1.1 are unpublished, checksummed candidates; the original release
-manifest remains unchanged. To test that explicit candidate after building its
-wheel into `.cache/candidates/`:
-
-```sh
-docker build -f containers/Candidate.Dockerfile \
-  --build-arg CANDIDATE_MANIFEST_SHA256=6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0 \
-  -t prosaic-integration-lab:candidate .
-.venv/bin/python -m lab_runner test --candidate --mode audit --postgres-version 16
-```
-
-Candidate receipts explicitly record dependency mode, wheel-manifest checksum
-and immutable image ID. A mismatched image fails before fixture allocation.
+[production-fixes.md](docs/verification/production-fixes.md). The release train
+publishes recorder/store adapters 0.1.1 and deliberately updates
+`dependencies/releases.json` to their exact released artifacts. Default commands
+use those releases. Earlier candidate manifests and receipts remain historical
+evidence; they are not a fallback for a failed release gate. A mismatched image
+fails before fixture allocation.
 
 Configurable OIDC authentication, including the owned Keycloak TLS test lane, is
 documented in [identity.md](docs/identity.md). Run `--mode identity` with either
@@ -211,8 +209,7 @@ against durable receipts; they do not guarantee a provider invoice ceiling.
 Verified TLS ingress, Keycloak authentication, non-sticky routing and in-flight
 drain/restart tests run with `--mode ingress`; deployment assumptions and commands
 are in [ingress.md](docs/ingress.md).
-Publishing the upstream wheel and updating released-package provenance are
-separate steps after review.
+Pinned dependency and native release verification are recorded in the release ledger.
 
 ```sh
 .venv/bin/python scripts/local_smoke.py
@@ -225,11 +222,11 @@ this is a smoke result, not a model-quality or provider-cost certification.
 
 ## Remaining acceptance work
 
-The full approved design remains the target. Tool-loop measurement, quarantined
-evidence, token-budget recovery, changed-default/scope recovery, the non-sticky
-proxy, CI and the architecture matrix still need their own executable evidence.
-Paid TokenProxy mode remains unimplemented and disabled. See the
-[implementation ledger](docs/verification/progress.md) for precise coverage.
+Longer deployment-specific soak, real provider/tool/streaming qualification,
+HA/PITR, managed identity/TLS/monitoring and customer invoice/payment closure
+remain separate. Paid TokenProxy mode is unimplemented and disabled. See the
+[production follow-up](docs/verification/production-follow-up-2026-10-09.md) and
+[capacity runbook](docs/capacity-retention.md) for the measured pilot limits.
 
 ## Local Lago billing robustness
 

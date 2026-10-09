@@ -5,7 +5,7 @@ from lab_runner.gates import validate,export
 def receipt(mode='audit'):
     return {'mode':mode,'passed':True,'cleanup':'verified','dependency_mode':'released',
         'test_returncode':0,'test_count':{'audit':88,'identity':20,'ingress':5}[mode],
-        'payload_audit':'verified','released_manifest_sha256':'247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7',
+        'payload_audit':'verified','released_manifest_sha256':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
         'skipped':0,'failed_tests':[],'host_architecture':'arm64',
         'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64}}
 

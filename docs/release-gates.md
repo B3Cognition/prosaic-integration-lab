@@ -28,13 +28,16 @@ an explicit local development mode and requires the candidate manifest hash.
 CI has no candidate fallback and never upgrades dependencies to make a red gate
 green. Updating the acceptance suite also requires reviewing its count contract.
 
-The released accounting adapter currently lacks the fixed schema/grant readiness
-contract, so the released audit gate is expected to fail until reviewed upstream
-fixes are published and the checksummed release manifest is updated. Local
-candidate receipts cannot authorize a release. The workflow is prepared locally;
-remote job success and branch-protection activation remain unverified until this
-branch is published and the repository rules require all four matrix checks.
-No GitHub run, push, release or repository-rule change is claimed here.
+The release manifest now pins Runtime 0.7.0/recorder 0.1.1 and Harness
+0.6.1/store 0.1.1, including schema/grant readiness and atomic lease registration
+fixes. The original 0.6 baseline is preserved in
+`dependencies/releases-baseline-0.6.json`; previous failing receipts remain
+historical evidence. Local candidate receipts cannot authorize a release.
+Current released-mode evidence is recorded in
+[the release ledger](verification/release-train-2026-10-09.md), with final native
+results in the GitHub release notes. Repository rules must still require the
+four matrix checks for future protected merges; publication does not configure
+branch protection.
 
 Do not publish a consumer image based solely on a green local candidate. Release
 the upstream fixes first, update provenance deliberately, run the required native

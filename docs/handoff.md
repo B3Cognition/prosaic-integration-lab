@@ -2,6 +2,14 @@
 
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
+## Release checkpoint
+
+The maintainer subsequently authorized committing all repository changes and
+publishing new releases. The earlier no-publication statements below describe
+their historical tasks. Read [the release ledger](verification/release-train-2026-10-09.md)
+for current version pins, verification and remote publication status. All Lago
+work is now committed; earlier shared-file staging constraints are historical.
+
 ## Lago extension checkpoint
 
 The approved Lago design/plan adds `lab_runner test --mode lago`. A separate

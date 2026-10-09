@@ -121,6 +121,20 @@ class OwnedStack:
             args += ['--filter', f'label=io.prosaic.lab.owner={self.owner}']
         return command(self.engine, *args).splitlines()
 
+    def network_inventory(self):
+        for _ in range(3):
+            identifiers = self._ids('network')
+            if not identifiers:
+                return []
+            try:
+                return json.loads(command(self.engine,'network','inspect',*identifiers))
+            except EngineError:
+                if not set(identifiers) - set(self._ids('network')):
+                    raise
+        raise EngineError('network inventory changed repeatedly',diagnostic={
+            'operation':'network_inspect','return_code':None,
+            'category':'engine_failed','outcome':'unknown'})
+
     def _reconcile_intents(self):
         for intent in list(self.manifest.get('pending_resources', [])):
             kind, name = intent['kind'], intent['name']
@@ -183,8 +197,7 @@ class OwnedStack:
         pg_image = images[f'postgres{self.major}']
         command(self.engine, 'pull', pg_image)
         name = f'prosaic-lab-{self.owner}'
-        identifiers = self._ids('network')
-        networks = json.loads(command(self.engine,'network','inspect',*identifiers)) if identifiers else []
+        networks = self.network_inventory()
         network_options = ['--subnet',choose_subnet(networks,self.owner)]
         network = self._create('network', name, 'network', 'create', '--label',
             f'io.prosaic.lab.owner={self.owner}', *network_options, name)

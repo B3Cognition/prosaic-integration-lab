@@ -3,7 +3,7 @@ import pytest
 from lab_runner import stack
 
 @pytest.mark.parametrize('labels',[{}, {'io.prosaic.lab.release-manifest':'wrong'},
-    {'io.prosaic.lab.release-manifest':'247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7',
+    {'io.prosaic.lab.release-manifest':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
      'io.prosaic.lab.candidate-manifest':'3'*64}])
 def test_released_stack_rejects_unverified_or_retagged_candidate_before_resource_allocation(monkeypatch,tmp_path,labels):
     monkeypatch.setattr(stack,'ROOT',tmp_path)

@@ -20,7 +20,7 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
         item={'mode':mode,'passed':mode != 'audit','cleanup':'verified','dependency_mode':'released',
             'test_returncode':1 if mode == 'audit' else 0,'test_count':COUNTS[mode],'skipped':0,
             'failed_tests':['PRIVATE'] if mode == 'audit' else [],'host_architecture':'arm64',
-            'payload_audit':'verified','released_manifest_sha256':'247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7',
+            'payload_audit':'verified','released_manifest_sha256':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
             'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64},'secret':'PRIVATE'}
         if mode=='lago':
             item['images']['lago']=json.loads((source.parents[1]/'dependencies/lago.json').read_text())['image']

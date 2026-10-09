@@ -28,10 +28,37 @@
 
 ## Tasks
 
-- [ ] Fetch all remotes; integrate the clean Runtime/Harness fix branches and remote main changes.
-- [ ] Release Runtime 0.7.0 with recorder 0.1.1: version/CI/docs, full core + adapter tests, builds and installed wheel checks, commit/push, native CI, tagged GitHub assets/checksums.
-- [ ] Release Harness 0.6.1 with store 0.1.1: new Runtime commit pin, version/CI/docs, full core and owned adapter matrix, builds/installed checks, commit/push, native CI, tagged GitHub assets/checksums.
+- [x] Fetch all remotes; integrate the clean Runtime/Harness fix branches and remote main changes.
+- [x] Release Runtime 0.7.0 with recorder 0.1.1: version/CI/docs, full core + adapter tests, builds and installed wheel checks, commit/push, native CI, tagged GitHub assets/checksums.
+- [x] Release Harness 0.6.1 with store 0.1.1: new Runtime commit pin, version/CI/docs, full core and owned adapter matrix, builds/installed checks, commit/push, native CI, tagged GitHub assets/checksums.
 - [ ] Commit the complete lab including approved Lago work; release lab 0.2.0 with new immutable release manifest and updated provenance checks. Full local suite, released PostgreSQL 16/18 acceptance and Lago lanes, native matrix, source/wheel artifacts and checksums.
 - [ ] Verify every remote release/asset, clean tracked checkouts and included upstream fixes; update issues and release ledger with actual evidence and outstanding deployment qualification.
 
 Execute inline. User has already chosen publication; no additional menu or publication approval is required.
+
+Source checkpoint: upstream releases are published; the lab's 239 host tests,
+clean-wheel/source-archive checks and released 138-case integration gates on
+both database majors pass. Final lab native CI, publication and issue status
+are recorded in the release notes and `VERIFICATION-0.2.0.json` rather than
+altering source after the immutable release commit is qualified.
+
+## Execution rulings
+
+- Runtime's first native matrix passed ten jobs and failed only the macOS 3.13
+  heartbeat test. The original test assumed thread scheduling within 40 ms.
+  Controlled 80 ms scheduling reproduced the failure; observed-heartbeat waiting
+  and actual stopped-thread assertions replace the timing assumption. Preserve
+  the failed CI run, keep its release draft unpublished, and qualify a new commit.
+- Runtime's local adapter setup first failed two cases because the fixture role
+  lacked CREATEDB and the Harness test helper was absent from PYTHONPATH. Correct
+  the private driver setup; 39/39 then passed on both PostgreSQL majors. No
+  production behavior change is needed for those setup failures.
+- Harness registration coverage must use its upstream disposable database
+  fixture rather than a lab-only DSN. The absent-DSN regression was watched fail
+  before wiring it to db_admin_dsn and explicit fixture-owned initialization.
+- Require the new Lago feature in the lab's native release gates: exact 25 cases,
+  pinned Lago image, no skips and verified cleanup. Its 600-second inner pytest
+  process needs a 900-second outer fixture budget. Missing gate and short outer
+  timeout were reproduced before the narrow gate changes.
+- Commit all previously shared Lago work now that the maintainer explicitly
+  authorized all repository changes. Do not include ignored private evidence.
