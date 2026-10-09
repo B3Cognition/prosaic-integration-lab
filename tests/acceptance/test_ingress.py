@@ -64,15 +64,34 @@ def test_lost_client_reply_reinspection_and_same_key_do_not_redispatch(lab,gatew
     key = uuid.uuid4().hex
     body = json.dumps({'workflow':'synthetic','task':'lost-reply'}).encode()
     token = headers(lab)['Authorization']
-    with context.wrap_socket(socket.create_connection((url.hostname,url.port),timeout=5),server_hostname=url.hostname) as conn:
-        request = (f'POST /runs HTTP/1.1\r\nHost: localhost\r\nAuthorization: {token}\r\n'
-            f'Idempotency-Key: {key}\r\nContent-Type: application/json\r\nContent-Length: {len(body)}\r\n\r\n').encode()+body
-        conn.sendall(request)
-        wait_for(lambda:count(lab) == before+1,timeout=5)
-        # Deliberately discard the reply: mutation outcome is unknown to client.
-    response = gateway.post('/runs',headers={**headers(lab),'Idempotency-Key':key},
+    httpx.post(lab['model']+'/control',json={'blocked':True},timeout=5).raise_for_status()
+    try:
+        with context.wrap_socket(socket.create_connection((url.hostname,url.port),timeout=5),server_hostname=url.hostname) as conn:
+            request = (f'POST /runs HTTP/1.1\r\nHost: localhost\r\nAuthorization: {token}\r\n'
+                f'Idempotency-Key: {key}\r\nContent-Type: application/json\r\nContent-Length: {len(body)}\r\n\r\n').encode()+body
+            conn.sendall(request)
+            wait_for(lambda:count(lab) == before+1,timeout=5)
+            # Dispatch count is not completion. Drop the reply while work is held.
+        import psycopg
+        with psycopg.connect(lab['app_dsn']) as connection:
+            run_id=connection.execute('SELECT run_id FROM lab_app.runs WHERE actor_id=%s AND idempotency_key=%s',
+                ('alice',key)).fetchone()[0]
+        response = gateway.post('/runs',headers={**headers(lab),'Idempotency-Key':key},
+            json={'workflow':'synthetic','task':'lost-reply'})
+        assert response.status_code in {200,503}
+        if response.status_code==200:
+            assert response.json()['run_id']==run_id
+            assert response.json()['status'] in {'running','start_uncertain'}
+        else:
+            assert response.json()=={'detail':'capacity_exhausted'}
+        assert count(lab)==before+1
+    finally:
+        httpx.post(lab['model']+'/control',json={},timeout=5).raise_for_status()
+    wait_for(lambda:gateway.get('/runs/'+run_id,headers=headers(lab)).json().get('status')=='waiting',timeout=10)
+    recovered=gateway.post('/runs',headers={**headers(lab),'Idempotency-Key':key},
         json={'workflow':'synthetic','task':'lost-reply'})
-    assert response.status_code == 200 and response.json()['status'] == 'waiting'
+    assert recovered.status_code==200
+    assert recovered.json()['run_id']==run_id and recovered.json()['status']=='waiting'
     assert count(lab) == before+1
 
 def test_replica_sigterm_drains_inflight_dispatch_without_duplicate(lab,gateway):

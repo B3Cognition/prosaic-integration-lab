@@ -1,0 +1,29 @@
+{
+  "deployment_mode": "production",
+  "environment": "sandbox",
+  "namespace": "integration-service",
+  "assets": "/srv/lab/assets",
+  "harness_dsn": "host=database dbname=service user=harness_runtime",
+  "accounting_dsn": "host=database dbname=service user=accounting_runtime",
+  "app_dsn": "host=database dbname=service user=app_runtime",
+  "authentication": {
+    "provider": "auth0",
+    "issuer": "https://YOUR_TENANT.eu.auth0.com/",
+    "audience": "https://integration-service.example/api",
+    "jwks_uri": "https://YOUR_TENANT.eu.auth0.com/.well-known/jwks.json",
+    "required_scope": "run:service",
+    "subjects": {
+      "auth0|REPLACE_WITH_VERIFIED_SUBJECT": {
+        "tenant_id": "tenant-a",
+        "actor_id": "alice",
+        "billing_account_id": "account-a",
+        "disabled": false,
+        "not_before": 0
+      }
+    },
+    "request_timeout": 2,
+    "jwks_ttl": 60,
+    "refresh_cooldown": 5,
+    "max_token_lifetime": 300
+  }
+}

@@ -99,6 +99,53 @@ def test_killed_ca_delivery_never_publishes_a_mixed_config_generation(lab):
         mutate_replica(lab,'start','b')
         wait_for(lambda:httpx.get(lab['b']+'/readyz',timeout=2).status_code == 200)
 
+def test_auth0_jwt_profile_tls_cross_replica_binding_and_accounting_contract(lab):
+    # Owned Keycloak supplies real TLS/RS256 tokens, not a claimed live Auth0 tenant.
+    source=Path(lab['fixture_manifest']).parent/'secrets/service.json'
+    original=source.read_text()
+    config=json.loads(original)
+    config['authentication']['provider']='auth0'
+    del config['authentication']['introspection']
+    def publish():
+        source.write_text(json.dumps(config))
+        deliver_owned_config(lab)
+        for replica in ('a','b'):
+            mutate_replica(lab,'kill',replica); mutate_replica(lab,'start',replica)
+            wait_for(lambda:httpx.get(lab[replica]+'/readyz',timeout=2).status_code==200)
+    try:
+        publish()
+        before=count(lab)
+        response=start(lab,workflow='synthetic')
+        assert response.status_code==200
+        run=response.json(); path='/runs/'+run['run_id']
+        for replica in ('a','b'):
+            assert httpx.get(lab[replica]+path,headers=headers(lab),timeout=5).status_code==200
+            assert httpx.get(lab[replica]+path,headers=headers(lab,'bob'),timeout=5).status_code==404
+        approved=httpx.post(lab['b']+path+'/resume',headers=headers(lab),
+            json={'choice':'approve','expected_revision':run['revision']},timeout=10)
+        assert approved.status_code==200 and approved.json()['status']=='completed'
+        usage=httpx.get(lab['a']+path+'/usage',headers=headers(lab),timeout=5).json()
+        assert usage['complete_calls']==1 and usage['billing_eligible'] is False
+        assert count(lab)==before+1
+        import psycopg
+        with psycopg.connect(lab['app_dsn']) as connection:
+            row=connection.execute('SELECT tenant_id,actor_id,billing_account_id FROM lab_app.runs WHERE run_id=%s',
+                (run['run_id'],)).fetchone()
+        assert row==('tenant-a','alice','account-a')
+        for binding in config['authentication']['subjects'].values():
+            if binding['actor_id']=='alice': binding['disabled']=True
+        publish()
+        for replica in ('a','b'):
+            denied=httpx.post(lab[replica]+'/runs',headers={**headers(lab),'Idempotency-Key':'auth0-disabled'},
+                content='malformed private body',timeout=5)
+            assert denied.status_code==401 and denied.json()=={'detail':'unauthenticated'}
+        assert count(lab)==before+1
+    finally:
+        source.write_text(original); deliver_owned_config(lab)
+        for replica in ('a','b'):
+            mutate_replica(lab,'kill',replica); mutate_replica(lab,'start',replica)
+            wait_for(lambda:httpx.get(lab[replica]+'/readyz',timeout=2).status_code==200)
+
 def test_keycloak_revocation_is_enforced_on_both_replicas_before_body(lab):
     before = count(lab)
     fixture = lab['oidc_fixture']

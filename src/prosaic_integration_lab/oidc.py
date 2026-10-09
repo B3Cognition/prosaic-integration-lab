@@ -15,12 +15,15 @@ class IdentityUnavailable(RuntimeError):
 
 class OidcAuthenticator:
     def __init__(self,settings,*,deployment_mode='production',transport=None):
-        required = {'provider','issuer','audience','jwks_uri','subjects','introspection'}
+        if not isinstance(settings,dict) or settings.get('provider') not in {'oidc','auth0'}:
+            raise ValueError('invalid OIDC provider')
+        offline = settings['provider']=='auth0'
+        required = {'provider','issuer','audience','jwks_uri','subjects'}
+        if not offline: required.add('introspection')
         optional = {'ca_file','allow_insecure_http','request_timeout','jwks_ttl',
                     'refresh_cooldown','max_token_lifetime','required_scope'}
         if not isinstance(settings,dict) or not required <= set(settings) or set(settings)-required-optional:
             raise ValueError('invalid OIDC configuration')
-        if settings['provider'] != 'oidc': raise ValueError('invalid OIDC provider')
         insecure = settings.get('allow_insecure_http',False)
         if type(insecure) is not bool or (deployment_mode != 'lab' and insecure):
             raise ValueError('invalid OIDC transport policy')
@@ -29,18 +32,20 @@ class OidcAuthenticator:
             self._url(settings[key],insecure)
         if type(settings['audience']) is not str or not 1 <= len(settings['audience']) <= 256:
             raise ValueError('invalid OIDC audience')
-        intro = settings['introspection']
-        if (not isinstance(intro,dict) or set(intro) != {'url','client_id','client_secret'} or
-            any(type(intro[key]) is not str or not intro[key] or len(intro[key]) > 8192 for key in intro)):
-            raise ValueError('invalid OIDC introspection configuration')
-        self._url(intro['url'],insecure)
-        self.introspection = dict(intro)
+        self.introspection = None
+        if not offline:
+            intro = settings['introspection']
+            if (not isinstance(intro,dict) or set(intro) != {'url','client_id','client_secret'} or
+                any(type(intro[key]) is not str or not intro[key] or len(intro[key]) > 8192 for key in intro)):
+                raise ValueError('invalid OIDC introspection configuration')
+            self._url(intro['url'],insecure)
+            self.introspection = dict(intro)
         self.timeout = settings.get('request_timeout',2)
         self.ttl = settings.get('jwks_ttl',60)
         self.cooldown = settings.get('refresh_cooldown',5)
         self.max_lifetime = settings.get('max_token_lifetime',300)
         for value,lower,upper in ((self.timeout,.01,2),(self.ttl,1,300),
-                                  (self.cooldown,1,60),(self.max_lifetime,1,3600)):
+                                  (self.cooldown,1,60),(self.max_lifetime,1,300 if offline else 3600)):
             if type(value) not in {float,int} or not math.isfinite(value) or not lower <= value <= upper:
                 raise ValueError('invalid OIDC bounds')
         subjects = settings['subjects']
@@ -160,10 +165,11 @@ class OidcAuthenticator:
             if disabled or claims['iat'] < not_before: raise ValueError()
             required_scope = self.settings.get('required_scope')
             if required_scope and required_scope not in str(claims.get('scope','')).split(): raise ValueError()
-            active = await self._json('POST',self.introspection['url'],data={'token':token,'token_type_hint':'access_token'},
-                auth=httpx.BasicAuth(self.introspection['client_id'],self.introspection['client_secret']))
-            if active.get('active') is not True or active.get('sub',claims['sub']) != claims['sub']:
-                raise ValueError()
+            if self.introspection is not None:
+                active = await self._json('POST',self.introspection['url'],data={'token':token,'token_type_hint':'access_token'},
+                    auth=httpx.BasicAuth(self.introspection['client_id'],self.introspection['client_secret']))
+                if active.get('active') is not True or active.get('sub',claims['sub']) != claims['sub']:
+                    raise ValueError()
             return actor
         except (jwt.PyJWTError,ValueError,KeyError,TypeError):
             raise ValueError('unauthenticated') from None

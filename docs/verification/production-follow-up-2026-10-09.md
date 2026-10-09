@@ -64,3 +64,9 @@ No paid model calls or customer credentials were used for this hardening pass.
 Terminal traffic/accounting, SLO and retention commands are in
 [capacity-retention.md](../capacity-retention.md); operational metrics are in
 [observability.md](../observability.md).
+
+Auth0 extension: configurable `provider: auth0` now shares bounded JWT/JWKS
+verification with a five-minute lifetime cap and explicit offline revocation
+semantics. Keycloak `oidc` retains per-request introspection. See
+[Auth0 verification](auth0-2026-10-09.md) and [identity setup](../identity.md).
+Local contract tests do not certify an existing Auth0 tenant.

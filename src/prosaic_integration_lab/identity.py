@@ -25,7 +25,7 @@ def make_authenticator(config):
     if provider == 'fixture':
         if mode != 'lab' or set(settings) != {'provider'}: raise ValueError('fixture authentication is lab-only')
         return FixtureAuthenticator(config['principals'])
-    if provider == 'oidc':
+    if provider in {'oidc','auth0'}:
         if mode == 'production' and config.get('principals'): raise ValueError('fixture identities are lab-only')
         from .oidc import OidcAuthenticator
         return OidcAuthenticator(settings,deployment_mode=mode)

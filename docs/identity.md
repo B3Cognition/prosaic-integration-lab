@@ -1,11 +1,13 @@
 # Configurable authentication
 
 The service supports explicit lab fixture authentication and a configurable OIDC
-provider. Keycloak is the tested reference. Other issuers configure the same
+provider and an explicit Auth0 JWT profile. Keycloak is the online-introspection
+reference. Other introspecting issuers configure the same
 issuer/audience/JWKS/introspection interface; no Keycloak SDK or endpoint lookup
 from token headers is involved. Current signature policy is RS256, RSA2048+.
 
-`deployment_mode: production` requires OIDC and HTTPS issuer/JWKS/introspection,
+`deployment_mode: production` requires `oidc` or `auth0` and HTTPS issuer/JWKS
+(plus introspection for `oidc`),
 and rejects fixture identities. This secures identity configuration; service TLS
 ingress qualification is separately tracked in issue 11. Execution `environment`
 remains `sandbox` for this synthetic test blueprint, including the identity lane,
@@ -26,7 +28,7 @@ token claims or forwarded headers. `disabled` and `not_before` provide local
 binding policy after config delivery/restart. Existing reservations retain their
 frozen attribution when current bindings change.
 
-Every accepted token is also checked through configured RFC7662 introspection,
+For `provider: oidc`, every accepted token is checked through RFC7662 introspection,
 with no active-token cache. Inactive tokens return 401. Provider/network/protocol
 failure returns curated 503 and cannot dispatch a workflow. Offline JWT validation
 alone does not promise immediate provider revocation. Introspection needs a
@@ -63,3 +65,44 @@ replicas. All ports bind loopback. It exercises real token issuance, cross-repli
 owner access/accounting, spoofed billing claims, signing-key rotation, logout and
 issuer outage. It never contacts an existing Keycloak instance. Exact owned
 resource cleanup and sanitized receipts are required; no model credits are used.
+
+## Auth0 profile
+
+Copy [auth0.example.json](../configs/auth0.example.json) into private runtime
+configuration. Select `provider: auth0`, set the exact HTTPS issuer (including
+its trailing slash), the custom API Identifier as `audience`, and the issuer's
+`/.well-known/jwks.json` endpoint. Custom domains are supported through these
+explicit URLs. Register an RS256 API and grant/request the configured
+`run:service` scope. Use authorization-code/PKCE at the interactive login client;
+this service consumes access tokens, not login credentials or ID tokens.
+Auth0 documents [access-token validation](https://auth0.com/docs/secure/tokens/access-tokens/validate-access-tokens)
+and [JWKS locations](https://auth0.com/docs/secure/tokens/json-web-tokens/locate-json-web-key-sets).
+
+The profile shares bounded RSA signature, exact issuer, audience (string or
+array), expiration/issued-at and optional scope validation with OIDC. Bind the
+stable `sub` (for example `auth0|...`) in trusted `subjects`; organization,
+email, tenant and billing claims never select application authorization. No
+Auth0 client secret, Management API access, `/userinfo` call or introspection
+configuration is required by the API. Supplying introspection to this profile
+is rejected rather than silently ignored.
+
+Configure the Auth0 API access-token lifetime to **300 seconds or less**; both
+the issued `exp - iat` and the service's `max_token_lifetime` must fit this cap.
+Auth0's longer default is deliberately rejected. See
+[token lifetime settings](https://auth0.com/docs/secure/tokens/access-tokens/update-access-token-lifetime).
+Logout or refresh-token revocation does not make this offline verifier immediately
+reject an already-issued access JWT. An otherwise valid JWT can be accepted until
+expiry. Local `disabled`/`not_before` bindings take effect after delivering config
+and restarting every replica. Cached signing keys are accepted only during their
+bounded TTL; a failed expired-key refresh returns 503. It does not fall back to
+stale keys. Keycloak `oidc` still checks activity on every request. See Auth0's
+[refresh-token revocation limitations](https://auth0.com/docs/secure/tokens/refresh-tokens/revoke-refresh-tokens).
+
+Tests cover Auth0-shaped audience arrays, JWT validation, binding policy, rotation,
+outage bounds, factory selection and the HTTP boundary. The owned identity lane
+also rolls both real replicas to `auth0`, using real TLS/RS256 tokens from its
+owned Keycloak issuer, and verifies cross-replica approval, owner isolation,
+frozen billing and binding disablement before body parsing. This tests the JWT
+integration contract; it is **not live Auth0 tenant certification**. Actual tenant
+issuance, custom domains, scope grants and lifetime settings need deployment
+acceptance with that tenant. No existing Auth0 account is contacted by these tests.

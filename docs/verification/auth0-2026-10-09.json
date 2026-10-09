@@ -1,0 +1,176 @@
+{
+  "date": "2026-10-09",
+  "profile": "auth0",
+  "token_lifetime_cap_seconds": 300,
+  "online_introspection": false,
+  "live_auth0_tenant_verified": false,
+  "local_suite_passed": 237,
+  "paid_inference_calls": 0,
+  "required_candidate_cells": [
+    {
+      "passed": true,
+      "postgres_major": 16,
+      "lanes": [
+        {
+          "passed": true,
+          "mode": "audit",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 88,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "c5af7efcc48b41eca07ba15a905cafdc",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+          },
+          "required_mode": "audit",
+          "gate_passed": true
+        },
+        {
+          "passed": true,
+          "mode": "identity",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 20,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "f71e513164a84eb6968217b253d25cb7",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+            "keycloak": "quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc"
+          },
+          "required_mode": "identity",
+          "gate_passed": true
+        },
+        {
+          "passed": true,
+          "mode": "ingress",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 5,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "903955b2c3414d7b9690d311309c43e0",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+            "keycloak": "quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc",
+            "ingress": "nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+          },
+          "required_mode": "ingress",
+          "gate_passed": true
+        }
+      ]
+    },
+    {
+      "passed": true,
+      "postgres_major": 18,
+      "lanes": [
+        {
+          "passed": true,
+          "mode": "audit",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 88,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "65a8e67bf33f4eaa923e7899449ff4f1",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336"
+          },
+          "required_mode": "audit",
+          "gate_passed": true
+        },
+        {
+          "passed": true,
+          "mode": "identity",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 20,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "ed605c2b3eee4a2f93911e14a232463f",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+            "keycloak": "quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc"
+          },
+          "required_mode": "identity",
+          "gate_passed": true
+        },
+        {
+          "passed": true,
+          "mode": "ingress",
+          "cleanup": "verified",
+          "dependency_mode": "candidate",
+          "host_architecture": "arm64",
+          "test_count": 5,
+          "skipped": 0,
+          "test_returncode": 0,
+          "failed_count": 0,
+          "payload_audit": "verified",
+          "owner": "50b838fd28c9401894f16b0a42326f39",
+          "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+          "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+          "images": {
+            "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+            "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+            "keycloak": "quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc",
+            "ingress": "nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+          },
+          "required_mode": "ingress",
+          "gate_passed": true
+        }
+      ]
+    }
+  ],
+  "final_revised_ingress_pg18": {
+    "passed": true,
+    "mode": "ingress",
+    "cleanup": "verified",
+    "dependency_mode": "candidate",
+    "host_architecture": "arm64",
+    "test_count": 5,
+    "skipped": 0,
+    "test_returncode": 0,
+    "failed_count": 0,
+    "payload_audit": "verified",
+    "owner": "45302791a66e4ff8b5b9a54fc9d25bd4",
+    "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+    "candidate_manifest_sha256": "6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0",
+    "images": {
+      "consumer": "sha256:97323c0e5397c9b68f28d40a153cc359b711b894e386999743edd21972eb893b",
+      "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+      "keycloak": "quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc",
+      "ingress": "nginx:1.28-alpine@sha256:a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236"
+    }
+  }
+}

@@ -50,8 +50,10 @@ def test_invalid_claims_never_reach_introspection(issuer,claim,value):
     asyncio.run(run())
     assert '/introspect' not in state['requests']
 
-def test_unknown_kid_fetches_are_bounded_and_header_url_is_ignored(issuer):
+@pytest.mark.parametrize('profile',['oidc','auth0'])
+def test_unknown_kid_fetches_are_bounded_and_header_url_is_ignored(issuer,profile):
     settings,state,endpoint,token,private = issuer
+    if profile=='auth0': settings=auth0_settings(settings)
     async def run():
         async with OidcAuthenticator(settings,transport=httpx.MockTransport(endpoint)) as provider:
             await provider.authenticate(token())
@@ -77,8 +79,10 @@ def test_production_configuration_fails_closed(settings):
     with pytest.raises(ValueError):
         make_authenticator({'deployment_mode':'production','authentication':settings,'principals':{}})
 
-def test_hmac_cannot_substitute_for_rsa_key(issuer):
+@pytest.mark.parametrize('profile',['oidc','auth0'])
+def test_hmac_cannot_substitute_for_rsa_key(issuer,profile):
     settings,state,endpoint,_,_ = issuer
+    if profile=='auth0': settings=auth0_settings(settings)
     async def run():
         async with OidcAuthenticator(settings,transport=httpx.MockTransport(endpoint)) as provider:
             forged = jwt.encode({'sub':'subject-1'},'fixture-only-key'*4,algorithm='HS256',headers={'kid':'key-1'})
@@ -94,8 +98,10 @@ def test_keyset_can_contain_unrelated_encryption_or_signature_algorithms(issuer)
             assert (await provider.authenticate(token())).actor_id == 'alice'
     asyncio.run(run())
 
-def test_key_rotation_refreshes_after_cooldown_and_removed_keys_expire(issuer,monkeypatch):
+@pytest.mark.parametrize('profile',['oidc','auth0'])
+def test_key_rotation_refreshes_after_cooldown_and_removed_keys_expire(issuer,monkeypatch,profile):
     settings,state,endpoint,token,_ = issuer
+    if profile=='auth0': settings=auth0_settings(settings)
     clock = [0]
     monkeypatch.setattr(oidc,'time',SimpleNamespace(monotonic=lambda:clock[0]))
     second = rsa.generate_private_key(public_exponent=65537,key_size=2048)
@@ -145,8 +151,10 @@ def test_whole_authentication_deadline_includes_key_lookup_and_introspection(iss
             with pytest.raises(IdentityUnavailable): await provider.authenticate(token())
     asyncio.run(run())
 
-def test_expired_key_cache_never_accepts_during_refresh_outage(issuer,monkeypatch):
+@pytest.mark.parametrize('profile',['oidc','auth0'])
+def test_expired_key_cache_never_accepts_during_refresh_outage(issuer,monkeypatch,profile):
     settings,_,endpoint,token,_ = issuer
+    if profile=='auth0': settings=auth0_settings(settings)
     clock,failed = [0],[False]
     monkeypatch.setattr(oidc,'time',SimpleNamespace(monotonic=lambda:clock[0]))
     def upstream(request):
@@ -158,3 +166,56 @@ def test_expired_key_cache_never_accepts_during_refresh_outage(issuer,monkeypatc
             clock[0],failed[0] = 61,True
             with pytest.raises(IdentityUnavailable): await provider.authenticate(token())
     asyncio.run(run())
+
+def auth0_settings(settings):
+    return {key:value for key,value in {**settings,'provider':'auth0'}.items() if key!='introspection'}
+
+def test_auth0_uses_verified_jwt_without_introspection_and_supports_audience_array(issuer):
+    settings,state,endpoint,token,_=issuer
+    configured=auth0_settings(settings)
+    configured['subjects']={'auth0|fixture-subject':settings['subjects']['subject-1']}
+    async def run():
+        async with OidcAuthenticator(configured,transport=httpx.MockTransport(endpoint)) as provider:
+            actor=await provider.authenticate(token(sub='auth0|fixture-subject',aud=['service','https://issuer.example/userinfo']))
+            assert (actor.tenant_id,actor.billing_account_id)==('trusted','payer')
+            state['active']=False
+            assert await provider.authenticate(token(sub='auth0|fixture-subject'))==actor
+    asyncio.run(run())
+    assert state['requests']==['/keys']
+
+@pytest.mark.parametrize('overrides',[{'aud':'login-client'},{'scope':'other'},
+    {'sub':'unbound'},{'exp':1},{'exp':int(time.time())+600}])
+def test_auth0_rejects_invalid_access_tokens(issuer,overrides):
+    settings,state,endpoint,token,_=issuer
+    settings=auth0_settings(settings); settings['required_scope']='run:service'
+    async def run():
+        async with OidcAuthenticator(settings,transport=httpx.MockTransport(endpoint)) as provider:
+            with pytest.raises(ValueError): await provider.authenticate(token(**{'scope':'run:service',**overrides}))
+    asyncio.run(run())
+    assert state['requests']==['/keys']
+
+def test_auth0_binding_disable_and_not_before_reject_existing_tokens(issuer):
+    settings,_,endpoint,token,_=issuer
+    async def run():
+        for change in ({'disabled':True},{'not_before':int(time.time())+3600}):
+            configured=auth0_settings(settings)
+            configured['subjects']={'subject-1':{**settings['subjects']['subject-1'],**change}}
+            async with OidcAuthenticator(configured,transport=httpx.MockTransport(endpoint)) as provider:
+                with pytest.raises(ValueError): await provider.authenticate(token())
+    asyncio.run(run())
+
+@pytest.mark.parametrize('change',[{'introspection':None},{'max_token_lifetime':301},
+    {'allow_insecure_http':True},{'issuer':'http://issuer.example'}])
+def test_auth0_profile_rejects_ambiguous_or_unsafe_configuration(issuer,change):
+    settings,_,_,_,_=issuer
+    with pytest.raises(ValueError): OidcAuthenticator({**auth0_settings(settings),**change})
+
+def test_auth0_factory_is_explicit_and_production_rejects_fixture_bindings(issuer):
+    settings,_,_,_,_=issuer
+    async def run():
+        provider=make_authenticator({'deployment_mode':'production','authentication':auth0_settings(settings)})
+        assert isinstance(provider,OidcAuthenticator)
+        await provider.close()
+    asyncio.run(run())
+    with pytest.raises(ValueError):
+        make_authenticator({'deployment_mode':'production','authentication':auth0_settings(settings),'principals':{'fixture':{}}})
