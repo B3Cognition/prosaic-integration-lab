@@ -1,6 +1,8 @@
 def public_run(run_id, state, revision, *, workflow=None):
     result = {'run_id': run_id, 'status': state['status'], 'current_step': state['current'],
-              'revision': revision, 'recovery_status': 'retry_consent_required' if state.get('reason') == 'interrupted_call' else None}
+              'revision': revision, 'recovery_status': {
+                  'interrupted_call':'retry_consent_required','usage_unknown':'usage_reconciliation_required',
+                  'token_limit':'budget_exhausted'}.get(state.get('reason'))}
     if state['status'] == 'waiting':
         result['choices'] = [c for c in state.get('choices', []) if c in {'approve', 'reject'}]
         if state['current'] == 'approval' and workflow in {'approval','synthetic'}:

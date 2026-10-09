@@ -199,6 +199,14 @@ lane (`--mode persistence`) are documented in [persistence.md](docs/persistence.
 Owner terminal recovery (`recover`), crash/receipt handling and atomic credential
 delivery are documented in [recovery.md](docs/recovery.md); `--mode operations`
 executes the owned recovery lane.
+
+HTTP workflows require finite call, recorded-token and duration limits before
+startup creates database resources. The synthetic workflow allows three calls,
+300 recorded tokens and 120 seconds; approval performs no model execution.
+Consumed or unknown usage blocks further dispatch, including explicit retry
+consent across replicas. Run `--mode budget` to exercise the owned worker-loss
+and exhausted-budget regressions. Recorded-token limits are checked by Harness
+against durable receipts; they do not guarantee a provider invoice ceiling.
 Publishing the upstream wheel and updating released-package provenance are
 separate steps after review.
 

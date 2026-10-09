@@ -97,7 +97,7 @@ def test_loss_after_receipt_recovers_without_another_dispatch(lab):
     assert usage['total_calls'] == 1
 
 
-def test_missing_receipt_blocks_then_requires_explicit_retry(lab):
+def test_missing_receipt_requires_consent_but_finite_budget_still_refuses_unknown_retry(lab):
     before = count(lab)
     run_id = crash_during(lab, {'blocked': True}, lambda: count(lab) == before + 1)
     recovered = resume_after_lease(lab, run_id)
@@ -107,9 +107,10 @@ def test_missing_receipt_blocks_then_requires_explicit_retry(lab):
     response = httpx.post(lab['b'] + '/runs/' + run_id + '/resume', headers=headers(lab),
                          json={'expected_revision': recovered['revision'], 'retry_interrupted': True}, timeout=20)
     assert response.status_code == 200
-    assert response.json()['status'] == 'waiting'
-    assert count(lab) == before + 2
+    assert response.json()['status'] == 'blocked'
+    assert response.json()['recovery_status'] == 'usage_reconciliation_required'
+    assert count(lab) == before + 1
     usage = httpx.get(lab['b'] + '/runs/' + run_id + '/usage', headers=headers(lab), timeout=5).json()
-    assert usage['total_calls'] == 2
+    assert usage['total_calls'] == 1
     assert usage['unresolved_calls'] == 1
     assert usage['fully_costed'] is False

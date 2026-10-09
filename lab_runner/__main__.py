@@ -31,7 +31,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
@@ -89,6 +89,8 @@ def main():
             files += ['tests/acceptance/test_persistence.py']
         if args.mode in {'audit','operations'}:
             files += ['tests/acceptance/test_terminal_recovery.py','tests/acceptance/test_delivery_recovery.py']
+        if args.mode in {'audit','budget'}:
+            files += ['tests/acceptance/test_http_budget.py']
         if args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':

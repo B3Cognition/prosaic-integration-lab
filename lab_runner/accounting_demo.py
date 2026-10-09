@@ -25,7 +25,7 @@ def capture_accounting(config, ownership_id):
                     json={'workflow': 'synthetic', 'task': 'Neutral accounting demonstration'})
                 response.raise_for_status()
                 run = response.json()
-                if run['status'] != ('blocked' if scenario == 'invalid_output' else 'waiting'):
+                if run['status'] != ('blocked' if scenario in {'invalid_output','missing_usage'} else 'waiting'):
                     raise ValueError('demo workflow did not reach the expected state')
                 # Approve normal results on B. Rejected/missing cases retain
                 # their state; no automatic retries or billing consent.

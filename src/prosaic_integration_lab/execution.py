@@ -1,5 +1,6 @@
 """Bounded SDK execution; never redispatch uncertain starts."""
 from pathlib import Path
+import math
 from fastapi import HTTPException
 from prosaic_harness import Harness, RunNotFound, Workflow
 from prosaic_harness_postgres import PostgresRunStore
@@ -11,11 +12,23 @@ from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
 
+def validate_workflow_limits(definition):
+    limits = definition.get('limits',{})
+    for name,maximum in (('max_calls',3),('max_tokens',4096)):
+        value = limits.get(name)
+        if type(value) is not int or not 1 <= value <= maximum:
+            raise ValueError('finite service execution policy is required')
+    duration = limits.get('max_run_s')
+    if type(duration) not in {float,int} or not math.isfinite(duration) or not 0 < duration <= 120:
+        raise ValueError('finite service execution duration is required')
+
 class Execution:
     def __init__(self, config):
         self.config = config
         self.fingerprint = assets_hash(config['assets'])
         self.workflows = {name: Workflow.load(Path(config['assets']) / (name + '.yml')) for name in ('approval', 'synthetic')}
+        for workflow in self.workflows.values():
+            validate_workflow_limits(workflow.definition)
         self.metadata = Metadata(config['app_dsn'])
         self.store = PostgresRunStore(config['harness_dsn'], namespace=config['namespace'], max_active_leases=2,
             lease_s=15, renew_s=3, operation_timeout_s=5, pool_timeout_s=2, connect_timeout_s=3,

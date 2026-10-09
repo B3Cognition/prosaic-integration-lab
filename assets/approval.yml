@@ -2,7 +2,7 @@ version: 1
 runtime: runtime.yml
 source: .
 start: approval
-limits: {max_calls: 1, timeout_s: 10}
+limits: {max_calls: 1, max_tokens: 1, timeout_s: 10, max_run_s: 120}
 steps:
   approval:
     kind: pause

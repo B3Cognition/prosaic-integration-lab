@@ -30,7 +30,7 @@ def stats():
 @app.post('/control')
 def control(body: Control):
     global scenario,result_text
-    if body.scenario not in {'normal', 'missing_usage', 'invalid_output'}:
+    if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage'}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -64,6 +64,7 @@ def completions():
                 'message': {'role': 'assistant', 'content': json.dumps({'result':output})
                             if selected != 'invalid_output' else 'invalid fixture output'}}]}
     if selected != 'missing_usage':
-        result['usage'] = {'prompt_tokens': 100, 'completion_tokens': 25, 'total_tokens': 125,
+        prompt = 500 if selected == 'large_usage' else 100
+        result['usage'] = {'prompt_tokens': prompt, 'completion_tokens': 25, 'total_tokens': prompt+25,
                            'prompt_tokens_details': {'cached_tokens': 20}}
     return result

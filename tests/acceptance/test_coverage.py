@@ -15,7 +15,8 @@ def test_missing_final_usage_is_unknown_not_zero(lab):
     try:
         before = count(lab)
         run = start(lab, workflow='synthetic').json()
-        assert run['status'] == 'waiting'
+        assert run['status'] == 'blocked'
+        assert run['recovery_status'] == 'usage_reconciliation_required'
         usage = httpx.get(lab['b'] + '/runs/' + run['run_id'] + '/usage', headers=headers(lab), timeout=10).json()
         assert usage['total_calls'] == 1
         assert usage['fully_costed'] is False

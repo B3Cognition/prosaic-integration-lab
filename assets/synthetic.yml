@@ -2,7 +2,7 @@ version: 1
 runtime: runtime.yml
 source: .
 start: author
-limits: {max_calls: 3, timeout_s: 10, max_run_s: 120}
+limits: {max_calls: 3, max_tokens: 300, timeout_s: 10, max_run_s: 120}
 steps:
   author:
     kind: agent

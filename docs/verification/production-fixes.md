@@ -15,7 +15,7 @@ push, library publication or production deployment is implied.
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | OIDC/Keycloak locally verified; service ingress in issue 11 |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Locally verified |
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Locally verified |
-| 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Queued |
+| 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Locally verified |
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Queued |
 | 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Queued |
 | 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Queued |
@@ -283,3 +283,25 @@ old-generation authentication after B restart. PostgreSQL 16 final receipt
 `d5f2e60af07b405c97596d2c2c4b775c` preceded the durability-only correction.
 Independent review reports no remaining important finding. Runbook and concrete
 terminal commands are in [recovery.md](../recovery.md).
+
+## Finite HTTP workflow budgets
+
+Startup rejects absent, nonfinite or excessive call/token/duration limits before
+constructing database resources. Synthetic runs allow three calls, 300 recorded
+tokens and 120 seconds. Durable consumed or unknown usage blocks redispatch,
+including consented retries on either replica; original billing attribution is
+preserved. Public views expose curated recovery reasons only. Recorded usage
+limits are not a provider invoice ceiling.
+
+New unit/functional regressions failed before implementation; focused suite is
+10/10. Prior-image real lane failed three assertions (receipt
+`3863586682904e7d8e930eb6e827ec43`), retained with verified cleanup. Current budget
+lanes pass 23/23 on both majors (`1d59a25b33f04867bb4f7b4f7ddb9af9` /
+`ce5f1d63a64047cdb000c1ee065c8ace`). Full audits pass **77/77 on both majors**,
+no skips, verified cleanup (`fa2c7da59a624a7ea9a5e3740a8bd189` /
+`ba96d39406ae41e89b790f19f3d45636`). Image:
+`sha256:21bd762f93ed60561560136474b4dbbe090fb4b8c844106c5581ab970d378599`.
+Independent review found no important gaps. The shared full unit suite was
+149 passed/one failure in concurrently developed Lago CLI loading; those changes
+are outside this fix and preserved. Historic missing-usage receipts remain intact;
+new finite policy intentionally blocks further execution pending reconciliation.
