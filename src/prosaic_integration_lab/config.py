@@ -6,7 +6,7 @@ from pathlib import Path
 def load_config():
     config = json.loads(Path(os.environ['LAB_CONFIG']).read_text())
     required = {'namespace', 'environment', 'assets', 'principals', 'harness_dsn', 'accounting_dsn', 'app_dsn'}
-    if not required <= set(config) or set(config) - required - {'fixture_events_url'} or config['environment'] != 'sandbox':
+    if not required <= set(config) or set(config) - required - {'fixture_events_url','http_bounds'} or config['environment'] != 'sandbox':
         raise ValueError('invalid lab configuration')
     return config
 

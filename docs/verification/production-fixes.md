@@ -9,7 +9,7 @@ push, library publication or production deployment is implied.
 | 1 | [Runtime 3](https://github.com/B3Cognition/prosaic-runtime/issues/3) | Accounting schema/grant readiness | Locally verified candidate; publication pending |
 | 2 | [Lab 2](https://github.com/B3Cognition/prosaic-integration-lab/issues/2) | Application readiness | Locally verified |
 | 3 | [Lab 3](https://github.com/B3Cognition/prosaic-integration-lab/issues/3) | Bounded metadata admission | Locally verified; Harness candidate dependency |
-| 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Queued |
+| 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Locally verified |
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Queued |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Queued |
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | Queued; configurable OIDC, Keycloak reference |
@@ -106,3 +106,24 @@ failures remain (`cf6ec5e1b7164013acc3307e4bb11d1b` /
 `883daef3f7724ec7b6fb2e7df7c3813a`). All these fixtures verified cleanup.
 Minimal sanitized stage diagnostics were brought forward from issue 13 to aid
 failure investigation; broader operational metrics remain queued.
+
+## HTTP guard verification
+
+Authentication precedes body reads and parsing. Per replica: 32 HTTP operations,
+2-second whole-body deadline, 8 KiB body, 16 KiB headers, 100 requests/second
+with burst 200 per trusted actor. `http_bounds` can configure finite capacity,
+deadline, rate and burst. Health/readiness bypass the protected HTTP pool;
+database readiness still has its separate bounded read pool. Rejections close
+connections. Uvicorn uses concurrency/backlog 64 and 5-second keep-alive.
+An ingress header deadline remains in issue 11; these are application bounds.
+
+The malformed unauthenticated POST functional regression failed with 422 before
+the guard, then passed with 401. Unit tests verify no body read before auth or
+admission/rate rejection, timeout release, health availability, trusted actor
+rate separation and body replay. Local suite: 60 passed. Raw TCP partial bodies
+with Content-Length/chunked framing return 401 immediately; authenticated partial
+body returns 408 without a model call. Candidate audit: 63 tests, 61 passed and
+only root/writable-root failures remain on both majors; zero skips, cleanup
+verified (`06bcb3041d5449578e1d8f3507db0779` /
+`f13a79592f4f4324955a64f9cda2b393`). Image:
+`sha256:2f4c3f518a5322ae125b3dc61ed6c5440b7a1cd7e1e30aca88f067b73c273f8d`.

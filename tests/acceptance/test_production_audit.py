@@ -36,16 +36,31 @@ def replica_state(lab, replica='a'):
     return manifest, identifier, state
 
 
-def test_unauthenticated_partial_post_is_rejected_before_waiting_for_body(lab):
+@pytest.mark.parametrize('framing',[b'Content-Length: 100\r\n\r\n{',
+    b'Transfer-Encoding: chunked\r\n\r\n64\r\n{'])
+def test_unauthenticated_partial_post_is_rejected_before_waiting_for_body(lab,framing):
     url = httpx.URL(lab['a'])
     with socket.create_connection((url.host, url.port), timeout=2) as connection:
         connection.settimeout(1)
-        connection.sendall(b'POST /runs HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 100\r\n\r\n{')
+        connection.sendall(b'POST /runs HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\n'+framing)
         try:
             response = connection.recv(1024)
         except socket.timeout:
             pytest.fail('unauthenticated partial body held request open beyond rejection deadline')
         assert response.startswith(b'HTTP/1.1 401')
+
+
+def test_authenticated_partial_post_has_deadline_without_reservation(lab):
+    before = count(lab)
+    url = httpx.URL(lab['a'])
+    token = headers(lab)['Authorization'].encode('ascii')
+    with socket.create_connection((url.host,url.port),timeout=2) as connection:
+        connection.settimeout(4)
+        connection.sendall(b'POST /runs HTTP/1.1\r\nHost: localhost\r\nAuthorization: '+token+
+            b'\r\nContent-Type: application/json\r\nIdempotency-Key: partial-fixture\r\nContent-Length: 100\r\n\r\n{')
+        assert connection.recv(1024).startswith(b'HTTP/1.1 408')
+    assert httpx.get(lab['a']+'/healthz',timeout=2).status_code == 200
+    assert count(lab) == before
 
 
 def test_service_container_runs_as_nonroot(lab):

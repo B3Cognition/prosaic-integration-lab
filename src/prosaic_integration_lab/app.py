@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from prosaic_harness import StoreError
 from .config import load_config
 from .execution import Execution
-from .identity import authenticate
+from .http_guard import HttpGuard
 from .metadata import RequestConflict
 
 
@@ -44,11 +44,10 @@ def create_app():
             await asyncio.to_thread(execution.close)
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
-    def principal(authorization: str | None = Header(default=None)):
-        try:
-            return authenticate(authorization, config['principals'])
-        except ValueError:
-            raise HTTPException(401, 'unauthenticated') from None
+    app.add_middleware(HttpGuard,principals=config['principals'],**config.get('http_bounds',{}))
+
+    def principal(request: Request):
+        return request.state.principal
 
     @app.exception_handler(RequestValidationError)
     async def invalid(request, error):
@@ -70,20 +69,6 @@ def create_app():
     @app.exception_handler(Exception)
     async def unexpected(request, error):
         return JSONResponse({'detail': 'service_unavailable'}, status_code=503)
-
-    @app.middleware('http')
-    async def bounded_body(request: Request, call_next):
-        if request.method == 'POST':
-            content = bytearray()
-            async for chunk in request.stream():
-                content.extend(chunk)
-                if len(content) > 8192:
-                    return JSONResponse({'detail': 'request_too_large'}, status_code=413)
-            request._body = bytes(content)
-        try:
-            return await call_next(request)
-        except Exception:
-            return JSONResponse({'detail': 'service_unavailable'}, status_code=503)
 
     def owned(execution, actor, run_id):
         reservation = execution.metadata.owned(actor, run_id)
