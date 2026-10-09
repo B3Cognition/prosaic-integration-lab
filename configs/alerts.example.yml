@@ -1,0 +1,22 @@
+groups:
+  - name: prosaic-blueprint
+    rules:
+      - alert: ProsaicReadinessUnavailable
+        expr: up{job="prosaic-blueprint"} == 0 or lab_readiness == 0
+        for: 15s
+        labels: {severity: critical}
+        annotations: {summary: "Readiness or protected metrics scrape failed"}
+      - alert: ProsaicUnknownAccountingObserved
+        expr: increase(lab_accounting_unknown_observations_total[5m]) > 0
+        labels: {severity: warning}
+        annotations: {summary: "Inspect durable owner-scoped usage; unknown is not zero"}
+      - alert: ProsaicAdmissionRejections
+        expr: increase(lab_admission_rejections_total[5m]) > 0
+        for: 1m
+        labels: {severity: warning}
+        annotations: {summary: "Admission capacity or actor quota is rejecting work"}
+      - alert: ProsaicReservationBacklog
+        expr: sum(lab_reservation_phase{phase=~"reserved|starting"}) > 0
+        for: 2m
+        labels: {severity: warning}
+        annotations: {summary: "Inspect reservation backlog; do not automatically retry uncertain effects"}

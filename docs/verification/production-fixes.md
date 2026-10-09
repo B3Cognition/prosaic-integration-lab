@@ -18,7 +18,7 @@ push, library publication or production deployment is implied.
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Locally verified |
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Locally verified |
 | 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Locally verified; native CI activation/publication pending |
-| 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Queued |
+| 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Locally verified; monitor deployment pending |
 | 14 | [Lab 14](https://github.com/B3Cognition/prosaic-integration-lab/issues/14) | Capacity SLOs/retention qualification | Queued |
 
 ## Execution contract
@@ -375,3 +375,35 @@ is preserved separately from the successful sequential retry. Bounded engine
 phase diagnostics remain issue 13. Independent review has no remaining important
 finding. Remote CI execution and required repository rules cannot be called
 verified until publication/activation; see [release-gates.md](../release-gates.md).
+
+## Protected metrics and safe operational correlation
+
+Independent operator credentials protect fixed-label process counters, latency
+buckets, admission occupancy/rejections and readiness. Scrapes run actual schema/
+grant readiness and application-owned reservation aggregates through bounded
+asynchronous read admission. Failed scrapes are 503, not green missing data.
+Host-generated request IDs, trusted run UUIDs and keyed tenant/call references
+correlate admitted worker logs without copying private requests or error text.
+Unknown accounting observations remain explicitly non-unique process observations;
+durable owner-scoped evidence remains the recovery authority. Metrics reset on
+restart, phase counts reflect persistent application reservations, and repeated
+replica scrapes must not be summed as unique runs. Alert examples are prepared;
+no remote monitoring installation is claimed.
+
+Terminal `metrics` accepts credentials only from environment, requires verified
+TLS or explicit loopback lab mode, bounds responses and rejects arbitrary names,
+labels/nonfinite values. Engine errors and safe exports retain only fixed phase,
+bounded return code/category and unknown outcome. Original stderr/arguments remain
+private; unknown resource creation still cannot certify cleanup without inventory.
+
+New metrics/engine/viewer regressions were red before implementation. Tracked plus
+new unit/functional suite: **163/163**. Prior image cannot deliver the new operator
+config contract (`bad66e58e5a44761853070e9d72dc08f`, failed receipt retained,
+verified cleanup). Observability lanes **26/26 on each major**
+(`23e8f0a1ee104a698c523df70a07c199` / `9ca88f030b054a0483e024a4b02feb65`).
+Final full audits **82/82 on PostgreSQL 16 and 18**, no skips, verified cleanup
+(`e63d2c9ebb2044e9a8107f55f68b2bc3` / `66ce65f63a054fa493a4eaf3d8d6483a`).
+Consumer image `sha256:45b753f06b597d63e0e790e47761c76dc027aecdf6511068403af3c565074f70`.
+Tests inspect actual safe logs, missing final usage, saturation with live reads,
+real accounting grant loss/recovery and owned engine exit 17. Independent review
+has no important findings. See [observability.md](../observability.md).

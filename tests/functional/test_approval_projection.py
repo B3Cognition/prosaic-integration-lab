@@ -5,7 +5,7 @@ from prosaic_integration_lab.views import public_run
 
 def test_http_owner_sees_plain_json_review_without_private_operator_state(monkeypatch):
     class Execution:
-        def __init__(self,config): self.metadata = SimpleNamespace(owned=self.owned)
+        def __init__(self,config,**kwargs): self.metadata = SimpleNamespace(owned=self.owned)
         def ready(self): pass
         def close(self): pass
         def owned(self,actor,run_id): return {'run_id':run_id} if actor.actor_id == 'alice' else None

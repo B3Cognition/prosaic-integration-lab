@@ -11,6 +11,7 @@ from .metadata import Metadata
 from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
+from .observability import bind_run,accounting_observation
 
 def validate_workflow_limits(definition):
     limits = definition.get('limits',{})
@@ -23,7 +24,7 @@ def validate_workflow_limits(definition):
         raise ValueError('finite service execution duration is required')
 
 class Execution:
-    def __init__(self, config):
+    def __init__(self, config, *, metrics=None):
         self.config = config
         self.fingerprint = assets_hash(config['assets'])
         self.workflows = {name: Workflow.load(Path(config['assets']) / (name + '.yml')) for name in ('approval', 'synthetic')}
@@ -35,8 +36,8 @@ class Execution:
             lock_timeout_s=1, statement_timeout_s=3)
         self.recorder = PostgresRecorder(config['accounting_dsn'], namespace=config['namespace'],
             environment=config['environment'], rate_card=RateCard('synthetic-v1', 'test-model', '2', '8', '0.5'))
-        self.operations = Admission(2)
-        self.reads = Admission(4)
+        self.operations = Admission(2,metrics=metrics)
+        self.reads = Admission(4,metrics=metrics,pool_name='reads')
 
     def ready(self):
         self.metadata.check_ready()
@@ -71,6 +72,7 @@ class Execution:
             response.raise_for_status()
 
     def status(self, reservation):
+        bind_run(reservation)
         try:
             snapshot = self.harness(reservation).status()
         except RunNotFound:
@@ -78,6 +80,7 @@ class Execution:
         return public_run(reservation['run_id'], snapshot.state, snapshot.revision,workflow=reservation['workflow'])
 
     def start(self, reservation):
+        bind_run(reservation)
         with stage('harness_config'):
             harness = self.harness(reservation)
         with stage('claim_start'):
@@ -102,6 +105,7 @@ class Execution:
         return self.start(reservation)
 
     def resume(self, reservation, revision, choice, retry):
+        bind_run(reservation)
         if choice is not None:
             reviewed = self.status(reservation)
             if reviewed.get('status') == 'waiting' and not reviewed.get('review'):
@@ -110,10 +114,14 @@ class Execution:
         return self.status(reservation)
 
     def usage(self, reservation):
+        bind_run(reservation)
         self.check_scope(reservation)
-        return public_usage(self.recorder.report(application_id='integration-lab', tenant_id=reservation['tenant_id'],
+        report=self.recorder.report(application_id='integration-lab', tenant_id=reservation['tenant_id'],
             billing_account_id=reservation['billing_account_id'], actor_id=reservation['actor_id'],
-            request_id=reservation['run_id'], run_id=reservation['run_id']))
+            request_id=reservation['run_id'], run_id=reservation['run_id'])
+        calls=self.recorder.calls(run_id=reservation['run_id'])
+        accounting_observation(report,calls)
+        return public_usage(report)
 
     async def admitted(self, function, *args):
         owner = args[0]

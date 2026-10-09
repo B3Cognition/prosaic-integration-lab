@@ -3,7 +3,7 @@ import re
 import hashlib
 from pathlib import Path
 
-COUNTS = {'audit':77,'identity':19,'ingress':5}
+COUNTS = {'audit':82,'identity':19,'ingress':5}
 
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
@@ -47,6 +47,17 @@ def export(item):
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner
+    diagnostic=item.get('engine_diagnostic')
+    if isinstance(diagnostic,dict):
+        operation=diagnostic.get('operation')
+        category=diagnostic.get('category')
+        code=diagnostic.get('return_code')
+        operations={'info','pull','run','create','start','stop','kill','exec','inspect','logs','ps','rm','unknown'}
+        operations|={base+'_'+verb for base in ('network','volume','image') for verb in ('create','inspect','rm','ls')}
+        if (operation in operations and category in {'command_timeout','rate_limited','image_missing',
+            'engine_unavailable','network_timeout','permission_denied','engine_failed'} and
+            (code is None or type(code) is int and -128 <= code <= 255) and diagnostic.get('outcome')=='unknown'):
+            result['engine_diagnostic']={'operation':operation,'return_code':code,'category':category,'outcome':'unknown'}
     for key in ('released_manifest_sha256','candidate_manifest_sha256'):
         value = item.get(key)
         if isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value): result[key] = value

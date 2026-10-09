@@ -7,7 +7,7 @@ from prosaic_integration_lab import app as service
 def test_saturated_http_start_never_calls_reservation_boundary(monkeypatch):
     writes = []
     class Execution:
-        def __init__(self, config):
+        def __init__(self, config, **kwargs):
             self.fingerprint = 'fixture'
             self.metadata = SimpleNamespace(reserve=self.reserve)
         def ready(self): pass

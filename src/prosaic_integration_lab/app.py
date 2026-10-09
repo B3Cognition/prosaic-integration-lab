@@ -11,6 +11,7 @@ from .execution import Execution
 from .http_guard import HttpGuard
 from .identity import make_authenticator
 from .metadata import RequestConflict
+from .observability import Metrics,Observability
 
 
 class StartRequest(BaseModel):
@@ -28,18 +29,20 @@ class ResumeRequest(BaseModel):
 
 def create_app():
     config = load_config()
+    metrics=Metrics(config.get('metrics_token'))
     authenticator = make_authenticator(config)
     @asynccontextmanager
     async def lifespan(app):
         execution = None
         try:
             try:
-                execution = Execution(config)
+                execution = Execution(config,metrics=metrics)
             except Exception:
                 raise RuntimeError('lab startup configuration failed') from None
             app.state.execution = execution
             try:
                 await asyncio.to_thread(execution.ready)
+                metrics.ready=1
             except Exception:
                 raise RuntimeError('lab startup readiness failed') from None
             yield
@@ -52,6 +55,7 @@ def create_app():
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
     app.add_middleware(HttpGuard,authenticator=authenticator,**config.get('http_bounds',{}))
+    app.add_middleware(Observability,metrics=metrics,operator_token=config.get('metrics_token'))
 
     def principal(request: Request):
         return request.state.principal

@@ -19,7 +19,7 @@ def test_http_identity_verification_and_revocation_precede_request_body(monkeypa
             {'tenant_id':'trusted','actor_id':'alice','billing_account_id':'payer'}},
         'introspection':{'url':'https://issuer.example/introspect','client_id':'service','client_secret':'fixture'}}
     class Execution:
-        def __init__(self,config): pass
+        def __init__(self,config,**kwargs): pass
         def ready(self): pass
         def close(self): pass
         def start_request(self,actor,key,payload):

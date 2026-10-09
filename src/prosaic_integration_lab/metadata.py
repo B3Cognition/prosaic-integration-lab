@@ -31,6 +31,12 @@ class Metadata:
         with self.connection() as conn:
             check_ready(conn)
 
+    def phase_counts(self,namespace,environment):
+        with self.connection() as conn:
+            rows=conn.execute('''SELECT phase,count(*) AS count FROM lab_app.runs
+                WHERE namespace=%s AND environment=%s GROUP BY phase''',(namespace,environment)).fetchall()
+            return {row['phase']:row['count'] for row in rows}
+
     def reserve(self, principal, key, payload, assets_hash, *, namespace, environment):
         request_hash = hashlib.sha256(canonical_request(payload).encode()).hexdigest()
         with self.connection() as conn:

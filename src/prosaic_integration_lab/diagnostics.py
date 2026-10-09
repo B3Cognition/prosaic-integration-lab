@@ -7,6 +7,7 @@ import psycopg
 from fastapi import HTTPException
 from prosaic_harness import StoreError
 from prosaic_runtime import AccountingError
+from .observability import correlation
 
 logger = logging.getLogger('prosaic_integration_lab')
 
@@ -19,7 +20,7 @@ def stage(name):
         classes = ((psycopg.Error,'DatabaseError'),(StoreError,'StoreError'),(AccountingError,'AccountingError'),
                    (HTTPException,'HTTPException'),(ValueError,'ValueError'),(TimeoutError,'TimeoutError'))
         category = next((label for kind,label in classes if isinstance(error,kind)),'UnexpectedError')
-        record = {'event':'operation_failed','stage':name,'error_class':category}
+        record = {'event':'operation_failed','stage':name,'error_class':category,**correlation()}
         sqlstate = getattr(error,'sqlstate',None)
         if isinstance(error,psycopg.Error) and isinstance(sqlstate,str) and re.fullmatch('[A-Z0-9]{5}',sqlstate):
             record['sqlstate'] = sqlstate

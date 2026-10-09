@@ -3,7 +3,7 @@ from prosaic_integration_lab import app as service
 
 def test_bad_json_without_auth_is_rejected_before_validation(monkeypatch):
     class Execution:
-        def __init__(self,config): pass
+        def __init__(self,config,**kwargs): pass
         def ready(self): pass
         def close(self): pass
     monkeypatch.setattr(service,'Execution',Execution)
@@ -15,7 +15,7 @@ def test_bad_json_without_auth_is_rejected_before_validation(monkeypatch):
 
 def test_unexpected_route_exception_does_not_escape_to_server_logger(monkeypatch,caplog):
     class Execution:
-        def __init__(self,config): pass
+        def __init__(self,config,**kwargs): pass
         def ready(self): pass
         def close(self): pass
         def start_request(self,*args): raise RuntimeError('PRIVATE_ROUTE_DIAGNOSTIC')

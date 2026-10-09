@@ -13,22 +13,54 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class EngineError(RuntimeError):
-    pass
+    def __init__(self,message,*,diagnostic=None):
+        super().__init__(message)
+        self.diagnostic=diagnostic
+
+
+def choose_subnet(networks,owner):
+    """Select an explicit fixture subnet without touching existing networks."""
+    occupied = [ipaddress.ip_network(c['Subnet'],strict=False) for n in networks
+                for c in ((n.get('IPAM') or {}).get('Config') or []) if c.get('Subnet')]
+    occupied.extend(ipaddress.ip_network(c['subnet'],strict=False) for n in networks
+                    for c in (n.get('subnets') or []) if c.get('subnet'))
+    initial = int(owner[:2],16)
+    for offset in range(256):
+        candidate = ipaddress.ip_network(f'10.250.{(initial+offset)%256}.0/24')
+        if all(candidate.version != old.version or not candidate.overlaps(old) for old in occupied):
+            return str(candidate)
+    raise ValueError('no free owned fixture subnet')
 
 
 def command(engine, *args):
+    operation=args[0] if args and args[0] in {'info','image','pull','run','create','start','stop','kill',
+        'exec','inspect','logs','ps','rm','network','volume'} else 'unknown'
+    if operation in {'network','volume','image'} and len(args)>1 and args[1] in {'create','inspect','rm','ls'}:
+        operation+='_'+args[1]
     try:
         result = subprocess.run([engine, *args], capture_output=True, text=True, timeout=180)
-    except (OSError, subprocess.TimeoutExpired):
-        raise EngineError('engine unavailable or command timed out') from None
+    except subprocess.TimeoutExpired:
+        raise EngineError('engine unavailable or command timed out',diagnostic={
+            'operation':operation,'return_code':None,'category':'command_timeout','outcome':'unknown'}) from None
+    except OSError:
+        raise EngineError('engine unavailable or command timed out',diagnostic={
+            'operation':operation,'return_code':None,'category':'engine_unavailable','outcome':'unknown'}) from None
     if result.returncode:
         # Engine stderr may include command configuration; keep it private.
-        raise EngineError(f'engine operation failed: {args[0]}')
+        stderr=result.stderr.lower()
+        categories=(('rate_limited',('rate limit','too many requests')),
+            ('image_missing',('no such image',)),('engine_unavailable',('cannot connect','connection refused','daemon not running')),
+            ('network_timeout',('i/o timeout','context deadline exceeded')),
+            ('permission_denied',('permission denied','unauthorized')))
+        category=next((name for name,markers in categories if any(marker in stderr for marker in markers)),'engine_failed')
+        code=result.returncode if type(result.returncode) is int and -128 <= result.returncode <= 255 else None
+        raise EngineError('engine operation failed: '+operation,diagnostic={
+            'operation':operation,'return_code':code,'category':category,'outcome':'unknown'})
     return result.stdout.strip()
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None, observability=False):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -36,6 +68,7 @@ class OwnedStack:
         self.engine, self.major = engine, postgres_major
         self.candidate = candidate
         self.identity = identity
+        self.observability=observability
         if consumer_image is not None:
             import re
             if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
@@ -181,6 +214,8 @@ class OwnedStack:
         container_config = {'namespace': f'lab-{self.owner}', 'environment': 'sandbox', 'assets': '/srv/lab/assets',
                             'fixture_events_url': 'http://model:8000/events'}
         host_config = dict(container_config)
+        if self.observability:
+            container_config['metrics_token']=host_config['metrics_token']=secrets.token_hex(32)
         host_config['migration_dsn'] = f'host=127.0.0.1 port={port} dbname=lab user=lab_migration password={credentials["lab_migration"]}'
         host_config['fixture_manifest'] = str(self.directory / 'ownership.json')
         for key, role in [('harness_dsn', 'harness_runtime'), ('accounting_dsn', 'accounting_runtime'), ('app_dsn', 'app_runtime')]:
