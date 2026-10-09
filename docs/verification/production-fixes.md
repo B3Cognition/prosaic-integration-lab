@@ -14,7 +14,7 @@ push, library publication or production deployment is implied.
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Locally verified |
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | OIDC/Keycloak locally verified; service ingress in issue 11 |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Locally verified |
-| 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Queued |
+| 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Locally verified |
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Queued |
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Queued |
 | 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Queued |
@@ -245,3 +245,41 @@ backup is deleted only with the owned fixture, never exported as public evidence
 Rollback is reviewed backup plus compatible pinned image, not destructive scope
 removal. Deployment-specific HA/PITR/RPO/RTO qualification is separate; see
 [persistence.md](../persistence.md).
+
+## Constrained recovery and credential generations
+
+Owner terminal `recover` inspects filtered run/usage views; mutations require
+named action and exact reviewed revision. Tokens come from environment, origins
+require HTTPS or explicit loopback lab mode, responses are bounded and redirects
+are refused. There is no mutation retry/revision-refresh loop. Uncertain starts
+allow inspection only; interrupted retry requires explicit effect-risk consent
+and remains subject to the SDK budget. Lost mutation replies report unknown
+outcome rather than assuming failure. Receipt recovery adds no provider call.
+
+Credential delivery now stages complete private config/CA generations and
+atomically switches the existing service.json path. Pinned CA paths retain a
+matching generation through restart. Process abort leaves the prior generation
+active and does not block a later fresh staging name. Old/orphan generations are
+retained privately for reviewed retirement. File metadata, generation child and
+parent directories sync before pointer publication, followed by volume root.
+Review caught missing generation-parent sync and pre-owner file sync; both actual
+filesystem ordering regressions failed before the correction and now pass.
+Process-abort proof does not certify physical storage/host-power-loss behavior.
+
+New unit/CLI tests failed before implementation. The previous image failed the
+delivery-abort integration contract (`36fb3035fbb042309c3325d939074f35`, cleanup
+verified), while its terminal receipt recovery already passed. Current local
+suite: 113 passed. An unexpected dispatch regression also failed before curated
+HTTP handling; real database errors containing private row details now emit only
+safe class/stage/SQLSTATE and never raw ASGI tracebacks. This portion of issue 13
+was brought forward to make recovery diagnostics safe.
+
+Final audits **75/75 on both PostgreSQL majors**, no skips, verified cleanup
+(`686d5cae7841415ca004ee03c9b93f45` / `85c0c06ac3524628a2f9551e99738841`).
+Image: `sha256:3cceb301752e9e60a70a69f0bb2d5a7720d92929e76959e4770f5fd33d73faee`.
+Keycloak TLS lane: 19/19 with a staged different-CA abrupt exit and successful
+old-generation authentication after B restart. PostgreSQL 16 final receipt
+`383ff7826f99458b85438be9608dfda6`; PostgreSQL 18 earlier process-abort receipt
+`d5f2e60af07b405c97596d2c2c4b775c` preceded the durability-only correction.
+Independent review reports no remaining important finding. Runbook and concrete
+terminal commands are in [recovery.md](../recovery.md).

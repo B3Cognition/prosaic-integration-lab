@@ -66,3 +66,8 @@ def test_rate_is_scoped_by_trusted_actor_and_body_is_replayed_once():
     guard = HttpGuard(downstream,mapping,rate=.01,burst=1)
     assert asyncio.run(invoke(guard)) == 204
     assert asyncio.run(invoke(guard,b'Bearer second')) == 204
+
+def test_unexpected_dispatch_error_is_curated_without_rethrow_or_message_leak(caplog):
+    async def failed(*args): raise RuntimeError('PRIVATE_CREDENTIAL_SENTINEL')
+    assert asyncio.run(invoke(HttpGuard(failed,IDENTITY))) == 503
+    assert 'PRIVATE_CREDENTIAL_SENTINEL' not in caplog.text

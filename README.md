@@ -195,6 +195,10 @@ PostgreSQL major to verify real issuer signatures, revocation and key rotation.
 
 Persistent deployment, explicit versioned migrations and the owned backup/restore
 lane (`--mode persistence`) are documented in [persistence.md](docs/persistence.md).
+
+Owner terminal recovery (`recover`), crash/receipt handling and atomic credential
+delivery are documented in [recovery.md](docs/recovery.md); `--mode operations`
+executes the owned recovery lane.
 Publishing the upstream wheel and updating released-package provenance are
 separate steps after review.
 

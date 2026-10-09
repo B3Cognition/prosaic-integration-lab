@@ -2,6 +2,11 @@
 import json
 import os
 from pathlib import Path
+import uuid
+import stat
+
+RUNTIME_UID = 10001
+RUNTIME_GID = 10001
 
 def read_runtime_config(source):
     data = json.loads(Path(source).read_text())
@@ -10,41 +15,66 @@ def read_runtime_config(source):
         raise ValueError('invalid runtime config')
     return data
 
-def install(source,target):
+def private_file(path,content):
+    descriptor = os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400)
+    with os.fdopen(descriptor,'w') as output:
+        output.write(content)
+        output.flush()
+        os.fchmod(output.fileno(),0o400)
+        os.fchown(output.fileno(),RUNTIME_UID,RUNTIME_GID)
+        os.fsync(output.fileno())
+
+def sync_directory(path):
+    descriptor = os.open(path,os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+    try: os.fsync(descriptor)
+    finally: os.close(descriptor)
+
+def install(source,target,*,checkpoint=lambda stage:None):
     data = read_runtime_config(source)
     target = Path(target)
     parent = target.parent.stat()
     initial = parent.st_uid == 0
-    if not initial and (parent.st_uid != 10001 or parent.st_gid != 10001 or parent.st_mode & 0o777 != 0o700):
+    if not initial and (parent.st_uid != RUNTIME_UID or parent.st_gid != RUNTIME_GID or parent.st_mode & 0o777 != 0o700):
         raise ValueError('invalid runtime credential directory')
+    generations = target.parent/'generations'
+    if not generations.exists():
+        generations.mkdir(mode=0o700)
+        os.chown(generations,RUNTIME_UID,RUNTIME_GID)
+    state = generations.lstat()
+    if not stat.S_ISDIR(state.st_mode) or state.st_uid != RUNTIME_UID or state.st_mode & 0o777 != 0o700:
+        raise ValueError('invalid runtime generation directory')
+    generation = uuid.uuid4().hex
+    directory = generations/generation
+    directory.mkdir(mode=0o700)
     if data.get('authentication',{}).get('ca_file') == '/run/secrets/issuer-ca.pem':
         certificate = Path('/run/source/issuer-ca.pem').read_text()
-        pending_ca = target.parent/'issuer-ca.next'
-        descriptor = os.open(pending_ca,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400)
-        try:
-            with os.fdopen(descriptor,'w') as output:
-                output.write(certificate)
-                output.flush()
-                os.fchmod(output.fileno(),0o400)
-                os.fchown(output.fileno(),10001,10001)
-            os.replace(pending_ca,target.parent/'issuer-ca.pem')
-        finally:
-            pending_ca.unlink(missing_ok=True)
-    temporary = target.with_suffix('.next')
-    descriptor = os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o400)
+        private_file(directory/'issuer-ca.pem',certificate)
+        data['authentication'] = {**data['authentication'],
+            'ca_file':f'/run/secrets/generations/{generation}/issuer-ca.pem'}
+        checkpoint('after_ca')
+    private_file(directory/'service.json',json.dumps(data))
+    os.chown(directory,RUNTIME_UID,RUNTIME_GID)
+    sync_directory(directory)
+    sync_directory(generations)
+    if initial:
+        os.chmod(target.parent,0o700)
+        os.chown(target.parent,RUNTIME_UID,RUNTIME_GID)
+    checkpoint('before_publish')
+    temporary = target.parent/('current-next-'+generation)
     try:
-        with os.fdopen(descriptor,'w') as output:
-            json.dump(data,output)
-            output.flush()
-            os.fsync(output.fileno())
-            os.fchmod(output.fileno(),0o400)
-            os.fchown(output.fileno(),10001,10001)
+        os.symlink(f'generations/{generation}/service.json',temporary)
         os.replace(temporary,target)
-        if initial:
-            os.chmod(target.parent,0o700)
-            os.chown(target.parent,10001,10001)
+        sync_directory(target.parent)
     finally:
         temporary.unlink(missing_ok=True)
+    return generation
+
+def fixture_checkpoint(stage):
+    path = os.environ.get('LAB_TEST_DELIVERY_CONTROLS')
+    if path:
+        controls = json.loads(Path(path).read_text())
+        if controls.get('failpoint') == stage:
+            os._exit(17)  # Owned test-only abrupt process loss before publication.
 
 if __name__ == '__main__':
-    install('/run/secrets/service.json','/run/runtime/service.json')
+    install('/run/secrets/service.json','/run/runtime/service.json',checkpoint=fixture_checkpoint)

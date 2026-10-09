@@ -15,7 +15,15 @@ from . import workload
 
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
-    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch'])
+    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover'])
+    parser.add_argument('--url',help='recovery service origin; HTTPS unless explicit loopback lab mode')
+    parser.add_argument('--token-env',default='LAB_API_TOKEN')
+    parser.add_argument('--run-id')
+    parser.add_argument('--action',choices=['inspect','resume','approve','reject','retry'],default='inspect')
+    parser.add_argument('--expected-revision')
+    parser.add_argument('--acknowledge-effect-risk',action='store_true')
+    parser.add_argument('--lab-http',action='store_true')
+    parser.add_argument('--ca-file')
     parser.add_argument('--users', type=int, default=3)
     parser.add_argument('--runs-per-user', type=int, default=1)
     parser.add_argument('--concurrency', type=int, default=2)
@@ -23,11 +31,14 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
     args = parser.parse_args()
+    if args.command == 'recover':
+        from .recovery import cli
+        return cli(args)
     if args.command == 'watch':
         if not args.directory or not os.path.isdir(args.directory):
             parser.error('watch requires an existing --directory from the run output')
@@ -76,6 +87,8 @@ def main():
                 'tests/acceptance/test_identity.py']
         if args.mode in {'audit','persistence'}:
             files += ['tests/acceptance/test_persistence.py']
+        if args.mode in {'audit','operations'}:
+            files += ['tests/acceptance/test_terminal_recovery.py','tests/acceptance/test_delivery_recovery.py']
         if args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':

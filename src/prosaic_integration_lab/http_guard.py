@@ -5,6 +5,7 @@ import time
 from starlette.responses import JSONResponse
 from .identity import FixtureAuthenticator
 from .oidc import IdentityUnavailable
+from .diagnostics import stage
 
 
 class HttpGuard:
@@ -85,7 +86,23 @@ class HttpGuard:
                         delivered = True
                         return {'type':'http.request','body':bytes(content),'more_body':False}
                     return await receive()
-                return await self.app(scope,replay,send)
-            return await self.app(scope,receive,send)
+                return await self.dispatch(scope,replay,send)
+            return await self.dispatch(scope,receive,send)
         finally:
             self.active -= 1
+
+    async def dispatch(self,scope,receive,send):
+        started = False
+        async def observed(message):
+            nonlocal started
+            if message['type'] == 'http.response.start': started = True
+            await send(message)
+        try:
+            with stage('http_dispatch'):
+                await self.app(scope,receive,observed)
+        except Exception:
+            # Do not let an exception message/traceback reach the ASGI server's
+            # logger. An already-started response remains incomplete/uncertain.
+            if not started:
+                await JSONResponse({'detail':'service_unavailable'},status_code=503,
+                    headers={'Connection':'close'})(scope,receive,send)

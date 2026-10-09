@@ -184,11 +184,14 @@ class OwnedStack:
         runtime_volume = self._create('volume',runtime_name,'volume','create','--label',
             f'io.prosaic.lab.owner={self.owner}',runtime_name)
         delivery_name = name+'-deliver-config'
+        self._secret('delivery-controls.json','{}')
         ca_mount = ['-v',f'{self.secrets / "issuer-ca.pem"}:/run/source/issuer-ca.pem:ro'] if self.identity else []
         delivery = self._create('container',delivery_name,'create','--name',delivery_name,'--label',
             f'io.prosaic.lab.owner={self.owner}','--network','none','--user','0','--read-only',
             '--cap-drop','ALL','--cap-add','CHOWN','--cap-add','DAC_OVERRIDE',
             '--security-opt','no-new-privileges','--memory','128m','--pids-limit','32',
+            '-e','LAB_TEST_DELIVERY_CONTROLS=/run/source/delivery-controls.json',
+            '-v',f'{self.secrets / "delivery-controls.json"}:/run/source/delivery-controls.json:ro',
             '-v',f'{self.secrets / "service.json"}:/run/secrets/service.json:ro',
             '-v',f'{runtime_volume}:/run/runtime',*ca_mount,self.manifest['images']['consumer'],
             'python','-m','lab_runner.secret_delivery')

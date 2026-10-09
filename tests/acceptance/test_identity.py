@@ -8,6 +8,12 @@ from lab_runner.stack import command
 from test_approval import headers,start
 from test_accounting import count
 from test_recovery import wait_for
+from test_recovery import mutate_replica
+from test_scope import deliver_owned_config
+from test_delivery_recovery import published_path
+from lab_runner.stack import EngineError
+from lab_runner.keycloak import bundle
+import pytest
 
 def test_real_keycloak_tls_token_claims_do_not_control_billing(lab):
     fixture = lab['oidc_fixture']
@@ -62,6 +68,36 @@ def test_real_keycloak_signing_key_rotation_preserves_owner_and_frozen_accountin
         assert usage.status_code == 200 and usage.json()['complete_calls'] == 1
         assert httpx.get(lab[replica]+path,headers=headers(lab),timeout=5).status_code == 200
     assert count(lab) == before
+
+
+def test_killed_ca_delivery_never_publishes_a_mixed_config_generation(lab):
+    run = start(lab).json()
+    secrets = Path(lab['fixture_manifest']).parent/'secrets'
+    source,certificate,controls = secrets/'service.json',secrets/'issuer-ca.pem',secrets/'delivery-controls.json'
+    original,original_ca = source.read_text(),certificate.read_text()
+    previous = published_path(lab)
+    config = json.loads(original)
+    config['namespace'] += '-unpublished'
+    other_files,_,_,_ = bundle([])
+    try:
+        source.write_text(json.dumps(config))
+        certificate.write_text(other_files['ca.pem'])
+        controls.write_text(json.dumps({'failpoint':'after_ca'}))
+        with pytest.raises(EngineError): deliver_owned_config(lab)
+        assert published_path(lab) == previous
+        mutate_replica(lab,'kill','b')
+        mutate_replica(lab,'start','b')
+        wait_for(lambda:httpx.get(lab['b']+'/readyz',timeout=2).status_code == 200)
+        # Real TLS introspection still trusts the old matching CA after restart.
+        assert httpx.get(lab['b']+'/runs/'+run['run_id'],headers=headers(lab),timeout=5).status_code == 200
+    finally:
+        source.write_text(original)
+        certificate.write_text(original_ca)
+        controls.write_text('{}')
+        deliver_owned_config(lab)
+        mutate_replica(lab,'kill','b')
+        mutate_replica(lab,'start','b')
+        wait_for(lambda:httpx.get(lab['b']+'/readyz',timeout=2).status_code == 200)
 
 def test_keycloak_revocation_is_enforced_on_both_replicas_before_body(lab):
     before = count(lab)
