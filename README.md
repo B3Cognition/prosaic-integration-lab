@@ -192,6 +192,9 @@ and immutable image ID. A mismatched image fails before fixture allocation.
 Configurable OIDC authentication, including the owned Keycloak TLS test lane, is
 documented in [identity.md](docs/identity.md). Run `--mode identity` with either
 PostgreSQL major to verify real issuer signatures, revocation and key rotation.
+
+Persistent deployment, explicit versioned migrations and the owned backup/restore
+lane (`--mode persistence`) are documented in [persistence.md](docs/persistence.md).
 Publishing the upstream wheel and updating released-package provenance are
 separate steps after review.
 

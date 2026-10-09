@@ -13,7 +13,7 @@ push, library publication or production deployment is implied.
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Locally verified |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Locally verified |
 | 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | OIDC/Keycloak locally verified; service ingress in issue 11 |
-| 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Queued |
+| 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Locally verified |
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Queued |
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Queued |
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Queued |
@@ -216,3 +216,32 @@ assigned to issue 9. Service TLS ingress/drain remains issue 11. The deployment
 identity profile still uses synthetic sandbox execution; it is not production
 inference or billing certification. Configuration and CLI examples are in
 [identity.md](../identity.md).
+
+## Persistent upgrades and restore
+
+An explicit operator CLI creates schema v2 or transactionally upgrades v1 under
+an advisory lock. Nonempty legacy rows require exact per-run archived scope
+records; ambiguous attribution aborts. Identity/idempotency/request/assets/phase
+remain unchanged. V2 reruns reject conflicting scope. Runtime roles cannot
+update the version ledger, and replicas never invoke migrations. Fresh fixture
+provisioning delegates application DDL to this versioned implementation.
+
+Unit and functional CLI tests failed before implementation; current local suite
+has 100 passing tests. Initial persistence lanes passed 24/24 on each major
+(`5ae556e4dd884fd7839f81b9e66b8410` / `02a85cabf5ca4874bc29e9c945c7428d`).
+Review identified a fresh-database edge: supplied legacy records were silently
+ignored. Real regression failed (`0e660490cfd342faa603e19fd4462f7b`) before adding
+exact empty-database validation. Original failed receipt and verified cleanup
+are preserved.
+
+Final full audits: **70/70 on PostgreSQL 16 and 18**, no skips, cleanup verified
+(`e8367df3a0d3411bb0f943033524a6bf` / `39c6958060434a799c772fb4719d816e`).
+Image: `sha256:ffd91a647b16b7d9394bc505f1f989d739bc4da933279af22b44f306a891c651`.
+Owned pg_dump/restore into a second database preserves waiting review/revisions,
+unknown usage and uncertain starts. A restarted replica verifies and resumes a
+restored approval without inference; the original database remains independent.
+All original fields survive v1→v2 and idempotent migration rerun. The protected
+backup is deleted only with the owned fixture, never exported as public evidence.
+Rollback is reviewed backup plus compatible pinned image, not destructive scope
+removal. Deployment-specific HA/PITR/RPO/RTO qualification is separate; see
+[persistence.md](../persistence.md).

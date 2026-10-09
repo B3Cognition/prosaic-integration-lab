@@ -7,6 +7,7 @@ import subprocess
 import psycopg
 from psycopg import sql
 from prosaic_runtime_postgres import PostgresRecorder
+from prosaic_integration_lab.migrations import migrate
 
 
 def main():
@@ -23,17 +24,8 @@ def main():
     if result.returncode:
         raise RuntimeError('Harness explicit migration failed')
     PostgresRecorder(migration, namespace='provision', environment='sandbox').initialize()
+    migrate(migration,runtime_role='app_runtime')
     with psycopg.connect(migration) as conn:
-        conn.execute('CREATE SCHEMA lab_app')
-        conn.execute('CREATE TABLE lab_app.schema_version (version integer PRIMARY KEY)')
-        conn.execute('INSERT INTO lab_app.schema_version VALUES (2)')
-        conn.execute('''CREATE TABLE lab_app.runs (
-            run_id text PRIMARY KEY, tenant_id text NOT NULL, actor_id text NOT NULL,
-            billing_account_id text NOT NULL, idempotency_key text NOT NULL,
-            request_hash text NOT NULL, request jsonb NOT NULL, workflow text NOT NULL,
-            assets_hash text NOT NULL, phase text NOT NULL CHECK (phase IN ('reserved','starting','started')),
-            namespace text NOT NULL, environment text NOT NULL,
-            UNIQUE(tenant_id,actor_id,idempotency_key))''')
         conn.execute('REVOKE CREATE ON SCHEMA public FROM PUBLIC')
         conn.execute('GRANT USAGE ON SCHEMA prosaic_harness TO harness_runtime')
         conn.execute('GRANT SELECT ON ALL TABLES IN SCHEMA prosaic_harness TO harness_runtime')
