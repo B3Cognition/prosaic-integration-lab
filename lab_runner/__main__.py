@@ -10,25 +10,44 @@ from .stack import OwnedStack, ROOT
 from .results import sanitize_junit
 from .accounting_demo import capture_accounting
 from .accounting_report import write_report
+from . import workload
 
 
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
-    parser.add_argument('command', choices=['test', 'demo'])
+    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch'])
+    parser.add_argument('--users', type=int, default=3)
+    parser.add_argument('--runs-per-user', type=int, default=1)
+    parser.add_argument('--concurrency', type=int, default=2)
+    parser.add_argument('--allow-overload', action='store_true', help='allow measured capacity rejections; correctness failures still fail')
+    parser.add_argument('--directory', help='exact evidence directory for watch')
+    parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
     parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     args = parser.parse_args()
+    if args.command == 'watch':
+        if not args.directory or not os.path.isdir(args.directory):
+            parser.error('watch requires an existing --directory from the run output')
+        workload.watch(args.directory, args.stream)
+        return 0
+    try:
+        workload.validate(args.users, args.runs_per_user, args.concurrency)
+    except ValueError as error:
+        parser.error(str(error))
     if args.open_report and args.command != 'demo':
         parser.error('--open-report requires demo')
-    stack = OwnedStack(args.engine, args.postgres_version)
+    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command == 'run' else 3)
+    events = workload.Events(stack.directory) if args.command == 'run' else None
+    if events:
+        print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
     started = time.monotonic()
-    result = {'owner': stack.owner, 'mode': 'demo' if args.command == 'demo' else args.mode, 'host_architecture': platform.machine(),
+    result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run'} else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending'}
     try:
         stack.start()
-        if args.command == 'demo' or args.mode != 'provisioning':
+        if args.command in {'demo', 'run'} or args.mode != 'provisioning':
             stack.start_model()
             stack.start_replica('a')
             stack.start_replica('b')
@@ -44,7 +63,9 @@ def main():
             files += ['tests/acceptance/test_load.py']
         if args.mode == 'recovery':
             files += ['tests/acceptance/test_accounting_failures.py', 'tests/acceptance/test_recovery.py', 'tests/acceptance/test_scope.py']
-        if args.command == 'demo':
+        if args.command == 'run':
+            result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
+        elif args.command == 'demo':
             report = capture_accounting(config, stack.owner)
             report_path = write_report(report, stack.directory / 'report')
             result.update(passed=True, report_html=str(report_path),
@@ -77,6 +98,8 @@ def main():
             result['passed'] = False
         result['seconds'] = round(time.monotonic() - started, 2)
         result['images'] = stack.manifest['images']
+        if events:
+            events.finish(result)
         (stack.directory / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
         print(json.dumps(result))
         print(f'Evidence: {stack.directory}')

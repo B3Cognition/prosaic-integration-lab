@@ -93,3 +93,45 @@ changed-default/scope recovery, public-log sentinels, non-sticky proxy and
 CI/architecture matrix remain. Task 6 is unimplemented; Task 7 is disabled and
 requires separate live-provider authorization. The design and historic issue
 body remain unchanged; partial milestones do not complete the full checklist.
+# Configurable terminal workloads (2026-10-09)
+
+Added `lab_runner run --users --runs-per-user --concurrency` and a second-terminal
+`lab_runner watch --directory --stream accounting|requests`. Trusted fixture
+identities span two tenants. Sessions alternate replicas and verify cross-replica
+approval, per-run usage and other-user read/usage denial. Request events include
+status and latency; accounting events export filtered counts and exact synthetic
+amounts. Finite closed-loop sessions, no blind retries, optional explicitly
+allowed capacity rejections, independent dispatch/ledger reconciliation and
+verified exact-owned cleanup form an initial load/stress foundation.
+
+Verified on Docker Desktop Linux/arm64, host Python 3.12.14, PostgreSQL 16:
+
+- `.venv/bin/python -m pytest -q`: 38 passed. Includes CLI startup without
+  editable consumer installation, input limits, accounting-only replay and a
+  subprocess follower that waits for new evidence and ends after cleanup.
+  External HTTP/recorder boundary regressions exercise workload handling of
+  deferred approvals, mismatched ledger evidence and failed owner isolation.
+- `run --users 6 --runs-per-user 2 --concurrency 2`: 12 completed, no rejection
+  or error, 12 independently counted calls reconciled; cleanup verified.
+  Receipt `.lab/7195ba18e5364658949c6d6f8fa714d5/result.json`.
+- `run --users 12 --runs-per-user 3 --concurrency 12 --allow-overload`: 12
+  completed, 24 capacity-rejected, no correctness errors, 12 reconciled calls;
+  cleanup verified. Receipt `.lab/9376828b24c84b6abfe080ef34cce776/result.json`.
+- `test --mode load`: 23 passed, zero skips, cleanup verified.
+  Receipt `.lab/71393af4cc4c4c479a9feb0cd518a744/result.json`.
+- Final single-user path: one completion and one reconciled call, cleanup
+  verified, filtered accounting replay successful.
+  Receipt `.lab/08740463e1d34bc7abdad1cb345eb696/result.json`.
+- Review found that resume admission can reject an already measured workflow.
+  Added separate start-rejected and approval-deferred outcomes, retaining usage
+  for waiting workflows without retry. Final real `run --users 20
+  --runs-per-user 10 --concurrency 20 --allow-overload`: 16 completed, 168
+  start-rejected, 16 approval-deferred, no errors; 32 fixture dispatches match
+  32 complete accounting calls. Cleanup verified.
+  Receipt `.lab/eee0bc31bd714786922dec04cb6f63e9/result.json`.
+
+An intermediate host CLI import failed after reusing the consumer's source-only
+projection. A subprocess regression demonstrated that failure; removing that
+host installation assumption restored startup. No model/provider credits used.
+Arrival-rate control, soak duration, latency thresholds and performance
+certification remain pending. Existing acceptance gaps below remain unchanged.

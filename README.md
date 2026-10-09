@@ -103,6 +103,56 @@ A current test command exits nonzero on any failing assertion, skip, required
 infrastructure failure or cleanup failure; old failing receipts do not mean
 the current suite is red.
 
+## Multiuser terminal workload
+
+Run from this repository with Docker running and the consumer image built:
+
+```sh
+.venv/bin/python -m lab_runner run --users 10 --runs-per-user 20 --concurrency 2
+```
+
+The first line prints an exact command to paste into another terminal:
+
+```sh
+.venv/bin/python -m lab_runner watch --directory .lab/<printed-owner-id> --stream accounting
+```
+
+The workload terminal streams fixture actor, operation, replica, HTTP status,
+run IDs and request latency. Each user has a distinct trusted identity, starts
+on alternating replicas, approves on the other replica, checks measured usage,
+and verifies another user cannot read its run or accounting. `--concurrency`
+limits active user sessions; each session sends its runs sequentially. Sessions
+beyond that limit wait in the driver. This is a closed-loop workload, not a
+fixed requests-per-second benchmark.
+
+The accounting terminal follows per-run complete/unknown call counts and exact
+synthetic USD estimates, then the global usage summary. It replays existing
+events when attached late and exits after cleanup. `--stream requests` replays
+the request stream instead. JSONL evidence and `result.json` survive teardown;
+neither stream contains bearer tokens, DSNs or workflow contents.
+
+For an initial overload experiment:
+
+```sh
+.venv/bin/python -m lab_runner run --users 20 --runs-per-user 20 --concurrency 20 --allow-overload
+```
+
+Each replica admits at most two executions. Capacity-exhausted 503 responses
+are counted separately and never blindly retried. Without `--allow-overload`,
+any capacity rejection fails the run. With it, correctness/accounting/cleanup
+failures still exit nonzero; inspect completed versus capacity-rejected counts.
+`start_capacity_rejected` means no dispatch occurred; `approval_deferred` means
+the model call was measured but cross-replica approval was rejected for capacity.
+Deferred workflows stay waiting, with no automatic retry. Independent fixture
+dispatches must reconcile with complete ledger calls for completed and deferred
+workflows together.
+Limits are 1–1000 users, 1–1000 runs/user, at most 10,000 total runs and 1–64
+concurrent sessions. This provides a load/stress foundation; arrival-rate
+control, soak duration and performance thresholds remain future work.
+
+These commands use the credential-free synthetic endpoint, without local or
+cloud model calls. Estimates are test rate-card values, not billable invoices.
+
 ## Optional local model smoke
 
 ```sh

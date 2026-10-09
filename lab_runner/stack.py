@@ -28,7 +28,9 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16):
+    def __init__(self, engine='docker', postgres_major=16, users=3):
+        from .workload import identities
+        self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
             raise ValueError('unsupported engine/PostgreSQL major')
         self.engine, self.major = engine, postgres_major
@@ -150,7 +152,7 @@ class OwnedStack:
             container_config[key] = f'host=database port=5432 dbname=lab user={role} password={credentials[role]}'
             host_config[key] = f'host=127.0.0.1 port={port} dbname=lab user={role} password={credentials[role]}'
         principals = {secrets.token_hex(24): {'tenant_id': tenant, 'actor_id': actor, 'billing_account_id': account}
-            for tenant, actor, account in [('tenant-a', 'alice', 'account-a'), ('tenant-a', 'bob', 'account-a'), ('tenant-b', 'carol', 'account-b')]}
+            for tenant, actor, account in [(p['tenant_id'], p['actor_id'], p['billing_account_id']) for p in self.identities]}
         container_config['principals'] = principals
         host_config['principals'] = principals
         self._secret('service.json', json.dumps(container_config))
