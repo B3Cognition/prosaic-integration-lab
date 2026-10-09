@@ -312,6 +312,26 @@ def test_overloaded_starts_do_not_grow_durable_reservations(lab):
                 future.result(timeout=20)
 
 
+def test_one_actor_cannot_monopolize_both_replica_execution_slots(lab):
+    before = count(lab)
+    httpx.post(lab['model'] + '/control',json={'blocked':True},timeout=5).raise_for_status()
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        pending = pool.submit(start,lab,'alice','synthetic')
+        try:
+            wait_for(lambda:count(lab)==before+1,timeout=5)
+            excess = start(lab,'alice','synthetic')
+            assert excess.status_code == 503
+            assert excess.json() == {'detail':'capacity_exhausted'}
+            unrelated = start(lab,'carol','approval')
+            assert unrelated.status_code == 200
+            assert unrelated.json()['status'] == 'waiting'
+            assert httpx.get(lab['a'] + '/runs/' + unrelated.json()['run_id'],headers=headers(lab,'carol'),timeout=5).status_code == 200
+            assert count(lab) == before+1
+        finally:
+            httpx.post(lab['model'] + '/control',json={},timeout=5).raise_for_status()
+            assert pending.result(timeout=20).json()['status'] == 'waiting'
+
+
 def test_private_inputs_and_credentials_absent_from_public_views_and_server_logs(lab):
     sentinel = 'AUDIT_PRIVATE_INPUT_' + uuid.uuid4().hex
     response = start(lab, workflow='synthetic', task=sentinel)

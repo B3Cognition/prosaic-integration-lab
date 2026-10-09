@@ -8,7 +8,7 @@ push, library publication or production deployment is implied.
 | --- | --- | --- | --- |
 | 1 | [Runtime 3](https://github.com/B3Cognition/prosaic-runtime/issues/3) | Accounting schema/grant readiness | Locally verified candidate; publication pending |
 | 2 | [Lab 2](https://github.com/B3Cognition/prosaic-integration-lab/issues/2) | Application readiness | Locally verified |
-| 3 | [Lab 3](https://github.com/B3Cognition/prosaic-integration-lab/issues/3) | Bounded metadata admission | In progress |
+| 3 | [Lab 3](https://github.com/B3Cognition/prosaic-integration-lab/issues/3) | Bounded metadata admission | Locally verified; Harness candidate dependency |
 | 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Queued |
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Queued |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Queued |
@@ -74,3 +74,35 @@ major, zero skips, verified cleanup. Receipts:
 Candidate consumer image:
 `sha256:58cc0e833ac1c1e969f912eda21ce78b48bec25e16b0ce235f416e816554ce4e`.
 This is candidate integration evidence, not an upstream release claim.
+
+## Admission and lease registration
+
+Writes now acquire bounded admission before ownership reservation, with one
+active write per trusted actor per replica. Reads have a separate bounded pool.
+Client cancellation holds admission until the actual worker exits. Unit and
+functional suites: 54 passed. Real admission and cross-tenant fairness tests pass.
+
+A concurrent 500-run receipt `f991fa5e443346c3baac9f97c0263b02` retained one
+pre-dispatch failure; 499 calls reconciled. Its original cause cannot be proven
+from the available receipt. Investigation independently reproduced a Harness
+capacity race: an acquired lease was briefly counted as both acquiring and
+registered. [Harness issue 3](https://github.com/B3Cognition/prosaic-harness/issues/3)
+tracks its atomic transfer fix, commit `052cc779653a30039bebed3e675ba69c146073f9`
+in `.lab/worktrees/harness-registration`. The deterministic PostgreSQL regression
+failed before the fix (`d52bc99df4724a77809de9dbba99d822`). Its unit and real database
+tests now pass on both majors (`2d58d6bce7e144cda1c8d0ef71ced52b` /
+`58969458f11d4114a243d7167ab8224c`); Harness core: 172 passed.
+
+Candidate manifest now pins both adapter wheels, retaining the three original
+core wheels. Harness wheel SHA256:
+`7617bb3af272e82be526dd481daab7397e4036b11b1fcd2ce25b21169ec431e8`.
+Manifest SHA256:
+`6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0`.
+Candidate image `sha256:7f30e987fb1905d8156d693d79fa04be403d836f3755c37ae588b83a45116545`
+completed 500/500 workflows with zero errors/rejections and 500 independently
+reconciled calls while an audit ran concurrently (`5e4658a6fa3f4dddbb7a949d46ca9211`).
+Audit on each major: 61 tests, 58 passed, only early-auth/root/writable-root
+failures remain (`cf6ec5e1b7164013acc3307e4bb11d1b` /
+`883daef3f7724ec7b6fb2e7df7c3813a`). All these fixtures verified cleanup.
+Minimal sanitized stage diagnostics were brought forward from issue 13 to aid
+failure investigation; broader operational metrics remain queued.

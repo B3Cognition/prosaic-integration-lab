@@ -175,13 +175,13 @@ failures or changes to the existing green deterministic/recovery/load contracts.
 
 The sequential production fix ledger is
 [production-fixes.md](docs/verification/production-fixes.md). Accounting adapter
-0.1.1 is currently an unpublished, checksummed candidate; the original release
+and Harness adapters 0.1.1 are unpublished, checksummed candidates; the original release
 manifest remains unchanged. To test that explicit candidate after building its
 wheel into `.cache/candidates/`:
 
 ```sh
 docker build -f containers/Candidate.Dockerfile \
-  --build-arg CANDIDATE_MANIFEST_SHA256=5001cd072ed7f39ee4bd6b9aeb801ae9e972b3318d8c00bc188bb4bc8d340358 \
+  --build-arg CANDIDATE_MANIFEST_SHA256=6dd1eb2e1196a6741ad805255dbbdb7768185206a07e8dd33f2ebceb6b5745b0 \
   -t prosaic-integration-lab:candidate .
 .venv/bin/python -m lab_runner test --candidate --mode audit --postgres-version 16
 ```

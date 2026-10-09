@@ -38,12 +38,12 @@
     },
     {
       "distribution": "prosaic-harness-postgres",
-      "version": "0.1.0",
-      "filename": "prosaic_harness_postgres-0.1.0-py3-none-any.whl",
-      "sha256": "c45cdcfa03a7dad90902aa3fe71f8b75c988b25c3ae8d4f00483f471f5462df6",
-      "source_commit": "2bd14fd8aa17f30c957ff29f886ffd16b2af52ca",
-      "url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.6.0/prosaic_harness_postgres-0.1.0-py3-none-any.whl",
-      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.6.0/SHA256SUMS-0.6.0.txt"
+      "version": "0.1.1",
+      "filename": "prosaic_harness_postgres-0.1.1-py3-none-any.whl",
+      "sha256": "7617bb3af272e82be526dd481daab7397e4036b11b1fcd2ce25b21169ec431e8",
+      "source_commit": "052cc779653a30039bebed3e675ba69c146073f9",
+      "url": "unpublished-candidate",
+      "checksum_url": "local-candidate-manifest"
     }
   ],
   "dependency_mode": "unpublished-candidate"

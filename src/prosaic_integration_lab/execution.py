@@ -1,8 +1,5 @@
 """Bounded SDK execution; never redispatch uncertain starts."""
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-import threading
 from fastapi import HTTPException
 from prosaic_harness import Harness, RunNotFound, Workflow
 from prosaic_harness_postgres import PostgresRunStore
@@ -11,6 +8,8 @@ from prosaic_runtime_postgres import PostgresRecorder
 from .config import assets_hash
 from .metadata import Metadata
 from .views import public_run, public_usage, uncertain_run
+from .admission import Admission
+from .diagnostics import stage
 
 class Execution:
     def __init__(self, config):
@@ -23,8 +22,8 @@ class Execution:
             lock_timeout_s=1, statement_timeout_s=3)
         self.recorder = PostgresRecorder(config['accounting_dsn'], namespace=config['namespace'],
             environment=config['environment'], rate_card=RateCard('synthetic-v1', 'test-model', '2', '8', '0.5'))
-        self.pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix='lab-execution')
-        self.slots = threading.BoundedSemaphore(2)
+        self.operations = Admission(2)
+        self.reads = Admission(4)
 
     def ready(self):
         self.metadata.check_ready()
@@ -32,7 +31,8 @@ class Execution:
         self.recorder.check_ready()
 
     def close(self):
-        self.pool.shutdown(wait=True)
+        self.operations.close()
+        self.reads.close()
         self.store.close()
 
     def harness(self, reservation):
@@ -65,12 +65,28 @@ class Execution:
         return public_run(reservation['run_id'], snapshot.state, snapshot.revision)
 
     def start(self, reservation):
-        harness = self.harness(reservation)
-        if not self.metadata.claim_start(reservation['run_id']):
+        with stage('harness_config'):
+            harness = self.harness(reservation)
+        with stage('claim_start'):
+            claimed = self.metadata.claim_start(reservation['run_id'])
+        if not claimed:
             return self.status(reservation)
-        harness.run({'task': reservation['request']['task']})
-        self.metadata.started(reservation['run_id'])
-        return self.status(reservation)
+        with stage('harness_run'):
+            harness.run({'task': reservation['request']['task']})
+        with stage('mark_started'):
+            self.metadata.started(reservation['run_id'])
+        with stage('start_status'):
+            return self.status(reservation)
+
+    def start_request(self, principal, key, payload):
+        # Called only inside admitted work. No fresh DB reservation is allocated
+        # for execution that cannot be admitted; reservation still commits before dispatch.
+        with stage('reserve'):
+            reservation = self.metadata.reserve(principal,key,payload,self.fingerprint,
+                namespace=self.config['namespace'],environment=self.config['environment'])
+        if reservation['phase'] != 'reserved':
+            return self.status(reservation)
+        return self.start(reservation)
 
     def resume(self, reservation, revision, choice, retry):
         self.harness(reservation).resume(choice=choice, expected_revision=revision, retry_interrupted=retry)
@@ -83,12 +99,12 @@ class Execution:
             request_id=reservation['run_id'], run_id=reservation['run_id']))
 
     async def admitted(self, function, *args):
-        if not self.slots.acquire(blocking=False):
-            raise HTTPException(503, 'capacity_exhausted')
-        def work():
-            try:
-                return function(*args)
-            finally:
-                self.slots.release()
-        future = asyncio.get_running_loop().run_in_executor(self.pool, work)
-        return await asyncio.shield(future)
+        owner = args[0]
+        key = (owner['tenant_id'],owner['actor_id']) if isinstance(owner,dict) else (owner.tenant_id,owner.actor_id)
+        return await self.operations.run(function,*args,key=key)
+
+    async def inspected(self, function, *args):
+        return await self.reads.run(function,*args)
+
+    def read(self, function, *args):
+        return self.reads.run_sync(function,*args)

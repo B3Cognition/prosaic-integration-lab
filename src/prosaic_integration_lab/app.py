@@ -98,7 +98,7 @@ def create_app():
     @app.get('/readyz')
     def ready(request: Request):
         try:
-            request.app.state.execution.ready()
+            request.app.state.execution.read(request.app.state.execution.ready)
         except Exception:
             raise HTTPException(503, 'not_ready') from None
         return {'status': 'ready'}
@@ -107,28 +107,23 @@ def create_app():
     async def start(body: StartRequest, request: Request, actor=Depends(principal),
                     idempotency_key: str = Header(min_length=1, max_length=128)):
         execution = request.app.state.execution
-        reservation = await asyncio.to_thread(execution.metadata.reserve, actor, idempotency_key,
-                                             body.model_dump(), execution.fingerprint,
-                                             namespace=config['namespace'], environment=config['environment'])
-        if reservation['phase'] != 'reserved':
-            return await asyncio.to_thread(execution.status, reservation)
-        return await execution.admitted(execution.start, reservation)
+        return await execution.admitted(execution.start_request,actor,idempotency_key,body.model_dump())
 
     @app.get('/runs/{run_id}')
     def status(run_id: str, request: Request, actor=Depends(principal)):
         execution = request.app.state.execution
-        return execution.status(owned(execution, actor, run_id))
+        return execution.read(lambda: execution.status(owned(execution,actor,run_id)))
 
     @app.post('/runs/{run_id}/resume')
     async def resume(run_id: str, body: ResumeRequest, request: Request, actor=Depends(principal)):
         execution = request.app.state.execution
-        reservation = await asyncio.to_thread(owned, execution, actor, run_id)
+        reservation = await execution.inspected(owned,execution,actor,run_id)
         return await execution.admitted(execution.resume, reservation, body.expected_revision,
                                         body.choice, body.retry_interrupted)
 
     @app.get('/runs/{run_id}/usage')
     def usage(run_id: str, request: Request, actor=Depends(principal)):
         execution = request.app.state.execution
-        return execution.usage(owned(execution, actor, run_id))
+        return execution.read(lambda: execution.usage(owned(execution,actor,run_id)))
 
     return app
