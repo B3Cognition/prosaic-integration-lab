@@ -1,14 +1,13 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import platform
 import subprocess
 import sys
 import time
-import xml.etree.ElementTree as ET
 
 from .stack import OwnedStack, ROOT
+from .results import sanitize_junit
 
 
 def main():
@@ -39,35 +38,25 @@ def main():
         if args.mode == 'load':
             files += ['tests/acceptance/test_load.py']
         if args.mode == 'recovery':
-            files += ['tests/acceptance/test_accounting_failures.py', 'tests/acceptance/test_recovery.py']
+            files += ['tests/acceptance/test_accounting_failures.py', 'tests/acceptance/test_recovery.py', 'tests/acceptance/test_scope.py']
         test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
             f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
             env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True, timeout=180)
-        # Failure tracebacks can contain request/config values. Retain only
-        # testcase identity/status and constant error text in exported JUnit.
-        junit = ET.parse(stack.directory / 'junit.xml')
-        skipped = 0
-        result['failed_tests'] = []
-        for case in junit.iter('testcase'):
-            for child in list(case):
-                if child.tag == 'skipped':
-                    skipped += 1
-                if child.tag in {'failure', 'error', 'skipped'}:
-                    if child.tag != 'skipped':
-                        result['failed_tests'].append(case.attrib['name'])
-                    # Keep only exception type and assertion expression, not
-                    # rendered locals, values or driver diagnostics.
-                    child.attrib.clear()
-                    child.text = 'Required acceptance assertion failed; reproduce with the owned runner'
-                else:
-                    case.remove(child)
-        junit.write(stack.directory / 'junit.xml', encoding='unicode')
-        result['test_count'] = len(list(junit.iter('testcase')))
-        result['passed'] = test.returncode == 0 and skipped == 0 and result['test_count'] > 0
-        result['skipped'] = skipped
+        result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__
     finally:
+        junit = stack.directory / 'junit.xml'
+        if junit.exists():
+            try:
+                result.update(sanitize_junit(junit))
+                result['passed'] = (result.get('test_returncode') == 0 and 'error' not in result
+                    and result['skipped'] == 0 and result['test_count'] > 0 and not result['failed_tests'])
+            except Exception:
+                # Never leave a raw/incomplete export after timeout or errors.
+                junit.unlink(missing_ok=True)
+                result['error'] = 'InvalidJUnitExport'
+                result['passed'] = False
         try:
             stack.stop()
             result['cleanup'] = 'verified'

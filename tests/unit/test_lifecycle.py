@@ -10,6 +10,8 @@ def test_failed_partial_start_cleans_only_recorded_owned_resources(tmp_path, mon
     stack._record('container', 'owned-container')
     state = {'owned-container': {'Id': 'owned-container', 'Config': {'Labels': {'io.prosaic.lab.owner': stack.owner}}}}
     def engine(_, *args):
+        if args[0] == 'ps':
+            return '\n'.join(state)
         if args[0] == 'inspect':
             if args[1] not in state:
                 raise module.EngineError('absent')
@@ -30,6 +32,8 @@ def test_replaced_container_is_preserved_and_cleanup_fails(tmp_path, monkeypatch
     stack._record('container', 'recorded-id')
     state = {'Id': 'foreign-id', 'Config': {'Labels': {'io.prosaic.lab.owner': 'someone-else'}}}
     def engine(_, *args):
+        if args[0] == 'ps':
+            return 'recorded-id'
         if args == ('inspect', 'recorded-id'):
             return json.dumps([state])
         raise AssertionError('foreign resource mutation attempted')

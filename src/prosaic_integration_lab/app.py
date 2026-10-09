@@ -108,7 +108,8 @@ def create_app():
                     idempotency_key: str = Header(min_length=1, max_length=128)):
         execution = request.app.state.execution
         reservation = await asyncio.to_thread(execution.metadata.reserve, actor, idempotency_key,
-                                             body.model_dump(), execution.fingerprint)
+                                             body.model_dump(), execution.fingerprint,
+                                             namespace=config['namespace'], environment=config['environment'])
         if reservation['phase'] != 'reserved':
             return await asyncio.to_thread(execution.status, reservation)
         return await execution.admitted(execution.start, reservation)

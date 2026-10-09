@@ -26,12 +26,13 @@ def main():
     with psycopg.connect(migration) as conn:
         conn.execute('CREATE SCHEMA lab_app')
         conn.execute('CREATE TABLE lab_app.schema_version (version integer PRIMARY KEY)')
-        conn.execute('INSERT INTO lab_app.schema_version VALUES (1)')
+        conn.execute('INSERT INTO lab_app.schema_version VALUES (2)')
         conn.execute('''CREATE TABLE lab_app.runs (
             run_id text PRIMARY KEY, tenant_id text NOT NULL, actor_id text NOT NULL,
             billing_account_id text NOT NULL, idempotency_key text NOT NULL,
             request_hash text NOT NULL, request jsonb NOT NULL, workflow text NOT NULL,
             assets_hash text NOT NULL, phase text NOT NULL CHECK (phase IN ('reserved','starting','started')),
+            namespace text NOT NULL, environment text NOT NULL,
             UNIQUE(tenant_id,actor_id,idempotency_key))''')
         conn.execute('REVOKE CREATE ON SCHEMA public FROM PUBLIC')
         conn.execute('GRANT USAGE ON SCHEMA prosaic_harness TO harness_runtime')

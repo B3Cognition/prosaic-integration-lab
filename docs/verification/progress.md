@@ -44,10 +44,34 @@ endpoint credentials were identified. Branch: `codex/integration-lab`.
   constructor option. No library code changed.
 - Host Python 3.12.14/libpq 18.0.6; Docker Linux/arm64. Wheel/sdist builds passed.
 
+## Review and corrective verification
+
+One independent read-only reviewer examined the first slice. Two important
+findings were reproduced with failing regressions and corrected:
+
+- Persist create intentions before engine mutation; reconcile only exact
+  owner/resource labels to real IDs after lost acknowledgements. Unresolved
+  intentions remain failures. A successful inventory proves removal; engine
+  errors never count as absence. Renamed resources retain immutable labels.
+- Freeze namespace/environment in application reservations (app schema 2).
+  Run reads/resume/usage reject scope drift with 409 before consulting a
+  different run-store/recorder scope. Measured usage cannot become a false zero.
+- Readiness now checks the application run-table contract as well as schema
+  version; missing tables fail without automatic repair.
+- Unit suite grew to 25 passing checks. Namespace drift regression failed on
+  the prior image, then passed in PostgreSQL 16/18 recovery acceptance.
+- Final unit suite: 27 passed, including stripped/incomplete JUnit exports.
+  Sanitization runs in `finally` before teardown, including failure/timeout.
+- Final recovery: 27 passed on both PostgreSQL majors. Deterministic: 21 passed;
+  load: 23 passed. No skips; cleanup verified. Sanitized receipts are retained
+  in `2026-10-09-linux-arm64.json`. No owned test containers remain.
+- Full-design omissions listed below remain outside this first-slice review.
+  Identity override headers are ignored, never used as trusted attribution.
+
 ## Remaining plan coverage
 
 Tasks 1–4 have an executable first slice; Task 5 has fault/load coverage but is
-not complete against the full spec. Missing-schema/adapter-corruption negative
+not complete against the full spec. Remaining adapter-schema/corruption negative
 cases, tool loops, quarantined/conflicting evidence, token-budget recovery,
 changed-default/scope recovery, public-log sentinels, non-sticky proxy and
 CI/architecture matrix remain. Task 6 is unimplemented; Task 7 is disabled and

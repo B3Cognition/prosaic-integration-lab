@@ -36,6 +36,7 @@ class Execution:
         self.store.close()
 
     def harness(self, reservation):
+        self.check_scope(reservation)
         if reservation['assets_hash'] != self.fingerprint:
             raise HTTPException(409, 'asset_conflict')
         context = ExecutionContext(application_id='integration-lab', tenant_id=reservation['tenant_id'],
@@ -43,6 +44,10 @@ class Execution:
         return Harness(self.workflows[reservation['workflow']], store=self.store,
                        run_id=reservation['run_id'], context=context, accounting=self.recorder,
                        on_event=self.fixture_event if self.config.get('fixture_events_url') else None)
+
+    def check_scope(self, reservation):
+        if any(reservation[name] != self.config[name] for name in ('namespace', 'environment')):
+            raise HTTPException(409, 'scope_conflict')
 
     def fixture_event(self, event):
         # Public Harness callback; the fixture sees only event type, never
@@ -72,6 +77,7 @@ class Execution:
         return self.status(reservation)
 
     def usage(self, reservation):
+        self.check_scope(reservation)
         return public_usage(self.recorder.report(application_id='integration-lab', tenant_id=reservation['tenant_id'],
             billing_account_id=reservation['billing_account_id'], actor_id=reservation['actor_id'],
             request_id=reservation['run_id'], run_id=reservation['run_id']))

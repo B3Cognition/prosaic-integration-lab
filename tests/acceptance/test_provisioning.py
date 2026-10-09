@@ -19,7 +19,7 @@ def test_runtime_roles_cannot_create_schema(lab, dsn_key):
 
 def test_app_schema_and_primary_durability(lab):
     with psycopg.connect(lab['app_dsn']) as conn:
-        assert conn.execute('SELECT version FROM lab_app.schema_version').fetchone() == (1,)
+        assert conn.execute('SELECT version FROM lab_app.schema_version').fetchone() == (2,)
         assert conn.execute('SELECT pg_is_in_recovery()').fetchone() == (False,)
         for setting in ('fsync', 'full_page_writes'):
             assert conn.execute('SELECT current_setting(%s)', (setting,)).fetchone() == ('on',)

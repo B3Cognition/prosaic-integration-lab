@@ -93,7 +93,7 @@ PostgreSQL does not make workflow and accounting writes atomic. Namespaces are
 not authorization, leases are not external-effect idempotency, and estimates
 are not customer charges.
 
-## Verification record
+## Historic initial verification record
 
 At handoff, verification is limited to documentation/file consistency, Git
 publication and public repository/issue visibility. Implementation-specific

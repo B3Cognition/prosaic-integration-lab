@@ -51,6 +51,51 @@ class OwnedStack:
         self._save()
         return identifier
 
+    def _create(self, kind, name, *args):
+        intent = {'kind': kind, 'name': name}
+        if intent in self.manifest.get('pending_resources', []):
+            raise EngineError('creation outcome unresolved; refusing repeat mutation')
+        self.manifest.setdefault('pending_resources', []).append(intent)
+        self._save()  # Durable intention precedes the engine mutation.
+        position = 1 if kind == 'container' else 2
+        creation = (*args[:position], '--label', f'io.prosaic.lab.resource={name}', *args[position:])
+        identifier = command(self.engine, *creation)
+        inspection = ('inspect', identifier) if kind == 'container' else (kind, 'inspect', identifier)
+        state = json.loads(command(self.engine, *inspection))[0]
+        validate_resource(state, identifier, self.owner)
+        self._record(kind, identifier)
+        self.manifest['pending_resources'].remove(intent)
+        self._save()
+        return identifier
+
+    def _ids(self, kind, *, owned_only=False):
+        args = ['ps', '-a', '-q', '--no-trunc'] if kind == 'container' else [kind, 'ls', '-q']
+        if kind == 'network':
+            args.append('--no-trunc')
+        if owned_only:
+            args += ['--filter', f'label=io.prosaic.lab.owner={self.owner}']
+        return command(self.engine, *args).splitlines()
+
+    def _reconcile_intents(self):
+        for intent in list(self.manifest.get('pending_resources', [])):
+            kind, name = intent['kind'], intent['name']
+            found = False
+            for identifier in self._ids(kind, owned_only=True):
+                args = ('inspect', identifier) if kind == 'container' else (kind, 'inspect', identifier)
+                state = json.loads(command(self.engine, *args))[0]
+                labels = state.get('Labels') or state.get('Config', {}).get('Labels') or {}
+                if labels.get('io.prosaic.lab.resource') != name:
+                    continue
+                validate_resource(state, identifier, self.owner)
+                found = True
+                resource = {'kind': kind, 'id': identifier}
+                if resource not in self.manifest['resources']:
+                    self._record(kind, identifier)
+            if not found:
+                raise EngineError('creation outcome remains unknown; cleanup cannot be certified')
+            self.manifest['pending_resources'].remove(intent)
+            self._save()
+
     def _secret(self, name, content):
         path = self.secrets / name
         path.write_text(content)
@@ -62,18 +107,20 @@ class OwnedStack:
         images = json.loads((ROOT / 'dependencies/images.json').read_text())
         pg_image = images[f'postgres{self.major}']
         command(self.engine, 'pull', pg_image)
-        network = self._record('network', command(self.engine, 'network', 'create', '--label',
-            f'io.prosaic.lab.owner={self.owner}', f'prosaic-lab-{self.owner}'))
-        volume = self._record('volume', command(self.engine, 'volume', 'create', '--label',
-            f'io.prosaic.lab.owner={self.owner}', f'prosaic-lab-{self.owner}'))
+        name = f'prosaic-lab-{self.owner}'
+        network = self._create('network', name, 'network', 'create', '--label',
+            f'io.prosaic.lab.owner={self.owner}', name)
+        volume = self._create('volume', name, 'volume', 'create', '--label',
+            f'io.prosaic.lab.owner={self.owner}', name)
         admin = secrets.token_hex(24)
         password = self._secret('postgres_password', admin)
-        db = self._record('container', command(self.engine, 'run', '-d', '--label',
+        db_name = name + '-database'
+        db = self._create('container', db_name, 'run', '-d', '--name', db_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', network, '--network-alias', 'database',
             '-p', '127.0.0.1::5432', '-e', 'POSTGRES_PASSWORD_FILE=/run/secrets/password',
             '-v', f'{password}:/run/secrets/password:ro', '-v',
             f'{volume}:/var/lib/postgresql' + ('/data' if self.major == 16 else ''),
-            pg_image))
+            pg_image)
         self.manifest['database_id'] = db
         self.manifest['network_id'] = network
         self.manifest['images']['postgres'] = pg_image
@@ -108,21 +155,23 @@ class OwnedStack:
         host_config['principals'] = principals
         self._secret('service.json', json.dumps(container_config))
         self._secret('host.json', json.dumps(host_config))
-        provision = self._record('container', command(self.engine, 'create', '--label',
+        provision_name = name + '-provision'
+        provision = self._create('container', provision_name, 'create', '--name', provision_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', network, '-v',
             f'{self.secrets / "provision.json"}:/run/secrets/provision.json:ro',
-            self.manifest['images']['consumer'], 'python', 'scripts/provision.py'))
+            self.manifest['images']['consumer'], 'python', 'scripts/provision.py')
         command(self.engine, 'start', '-a', provision)
         self._save()
         return self.manifest
 
     def start_replica(self, name):
-        identifier = self._record('container', command(self.engine, 'run', '-d', '--label',
+        replica_name = f'prosaic-lab-{self.owner}-replica-{name}'
+        identifier = self._create('container', replica_name, 'run', '-d', '--name', replica_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', self.manifest['network_id'],
             '-p', '127.0.0.1::8080', '-v', f'{self.secrets / "service.json"}:/run/secrets/service.json:ro',
             '-e', 'LAB_CONFIG=/run/secrets/service.json', self.manifest['images']['consumer'],
             'python', '-m', 'uvicorn', 'prosaic_integration_lab.app:create_app', '--factory',
-            '--host', '0.0.0.0', '--port', '8080', '--no-access-log'))
+            '--host', '0.0.0.0', '--port', '8080', '--no-access-log')
         port = json.loads(command(self.engine, 'inspect', identifier))[0]['NetworkSettings']['Ports']['8080/tcp'][0]['HostPort']
         url = f'http://127.0.0.1:{port}'
         self.manifest['endpoints'][name] = url
@@ -141,10 +190,11 @@ class OwnedStack:
             time.sleep(0.2)
 
     def start_model(self):
-        identifier = self._record('container', command(self.engine, 'run', '-d', '--label',
+        model_name = f'prosaic-lab-{self.owner}-model'
+        identifier = self._create('container', model_name, 'run', '-d', '--name', model_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', self.manifest['network_id'], '--network-alias', 'model',
             '-p', '127.0.0.1::8000', self.manifest['images']['consumer'], 'python', '-m', 'uvicorn',
-            'lab_runner.model:app', '--host', '0.0.0.0', '--port', '8000', '--no-access-log'))
+            'lab_runner.model:app', '--host', '0.0.0.0', '--port', '8000', '--no-access-log')
         port = json.loads(command(self.engine, 'inspect', identifier))[0]['NetworkSettings']['Ports']['8000/tcp'][0]['HostPort']
         url = f'http://127.0.0.1:{port}'
         self.manifest['endpoints']['model'] = url
@@ -163,20 +213,24 @@ class OwnedStack:
 
     def stop(self):
         failures = []
+        try:
+            self._reconcile_intents()
+        except (EngineError, ValueError):
+            failures.append({'kind': 'pending', 'id': 'unknown'})
         for resource in reversed(self.manifest['resources']):
             kind, identifier = resource['kind'], resource['id']
             try:
+                if identifier not in self._ids(kind):
+                    continue
                 args = ('inspect', identifier) if kind == 'container' else (kind, 'inspect', identifier)
                 state = json.loads(command(self.engine, *args))[0]
                 validate_resource(state, identifier, self.owner)
                 mutation = ('rm', '-f', identifier) if kind == 'container' else (kind, 'rm', identifier)
                 command(self.engine, *mutation)
-                # Absence is verified; a failed inspection is expected after removal.
-                try:
-                    command(self.engine, *args)
-                except EngineError:
-                    continue
-                raise EngineError('owned resource still exists after cleanup')
+                # A successful inventory, not a failed inspection, proves
+                # absence. Daemon outages/timeouts cannot certify cleanup.
+                if identifier in self._ids(kind):
+                    raise EngineError('owned resource still exists after cleanup')
             except (EngineError, ValueError):
                 failures.append({'kind': kind, 'id': identifier})
         self.manifest['cleanup'] = 'failed' if failures else 'verified'
@@ -184,6 +238,7 @@ class OwnedStack:
         self._save()
         if failures:
             raise EngineError('owned fixture cleanup failed; inspect ownership manifest')
-        for path in self.secrets.iterdir():
-            path.unlink()
-        self.secrets.rmdir()
+        if self.secrets.exists():
+            for path in self.secrets.iterdir():
+                path.unlink()
+            self.secrets.rmdir()

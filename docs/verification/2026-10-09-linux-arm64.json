@@ -1,0 +1,101 @@
+{
+  "date": "2026-10-09",
+  "unit_tests": 27,
+  "host_python": "3.12.14",
+  "host_libpq": 180006,
+  "container_architecture": "linux/arm64",
+  "cloud_model_calls": 0,
+  "local_smoke": {
+    "model": "mlx-community--Qwen2.5-Coder-7B-Instruct-4bit",
+    "exit_code": 0,
+    "reported_tokens": 85
+  },
+  "lanes": [
+    {
+      "owner": "7b8c1cdfd4f04add8e2f9e1a2e048915",
+      "mode": "deterministic",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "test_returncode": 0,
+      "test_count": 21,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 8.35,
+      "images": {
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+        "consumer": "sha256:52b25184b7268a24da01b662eb551a7744f05a370f13b2db268d5c652bd167c7"
+      }
+    },
+    {
+      "owner": "600f150b3454489c8740ea9c1f1bc5bd",
+      "mode": "recovery",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "failed_tests": [],
+      "test_count": 27,
+      "skipped": 0,
+      "seconds": 40.67,
+      "images": {
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+        "consumer": "sha256:91cc7e6b95c3eb8b905e61481da3514c73d2203d752f19c6289d5b5495b8c271"
+      }
+    },
+    {
+      "owner": "06d7fe021bf34140ade02f2c5a6fbac7",
+      "mode": "recovery",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "test_returncode": 0,
+      "test_count": 27,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 40.73,
+      "images": {
+        "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+        "consumer": "sha256:52b25184b7268a24da01b662eb551a7744f05a370f13b2db268d5c652bd167c7"
+      }
+    },
+    {
+      "owner": "bbc1ccc8563748ec95f4e39ae4d5f4e3",
+      "mode": "load",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "failed_tests": [],
+      "test_count": 23,
+      "skipped": 0,
+      "seconds": 8.83,
+      "images": {
+        "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+        "consumer": "sha256:91cc7e6b95c3eb8b905e61481da3514c73d2203d752f19c6289d5b5495b8c271"
+      }
+    },
+    {
+      "owner": "12b4b220650a42b18bde481bd4415410",
+      "mode": "load",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "failed_tests": [],
+      "test_count": 22,
+      "skipped": 0,
+      "seconds": 8.39,
+      "images": {
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+        "consumer": "sha256:430aacce03e5c6e29582808745df819639bc917edf430cbeb85c077f769c2a33"
+      }
+    }
+  ],
+  "limitations": [
+    "No amd64/Podman/CI certification",
+    "Remaining full-design acceptance scenarios are tracked in progress.md"
+  ]
+}

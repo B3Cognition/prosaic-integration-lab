@@ -43,8 +43,8 @@ cd prosaic-integration-lab
 Open the checkout in Codex and use this prompt:
 
 > Read AGENTS.md, docs/handoff.md, the approved design and the tracking issue.
-> Prepare a staged implementation plan for the integration lab and ask me to
-> review it and select an execution method before implementation. Preserve the
+> Continue the approved implementation plan from docs/verification/progress.md.
+> Preserve the
 > public SDK, authorization, accounting and exact-owned fixture boundaries.
 
 Python 3.12, `uv`, and a running Docker daemon are needed for the verified path.

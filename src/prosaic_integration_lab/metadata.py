@@ -28,16 +28,22 @@ class Metadata:
 
     def check_ready(self):
         with self.connection() as conn:
-            if conn.execute('SELECT version FROM lab_app.schema_version').fetchall() != [{'version': 1}]:
+            if conn.execute('SELECT version FROM lab_app.schema_version').fetchall() != [{'version': 2}]:
                 raise ValueError('incompatible app schema')
+            conn.execute('''SELECT run_id,tenant_id,actor_id,billing_account_id,idempotency_key,
+                request_hash,request,workflow,assets_hash,phase,namespace,environment
+                FROM lab_app.runs LIMIT 0''')
 
-    def reserve(self, principal, key, payload, assets_hash):
+    def reserve(self, principal, key, payload, assets_hash, *, namespace, environment):
         request_hash = hashlib.sha256(canonical_request(payload).encode()).hexdigest()
         with self.connection() as conn:
-            conn.execute('''INSERT INTO lab_app.runs VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'reserved')
+            conn.execute('''INSERT INTO lab_app.runs
+                (run_id,tenant_id,actor_id,billing_account_id,idempotency_key,request_hash,
+                 request,workflow,assets_hash,phase,namespace,environment)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,'reserved',%s,%s)
                 ON CONFLICT(tenant_id,actor_id,idempotency_key) DO NOTHING''',
                 (uuid.uuid4().hex, principal.tenant_id, principal.actor_id, principal.billing_account_id,
-                 key, request_hash, Jsonb(payload), payload['workflow'], assets_hash))
+                 key, request_hash, Jsonb(payload), payload['workflow'], assets_hash, namespace, environment))
             row = conn.execute('SELECT * FROM lab_app.runs WHERE tenant_id=%s AND actor_id=%s AND idempotency_key=%s',
                                (principal.tenant_id, principal.actor_id, key)).fetchone()
             if row['request_hash'] != request_hash:
