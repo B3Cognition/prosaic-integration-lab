@@ -28,7 +28,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -36,6 +36,10 @@ class OwnedStack:
         self.engine, self.major = engine, postgres_major
         self.candidate = candidate
         self.identity = identity
+        if consumer_image is not None:
+            import re
+            if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
+        self.consumer_image = consumer_image
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
         self.directory.mkdir(parents=True, mode=0o700)
@@ -109,8 +113,9 @@ class OwnedStack:
 
     def start(self):
         command(self.engine, 'info')
-        image_name = 'prosaic-integration-lab:candidate' if self.candidate else 'prosaic-integration-lab:dev'
+        image_name = self.consumer_image or ('prosaic-integration-lab:candidate' if self.candidate else 'prosaic-integration-lab:dev')
         image = json.loads(command(self.engine, 'image', 'inspect', image_name))[0]
+        labels = image['Config'].get('Labels') or {}
         if self.candidate:
             import hashlib
             manifest = ROOT / 'dependencies/accounting-candidate.json'
@@ -118,7 +123,25 @@ class OwnedStack:
             if (image['Config'].get('Labels') or {}).get('io.prosaic.lab.candidate-manifest') != expected:
                 raise EngineError('candidate image provenance mismatch')
             self.manifest['candidate_manifest_sha256'] = expected
+        import hashlib
+        released_sha = hashlib.sha256((ROOT/'dependencies/releases.json').read_bytes()).hexdigest()
+        if (labels.get('io.prosaic.lab.release-manifest') != released_sha or
+            labels.get('io.prosaic.lab.dependency-mode') != ('candidate' if self.candidate else 'released') or
+            (not self.candidate and 'io.prosaic.lab.candidate-manifest' in labels)):
+            raise EngineError('released image provenance mismatch')
+        self.manifest['released_manifest_sha256'] = released_sha
         self.manifest['images']['consumer'] = image['Id']
+        self._save()
+        audit_name = f'prosaic-lab-{self.owner}-payload-audit'
+        audit_manifest = 'dependencies/accounting-candidate.json' if self.candidate else 'dependencies/releases.json'
+        audit_wheels = '/srv/candidates' if self.candidate else '/srv/wheels'
+        audit_job = self._create('container',audit_name,'create','--name',audit_name,
+            '--label',f'io.prosaic.lab.owner={self.owner}','--network','none','--read-only',
+            '--cap-drop','ALL','--security-opt','no-new-privileges','--memory','128m','--pids-limit','32',
+            image['Id'],'python','scripts/audit_install.py',audit_manifest,audit_wheels,
+            self.manifest['candidate_manifest_sha256'] if self.candidate else released_sha)
+        command(self.engine,'start','-a',audit_job)
+        self.manifest['payload_audit'] = 'verified'
         self._save()
         images = json.loads((ROOT / 'dependencies/images.json').read_text())
         pg_image = images[f'postgres{self.major}']

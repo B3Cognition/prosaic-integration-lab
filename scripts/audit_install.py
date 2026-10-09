@@ -4,9 +4,15 @@ from importlib.metadata import distribution
 import json
 from pathlib import Path
 import zipfile
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
+from prosaic_integration_lab.dependencies import verify_dependencies
 
 
-def audit(manifest: Path, wheel_dir: Path):
+def audit(manifest: Path, wheel_dir: Path, *, expected_sha=None):
+    if expected_sha is not None and hashlib.sha256(manifest.read_bytes()).hexdigest() != expected_sha:
+        raise ValueError('manifest checksum mismatch')
+    verify_dependencies(manifest,wheel_dir)
     for item in json.loads(manifest.read_text())['artifacts']:
         installed = distribution(item['distribution'])
         if installed.version != item['version']:
@@ -23,4 +29,4 @@ def audit(manifest: Path, wheel_dir: Path):
 
 if __name__ == '__main__':
     import sys
-    audit(Path(sys.argv[1]), Path(sys.argv[2]))
+    audit(Path(sys.argv[1]), Path(sys.argv[2]),expected_sha=sys.argv[3] if len(sys.argv)>3 else None)

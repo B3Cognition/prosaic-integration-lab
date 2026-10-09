@@ -35,7 +35,12 @@ def main():
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
+    parser.add_argument('--consumer-image',help='immutable consumer sha256 image ID; manifest and installed payload still verified')
     args = parser.parse_args()
+    if args.consumer_image is not None:
+        import re
+        if not re.fullmatch('sha256:[0-9a-f]{64}',args.consumer_image):
+            parser.error('immutable consumer image ID required')
     if args.command == 'recover':
         from .recovery import cli
         return cli(args)
@@ -55,7 +60,7 @@ def main():
     if args.mode == 'ingress' and args.command != 'test':
         parser.error('ingress mode requires test')
     stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command == 'run' else 3,
-        candidate=args.candidate,identity=args.mode in {'identity','ingress'})
+        candidate=args.candidate,identity=args.mode in {'identity','ingress'},consumer_image=args.consumer_image)
     events = workload.Events(stack.directory) if args.command == 'run' else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
@@ -133,6 +138,8 @@ def main():
             result['passed'] = False
         result['seconds'] = round(time.monotonic() - started, 2)
         result['images'] = stack.manifest['images']
+        result['released_manifest_sha256'] = stack.manifest.get('released_manifest_sha256')
+        result['payload_audit'] = stack.manifest.get('payload_audit')
         if args.candidate:
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
         if events:

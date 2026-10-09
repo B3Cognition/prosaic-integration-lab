@@ -17,7 +17,7 @@ push, library publication or production deployment is implied.
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Locally verified |
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Locally verified |
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Locally verified |
-| 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Queued |
+| 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Locally verified; native CI activation/publication pending |
 | 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Queued |
 | 14 | [Lab 14](https://github.com/B3Cognition/prosaic-integration-lab/issues/14) | Capacity SLOs/retention qualification | Queued |
 
@@ -334,3 +334,44 @@ Independent review reports no remaining important finding. The reference assumes
 a restricted private backend network, managed deployment certificates and pinned
 compatible assets for pending runs; it does not certify unencrypted cross-host
 transport. See [ingress.md](../ingress.md).
+
+## Required release gates and verified image provenance
+
+Prepared read-only, pinned-action CI runs PostgreSQL 16/18 on native AMD64/ARM64
+Linux with required unit/functional and audit/identity/ingress lanes. No paid model
+credentials. Only bounded whitelisted summaries are uploaded, never raw receipts,
+logs, configs, backups or captured JUnit. All required lanes execute despite a
+prior failure; any skips, incorrect counts, process errors, missing receipts or
+unverified cleanup fail promotion.
+
+Review caught a retagged-candidate release bypass. Released manifest/mode labels
+are now checked before allocation; candidate labels are rejected in released
+mode. An exact-owned offline non-root job audits actual manifest bytes against
+the host checksum, original wheel checksums and installed payloads by immutable
+image ID before database/network/model creation. Gate receipts require this
+verified provenance. One image ID is snapshotted for the whole cell, preventing
+concurrent development-tag updates from mixing service versions. Missing images
+produce a safe failed summary.
+
+Unit regressions were red for missing implementation, absent payload/hash checks
+and wheel/manifest tampering before correction. Tracked plus new suite: 150/150;
+subsequent missing-image functional regression is also green (focused 25/25).
+Actual candidate image requested as released is refused before fixture allocation
+(`a74b923823a24a6cb28f6aa321659cab`, verified cleanup). Released PostgreSQL 18
+audit remains red with the original three accounting-readiness failures
+(`ad4d17987b7940e9a6ad216b9ed5855b`); identity/ingress passed, and the cell correctly
+failed. Upstream adapter publication and provenance update are prerequisites.
+
+Final candidate cells pass every required lane (77 audit, 19 identity, 5 ingress)
+on both majors, no skips and verified cleanup. PostgreSQL 16 receipts:
+`b8102f9531984d4b8504461d9a8fcf87`, `5a875d55a88f4876b92cd81731fc0c46`,
+`c924d50361b54c80bac54c5a81afe1a0`. PostgreSQL 18:
+`8f8b0c5cce6d4073a99c5d4f11bc262b`, `183966cf7e4a4ce7be875a80a85b3f2d`,
+`941ac1abab514212be78cf04a2b99e2e`. Consumer image:
+`sha256:b3d46539c80ca449f292033d3af7a575a5b5a7f49a80c09b22ca9aae38a6ca91`.
+An initial 16 cell failed on the pre-network image-pull path
+(`4f19f67988354292b7094df9939b654c`), cleanup verified; original failed cell report
+is preserved separately from the successful sequential retry. Bounded engine
+phase diagnostics remain issue 13. Independent review has no remaining important
+finding. Remote CI execution and required repository rules cannot be called
+verified until publication/activation; see [release-gates.md](../release-gates.md).

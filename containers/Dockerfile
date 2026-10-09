@@ -5,6 +5,10 @@ COPY dependencies/requirements.lock dependencies/requirements.lock
 RUN python -m pip install --require-hashes -r dependencies/requirements.lock
 COPY .cache/wheels/ /srv/wheels/
 COPY dependencies/releases.json dependencies/releases.json
+ARG RELEASE_MANIFEST_SHA256=247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7
+RUN python -c "import hashlib,os; from pathlib import Path; assert hashlib.sha256(Path('dependencies/releases.json').read_bytes()).hexdigest() == os.environ['RELEASE_MANIFEST_SHA256']"
+LABEL io.prosaic.lab.release-manifest=${RELEASE_MANIFEST_SHA256}
+LABEL io.prosaic.lab.dependency-mode="released"
 COPY src/ src/
 COPY scripts/ scripts/
 COPY lab_runner/ lab_runner/
