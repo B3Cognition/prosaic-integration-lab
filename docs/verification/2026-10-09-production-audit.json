@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-09",
+  "decision": "do_not_adopt_blueprint_unchanged",
+  "scope": {
+    "daemon": "Linux/arm64",
+    "host_python": "3.12.14",
+    "inference": "synthetic_only",
+    "model_credits_used": false,
+    "released_packages": {
+      "prosaic": "0.3.1",
+      "prosaic-runtime": "0.6.0",
+      "prosaic-harness": "0.6.0",
+      "prosaic-runtime-postgres": "0.1.0",
+      "prosaic-harness-postgres": "0.1.0"
+    },
+    "consumer_image": "sha256:52b25184b7268a24da01b662eb551a7744f05a370f13b2db268d5c652bd167c7"
+  },
+  "library_checks": {
+    "lab_unit": {"passed": 38, "failed": 0},
+    "prosaic_python_frozen_differential": {"passed": 432, "failed": 0, "skipped": 0},
+    "prosaic_shipped_cli_oracle": {"passed": 55, "suites_passed": 13, "failed": 0},
+    "prosaic_installed_wheel_without_node": {"passed": true},
+    "runtime_release_b13a62e": {"passed": 361, "failed": 0},
+    "runtime_checkout_c17dca4": {"passed": 456, "failed": 0, "installed_lab_capability_claim": false},
+    "harness_release_matching_2bd14fd": {"passed": 172, "failed": 0},
+    "installed_payloads_match_five_wheels": {"passed": true},
+    "lab_wheel_sdist_build": {"passed": true},
+    "prosaic_harness_runtime_checkout_wheel_sdist_builds": {"passed": true, "installed_over_release_baseline": false}
+  },
+  "owned_stack_checks": [
+    {"mode": "recovery", "postgres": 16, "passed": 27, "failed": 0, "skipped": 0, "cleanup": "verified", "owner": "2f5f6a4c1cfa4464a8201aca35ea908e"},
+    {"mode": "recovery", "postgres": 18, "passed": 27, "failed": 0, "skipped": 0, "cleanup": "verified", "owner": "48137b51ff8e4c75a42dcf720636709c"},
+    {"mode": "load", "postgres": 16, "passed": 23, "failed": 0, "skipped": 0, "cleanup": "verified", "owner": "dd346a714fa64d4caead1dc41d4fa97e"},
+    {"mode": "audit", "postgres": 16, "passed": 49, "failed": 9, "skipped": 0, "cleanup": "verified", "owner": "fc42c4b1a00f4df18a60dd852b7a1da0"},
+    {"mode": "audit", "postgres": 18, "passed": 49, "failed": 9, "skipped": 0, "cleanup": "verified", "owner": "f51696c81ec64ed7a99414054efb9c4e"},
+    {"mode": "released-runtime-adapter", "postgres": 16, "passed": 24, "failed": 0, "skipped": 0, "cleanup": "verified", "owner": "705a49c3762944bc8c071d7f236d74a4"}
+  ],
+  "production_failed_assertions": [
+    "test_unauthenticated_partial_post_is_rejected_before_waiting_for_body",
+    "test_service_container_runs_as_nonroot",
+    "test_service_assets_are_on_readonly_root_filesystem",
+    "test_missing_accounting_contract_fails_readiness_without_repair[prosaic_metering_intents-payload]",
+    "test_missing_accounting_contract_fails_readiness_without_repair[prosaic_metering_observations-payload_hash]",
+    "test_missing_write_grant_fails_readiness_without_repair[prosaic_metering_intents-accounting_runtime]",
+    "test_missing_write_grant_fails_readiness_without_repair[lab_app.runs-app_runtime]",
+    "test_missing_application_uniqueness_fails_readiness_without_repair",
+    "test_overloaded_starts_do_not_grow_durable_reservations"
+  ],
+  "workloads": [
+    {"users": 50, "runs_per_user": 10, "concurrency": 2, "completed": 500, "start_capacity_rejected": 0, "approval_deferred": 0, "errors": 0, "independent_model_calls": 500, "accounting_reconciled": true, "cleanup": "verified", "owner": "1b8c0818713b4885827ead0e3f77f72f"},
+    {"users": 100, "runs_per_user": 10, "concurrency": 32, "completed": 6, "start_capacity_rejected": 971, "approval_deferred": 23, "errors": 0, "independent_model_calls": 29, "accounting_reconciled": true, "cleanup": "verified", "owner": "c2afc831df1f46968998c325fd58872c"}
+  ],
+  "demo": {"postgres": 18, "independent_model_calls": 6, "complete_calls": 5, "unresolved_calls": 1, "known_fixture_estimate_usd": "0.001850", "billing_eligible": false, "cleanup": "verified", "owner": "18a0115c39e1449b87325318f959f92d"},
+  "failed_setup_receipts_preserved": [
+    {"owner": "f1e9d53df5454572a0d6451c58e50c62", "error": "EngineError", "cleanup": "failed", "pending_kind": "network", "subsequent_successful_owned_inventories_empty": true, "root_cause": "unresolved"},
+    {"owner": "be8c7d23339d4ac0aac6270e283ae4cb", "mode": "released-runtime-adapter", "passed": 22, "failed": 2, "cleanup": "verified", "classification": "fixture_path_and_createdb_setup"}
+  ],
+  "untested_end_to_end": ["real_provider", "tool_effects", "streaming_service", "primary_failover", "Linux/amd64", "Podman", "production_ingress", "long_soak", "killed_worker_finite_token_budget"]
+}

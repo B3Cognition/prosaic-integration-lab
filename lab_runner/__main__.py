@@ -23,7 +23,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     args = parser.parse_args()
@@ -59,10 +59,12 @@ def main():
         if args.mode != 'provisioning':
             files += ['tests/acceptance/test_approval.py', 'tests/acceptance/test_authorization.py', 'tests/acceptance/test_idempotency.py', 'tests/acceptance/test_accounting.py', 'tests/acceptance/test_coverage.py']
             files += ['tests/acceptance/test_reservations.py']
-        if args.mode == 'load':
+        if args.mode in {'load', 'audit'}:
             files += ['tests/acceptance/test_load.py']
-        if args.mode == 'recovery':
+        if args.mode in {'recovery', 'audit'}:
             files += ['tests/acceptance/test_accounting_failures.py', 'tests/acceptance/test_recovery.py', 'tests/acceptance/test_scope.py']
+        if args.mode == 'audit':
+            files += ['tests/acceptance/test_production_audit.py']
         if args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':

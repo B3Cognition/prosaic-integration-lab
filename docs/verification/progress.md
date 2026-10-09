@@ -135,3 +135,40 @@ projection. A subprocess regression demonstrated that failure; removing that
 host installation assumption restored startup. No model/provider credits used.
 Arrival-rate control, soak duration, latency thresholds and performance
 certification remain pending. Existing acceptance gaps below remain unchanged.
+
+## Production blueprint audit
+
+Maintainer requested aggressive testing and a report of production gaps.
+Implemented `--mode audit`: 58 required test cases on PostgreSQL 16 and 18,
+49 passing and 9 failing on each, zero skips, cleanup verified. Confirmed gaps
+are accounting/application readiness contract/grants, metadata allocation before
+execution admission, unauthenticated partial bodies, root execution and writable
+assets. Assertions intentionally remain red until their owners fix the behavior.
+No library source was patched and the existing green lanes were not weakened.
+
+Added passing checks for malformed/oversized input, owner-scoped key reuse,
+completed/lost-response non-redispatch, conflict/quarantine accounting, public
+and stdout/stderr sentinels, restricted role identity permissions and finite
+token budgets after durable SDK reconstruction. Explicit retry cannot bypass
+unknown/consumed token limits; tools remain disabled.
+
+Fresh verification: lab units 38; Prosaic 432 Python/differential plus 55 original
+CLI checks; installed wheel smoke passed without Node; released Runtime 361;
+newer Runtime checkout 456 (separate scope); release-matching Harness 172.
+Released Runtime PostgreSQL adapter tests: 24 passed, zero skips, owned fixture
+cleanup verified, after supplying its Harness fixture path and CREATEDB only
+to the isolated migration role for its missing-database case. The first two
+setup failures are retained separately. Installed five-wheel payload re-audit
+and lab wheel/sdist build passed.
+Existing recovery 27 on both PostgreSQL majors, load 23 on 16. Baseline 50 users
+completed 500 workflows with 500 reconciled calls and zero errors/rejections.
+Overload 100 users/1,000 attempts: 6 completed, 971 start-rejected, 23
+approval-deferred, 29 measured calls reconciled, zero correctness errors.
+
+One parallel demo setup failed with an unresolved network-create intention and
+failed cleanup receipt; successful owner-filtered inventories later found no
+owned engine resources. The original failure remains preserved. A fresh demo
+18 succeeded. Initial library test setup/provenance failures were corrected,
+not counted as product bugs. The full evidence, fix ownership/acceptance and
+conditional deferrals are in
+`production-readiness-2026-10-09.md`.

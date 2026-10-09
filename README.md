@@ -153,6 +153,24 @@ control, soak duration and performance thresholds remain future work.
 These commands use the credential-free synthetic endpoint, without local or
 cloud model calls. Estimates are test rate-card values, not billable invoices.
 
+## Production blueprint audit
+
+Read the [production readiness report](docs/verification/production-readiness-2026-10-09.md)
+before copying this lab into a production service. The report separates confirmed
+defects, adoption requirements and features that can remain disabled.
+
+```sh
+.venv/bin/python -m lab_runner test --mode audit --postgres-version 16
+.venv/bin/python -m lab_runner test --mode audit --postgres-version 18
+```
+
+This lane includes existing recovery/load cases plus adversarial HTTP inputs,
+schema/privilege corruption, accounting conflicts/quarantine, token budgets,
+private-response/log sentinels and production deployment checks. It currently
+exits **1**: 49 test cases pass and 9 fail on each database major, with zero skips
+and verified cleanup. Those are visible production gates; they are not expected
+failures or changes to the existing green deterministic/recovery/load contracts.
+
 ## Optional local model smoke
 
 ```sh
