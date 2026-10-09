@@ -7,8 +7,8 @@
 3. The tracking issue linked from README.md and the approved implementation plan
    when one exists. There is no implementation plan at initial handoff.
 
-The design is approved. The next step is a written implementation plan and
-maintainer review/execution-method selection, not immediate service coding.
+The design and implementation plan are approved for native execution. Read
+`docs/verification/progress.md` for implemented acceptance coverage and gaps.
 Use applicable skills available on the current machine; do not assume this
 machine's absolute paths or local caches exist elsewhere.
 
@@ -49,5 +49,6 @@ evidence as consent to retry, authority to approve output or a customer invoice.
   data without authorization. Do not spawn agents unless authorized by the user
   or applicable instructions.
 
-No implementation/test commands exist at initial handoff. Replace this status
-only after commands are implemented and freshly verified.
+Verified commands are in README.md. Run `.venv/bin/python -m pytest -q` for
+local unit tests, build the consumer image, then use `python -m lab_runner test`
+for required real-stack acceptance. Unit tests alone are not stack evidence.

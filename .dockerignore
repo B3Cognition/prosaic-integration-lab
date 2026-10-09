@@ -1,0 +1,16 @@
+*
+!containers/
+!containers/**
+!dependencies/
+!dependencies/**
+!scripts/
+!scripts/**
+!src/
+!src/**
+!lab_runner/
+!lab_runner/**
+!assets/
+!assets/**
+!.cache/
+!.cache/wheels/
+!.cache/wheels/*.whl

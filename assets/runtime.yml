@@ -1,0 +1,10 @@
+default_profile: synthetic
+allowed_tools: []
+routes: {fast: synthetic}
+limits: {timeout_s: 10, max_tool_rounds: 1}
+profiles:
+  synthetic:
+    base_url: http://model:8000/v1
+    model: test-model
+    max_tokens: 128
+    features: {streaming: false}

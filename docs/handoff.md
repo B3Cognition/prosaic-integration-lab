@@ -1,6 +1,6 @@
 # Codex handoff
 
-Checkpoint: 2026-10-09, documentation-only public repository.
+Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
 ## Completed
 
@@ -11,23 +11,36 @@ Checkpoint: 2026-10-09, documentation-only public repository.
   published with staged work and acceptance requirements.
 - No existing Prosaic/Harness/Runtime library sources changed for this handoff.
 
-## Not implemented or tested
+## Implementation checkpoint
 
-No Python application, dependency lock, image, PostgreSQL fixture, workflow asset,
+Native implementation was authorized by the maintainer's “proceed”. Branch
+`codex/integration-lab` contains the consumer image, wheel provenance/audit,
+owned runner, explicit grants, owner-only HTTP APIs, zero-call approval and
+synthetic inference/accounting. PostgreSQL 16 and 18 acceptance ran on Docker
+Desktop Linux/arm64 with verified cleanup. Read `verification/progress.md` for
+exact receipts and remaining coverage. No push or release is implied.
+
+The optional host-side local model reads `~/.omlx_token`; its 7B Qwen Coder smoke
+succeeded and reported 85 tokens. No cloud/TokenProxy model calls were made.
+
+## Historic initial handoff
+
+At the initial documentation-only handoff, no Python application, dependency lock, image, PostgreSQL fixture, workflow asset,
 model stub, test runner, load balancer or CI job exists yet. No container or model
 was started. No acceptance test, architecture matrix or live endpoint was run.
 Commands in the design are target interfaces, not commands available today.
 
-## Next action
+## Initial next action (superseded)
 
 Read the [approved design](superpowers/specs/2026-10-09-prosaic-integration-lab-design.md)
 and [tracking issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1).
-Write a staged implementation plan at
-`docs/superpowers/plans/YYYY-MM-DD-prosaic-integration-lab.md` and ask the
-maintainer to review it and select the execution method before coding.
+Review the [written implementation plan](superpowers/plans/2026-10-09-prosaic-integration-lab.md)
+and its execution ledger. The plan was prepared and approved in this checkout
+on 2026-10-09. Native execution starts with released-dependency provenance and
+exact-owned provisioning. No paid calls are needed for synthetic milestones.
 
 Do not re-request approval of the already approved project direction unless a
-material change is needed. The written implementation plan still needs review.
+material change is needed. The written implementation plan is now approved.
 
 Recommended milestone order:
 
