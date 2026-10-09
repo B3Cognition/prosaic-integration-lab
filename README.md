@@ -231,6 +231,56 @@ proxy, CI and the architecture matrix still need their own executable evidence.
 Paid TokenProxy mode remains unimplemented and disabled. See the
 [implementation ledger](docs/verification/progress.md) for precise coverage.
 
+## Local Lago billing robustness
+
+The optional Lago lane checks fixture charges against public Runtime usage
+evidence. It provisions a digest-pinned Lago 1.55.0 local stack, freezes trusted
+account/subscription mappings and the current billing period before inference,
+and delivers exclusive input, cached-input and output quantities through an
+application-owned PostgreSQL outbox. Replicas receive no Lago key; the exporter
+uses a separate restricted database role. Existing default lanes need no Lago.
+
+```sh
+docker build -f containers/Dockerfile -t prosaic-integration-lab:dev .
+.venv/bin/python -m lab_runner test --mode lago --postgres-version 16
+.venv/bin/python -m lab_runner test --mode lago --postgres-version 18
+```
+
+The lane exercises actual Harness calls, rejected outputs, cross-replica approval,
+Lago outages, duplicate replay, concurrent scans, expired/stale leases and killed
+exporter processes before send and after remote acceptance. Direct public-ledger
+fixtures separately exercise more than 1000 calls in one run, delayed evidence,
+unknown cache details, quarantine, reasoning overlap, equal account names in
+different tenants, fractional-cent charge rounding and out-of-period rejection.
+These direct fixtures are not extra inference calls.
+
+Immutable transaction IDs and timestamps survive retries. Unknown token detail
+stays excluded; a payload/mapping conflict blocks the source. Delivery is at
+least once with verified Lago deduplication. HTTP acknowledgement and processed
+usage are checked separately. Infrastructure errors, unexpected skips, failures
+and unverified cleanup return a nonzero exit code.
+
+The bundled upstream demo image contains its own PostgreSQL/Redis/API/worker;
+the selected `--postgres-version` applies to Prosaic's shared database. The
+owned fixture uses loopback ports and an explicit private subnet selected against
+existing Docker networks. Source/image/API provenance lives in
+[`dependencies/lago.json`](dependencies/lago.json). No existing billing deployment,
+payment processor or live inference credentials are used.
+
+Sanitized JUnit, `result.json` and the initial multiuser `billing.json` survive
+exact-owned teardown under `.lab/<owner>/`. Generated credentials and Lago data
+are removed. The finite standalone exporter command is
+`PYTHONPATH=src .venv/bin/python -m prosaic_integration_lab.billing_exporter --config <private-config-file>`;
+its config contains only `billing_dsn` and local `lago.url`/`lago.key`. Provisioning
+and mapping creation remain runner/operator operations. A pass can leave pending
+events during retry backoff; current-usage reconciliation is a separate required
+acceptance gate.
+
+Fixture retail rates intentionally differ from Runtime's provider-cost estimates.
+Runtime evidence remains `billing_eligible=False`. This lane verifies open-period
+metering and fixture charge reconciliation, not customer invoices, wallets,
+payments, finalized-period corrections or production billing readiness.
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).

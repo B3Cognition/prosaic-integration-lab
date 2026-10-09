@@ -40,7 +40,7 @@ def main():
         if args.candidate: command.append('--candidate')
         item = {}
         try:
-            process = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=300)
+            process = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=900 if mode=='lago' else 300)
             for line in process.stdout.splitlines():
                 if line.startswith('{'): item = json.loads(line)
             validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha)

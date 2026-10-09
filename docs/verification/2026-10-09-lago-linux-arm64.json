@@ -1,0 +1,108 @@
+{
+  "date": "2026-10-09",
+  "host_suite_passed": 188,
+  "host_suite_warning": "existing Starlette deprecation",
+  "wheel_sdist_build": "passed",
+  "installed_release_payload_audit": "five verified wheels match",
+  "cleanup_inventory": "all final owned resources absent",
+  "upstream_source_changes": false,
+  "execution": "Docker Desktop Linux/arm64, host Python 3.12.14",
+  "limitations": [
+    "amd64 and Podman execution unverified",
+    "synthetic inference and fixture prices",
+    "open-period metering only; no invoices, wallets or payment collection"
+  ],
+  "runs": [
+    {
+      "owner": "f7fc3d9c87ce480c8ee09338f6dce3bb",
+      "mode": "lago",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "dependency_mode": "released",
+      "test_returncode": 0,
+      "test_count": 25,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 297.83,
+      "images": {
+        "consumer": "sha256:d25ee785f0243773823e0c0b4694c9c1e565ea5a306cae91388e06c8ee14fd63",
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+        "lago": "getlago/lago:v1.55.0@sha256:60ecc02cdb2854c918e28a6436ccb4033d8f4a0447bc0b5150936596ebe2a290"
+      },
+      "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+      "payload_audit": "verified"
+    },
+    {
+      "owner": "8c73867a44db45e9a9a6fe853ab6beff",
+      "mode": "lago",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "dependency_mode": "released",
+      "test_returncode": 0,
+      "test_count": 25,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 302.87,
+      "images": {
+        "consumer": "sha256:d25ee785f0243773823e0c0b4694c9c1e565ea5a306cae91388e06c8ee14fd63",
+        "postgres": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+        "lago": "getlago/lago:v1.55.0@sha256:60ecc02cdb2854c918e28a6436ccb4033d8f4a0447bc0b5150936596ebe2a290"
+      },
+      "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+      "payload_audit": "verified"
+    },
+    {
+      "owner": "6b8173e4384348ab81571ae99a1e6cea",
+      "mode": "deterministic",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "dependency_mode": "released",
+      "test_returncode": 0,
+      "test_count": 21,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 11.01,
+      "images": {
+        "consumer": "sha256:d25ee785f0243773823e0c0b4694c9c1e565ea5a306cae91388e06c8ee14fd63",
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+      },
+      "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+      "payload_audit": "verified"
+    },
+    {
+      "owner": "a377145b106a4ba0b381dd1b16997787",
+      "mode": "recovery",
+      "host_architecture": "arm64",
+      "python": "3.12.14",
+      "passed": true,
+      "cleanup": "verified",
+      "dependency_mode": "released",
+      "test_returncode": 0,
+      "test_count": 27,
+      "skipped": 0,
+      "failed_tests": [],
+      "seconds": 43.79,
+      "images": {
+        "consumer": "sha256:d25ee785f0243773823e0c0b4694c9c1e565ea5a306cae91388e06c8ee14fd63",
+        "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+      },
+      "released_manifest_sha256": "247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7",
+      "payload_audit": "verified"
+    },
+    {
+      "owner": "916eef62d90343f6b3eded271caf45ef",
+      "mode": "lago-supplemental",
+      "passed": true,
+      "test_count": 13,
+      "skipped": 0,
+      "failed_tests": [],
+      "cleanup": "verified"
+    }
+  ]
+}

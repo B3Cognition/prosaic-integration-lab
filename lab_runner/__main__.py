@@ -13,6 +13,16 @@ from .accounting_report import write_report
 from . import workload
 
 
+def load_lago():
+    # The host runner consumes this repository's application source; upstream
+    # Prosaic dependencies remain installed, checksummed release wheels.
+    source = str(ROOT / 'src')
+    if source not in sys.path:
+        sys.path.insert(0,source)
+    from .lago import start
+    return start
+
+
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
     parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover','metrics','retention','stress'])
@@ -42,7 +52,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget','ingress','observability','capacity'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget','lago','ingress','observability','capacity'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
@@ -86,8 +96,10 @@ def main():
         parser.error('identity mode requires test')
     if args.mode == 'ingress' and args.command != 'test':
         parser.error('ingress mode requires test')
+    if args.mode == 'lago' and args.command != 'test':
+        parser.error('lago mode requires test')
     stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} else 3,
-        candidate=args.candidate,identity=args.mode in {'identity','ingress'},consumer_image=args.consumer_image,
+        candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
         observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None)
     events = workload.Events(stack.directory) if args.command in {'run','stress'} else None
     if events:
@@ -108,6 +120,13 @@ def main():
         if args.mode == 'ingress':
             from .ingress import start as start_ingress
             config['ingress'] = start_ingress(stack)
+        if args.mode == 'lago':
+            config['lago'] = load_lago()(stack)
+            from .lago import seed
+            from prosaic_integration_lab.billing_store import BillingStore
+            # Freeze account subscriptions and the open period before inference.
+            seed(config['lago'],[{**p,'namespace':config['namespace'],'environment':config['environment']}
+                for p in config['principals'].values()],BillingStore(config['billing_dsn']))
         config_path.write_text(json.dumps(config))
         files = ['tests/acceptance/test_provisioning.py']
         if args.mode != 'provisioning':
@@ -136,6 +155,9 @@ def main():
         if args.mode=='capacity': files=['tests/acceptance/test_capacity_retention.py']
         if args.mode == 'ingress':
             files = ['tests/acceptance/test_ingress.py']
+        if args.mode == 'lago':
+            files = ['tests/acceptance/test_provisioning.py','tests/acceptance/test_lago.py',
+                     'tests/acceptance/test_billing_outbox.py']
         if args.command == 'stress':
             from .load_profile import run as profile
             result.update(profile(config,args.users,args.duration,args.rate,args.concurrency,events,
@@ -151,7 +173,8 @@ def main():
         else:
             test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
                 f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
-                env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True, timeout=180)
+                env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True,
+                timeout=600 if args.mode == 'lago' else 180)
             result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__

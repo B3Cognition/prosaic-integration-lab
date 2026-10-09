@@ -1,5 +1,6 @@
 """Disposable resources identified by exact engine IDs and ownership labels."""
 import json
+import ipaddress
 import os
 from pathlib import Path
 import secrets
@@ -60,7 +61,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None, observability=False,capacity_policy=None):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -68,6 +69,7 @@ class OwnedStack:
         self.engine, self.major = engine, postgres_major
         self.candidate = candidate
         self.identity = identity
+        self.billing = billing
         self.observability=observability
         self.capacity_policy=capacity_policy
         if consumer_image is not None:
@@ -181,8 +183,11 @@ class OwnedStack:
         pg_image = images[f'postgres{self.major}']
         command(self.engine, 'pull', pg_image)
         name = f'prosaic-lab-{self.owner}'
+        identifiers = self._ids('network')
+        networks = json.loads(command(self.engine,'network','inspect',*identifiers)) if identifiers else []
+        network_options = ['--subnet',choose_subnet(networks,self.owner)]
         network = self._create('network', name, 'network', 'create', '--label',
-            f'io.prosaic.lab.owner={self.owner}', name)
+            f'io.prosaic.lab.owner={self.owner}', *network_options, name)
         volume = self._create('volume', name, 'volume', 'create', '--label',
             f'io.prosaic.lab.owner={self.owner}', name)
         admin = secrets.token_hex(24)
@@ -211,6 +216,8 @@ class OwnedStack:
         self.manifest['database_port'] = int(port)
         credentials = {name: secrets.token_hex(24) for name in
             ('lab_migration', 'harness_runtime', 'accounting_runtime', 'app_runtime')}
+        if self.billing:
+            credentials['billing_exporter'] = secrets.token_hex(24)
         self._secret('provision.json', json.dumps({'admin_password': admin, 'roles': credentials}))
         container_config = {'namespace': f'lab-{self.owner}', 'environment': 'sandbox', 'assets': '/srv/lab/assets',
                             'fixture_events_url': 'http://model:8000/events'}
@@ -221,6 +228,8 @@ class OwnedStack:
             container_config['metrics_token']=host_config['metrics_token']=secrets.token_hex(32)
         host_config['migration_dsn'] = f'host=127.0.0.1 port={port} dbname=lab user=lab_migration password={credentials["lab_migration"]}'
         host_config['fixture_manifest'] = str(self.directory / 'ownership.json')
+        if self.billing:
+            host_config['billing_dsn'] = f'host=127.0.0.1 port={port} dbname=lab user=billing_exporter password={credentials["billing_exporter"]}'
         for key, role in [('harness_dsn', 'harness_runtime'), ('accounting_dsn', 'accounting_runtime'), ('app_dsn', 'app_runtime')]:
             container_config[key] = f'host=database port=5432 dbname=lab user={role} password={credentials[role]}'
             host_config[key] = f'host=127.0.0.1 port={port} dbname=lab user={role} password={credentials[role]}'

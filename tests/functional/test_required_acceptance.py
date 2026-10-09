@@ -14,12 +14,16 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     seen = []
     def fake(command,**kwargs):
         mode=command[command.index('--mode')+1]; seen.append(mode)
+        if mode=='lago':
+            assert kwargs['timeout']==900
         assert command[command.index('--consumer-image')+1] == 'sha256:'+'1'*64
         item={'mode':mode,'passed':mode != 'audit','cleanup':'verified','dependency_mode':'released',
             'test_returncode':1 if mode == 'audit' else 0,'test_count':COUNTS[mode],'skipped':0,
             'failed_tests':['PRIVATE'] if mode == 'audit' else [],'host_architecture':'arm64',
             'payload_audit':'verified','released_manifest_sha256':'247a2b1b1d64b2f4ec318a6b6aec51c28b691fb41018044f8bac571c089d53c7',
             'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64},'secret':'PRIVATE'}
+        if mode=='lago':
+            item['images']['lago']=json.loads((source.parents[1]/'dependencies/lago.json').read_text())['image']
         return SimpleNamespace(returncode=item['test_returncode'],stdout=json.dumps(item)+'\nEvidence: PRIVATE',stderr='PRIVATE')
     monkeypatch.setattr(runner.subprocess,'run',fake)
     target=tmp_path/'safe.json'

@@ -1,0 +1,14 @@
+{
+  "version": "1.55.0",
+  "source_commit": "62f1ee0c8d0974f0e9919c28945601b5ea1d7401",
+  "api_source_commit": "25b8b7b0984dae3f64b690750eaa8a8daf7af752",
+  "source_url": "https://github.com/getlago/lago/tree/62f1ee0c8d0974f0e9919c28945601b5ea1d7401",
+  "image": "getlago/lago:v1.55.0@sha256:60ecc02cdb2854c918e28a6436ccb4033d8f4a0447bc0b5150936596ebe2a290",
+  "event_store": "postgresql",
+  "deployment": "bundled local demo image with PostgreSQL, Redis, API, worker and UI",
+  "platforms": ["linux/arm64", "linux/amd64"],
+  "api_contract_source": "https://github.com/getlago/lago/blob/62f1ee0c8d0974f0e9919c28945601b5ea1d7401/examples/agentic-ai-demo/seed-and-verify.sh",
+  "event_contract_source": "https://github.com/getlago/lago-api/tree/25b8b7b0984dae3f64b690750eaa8a8daf7af752/app/services/events",
+  "timestamp_precision": "milliseconds, verified by real event round-trip",
+  "fixture_charge_rounding": "round each metric charge to USD cents using ROUND_HALF_UP, then sum; verified by real current_usage"
+}

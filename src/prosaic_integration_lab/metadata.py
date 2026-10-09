@@ -46,6 +46,11 @@ class Metadata:
             return conn.execute('''SELECT * FROM lab_app.runs WHERE namespace=%s AND environment=%s
                 AND run_id>%s ORDER BY run_id LIMIT %s''',(namespace,environment,after,limit)).fetchall()
 
+    def billing_reservations(self):
+        with self.connection() as conn:
+            return conn.execute('''SELECT namespace,environment,tenant_id,actor_id,
+                billing_account_id,run_id FROM lab_app.runs ORDER BY run_id''').fetchall()
+
     def reserve(self, principal, key, payload, assets_hash, *, namespace, environment,max_runs=10000,max_tenant_runs=10000):
         if (type(max_runs) is not int or type(max_tenant_runs) is not int or
             not 1 <= max_tenant_runs <= max_runs <= 10000): raise ValueError('invalid retention capacity')

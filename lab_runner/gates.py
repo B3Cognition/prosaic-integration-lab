@@ -1,9 +1,10 @@
 """Required acceptance receipts and safe publication summaries."""
 import re
 import hashlib
+import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25}
 
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
@@ -19,6 +20,9 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if (not re.fullmatch(r'sha256:[0-9a-f]{64}',images.get('consumer','')) or
         not re.fullmatch(r'postgres:'+str(postgres_major)+r'@sha256:[0-9a-f]{64}',images.get('postgres',''))):
         raise ValueError('required image provenance missing')
+    if mode=='lago':
+        image=json.loads((Path(__file__).resolve().parents[1]/'dependencies/lago.json').read_text())['image']
+        if images.get('lago')!=image: raise ValueError('billing image provenance missing')
     expected = 'candidate' if candidate else 'released'
     if item.get('dependency_mode') != expected:
         raise ValueError('dependency provenance differs from required lane')
@@ -63,6 +67,6 @@ def export(item):
         if isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value): result[key] = value
     images = item.get('images',{})
     if not isinstance(images,dict): images = {}
-    result['images'] = {key:value for key,value in images.items() if key in {'consumer','postgres','keycloak','ingress'}
+    result['images'] = {key:value for key,value in images.items() if key in {'consumer','postgres','keycloak','ingress','lago'}
         and isinstance(value,str) and re.fullmatch(r'(?:[a-z0-9./:-]+@)?sha256:[0-9a-f]{64}',value)}
     return result

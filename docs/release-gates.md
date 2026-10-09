@@ -1,6 +1,6 @@
 # Required release gates
 
-CI runs unit/functional tests and owned `audit`, `identity` and `ingress` lanes
+CI runs unit/functional tests and owned `audit`, `identity`, `ingress` and `lago` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload

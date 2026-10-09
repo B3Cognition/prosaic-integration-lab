@@ -21,6 +21,18 @@ def test_required_gate_requires_exact_mode_and_database_major():
     with pytest.raises(ValueError): validate(receipt(),'identity',16,candidate=False)
     with pytest.raises(ValueError): validate(receipt(),'audit',18,candidate=False)
 
+def test_lago_release_gate_requires_verified_pinned_billing_image():
+    import json
+    from pathlib import Path
+    image=json.loads((Path(__file__).resolve().parents[2]/'dependencies/lago.json').read_text())['image']
+    item=receipt(); item.update(mode='lago',test_count=25)
+    item['images']['lago']=image
+    validate(item,'lago',16)
+    assert export(item)['images']['lago']==image
+    for invalid in (None,'getlago/lago:latest','getlago/lago:v1@sha256:'+'1'*64):
+        item['images']['lago']=invalid
+        with pytest.raises(ValueError): validate(item,'lago',16)
+
 @pytest.mark.parametrize('item',[None,[],{'images':None}])
 def test_malformed_receipts_fail_closed_and_have_safe_export(item):
     with pytest.raises(ValueError): validate(item,'audit',16,candidate=False)

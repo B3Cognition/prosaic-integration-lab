@@ -25,6 +25,9 @@ def main():
         raise RuntimeError('Harness explicit migration failed')
     PostgresRecorder(migration, namespace='provision', environment='sandbox').initialize()
     migrate(migration,runtime_role='app_runtime')
+    if 'billing_exporter' in config['roles']:
+        from prosaic_integration_lab.billing_store import migrate as migrate_billing
+        migrate_billing(migration)
     with psycopg.connect(migration) as conn:
         conn.execute('REVOKE CREATE ON SCHEMA public FROM PUBLIC')
         conn.execute('GRANT USAGE ON SCHEMA prosaic_harness TO harness_runtime')

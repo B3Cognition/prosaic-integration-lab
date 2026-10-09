@@ -2,6 +2,25 @@
 
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
+## Lago extension checkpoint
+
+The approved Lago design/plan adds `lab_runner test --mode lago`. A separate
+application-owned outbox exports public Runtime evidence to digest-pinned local
+Lago 1.55.0, with frozen attribution, unknown-cache exclusions, duplicate recovery,
+fenced leases, open-period gating and independent fixture-charge reconciliation.
+Prosaic core, Runtime and Harness sources remain unchanged.
+
+The required lane passed 25 cases on both PostgreSQL 16 and 18 on Docker Desktop
+Linux/arm64, zero skips and verified cleanup. Existing deterministic (21) and
+recovery (27) lanes passed on 16. Read `verification/lago-progress.md` for receipts,
+review findings/fixes, setup failures and the exact verification checkpoint.
+The tests use synthetic inference and separate direct public-ledger fixtures;
+no payment collection, customer invoicing or production billing certification.
+
+Shared runner files are also being changed by other authorized lab work. Preserve
+those changes; do not stage whole files indiscriminately or assume the latest
+consumer image tag equals a recorded immutable image ID.
+
 ## Completed
 
 - Maintainer approved the separate integration-lab design.
