@@ -7,11 +7,12 @@ import stat
 
 RUNTIME_UID = 10001
 RUNTIME_GID = 10001
+MAX_GENERATIONS = 64
 
 def read_runtime_config(source):
     data = json.loads(Path(source).read_text())
     required = {'namespace','environment','assets','harness_dsn','accounting_dsn','app_dsn'}
-    if not isinstance(data,dict) or not required <= set(data) or set(data)-required-{'principals','fixture_events_url','http_bounds','authentication','deployment_mode','metrics_token'}:
+    if not isinstance(data,dict) or not required <= set(data) or set(data)-required-{'principals','fixture_events_url','http_bounds','authentication','deployment_mode','metrics_token','capacity'}:
         raise ValueError('invalid runtime config')
     return data
 
@@ -43,6 +44,9 @@ def install(source,target,*,checkpoint=lambda stage:None):
     state = generations.lstat()
     if not stat.S_ISDIR(state.st_mode) or state.st_uid != RUNTIME_UID or state.st_mode & 0o777 != 0o700:
         raise ValueError('invalid runtime generation directory')
+    for count,_ in enumerate(generations.iterdir(),1):
+        if count>=MAX_GENERATIONS:
+            raise ValueError('runtime generation capacity requires reviewed retirement')
     generation = uuid.uuid4().hex
     directory = generations/generation
     directory.mkdir(mode=0o700)

@@ -15,7 +15,7 @@ from . import workload
 
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
-    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover','metrics'])
+    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover','metrics','retention','stress'])
     parser.add_argument('--url',help='recovery service origin; HTTPS unless explicit loopback lab mode')
     parser.add_argument('--token-env',default='LAB_API_TOKEN')
     parser.add_argument('--run-id')
@@ -26,6 +26,15 @@ def main():
     parser.add_argument('--ca-file')
     parser.add_argument('--samples',type=int,default=1)
     parser.add_argument('--interval',type=float,default=2)
+    parser.add_argument('--config')
+    parser.add_argument('--archive',action='store_true')
+    parser.add_argument('--destination')
+    parser.add_argument('--duration',type=float,default=10)
+    parser.add_argument('--rate',type=float,default=1)
+    parser.add_argument('--p95-target',type=float,default=2)
+    parser.add_argument('--max-rejection-rate',type=float,default=.05)
+    parser.add_argument('--tenant-capacity',type=int,choices=(1,2))
+    parser.add_argument('--max-reservations',type=int)
     parser.add_argument('--users', type=int, default=3)
     parser.add_argument('--runs-per-user', type=int, default=1)
     parser.add_argument('--concurrency', type=int, default=2)
@@ -33,7 +42,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget','ingress','observability'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget','ingress','observability','capacity'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
@@ -49,6 +58,11 @@ def main():
     if args.command == 'metrics':
         from .metrics_viewer import cli
         return cli(args)
+    if args.command == 'retention':
+        source=str(ROOT/'src')
+        if source not in sys.path: sys.path.insert(0,source)
+        from prosaic_integration_lab.retention import cli
+        return cli(args)
     if args.command == 'watch':
         if not args.directory or not os.path.isdir(args.directory):
             parser.error('watch requires an existing --directory from the run output')
@@ -56,27 +70,35 @@ def main():
         return 0
     try:
         workload.validate(args.users, args.runs_per_user, args.concurrency)
+        if args.command=='stress':
+            from .load_profile import validate
+            validate(args.duration,args.rate,args.concurrency,args.p95_target,args.max_rejection_rate)
     except ValueError as error:
         parser.error(str(error))
     if args.open_report and args.command != 'demo':
         parser.error('--open-report requires demo')
+    capacity_policy={}
+    if args.tenant_capacity is not None: capacity_policy['per_tenant']=args.tenant_capacity
+    if args.max_reservations is not None:
+        if not 1<=args.max_reservations<=10000: parser.error('reservation ceiling must be 1..10000')
+        capacity_policy['max_runs']=args.max_reservations
     if args.mode == 'identity' and args.command != 'test':
         parser.error('identity mode requires test')
     if args.mode == 'ingress' and args.command != 'test':
         parser.error('ingress mode requires test')
-    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command == 'run' else 3,
+    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},consumer_image=args.consumer_image,
-        observability=args.mode in {'audit','observability'})
-    events = workload.Events(stack.directory) if args.command == 'run' else None
+        observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None)
+    events = workload.Events(stack.directory) if args.command in {'run','stress'} else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
     started = time.monotonic()
-    result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run'} else args.mode, 'host_architecture': platform.machine(),
+    result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
     try:
         stack.start()
-        if args.command in {'demo', 'run'} or args.mode != 'provisioning':
+        if args.command in {'demo', 'run','stress'} or args.mode != 'provisioning':
             stack.start_model()
             stack.start_replica('a')
             stack.start_replica('b')
@@ -109,9 +131,16 @@ def main():
             files += ['tests/acceptance/test_http_budget.py']
         if args.mode in {'audit','observability'}:
             files += ['tests/acceptance/test_observability.py']
+        if args.mode in {'audit','capacity'}:
+            files += ['tests/acceptance/test_capacity_retention.py']
+        if args.mode=='capacity': files=['tests/acceptance/test_capacity_retention.py']
         if args.mode == 'ingress':
             files = ['tests/acceptance/test_ingress.py']
-        if args.command == 'run':
+        if args.command == 'stress':
+            from .load_profile import run as profile
+            result.update(profile(config,args.users,args.duration,args.rate,args.concurrency,events,
+                p95_target=args.p95_target,max_rejection=args.max_rejection_rate,allow_overload=args.allow_overload))
+        elif args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':
             report = capture_accounting(config, stack.owner)

@@ -7,7 +7,8 @@ from fastapi import HTTPException
 
 
 class Admission:
-    def __init__(self, capacity, *, metrics=None, pool_name='writes'):
+    def __init__(self, capacity, *, metrics=None, pool_name='writes',per_tenant=None):
+        self.per_tenant=capacity if per_tenant is None else per_tenant
         self.metrics,self.pool_name=metrics,pool_name
         self.slots = threading.BoundedSemaphore(capacity)
         self.pool = ThreadPoolExecutor(max_workers=capacity, thread_name_prefix='lab-operation')
@@ -20,7 +21,7 @@ class Admission:
             raise HTTPException(503,'capacity_exhausted')
         if key is not None:
             with self.lock:
-                if key in self.owners:
+                if key in self.owners or sum(owner[0]==key[0] for owner in self.owners)>=self.per_tenant:
                     if self.metrics is not None: self.metrics.admission(self.pool_name,rejected=True)
                     self.slots.release()
                     raise HTTPException(503,'capacity_exhausted')

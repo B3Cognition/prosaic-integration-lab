@@ -12,6 +12,7 @@ from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
 from .observability import bind_run,accounting_observation
+from .capacity import policy
 
 def validate_workflow_limits(definition):
     limits = definition.get('limits',{})
@@ -26,6 +27,7 @@ def validate_workflow_limits(definition):
 class Execution:
     def __init__(self, config, *, metrics=None):
         self.config = config
+        self.capacity=policy(config.get('capacity',{}))
         self.fingerprint = assets_hash(config['assets'])
         self.workflows = {name: Workflow.load(Path(config['assets']) / (name + '.yml')) for name in ('approval', 'synthetic')}
         for workflow in self.workflows.values():
@@ -36,8 +38,8 @@ class Execution:
             lock_timeout_s=1, statement_timeout_s=3)
         self.recorder = PostgresRecorder(config['accounting_dsn'], namespace=config['namespace'],
             environment=config['environment'], rate_card=RateCard('synthetic-v1', 'test-model', '2', '8', '0.5'))
-        self.operations = Admission(2,metrics=metrics)
-        self.reads = Admission(4,metrics=metrics,pool_name='reads')
+        self.operations = Admission(self.capacity['writes'],metrics=metrics,per_tenant=self.capacity['per_tenant'])
+        self.reads = Admission(self.capacity['reads'],metrics=metrics,pool_name='reads')
 
     def ready(self):
         self.metadata.check_ready()
@@ -99,7 +101,8 @@ class Execution:
         # for execution that cannot be admitted; reservation still commits before dispatch.
         with stage('reserve'):
             reservation = self.metadata.reserve(principal,key,payload,self.fingerprint,
-                namespace=self.config['namespace'],environment=self.config['environment'])
+                namespace=self.config['namespace'],environment=self.config['environment'],
+                max_runs=self.capacity['max_runs'],max_tenant_runs=self.capacity['max_tenant_runs'])
         if reservation['phase'] != 'reserved':
             return self.status(reservation)
         return self.start(reservation)

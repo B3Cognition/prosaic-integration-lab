@@ -60,7 +60,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None, observability=False):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, consumer_image=None, observability=False,capacity_policy=None):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -69,6 +69,7 @@ class OwnedStack:
         self.candidate = candidate
         self.identity = identity
         self.observability=observability
+        self.capacity_policy=capacity_policy
         if consumer_image is not None:
             import re
             if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
@@ -214,6 +215,8 @@ class OwnedStack:
         container_config = {'namespace': f'lab-{self.owner}', 'environment': 'sandbox', 'assets': '/srv/lab/assets',
                             'fixture_events_url': 'http://model:8000/events'}
         host_config = dict(container_config)
+        if self.capacity_policy is not None:
+            container_config['capacity']=host_config['capacity']=self.capacity_policy
         if self.observability:
             container_config['metrics_token']=host_config['metrics_token']=secrets.token_hex(32)
         host_config['migration_dsn'] = f'host=127.0.0.1 port={port} dbname=lab user=lab_migration password={credentials["lab_migration"]}'

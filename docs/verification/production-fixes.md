@@ -19,7 +19,7 @@ push, library publication or production deployment is implied.
 | 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Locally verified |
 | 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Locally verified; native CI activation/publication pending |
 | 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Locally verified; monitor deployment pending |
-| 14 | [Lab 14](https://github.com/B3Cognition/prosaic-integration-lab/issues/14) | Capacity SLOs/retention qualification | Queued |
+| 14 | [Lab 14](https://github.com/B3Cognition/prosaic-integration-lab/issues/14) | Capacity SLOs/retention qualification | Locally verified bounded pilot; deployment soak pending |
 
 ## Execution contract
 
@@ -407,3 +407,59 @@ Consumer image `sha256:45b753f06b597d63e0e790e47761c76dc027aecdf6511068403af3c56
 Tests inspect actual safe logs, missing final usage, saturation with live reads,
 real accounting grant loss/recovery and owned engine exit 17. Independent review
 has no important findings. See [observability.md](../observability.md).
+
+## Bounded capacity and conservative retention
+
+Validated configuration bounds per-replica write/read and tenant admission before
+database allocation. An advisory transaction lock serializes new reservations
+across replicas; global and tenant record ceilings stop new keys while preserving
+existing keys and all uncertain evidence. Lock contention and exhausted database
+connections produce bounded safe failures while health remains available.
+
+Private paginated archive copies retain application reservations, public SDK state
+and usage, classify uncertainty, and never delete sources. Copies are not a
+point-in-time backup. Credential generations stop at 64 without replacing the
+active pointer or removing orphan evidence. Retirement requires operator review.
+Finite open-loop stress separates shedding, rejection, deferred approval, errors,
+completed latency, correctness and SLO acceptance. Dispatches independently
+reconcile with durable accounting; estimates remain billing-ineligible.
+
+Unit/functional regressions were red for missing policy/archive/profile modules,
+incorrect lowered-limit defaults, unknown-usage SLO acceptance and generation
+ceiling before fixes. Tracked hardening unit/functional suite: **182/182**. Full
+shared local suite also passed **220/220**, including separately developed billing
+tests; that is not external billing-service acceptance. One benign Starlette
+deprecation warning. Previous service image failed three of six capacity tests
+(`f087a6e7bacb4073b5408e3270a3230f`); original red receipt preserved. New capacity
+lanes pass **6/6 on both majors**, no skips and verified cleanup
+(`4915af910df04421815acbc0df153de8` / `d5dce74da7c0462cbb95f5060bf8087f`).
+
+Measured baseline at 1 RPS, six users, concurrency 2 and tenant capacity 1:
+20/20 completed, zero rejections/errors, p95 0.1615 s
+(`aaedc86297c1413f95f71fe9aeabc211`, PostgreSQL 16).
+At 30 RPS for 10 s: 300 offered, 163 accepted/provider calls, 107 completed,
+193 rejection/deferral events including 56 deferred approvals, zero correctness
+errors, 64.33% rejection, completed p95 0.1291 s
+(`19843b8549574aeca8938a423b27cb5d`, PostgreSQL 18).
+Accounting correctness passed, **SLO failed**. Completion was uneven between
+actors. Both verified cleanup and used synthetic image
+`sha256:53f11ede4d2417ffcf64e2aec23b87f564a7009d0e94313d57467fc1cc53fe78`.
+This supports a small local pilot, not a 30 RPS or long-soak claim.
+
+Independent review found no important defect against the bounded pilot brief.
+Commands, record ceilings, private archives and manual generation retirement are
+in [capacity-retention.md](../capacity-retention.md). Remaining promotion work is
+explicit in [the follow-up report](production-follow-up-2026-10-09.md).
+
+Final rebuilt candidate passes every required lane on PostgreSQL 16 and 18:
+**88 audit + 19 identity + 5 ingress per major**, no skips, verified payload
+provenance and owned cleanup. Image
+`sha256:bd5259288814e04cdeadcee99c2b2c48ef5dc1f95fd8d6a7f50019aa660b2dfd`.
+PostgreSQL 16 receipts: `405d4b2f01714b5686cc8ed862495be2`,
+`d912d5057ce14e34808f391e9565aa9c`, `37aa59530b7148b08af0f303c3f80552`.
+PostgreSQL 18: `068a907905d54b4fb0a22e1915e83c05`,
+`a4faa03c14534beba38ec107d1ccca94`, `a1c5223082c7479183443c382c1861ce`.
+Commands: `.venv/bin/python scripts/required_acceptance.py --candidate
+--consumer-image IMAGE --postgres-version 16|18 --export PRIVATE_RESULT.json`.
+Native remote CI and production deployment remain pending, not implied by these
+local ARM Docker results.

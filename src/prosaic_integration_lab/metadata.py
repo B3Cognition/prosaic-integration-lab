@@ -4,6 +4,9 @@ import uuid
 import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
+from fastapi import HTTPException
+
+RESERVATION_LOCK_ID=0x505253414943
 
 def canonical_request(request):
     if set(request) - {'task', 'workflow'} or not isinstance(request.get('task'), str) or len(request['task']) > 2048:
@@ -37,9 +40,32 @@ class Metadata:
                 WHERE namespace=%s AND environment=%s GROUP BY phase''',(namespace,environment)).fetchall()
             return {row['phase']:row['count'] for row in rows}
 
-    def reserve(self, principal, key, payload, assets_hash, *, namespace, environment):
+    def retention_page(self,namespace,environment,after='',limit=100):
+        if type(limit) is not int or not 1 <= limit <= 100: raise ValueError('invalid archive page size')
+        with self.connection() as conn:
+            return conn.execute('''SELECT * FROM lab_app.runs WHERE namespace=%s AND environment=%s
+                AND run_id>%s ORDER BY run_id LIMIT %s''',(namespace,environment,after,limit)).fetchall()
+
+    def reserve(self, principal, key, payload, assets_hash, *, namespace, environment,max_runs=10000,max_tenant_runs=10000):
+        if (type(max_runs) is not int or type(max_tenant_runs) is not int or
+            not 1 <= max_tenant_runs <= max_runs <= 10000): raise ValueError('invalid retention capacity')
         request_hash = hashlib.sha256(canonical_request(payload).encode()).hexdigest()
         with self.connection() as conn:
+            lookup='SELECT * FROM lab_app.runs WHERE tenant_id=%s AND actor_id=%s AND idempotency_key=%s'
+            identity=(principal.tenant_id,principal.actor_id,key)
+            row=conn.execute(lookup,identity).fetchone()
+            if row is not None:
+                if row['request_hash']!=request_hash: raise RequestConflict('idempotency_conflict')
+                return row
+            conn.execute('SELECT pg_advisory_xact_lock(%s::bigint)',(RESERVATION_LOCK_ID,))
+            row=conn.execute(lookup,identity).fetchone()
+            if row is not None:
+                if row['request_hash']!=request_hash: raise RequestConflict('idempotency_conflict')
+                return row
+            counts=conn.execute('''SELECT count(*) AS total,
+                count(*) FILTER (WHERE tenant_id=%s) AS tenant FROM lab_app.runs''',(principal.tenant_id,)).fetchone()
+            if counts['total']>=max_runs or counts['tenant']>=max_tenant_runs:
+                raise HTTPException(503,'retention_capacity_exhausted')
             conn.execute('''INSERT INTO lab_app.runs
                 (run_id,tenant_id,actor_id,billing_account_id,idempotency_key,request_hash,
                  request,workflow,assets_hash,phase,namespace,environment)

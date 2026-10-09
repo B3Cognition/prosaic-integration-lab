@@ -3,7 +3,7 @@ import re
 import hashlib
 from pathlib import Path
 
-COUNTS = {'audit':82,'identity':19,'ingress':5}
+COUNTS = {'audit':88,'identity':19,'ingress':5}
 
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
