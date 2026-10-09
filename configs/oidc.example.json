@@ -1,0 +1,33 @@
+{
+  "deployment_mode": "production",
+  "environment": "sandbox",
+  "namespace": "integration-service",
+  "assets": "/srv/lab/assets",
+  "harness_dsn": "host=database dbname=service user=harness_runtime",
+  "accounting_dsn": "host=database dbname=service user=accounting_runtime",
+  "app_dsn": "host=database dbname=service user=app_runtime",
+  "authentication": {
+    "provider": "oidc",
+    "issuer": "https://keycloak.example/realms/services",
+    "audience": "integration-service",
+    "jwks_uri": "https://keycloak.example/realms/services/protocol/openid-connect/certs",
+    "introspection": {
+      "url": "https://keycloak.example/realms/services/protocol/openid-connect/token/introspect",
+      "client_id": "integration-service",
+      "client_secret": "REPLACE_USING_SECRET_MANAGER"
+    },
+    "subjects": {
+      "REPLACE_WITH_VERIFIED_ISSUER_SUBJECT": {
+        "tenant_id": "tenant-a",
+        "actor_id": "alice",
+        "billing_account_id": "account-a",
+        "disabled": false,
+        "not_before": 0
+      }
+    },
+    "request_timeout": 2,
+    "jwks_ttl": 60,
+    "refresh_cooldown": 5,
+    "max_token_lifetime": 300
+  }
+}

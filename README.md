@@ -188,6 +188,10 @@ docker build -f containers/Candidate.Dockerfile \
 
 Candidate receipts explicitly record dependency mode, wheel-manifest checksum
 and immutable image ID. A mismatched image fails before fixture allocation.
+
+Configurable OIDC authentication, including the owned Keycloak TLS test lane, is
+documented in [identity.md](docs/identity.md). Run `--mode identity` with either
+PostgreSQL major to verify real issuer signatures, revocation and key rotation.
 Publishing the upstream wheel and updating released-package provenance are
 separate steps after review.
 

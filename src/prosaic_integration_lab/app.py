@@ -9,6 +9,7 @@ from prosaic_harness import StoreError
 from .config import load_config
 from .execution import Execution
 from .http_guard import HttpGuard
+from .identity import make_authenticator
 from .metadata import RequestConflict
 
 
@@ -27,24 +28,30 @@ class ResumeRequest(BaseModel):
 
 def create_app():
     config = load_config()
+    authenticator = make_authenticator(config)
     @asynccontextmanager
     async def lifespan(app):
+        execution = None
         try:
-            execution = Execution(config)
-        except Exception:
-            raise RuntimeError('lab startup configuration failed') from None
-        app.state.execution = execution
-        try:
+            try:
+                execution = Execution(config)
+            except Exception:
+                raise RuntimeError('lab startup configuration failed') from None
+            app.state.execution = execution
             try:
                 await asyncio.to_thread(execution.ready)
             except Exception:
                 raise RuntimeError('lab startup readiness failed') from None
             yield
         finally:
-            await asyncio.to_thread(execution.close)
+            try:
+                if execution is not None:
+                    await asyncio.to_thread(execution.close)
+            finally:
+                await authenticator.close()
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
-    app.add_middleware(HttpGuard,principals=config['principals'],**config.get('http_bounds',{}))
+    app.add_middleware(HttpGuard,authenticator=authenticator,**config.get('http_bounds',{}))
 
     def principal(request: Request):
         return request.state.principal

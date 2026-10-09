@@ -28,13 +28,14 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
             raise ValueError('unsupported engine/PostgreSQL major')
         self.engine, self.major = engine, postgres_major
         self.candidate = candidate
+        self.identity = identity
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
         self.directory.mkdir(parents=True, mode=0o700)
@@ -166,6 +167,9 @@ class OwnedStack:
             for tenant, actor, account in [(p['tenant_id'], p['actor_id'], p['billing_account_id']) for p in self.identities]}
         container_config['principals'] = principals
         host_config['principals'] = principals
+        if self.identity:
+            from .keycloak import start
+            start(self,container_config,host_config)
         self._secret('service.json', json.dumps(container_config))
         self._secret('host.json', json.dumps(host_config))
         provision_name = name + '-provision'
@@ -180,12 +184,13 @@ class OwnedStack:
         runtime_volume = self._create('volume',runtime_name,'volume','create','--label',
             f'io.prosaic.lab.owner={self.owner}',runtime_name)
         delivery_name = name+'-deliver-config'
+        ca_mount = ['-v',f'{self.secrets / "issuer-ca.pem"}:/run/source/issuer-ca.pem:ro'] if self.identity else []
         delivery = self._create('container',delivery_name,'create','--name',delivery_name,'--label',
             f'io.prosaic.lab.owner={self.owner}','--network','none','--user','0','--read-only',
             '--cap-drop','ALL','--cap-add','CHOWN','--cap-add','DAC_OVERRIDE',
             '--security-opt','no-new-privileges','--memory','128m','--pids-limit','32',
             '-v',f'{self.secrets / "service.json"}:/run/secrets/service.json:ro',
-            '-v',f'{runtime_volume}:/run/runtime',self.manifest['images']['consumer'],
+            '-v',f'{runtime_volume}:/run/runtime',*ca_mount,self.manifest['images']['consumer'],
             'python','-m','lab_runner.secret_delivery')
         command(self.engine,'start','-a',delivery)
         self.manifest['runtime_config_volume'] = runtime_volume

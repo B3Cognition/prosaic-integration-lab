@@ -3,17 +3,19 @@ import asyncio
 import math
 import time
 from starlette.responses import JSONResponse
-from .identity import authenticate
+from .identity import FixtureAuthenticator
+from .oidc import IdentityUnavailable
 
 
 class HttpGuard:
-    def __init__(self,app,principals,*,capacity=32,body_timeout=2,rate=100,burst=200):
+    def __init__(self,app,principals=None,*,authenticator=None,capacity=32,body_timeout=2,rate=100,burst=200):
         if (type(capacity) is not int or not 1 <= capacity <= 1024 or
             type(burst) is not int or not 1 <= burst <= 10000 or
             not math.isfinite(body_timeout) or not 0 < body_timeout <= 30 or
             not math.isfinite(rate) or not 0 < rate <= 10000):
             raise ValueError('invalid HTTP bounds')
-        self.app,self.principals = app,principals
+        self.app = app
+        self.authenticator = authenticator or FixtureAuthenticator(principals)
         self.capacity,self.body_timeout,self.rate,self.burst = capacity,body_timeout,rate,burst
         self.active = 0
         self.buckets = {}
@@ -49,7 +51,9 @@ class HttpGuard:
             try:
                 if len(authorization) != 1:
                     raise ValueError('unauthenticated')
-                actor = authenticate(authorization[0].decode('ascii'),self.principals)
+                actor = await self.authenticator.authenticate(authorization[0].decode('ascii'))
+            except IdentityUnavailable:
+                return await reject(503,'identity_unavailable')
             except (ValueError,UnicodeError):
                 return await reject(401,'unauthenticated')
             scope.setdefault('state',{})['principal'] = actor

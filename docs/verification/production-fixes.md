@@ -12,7 +12,7 @@ push, library publication or production deployment is implied.
 | 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Locally verified |
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Locally verified |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Locally verified |
-| 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | Queued; configurable OIDC, Keycloak reference |
+| 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | OIDC/Keycloak locally verified; service ingress in issue 11 |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Queued |
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Queued |
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Queued |
@@ -176,3 +176,43 @@ Candidate audits: 66/66 passed on both database majors, zero skips and verified
 cleanup (`ea916cce168d4020be76576ec8c5da7c` /
 `cfc369b22d9747d0b446c65a190a01f1`). Image:
 `sha256:27ce0d15f0f63403aad3db0415c1f5c7158d65e6a16ff696a18157cbd9a5f761`.
+
+## Configurable OIDC identity verification
+
+The production identity profile requires configurable HTTPS OIDC issuer/audience,
+JWKS, online uncached introspection and server-owned subject bindings. It rejects
+fixture bearer maps, unsupported algorithms, missing/expired/future claims,
+unknown subjects and inactive tokens. Claims/forwarded headers cannot override
+tenant/actor/account. PyJWT 2.15.1 and cryptography 50.0.2 are hash-locked; existing
+lock pins stayed unchanged. Authentication has a whole 2-second deadline, eight
+outbound connections, 64 KiB response/32-key limits and bounded key refresh/cache.
+Cached expired keys never survive a failed refresh; token URLs are ignored.
+
+Unit regressions initially failed for absent OIDC implementation; a heterogeneous
+keyset regression additionally failed before allowing unrelated encryption keys.
+Current local suite: 90 passed, including real RSA verification, rotation/removal,
+response/deadline/cooldown bounds, outage and HTTP revocation-before-body behavior.
+
+Owned Keycloak 26.8.0 TLS reference uses generated private credentials and a
+generated certificate, never the maintainer's deployment. Both real lanes pass
+18/18 tests, zero skips, verified cleanup (`00b7a6e796b9486ea8756c580381242d` /
+`f6bff6a10d81418090629a9dcf1fdb79`), including actual signing-key rotation,
+cross-replica frozen accounting, spoofed billing claim, logout and issuer outage.
+Keycloak image:
+`quay.io/keycloak/keycloak:26.8.0@sha256:b0f60d489d51c5d113390bdf5461d4c06e6051be026c05549f2e1e10ec352bcc`.
+Consumer image:
+`sha256:9c08d80d0f63d9972d8d3f3008782ffb3e9443784a2bb2f4940f63a64cf8b7eb`.
+
+The fixture-auth audit remains green on PostgreSQL 16: 66/66, no skips, verified
+cleanup (`290e1ddfd6064ce682f762e7e24beba1`). A parallel PostgreSQL 18 fixture failed
+at Docker network creation before any tests (`16732a9bb8024aedbccb8a67ef77c39e`),
+with unresolved original cleanup. Its subsequent exact-owner inventory is empty;
+the original failed receipt stays unchanged. The sequential rerun passed 66/66,
+zero skips and verified cleanup (`2f88329d45ab4f00a06bd87ce2567c64`).
+
+Independent read-only review found no critical/important authentication defect.
+Interrupted CA/config generation delivery and staging residue recovery remain
+assigned to issue 9. Service TLS ingress/drain remains issue 11. The deployment
+identity profile still uses synthetic sandbox execution; it is not production
+inference or billing certification. Configuration and CLI examples are in
+[identity.md](../identity.md).
