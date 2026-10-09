@@ -8,22 +8,27 @@ import time
 
 from .stack import OwnedStack, ROOT
 from .results import sanitize_junit
+from .accounting_demo import capture_accounting
+from .accounting_report import write_report
 
 
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
-    parser.add_argument('command', choices=['test'])
+    parser.add_argument('command', choices=['test', 'demo'])
+    parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
     parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     args = parser.parse_args()
+    if args.open_report and args.command != 'demo':
+        parser.error('--open-report requires demo')
     stack = OwnedStack(args.engine, args.postgres_version)
     started = time.monotonic()
-    result = {'owner': stack.owner, 'mode': args.mode, 'host_architecture': platform.machine(),
+    result = {'owner': stack.owner, 'mode': 'demo' if args.command == 'demo' else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending'}
     try:
         stack.start()
-        if args.mode != 'provisioning':
+        if args.command == 'demo' or args.mode != 'provisioning':
             stack.start_model()
             stack.start_replica('a')
             stack.start_replica('b')
@@ -39,10 +44,17 @@ def main():
             files += ['tests/acceptance/test_load.py']
         if args.mode == 'recovery':
             files += ['tests/acceptance/test_accounting_failures.py', 'tests/acceptance/test_recovery.py', 'tests/acceptance/test_scope.py']
-        test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
-            f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
-            env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True, timeout=180)
-        result['test_returncode'] = test.returncode
+        if args.command == 'demo':
+            report = capture_accounting(config, stack.owner)
+            report_path = write_report(report, stack.directory / 'report')
+            result.update(passed=True, report_html=str(report_path),
+                          report_json=str(report_path.with_suffix('.json')),
+                          independent_model_calls=report['independent_model_calls'])
+        else:
+            test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
+                f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
+                env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True, timeout=180)
+            result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__
     finally:
@@ -68,6 +80,18 @@ def main():
         (stack.directory / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
         print(json.dumps(result))
         print(f'Evidence: {stack.directory}')
+        if args.command == 'demo' and result['passed']:
+            for run in report['runs']:
+                usage = run['usage']
+                amount = usage['estimated_amounts'].get('USD', 'Unknown')
+                print(f"{run['actor']:6} | {run['case']:20} | calls={usage['total_calls']} "
+                      f"complete={usage['complete_calls']} unknown={usage['unresolved_calls']} "
+                      f"known USD={amount}")
+            print(f"Report: {result['report_html']}")
+    if args.open_report and result['passed']:
+        import webbrowser
+        from pathlib import Path
+        webbrowser.open(Path(result['report_html']).as_uri())
     return 0 if result['passed'] else 1
 
 

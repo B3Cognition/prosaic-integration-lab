@@ -68,6 +68,22 @@ findings were reproduced with failing regressions and corrected:
 - Full-design omissions listed below remain outside this first-slice review.
   Identity override headers are ignored, never used as trusted attribution.
 
+## Visible accounting evidence
+
+The CLI now supports `python -m lab_runner demo --open-report`. It captures
+five real HTTP workflows across A/B: normal completion for Alice/Bob/Carol,
+two invalid-output attempts for Alice, and missing final usage for Bob.
+The six independent fixture dispatches match six owner-scoped ledger calls.
+Five calls have complete usage; one remains unresolved. The known fixture
+estimate is USD 0.001850; unknown usage is never rendered as a zero charge.
+
+The saved HTML/JSON contains filtered provider-call IDs, token counts,
+estimates and coverage, not credentials, DSNs, prompts or raw operator snapshots.
+Demo verification passed on PostgreSQL 16 and 18 with cleanup verified.
+The report persists under `.lab/<id>/report/` after fixture teardown.
+Unit suite now has 29 passing checks, including decimal report sums, unknown
+coverage and HTML escaping. These checks were watched failing before coding.
+
 ## Remaining plan coverage
 
 Tasks 1–4 have an executable first slice; Task 5 has fault/load coverage but is

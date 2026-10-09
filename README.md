@@ -80,6 +80,29 @@ the hash-locked third-party graph. The payload audit verifies all five installed
 release wheels, avoiding upstream VCS resolution without changing METADATA.
 No sibling checkout or private library API is used.
 
+## See the accounting evidence
+
+```sh
+.venv/bin/python -m lab_runner demo --postgres-version 16 --open-report
+```
+
+This runs a fresh owned synthetic stack and creates actual measured runs for
+Alice, Bob and Carol. It also shows two rejected-output attempts and a request
+with missing final usage. The command prints owner-scoped usage, saves a readable
+`accounting.html` and a filtered `accounting.json` under `.lab/<id>/report/`,
+verifies cleanup, then opens the saved report in your default browser.
+Omit `--open-report` for terminal-only use. The report persists after teardown.
+
+The demo checks independent endpoint counters against the Runtime ledger.
+It shows per-call input/cached/output tokens, exact decimal estimates and
+unknown coverage. All prices are fixed synthetic fixtures; every assessment
+is billing-ineligible. This is accounting evidence, not a customer invoice.
+
+Earlier failed `.lab/` receipts remain as historic test-first/regression evidence.
+A current test command exits nonzero on any failing assertion, skip, required
+infrastructure failure or cleanup failure; old failing receipts do not mean
+the current suite is red.
+
 ## Optional local model smoke
 
 ```sh
