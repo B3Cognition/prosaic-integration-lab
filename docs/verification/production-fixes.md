@@ -12,11 +12,11 @@ push, library publication or production deployment is implied.
 | 4 | [Lab 4](https://github.com/B3Cognition/prosaic-integration-lab/issues/4) | Early authentication and HTTP bounds | Locally verified |
 | 5 | [Lab 5](https://github.com/B3Cognition/prosaic-integration-lab/issues/5) | Non-root immutable deployment | Locally verified |
 | 6 | [Lab 6](https://github.com/B3Cognition/prosaic-integration-lab/issues/6) | Safe approval view | Locally verified |
-| 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | OIDC/Keycloak locally verified; service ingress in issue 11 |
+| 7 | [Lab 7](https://github.com/B3Cognition/prosaic-integration-lab/issues/7) | Production identity/TLS/rotation | Locally verified with configurable OIDC and TLS ingress |
 | 8 | [Lab 8](https://github.com/B3Cognition/prosaic-integration-lab/issues/8) | Persistent upgrades/backup restore | Locally verified |
 | 9 | [Lab 9](https://github.com/B3Cognition/prosaic-integration-lab/issues/9) | Operational recovery | Locally verified |
 | 10 | [Lab 10](https://github.com/B3Cognition/prosaic-integration-lab/issues/10) | HTTP token-budget crash recovery | Locally verified |
-| 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Queued |
+| 11 | [Lab 11](https://github.com/B3Cognition/prosaic-integration-lab/issues/11) | Non-sticky ingress/drain | Locally verified |
 | 12 | [Lab 12](https://github.com/B3Cognition/prosaic-integration-lab/issues/12) | Required CI/release gates | Queued |
 | 13 | [Lab 13](https://github.com/B3Cognition/prosaic-integration-lab/issues/13) | Sanitized operational evidence | Queued |
 | 14 | [Lab 14](https://github.com/B3Cognition/prosaic-integration-lab/issues/14) | Capacity SLOs/retention qualification | Queued |
@@ -305,3 +305,32 @@ Independent review found no important gaps. The shared full unit suite was
 149 passed/one failure in concurrently developed Lago CLI loading; those changes
 are outside this fix and preserved. Historic missing-usage receipts remain intact;
 new finite policy intentionally blocks further execution pending reconciliation.
+
+## Verified TLS ingress and in-flight drain
+
+Pinned non-root read-only NGINX routes round robin to both owned replicas, strips
+identity forwards, bounds initial headers/body/connections/upstream waits, and
+never automatically retries upstream requests. Generated CA verification and
+real owned Keycloak OIDC run together. A client without the fixture CA fails TLS.
+Lost replies preserve one dispatch through original-key recovery. In-flight
+replica TERM drains and restarts without redispatch. Gateway QUIT completes an
+accepted blocked request before exiting; review caught the initial idle-only
+drain test and the final regression exercises actual in-flight work.
+
+Unit/functional policy coverage: 3/3; tracked pre-Lago suite plus ingress coverage:
+126/126. Initial missing-module unit regression was red. Gateway startup failures
+are retained (`992073c6d3ef4afd8a9f041f9f13c88e`,
+`173c32fe0a79462faaf175a772e5fe97`, `9ca896195afb4550a184e971239d29af`,
+`3ca541b64abd4a95b9e28c35ed9dec2f`), all with verified owned cleanup. NGINX temp
+paths now use bounded tmpfs; HTTP handshake/header deadline uses the HTTP
+client-header policy rather than the stream-only handshake directive.
+
+Final combined TLS/OIDC lanes: **5/5 on both database majors**, no skips, verified
+cleanup (`1282c8d264f64f99811f3b587be8b35a` /
+`7aaa243a791e404cb7bace3a6b5fd7cc`). Consumer image:
+`sha256:131f84492918a3f8cf313eba50f9dd0e05c9afa5a86f7314e3269cd26d81b3f2`;
+NGINX digest `a8b39bd9cf0f83869a2162827a0caf6137ddf759d50a171451b335cecc87d236`.
+Independent review reports no remaining important finding. The reference assumes
+a restricted private backend network, managed deployment certificates and pinned
+compatible assets for pending runs; it does not certify unencrypted cross-host
+transport. See [ingress.md](../ingress.md).

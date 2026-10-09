@@ -207,6 +207,10 @@ Consumed or unknown usage blocks further dispatch, including explicit retry
 consent across replicas. Run `--mode budget` to exercise the owned worker-loss
 and exhausted-budget regressions. Recorded-token limits are checked by Harness
 against durable receipts; they do not guarantee a provider invoice ceiling.
+
+Verified TLS ingress, Keycloak authentication, non-sticky routing and in-flight
+drain/restart tests run with `--mode ingress`; deployment assumptions and commands
+are in [ingress.md](docs/ingress.md).
 Publishing the upstream wheel and updating released-package provenance are
 separate steps after review.
 
