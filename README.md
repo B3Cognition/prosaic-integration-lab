@@ -10,7 +10,7 @@ The service, container stack, test runner and CI are not implemented yet.
 There are no runnable acceptance commands and no deployment/test results here.
 
 Start with the [approved design](docs/superpowers/specs/2026-10-09-prosaic-integration-lab-design.md),
-[Codex handoff](docs/handoff.md) and [tracking issues](https://github.com/B3Cognition/prosaic-integration-lab/issues).
+[Codex handoff](docs/handoff.md) and [tracking issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1).
 
 ## Planned scope
 

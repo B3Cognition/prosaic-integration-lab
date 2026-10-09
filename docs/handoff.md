@@ -7,6 +7,8 @@ Checkpoint: 2026-10-09, documentation-only public repository.
 - Maintainer approved the separate integration-lab design.
 - Public repository and Apache-2.0 license created.
 - Approved design, README, agent instructions and remaining-work checklist saved.
+- [Tracking issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1)
+  published with staged work and acceptance requirements.
 - No existing Prosaic/Harness/Runtime library sources changed for this handoff.
 
 ## Not implemented or tested
@@ -19,7 +21,7 @@ Commands in the design are target interfaces, not commands available today.
 ## Next action
 
 Read the [approved design](superpowers/specs/2026-10-09-prosaic-integration-lab-design.md)
-and [tracking issues](https://github.com/B3Cognition/prosaic-integration-lab/issues).
+and [tracking issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1).
 Write a staged implementation plan at
 `docs/superpowers/plans/YYYY-MM-DD-prosaic-integration-lab.md` and ask the
 maintainer to review it and select the execution method before coding.

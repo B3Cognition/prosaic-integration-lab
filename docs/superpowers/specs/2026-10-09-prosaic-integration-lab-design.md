@@ -250,7 +250,7 @@ only with corresponding committed verification evidence.
 - [ ] Write/review the implementation plan and select execution method.
 - [x] Create public B3Cognition/prosaic-integration-lab; publish README, license,
       AGENTS.md, design and handoff instructions.
-- [ ] Publish the tracking issue and link it from the repository documentation.
+- [x] Publish tracking issue #1 and link it from the repository documentation.
 - [ ] Lock release dependencies/checksums and build a clean consumer image.
 - [ ] Implement owned stack provisioning with explicit grants/readiness/cleanup.
 - [ ] Implement fixture identity, durable ownership/idempotency and filtered APIs.

@@ -1,5 +1,8 @@
 # Build repeatable multiuser and accounting acceptance lab
 
+Published as [GitHub issue #1](https://github.com/B3Cognition/prosaic-integration-lab/issues/1).
+The GitHub issue is the active progress checklist; this file preserves its initial body.
+
 The maintainer approved the
 [integration-lab design](https://github.com/B3Cognition/prosaic-integration-lab/blob/main/docs/superpowers/specs/2026-10-09-prosaic-integration-lab-design.md)
 on 2026-10-09. This issue is the continuation checklist for Codex on another
