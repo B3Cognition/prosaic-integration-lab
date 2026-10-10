@@ -4,11 +4,27 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native':39,'legacy-upgrade':10,'qualification':2}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':39,'legacy-upgrade':10,'qualification':2}
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
+    'native-persistence':{
+        'test_proposal_replay_after_bundle_upgrade_keeps_original_reference':'proposal_replay',
+        'test_concurrent_bundle_admission_returns_only_original_winning_reference':'proposal_race',
+        'test_body_conflict_and_other_owner_lookup_do_not_expose_original':'proposal_owner',
+        'test_native_reservation_keeps_original_owner_billing_scope_and_inputs':'native_scope',
+        'test_runtime_role_cannot_mutate_immutable_proposals_or_migrate':'immutable_role',
+        'test_capacity_exhaustion_keeps_replay_and_blocks_new_key':'proposal_capacity',
+        'test_schema_constraints_bound_raw_immutable_storage':'schema_bounds',
+        'test_readiness_rejects_accidentally_granted_proposal_update':'readiness_grants',
+        'test_concurrent_explicit_migrations_share_transaction_lock':'migration_race',
+        'test_version_two_upgrade_preserves_every_legacy_field_and_phase':'migration_fields',
+        'test_uncertain_claim_never_reclaims_and_stale_token_cannot_commit':'journal_fence',
+        'test_same_scope_concurrent_claim_has_only_one_dispatch_winner':'journal_race',
+        'test_lost_commit_acknowledgement_discovers_committed_replay':'lost_commit_ack',
+        'test_lost_claim_acknowledgement_never_grants_redispatch':'lost_claim_ack',
+        'test_restricted_role_cannot_replace_signature_or_fencing_token':'journal_role'},
     'qualification':{
         'test_real_fairness_reads_growth_and_usage_are_measured':'capacity',
         'test_real_restore_cli_reports_measured_markers_and_verified_cleanup':'restore'},
@@ -59,6 +75,12 @@ for name,parameters,code in (
     ('test_worker_loss_claim_effect_commit_never_infers_redispatch',
      ('tool-claimed-0-uncertain','tool-effect-1-uncertain','tool-committed-1-replay'),'effect_recovery')):
     FAILURE_CASES['native'].update({name+'['+parameter+']':code for parameter in parameters})
+for name,parameters,code in (
+    ('test_public_json_input_type_survives_native_reservation_and_replay',
+     ('null','boolean','integer','float','string','array','object','nested'),'json_inputs'),
+    ('test_post_effect_invalid_result_preserves_uncertain_row',
+     ('oversize','nonfinite','unserializable'),'invalid_effect_result')):
+    FAILURE_CASES['native-persistence'].update({name+'['+parameter+']':code for parameter in parameters})
 
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
@@ -93,7 +115,7 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineag
     if candidate and (not isinstance(manifest_sha,str) or not re.fullmatch('[0-9a-f]{64}',manifest_sha) or
         item.get('candidate_manifest_sha256') != manifest_sha):
         raise ValueError('candidate manifest provenance missing')
-    if candidate and mode in {'native','legacy-upgrade','qualification'} and (
+    if candidate and mode in FAILURE_CASES and (
         not isinstance(lineage_sha,str) or not re.fullmatch('[0-9a-f]{64}',lineage_sha) or
         item.get('candidate_lineage_sha256')!=lineage_sha):
         raise ValueError('qualified candidate lineage missing')

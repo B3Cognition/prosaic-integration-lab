@@ -72,6 +72,10 @@ def test_qualification_failures_export_closed_cases_from_sanitized_junit(tmp_pat
 
 
 @pytest.mark.parametrize('mode,names,codes',[
+    ('native-persistence',['test_public_json_input_type_survives_native_reservation_and_replay[nested]',
+        'test_lost_claim_acknowledgement_never_grants_redispatch',
+        'test_post_effect_invalid_result_preserves_uncertain_row[PRIVATE]','PRIVATE'],
+        ['json_inputs','lost_claim_ack','unknown']),
     ('native',['test_native_saved_receipt_adoption_durable_usage_and_no_duplicate_provider',
         'test_worker_loss_claim_effect_commit_never_infers_redispatch[tool-effect-1-uncertain]',
         'test_worker_loss_claim_effect_commit_never_infers_redispatch[PRIVATE]','PRIVATE'],

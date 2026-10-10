@@ -9,7 +9,7 @@ from test_release_gates import receipt
 from test_native_execution import native
 
 
-@pytest.mark.parametrize('mode,count',[('native',39),('legacy-upgrade',10),('qualification',2)])
+@pytest.mark.parametrize('mode,count',[('native-persistence',26),('native',39),('legacy-upgrade',10),('qualification',2)])
 def test_new_required_lanes_reject_partial_collection(mode,count):
     item=receipt(); item.update(mode=mode,test_count=count)
     if mode=='legacy-upgrade':
@@ -22,6 +22,16 @@ def test_new_required_lanes_reject_partial_collection(mode,count):
         bad=copy.deepcopy(item);bad['test_count']=changed
         with pytest.raises(ValueError):validate(bad,mode,16)
         assert export(bad)['passed'] is False
+
+
+@pytest.mark.parametrize('lineage',[None,'invalid','4'*64])
+def test_native_persistence_candidate_requires_exact_lineage(lineage):
+    item=receipt();item.update(mode='native-persistence',test_count=26,dependency_mode='candidate',
+        candidate_manifest_sha256='3'*64,candidate_lineage_sha256=lineage)
+    with pytest.raises(ValueError,match='lineage'):
+        validate(item,'native-persistence',16,candidate=True,manifest_sha='3'*64,lineage_sha='5'*64)
+    item['candidate_lineage_sha256']='5'*64
+    validate(item,'native-persistence',16,candidate=True,manifest_sha='3'*64,lineage_sha='5'*64)
 
 
 def test_native_model_rejects_reviewer_without_actual_dependency_provenance():

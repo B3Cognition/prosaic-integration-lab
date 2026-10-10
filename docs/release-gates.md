@@ -37,8 +37,12 @@ remain unchanged. It never substitutes a branch checkout or published URL.
 Updating the acceptance suite also requires reviewing its count contract.
 
 The reviewed collection contracts are audit88, identity20, ingress5, Lago25,
-native39, legacy-upgrade10 and qualification2. Counts must match exactly, with
-zero skips. Native exercises actual HTTP inference, two specialists and artifact
+native-persistence26, native39, legacy-upgrade10 and qualification2. Counts must
+match exactly, with zero skips. Native persistence verifies actual SQL ownership,
+immutable grants and storage bounds, concurrent migrations/reservations, every
+supported JSON input type, journal fencing and lost acknowledgements. It requires
+the same exact candidate lineage as the HTTP and recovery lanes.
+Native exercises actual HTTP inference, two specialists and artifact
 provenance, check/gate, structured approval, current grants and retained bundles,
 fresh-process receipt adoption, finite budgets and a consequential fixture tool.
 The application owns that fixture's restricted SQL domain table with unique

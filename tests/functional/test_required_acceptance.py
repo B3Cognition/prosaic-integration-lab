@@ -6,6 +6,16 @@ import sys
 from types import SimpleNamespace
 from lab_runner.gates import COUNTS
 
+
+def test_native_persistence_candidate_requires_manifest_before_stack_allocation(monkeypatch):
+    import pytest
+    import lab_runner.__main__ as cli
+    def forbidden(*args,**kwargs):raise AssertionError('unbound candidate reached stack allocation')
+    monkeypatch.setattr(cli,'OwnedStack',forbidden)
+    monkeypatch.setattr(sys,'argv',['lab_runner','test','--mode','native-persistence','--candidate'])
+    with pytest.raises(SystemExit) as error:cli.main()
+    assert error.value.code==2
+
 def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_output(monkeypatch,tmp_path):
     source = Path(__file__).resolve().parents[2]/'scripts/required_acceptance.py'
     spec = importlib.util.spec_from_file_location('required_acceptance',source)

@@ -68,7 +68,7 @@ def main():
     if args.baseline_image is not None and (args.mode!='legacy-upgrade' or
             not __import__('re').fullmatch('sha256:[0-9a-f]{64}',args.baseline_image)):
         parser.error('baseline image requires legacy-upgrade and an immutable image ID')
-    if args.candidate and args.mode in {'native','legacy-upgrade','qualification'} and args.candidate_manifest is None:
+    if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     profile=None
     operational=args.command in {'qualify','qualify-recovery'}
@@ -275,7 +275,7 @@ def main():
         if args.candidate:
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
             result['candidate_lineage_sha256']=stack.manifest.get('candidate_lineage_sha256')
-            if args.mode in {'native','legacy-upgrade','qualification'} and not result['candidate_lineage_sha256']:
+            if args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and not result['candidate_lineage_sha256']:
                 result['passed']=False;result['qualification']='not_qualified'
         if operational and len(json.dumps(result).encode())>profile['maximum_report_bytes']:
             from .qualification import receipt
