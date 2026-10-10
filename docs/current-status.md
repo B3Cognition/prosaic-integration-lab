@@ -25,8 +25,13 @@ for source/archive/installed checks and original native receipts.
 
 The current recipe selects the seven-fix patch train: Core 0.4.1,
 Runtime 0.8.1/recorder 0.2.1 and Harness 0.7.1/store 0.2.1. Its original
-SDK bytes passed fresh qualification. The new Lab four-cell native run is
-pending; the earlier receipts above apply to their original sources. See the
+SDK bytes passed fresh qualification. Lab
+[run 38080612477](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38080612477)
+succeeded at `94f313e49707a09e7d0f3abbf818a9861bd6b14a` in all four cells:
+864 required cases, zero failures/errors/skips, 32 lane cleanups and four demo
+cleanups verified. Each cell passed 537 source tests; each separate native demo
+observed two synthetic calls and remained billing-ineligible. The earlier
+receipts above apply to their original sources. See the
 [hardening ledger](verification/hardening-2026-10-10.md) for exact sources,
 artifact hashes and consumer verification. Public APIs and formats are unchanged.
 
@@ -155,8 +160,8 @@ first; after its first exchange converts the pending publisher, register its
 adapter and repeat the same original-byte promotion. The package-channel guide
 details partial-upload verification and the complete-pair GitHub release gate.
 
-The earlier candidate Lab gate succeeded; the patch train needs its own native
-Lab evidence. After qualification and publisher registration, promotion publishes
+The patch candidate Lab gate has succeeded. After publisher registration,
+promotion publishes
 the original qualified bytes in dependency order: Core, Runtime/recorder,
 Harness/store. Both GitHub and index downloads must match the receipts. Lab
 0.3.0 then adopts verified public pins, builds a fresh consumer and reruns all

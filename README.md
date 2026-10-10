@@ -16,6 +16,9 @@ This branch consumes the five original qualified `b3-prosaic` candidate wheels.
 The patch train contains seven upstream reliability fixes. Its setup uses a new
 environment and `.cache/sdk-hardening/manifest.json`, preserving the earlier
 candidate manifest and verification receipts.
+The [hardening checkpoint](docs/verification/hardening-2026-10-10.md#native-hardening-closure)
+records the successful four-cell native run: 864 required cases, zero failures
+or skips, and all lane and demo cleanups verified at the exact qualified source.
 Public package-index publication is blocked by PyPI publisher setup; Lab 0.3.0
 has not been released. The explicit candidate path below works independently of
 that publication step. Python imports and CLI names remain unchanged.
