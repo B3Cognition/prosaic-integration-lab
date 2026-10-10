@@ -2,6 +2,7 @@
 import hashlib
 import json
 from pathlib import Path
+from types import MappingProxyType
 
 from fastapi import HTTPException
 from prosaic_harness import (Harness, RunNotFound, Validator, WorkflowBindings,
@@ -54,28 +55,34 @@ class NativeExecution:
         self.proposals = ProposalStore(host.config['app_dsn'])
         self.registry = BundleRegistry()
         self.factories = {}
-        self.definitions = {}
+        materials, frozen_grants = {}, {}
         native = host.config['native']
         if type(native) is not dict or set(native) != {'bundles','tenants'} or not native['bundles']:
             raise ValueError('invalid native configuration')
         for definition in native['bundles']:
             if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets'}:
                 raise ValueError('invalid native configuration')
+            material = self.material(definition)
             # Historical grants travel with each retained host bundle. Never rebuild
             # an old identity using mutable current tenant grants on a fresh worker.
             for tenant, settings in definition['policies'].items():
-                factory = self.factory(definition, grants(settings))
+                setting = grants(settings)
+                factory = self.factory(material, setting)
                 bundle = self.registry.register(WorkflowBundle(definition['version'],factory))
                 key = (tenant,definition['version'])
                 if key in self.factories: raise ValueError('invalid native configuration')
                 self.factories[key] = (bundle,factory)
-                self.definitions[key] = json.loads(json.dumps(definition))
+                materials[key] = material
+                # An encoded owned value cannot alias mutable host configuration.
+                frozen_grants[key] = json.dumps(setting,sort_keys=True)
+        self._materials = MappingProxyType(materials)
+        self._frozen_grants = MappingProxyType(frozen_grants)
         for tenant, value in native['tenants'].items():
             current = grants(value)
             if (tenant,current['bundle_version']) not in self.factories:
                 raise ValueError('invalid native configuration')
 
-    def factory(self, definition, setting):
+    def material(self, definition):
         directory = Path(definition['assets']) if 'assets' in definition else Path(self.host.config['assets'])/'native'
         agents = {}
         for alias in ('finder','reviewer'):
@@ -96,6 +103,11 @@ class NativeExecution:
             journal = PgToolJournal(self.host.config['app_dsn'],identity=definition['journal_identity'])
         bindings = WorkflowBindings(config=config,custom_tools={},validators={'approved':Validator('1.0.0',approved)},
             operation_namespace=definition['operation_namespace'],tool_journal=journal)
+        return catalog, bindings
+
+    @staticmethod
+    def factory(material, setting):
+        catalog, bindings = material
         policy = WorkflowPolicy(allowed_agents=frozenset(setting['agents']),allowed_schemas=frozenset(setting['schemas']),
             allowed_validators=frozenset(setting['validators']),allowed_model_tiers=frozenset(setting['model_tiers']),
             allow_agent_composition=setting['composition'],allow_inline_agents=setting['inline'],
@@ -112,7 +124,15 @@ class NativeExecution:
     def catalogue(self, principal):
         setting = self.current(principal)
         key = (principal.tenant_id,setting['bundle_version'])
-        factory = self.factory(self.definitions[key],setting)
+        frozen = json.loads(self._frozen_grants[key])
+        effective = {**setting}
+        for name in ('composition','inline'):
+            effective[name] = frozen[name] and setting[name]
+        for name in ('agents','schemas','validators','model_tiers'):
+            effective[name] = sorted(set(frozen[name]) & set(setting[name]))
+        # Discovery uses the registered bundle's public immutable material. It
+        # never reads changed files or creates a replacement proposal identity.
+        factory = self.factory(self._materials[key],effective)
         return {'bundle_version':setting['bundle_version'],'manifest':factory.describe(),
                 'proposal_schema':factory.proposal_schema()}
 
@@ -195,7 +215,7 @@ class NativeExecution:
             and pauses and all('review' in step.get('requires',[]) for step in pauses)) else ()
         schema = setting['response_schema'] and all(step.get('response_schema') in (None,'decision') for step in pauses)
         try:
-            interaction = harness.interaction(review_outputs=review,include_response_schema=schema,maximum_bytes=8192)
+            interaction = harness.interaction(review_outputs=review,include_response_schema=schema,maximum_bytes=262144)
             if interaction is not None:
                 view = public_native_interaction(interaction.to_dict(),include_response_schema=schema)
                 return {'run_id':reservation['run_id'],'status':'waiting','current_step':view['stepId'],

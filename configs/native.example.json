@@ -1,7 +1,7 @@
 {
   "namespace": "synthetic-pilot",
   "environment": "sandbox",
-  "assets": "/app/assets",
+  "assets": "/srv/lab/assets",
   "app_dsn": "postgresql://lab_app@postgres/lab",
   "harness_dsn": "postgresql://lab_harness@postgres/lab",
   "accounting_dsn": "postgresql://lab_accounting@postgres/lab",

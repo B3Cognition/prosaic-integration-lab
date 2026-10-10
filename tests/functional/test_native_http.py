@@ -266,3 +266,28 @@ def test_native_receipt_crash_replay_adopts_without_first_call_redispatch(native
         recovered=client.post('/runs/'+pending['run_id']+'/resume',json={'expected_revision':pending['revision']},headers=HEADERS)
         assert recovered.status_code==200 and recovered.json()['status']=='waiting'
         assert counters['models']==2
+
+
+def test_large_waiting_view_can_start_status_replay_and_resume(native_client):
+    client,_,counters = native_client
+    question='q'*9000
+    body={'definition':{'version':1,'start':'ask','steps':{
+        'ask':{'kind':'pause','question':question,'choices':{'accept':'done'},'response_schema':'decision'},
+        'done':{'kind':'finish'}}}}
+    proposal_response=client.post('/workflow-proposals',json=body,headers=HEADERS)
+    assert proposal_response.status_code==200
+    payload={'proposal_id':proposal_response.json()['proposal_id'],'inputs':{}}
+    headers={**HEADERS,'Idempotency-Key':'large-view'}
+    started=client.post('/native-runs',json=payload,headers=headers)
+    assert started.status_code==200,started.text
+    run=started.json()
+    assert run['status']=='waiting' and run['interaction']['question']==question
+    assert len(started.content)>8192
+    assert client.get('/runs/'+run['run_id'],headers=HEADERS).json()==run
+    assert client.post('/native-runs',json=payload,headers=headers).json()==run
+    resumed=client.post('/runs/'+run['run_id']+'/resume',json={'expected_revision':run['revision'],
+        'choice':'accept','response':{'confirmed':True}},headers=HEADERS)
+    assert resumed.status_code==200 and resumed.json()['status']=='completed'
+    assert counters['models']==counters['validators']==0
+    # The expanded public view does not expand incoming run/resume body limits.
+    assert client.post('/runs/'+run['run_id']+'/resume',content=' '*8193,headers=HEADERS).status_code==413

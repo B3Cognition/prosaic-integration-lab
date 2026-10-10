@@ -227,3 +227,104 @@ def test_native_execution_checks_frozen_scope_before_sdk_access(native,monkeypat
     monkeypatch.setattr(execution.host.store,'load_run',forbidden)
     with pytest.raises(HTTPException) as error: execution.status(row)
     assert error.value.status_code==409 and error.value.detail=='scope_conflict'
+
+
+def test_current_permission_expansion_does_not_expand_retained_catalogue_or_schema(native):
+    from prosaic_harness import WorkflowAdmissionError
+    from prosaic_integration_lab.native_execution import approved_proposal
+    execution,_,b=native
+    setting=execution.host.config['native']['tenants']['b']
+    setting.update(composition=True,inline=True)
+    view=execution.catalogue(b)
+    assert view['manifest']['allowAgentComposition'] is False
+    assert view['manifest']['allowInlineAgents'] is False
+    assert view['proposal_schema']['properties']['inline_agents']['maxProperties']==0
+    with pytest.raises(WorkflowAdmissionError) as error:
+        execution.propose(b,'expanded',json.dumps(approved_proposal()))
+    assert error.value.code=='policy_denied'
+    with execution.proposals.connection() as connection:
+        assert connection.execute('SELECT count(*) AS count FROM lab_app.proposals').fetchone()['count']==0
+
+
+def test_alias_and_tier_expansions_intersect_frozen_host_grants(native):
+    from prosaic_integration_lab.native_execution import NativeExecution
+    from prosaic_harness import WorkflowAdmissionError
+    execution,_,b=native
+    definition=execution.host.config['native']['bundles'][0]
+    definition['routes']={'fast':'fixture'}
+    definition['policies']['b']={'composition':True,'inline':True,'agents':['finder'],
+        'schemas':['found'],'validators':[],'model_tiers':[]}
+    execution.host.config['native']['tenants']['b'].update(composition=True,inline=True,
+        agents=['finder','reviewer'],schemas=['found','reviewed','decision'],
+        validators=['approved'],model_tiers=['fast'])
+    fresh=NativeExecution(execution.host)
+    fresh.proposals.connection=execution.proposals.connection
+    view=fresh.catalogue(b)
+    assert set(view['manifest']['agents'])=={'finder'}
+    assert set(view['manifest']['schemas'])=={'found'}
+    assert view['manifest']['validators']=={} and view['manifest']['modelTiers']==[]
+    inline_schema=view['proposal_schema']['properties']['inline_agents']
+    assert inline_schema['additionalProperties']['properties']['frontmatter']['properties']['model_tier'] is False
+    step_schemas=view['proposal_schema']['properties']['definition']['properties']['steps']['additionalProperties']['oneOf']
+    agent_schema=next(branch for branch in step_schemas if branch['properties']['kind']['const']=='agent')
+    check_schema=next(branch for branch in step_schemas if branch['properties']['kind']['const']=='check')
+    assert agent_schema['properties']['schema']['enum']==['found']
+    assert check_schema['properties']['validators']['items'] is False
+    body={'definition':{'version':1,'start':'review','steps':{
+        'review':{'kind':'agent','agent':'reviewer','schema':'found','next':'done'},'done':{'kind':'finish'}}}}
+    with pytest.raises(WorkflowAdmissionError): fresh.propose(b,'alias-expansion',json.dumps(body))
+
+
+def test_catalogue_uses_registered_material_snapshot_without_file_reads(native,tmp_path):
+    import shutil
+    from pathlib import Path
+    from prosaic_integration_lab.native_execution import NativeExecution
+    execution,a,_=native
+    directory=tmp_path/'native'
+    shutil.copytree(Path(execution.host.config['assets'])/'native',directory)
+    execution.host.config['native']['bundles'][0]['assets']=str(directory)
+    fresh=NativeExecution(execution.host)
+    before=fresh.catalogue(a)
+    (directory/'schemas/found.json').write_text('invalid post-registration physical schema')
+    (directory/'agents/finder.md').unlink()
+    assert fresh.catalogue(a)==before
+
+
+def test_frozen_projection_grants_do_not_alias_mutable_config(native):
+    execution,_,b=native
+    original=execution.catalogue(b)
+    execution.host.config['native']['bundles'][0]['policies']['b']['composition']=True
+    execution.host.config['native']['tenants']['b']['composition']=True
+    assert execution.catalogue(b)['manifest']['allowAgentComposition'] is False
+    execution.host.config['native']['bundles'][0]['policies']['b']['agents']=[]
+    assert execution.catalogue(b)['manifest']['agents']==original['manifest']['agents']
+
+
+def test_restrictive_current_grants_project_and_deny_then_new_registered_bundle_expands(native):
+    from prosaic_integration_lab.native_execution import NativeExecution,approved_proposal
+    from prosaic_harness import WorkflowAdmissionError
+    execution,a,b=native
+    saved=execution.propose(a,'original',text())
+    execution.host.config['native']['tenants']['a'].update(composition=False,agents=['finder'],
+        schemas=['found'],validators=[])
+    reduced=execution.catalogue(a)['manifest']
+    assert reduced['allowAgentComposition'] is False and set(reduced['agents'])=={'finder'}
+    assert set(reduced['schemas'])=={'found'} and reduced['validators']=={}
+    with pytest.raises(HTTPException) as error: execution.propose(a,'reduced',json.dumps(approved_proposal()))
+    assert error.value.status_code==403
+    positive={'definition':{'version':1,'start':'one','steps':{
+        'one':{'kind':'agent','agent':'finder','schema':'found','next':'done'},'done':{'kind':'finish'}}}}
+    assert execution.propose(a,'still-granted',json.dumps(positive))['proposal_id']
+    definition=execution.host.config['native']['bundles'][0]
+    newer=json.loads(json.dumps(definition))
+    newer['version']='synthetic-v2'
+    newer['policies']['b']={'composition':True,'inline':True}
+    execution.host.config['native']['bundles'].append(newer)
+    execution.host.config['native']['tenants']['b'].update(bundle_version='synthetic-v2',composition=True,inline=True)
+    execution.host.config['native']['tenants']['a'].update(bundle_version='synthetic-v2')
+    fresh=NativeExecution(execution.host)
+    fresh.proposals.connection=execution.proposals.connection
+    assert fresh.catalogue(b)['manifest']['allowAgentComposition'] is True
+    expanded=fresh.propose(b,'new-bundle',json.dumps(approved_proposal()))
+    assert expanded['reference']['bundleVersion']=='synthetic-v2'
+    assert fresh.propose(a,'original',text())==saved

@@ -251,3 +251,40 @@ def test_build_from_extracted_release_archive_excludes_extra_private_files(tmp_p
         return subprocess.CompletedProcess(argv, 0)
     monkeypatch.setattr(module.subprocess, 'run', external)
     assert module.build(manifest, cache, 'archive:dev', 'released') == 'sha256:' + '3' * 64
+
+
+def test_real_sdist_contains_all_public_build_inputs_and_builds_exact_snapshot(tmp_path,monkeypatch):
+    import importlib.util
+    import tarfile
+    output=tmp_path/'sdist'
+    built=subprocess.run([sys.executable,'-I','-m','build','--sdist','--outdir',str(output),str(ROOT)],
+        capture_output=True,text=True,timeout=120,
+        env={name:value for name,value in os.environ.items() if name!='PYTHONPATH'})
+    assert built.returncode==0,built.stdout+built.stderr
+    archives=list(output.glob('*.tar.gz'))
+    assert len(archives)==1
+    unpacked=tmp_path/'unpacked'
+    unpacked.mkdir()
+    with tarfile.open(archives[0]) as archive:
+        archive.extractall(unpacked,filter='data')
+    checkout=next(unpacked.iterdir())
+    inventory=json.loads((checkout/'dependencies/public-build-inputs.json').read_text())['files']
+    missing=[name for name in inventory if not (checkout/name).is_file()]
+    assert missing==[],f'missing public build inputs: {missing}'
+    assert (checkout/'configs/native.example.json').read_bytes()==(ROOT/'configs/native.example.json').read_bytes()
+    assert not (checkout/'.git').exists()
+    spec=importlib.util.spec_from_file_location('sdist_build_consumer',checkout/'scripts/build_consumer.py')
+    module=importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    manifest,cache,_=wheel_family(tmp_path)
+    def external(argv,**kwargs):
+        assert argv[0]!='git'
+        context=Path(argv[-1])
+        for name in inventory:
+            if name!='dependencies/releases.json':
+                assert (context/name).read_bytes()==(checkout/name).read_bytes()
+        assert not (context/'.git').exists()
+        Path(argv[argv.index('--iidfile')+1]).write_text('sha256:'+'4'*64)
+        return subprocess.CompletedProcess(argv,0)
+    monkeypatch.setattr(module.subprocess,'run',external)
+    assert module.build(manifest,cache,'sdist:dev','released')=='sha256:'+'4'*64

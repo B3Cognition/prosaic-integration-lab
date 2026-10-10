@@ -5,7 +5,8 @@ Native execution is opt-in private service configuration. The example in
 and two packaged specialists. It contains illustrative local fixture identities
 and DSNs; provision separate migration/runtime roles and deliver the real private
 configuration using the existing secret-delivery path. Fixture tokens are
-lab-only authentication. These endpoints exercise synthetic find, review, check,
+lab-only authentication. The example uses the shipped `/srv/lab/assets` directory
+in both consumer images. These endpoints exercise synthetic find, review, check,
 gate, pause and finish; they access no product data or external business service.
 
 This implementation consumes the new public SDK factory/bundle/interaction APIs.
@@ -31,7 +32,13 @@ are host configuration and never accepted in client proposals.
 
 `native.tenants` selects each tenant's current bundle version and current grants.
 Grant fields are `composition`, `inline`, `agents`, `schemas`, `validators` and
-`model_tiers`. Composition and inline instructions are separate permissions:
+`model_tiers`. Catalogue and proposal-schema discovery project the intersection
+of current grants and the selected retained bundle's frozen admission grants,
+using its exact captured public catalogue/bindings without rereading files.
+Current authorization cannot expand a frozen bundle's capabilities. To enable a
+new capability, register an explicit new host bundle and select its version in
+current tenant grants. The original bundle identity and owner/key replay remain
+unchanged. Composition and inline instructions are separate permissions:
 composition does not grant inline agents, and a single granted inline agent does
 not grant multi-agent composition. The approved specialist prose omits model tiers
 and uses the host default. Explicit inline tiers must be both configured through
@@ -101,7 +108,9 @@ are bounded to 128 UTF-8 bytes. Unknown fields are rejected.
    `response_schema` are independent host opt-ins, disabled by default. With the
    example opt-ins, only the approved `review` step's `entity_id` and `approved`
    fields and the host-approved decision schema are included. Inputs, binding
-   records, history, evidence and arbitrary outputs are excluded.
+   records, history, evidence and arbitrary outputs are excluded. Public
+   catalogue/interaction views use the SDK's 256 KiB output bound; the 8 KiB
+   run/resume limit applies only to incoming request bodies.
 5. Resume with the exact interaction revision and schema-conforming response:
 
    ```sh
