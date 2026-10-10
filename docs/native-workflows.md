@@ -18,7 +18,8 @@ gate, pause and finish; they access no product data or external business service
 
 This implementation consumes the new public SDK factory/bundle/interaction APIs.
 The candidate train passed the required native Linux AMD64/ARM64 × PostgreSQL
-16/18 matrix; see the [verification ledger](verification/ecosystem-production-2026-10-10.md).
+16/18 matrix; see the [adoption ledger](verification/native-adoption-2026-10-10.md)
+and [original ecosystem checkpoint](verification/ecosystem-production-2026-10-10.md).
 Public SDK publication and Lab 0.3.0 remain pending. The historical release
 manifest is preserved; use the explicit candidate manifest for this branch.
 Synthetic fixture qualification does not certify a live provider or deployment.

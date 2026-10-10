@@ -33,6 +33,9 @@ see [current status](current-status.md). Actions artifacts have 90-day retention
    example records two complete calls; all estimates are billing-ineligible.
 
 The fixture graph follows `finder → reviewer → check → gate → pause → finish`.
+The [native demo client](../lab_runner/native_demo.py) shows the complete request
+sequence and checks in executable Python. Its fixed synthetic receipt is safe
+to share; the owned runner keeps authentication and service configuration private.
 The same API accepts admitted graphs built from the host's offered aliases.
 The [manual HTTP example](native-workflows.md#catalogue-proposal-execution-and-human-response)
 shows request bodies and responses. Generated graphs never provide endpoints,

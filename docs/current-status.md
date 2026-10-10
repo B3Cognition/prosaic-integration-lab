@@ -15,7 +15,13 @@ The native adoption entry point now has a pinned candidate setup recipe and
 guide. Its new regression extends the native collection contract to 40 cases;
 the separate demo CLI also runs in each native CI cell. The earlier 860-case
 receipt remains evidence for its original source, not for these additions.
-Fresh qualification of the adoption additions is in progress.
+[Native adoption run 38065626859](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38065626859)
+succeeded at source `60c6e7bc306b965b5074a536f2bb612d7d567322` in all four
+cells: 864 required cases with zero failures/errors/skips, all 32 lane cleanups
+and four separate demo cleanups verified. Each cell also passed 537 source
+tests. See the
+[adoption verification ledger](verification/native-adoption-2026-10-10.md)
+for source/archive/installed checks and original native receipts.
 
 Start with the [runnable native consumption guide](consume-native-workflows.md),
 [native workflow usage](native-workflows.md), [persistence and

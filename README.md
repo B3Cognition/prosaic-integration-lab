@@ -143,9 +143,9 @@ commit. Repeat with PostgreSQL 18. CI separately runs both Linux AMD64 and ARM64
 a local run verifies the actual host architecture. All eight lanes require exact
 counts, zero skips, installed-payload provenance and verified cleanup. See
 [release gates](docs/release-gates.md) and the
-[native qualification ledger](docs/verification/ecosystem-production-2026-10-10.md).
-Only the sanitized gate summaries are suitable for sharing; private `.lab`
-configurations, raw logs and backups stay local.
+[native adoption ledger](docs/verification/native-adoption-2026-10-10.md).
+Share the filtered native demo receipt or sanitized gate summaries; private
+`.lab` configurations, raw logs and backups stay local.
 
 The eight lanes cover adversarial service inputs, identity, TLS ingress, Lago,
 native SQL persistence, native execution/effect recovery, original-release
