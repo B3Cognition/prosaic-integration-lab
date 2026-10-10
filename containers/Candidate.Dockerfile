@@ -1,13 +1,22 @@
-ARG BASE_IMAGE=prosaic-integration-lab:dev
-FROM ${BASE_IMAGE}
-USER 0
-ARG CANDIDATE_MANIFEST_SHA256
-COPY .cache/candidates/ /srv/candidates/
-COPY dependencies/accounting-candidate.json /srv/lab/dependencies/accounting-candidate.json
-RUN python -c "import hashlib,os; from pathlib import Path; assert hashlib.sha256(Path('/srv/lab/dependencies/accounting-candidate.json').read_bytes()).hexdigest() == os.environ['CANDIDATE_MANIFEST_SHA256']"
-RUN PYTHONPATH=src python -c "from pathlib import Path; from prosaic_integration_lab.dependencies import verify_dependencies; verify_dependencies(Path('dependencies/accounting-candidate.json'),Path('/srv/candidates'))"
-RUN python -m pip install --no-deps /srv/candidates/prosaic_runtime_postgres-0.1.1-py3-none-any.whl /srv/candidates/prosaic_harness_postgres-0.1.1-py3-none-any.whl
-RUN python scripts/audit_install.py dependencies/accounting-candidate.json /srv/candidates
+ARG PYTHON_IMAGE=python:3.12-slim@sha256:05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f
+FROM ${PYTHON_IMAGE}
+WORKDIR /srv/lab
+COPY dependencies/requirements.lock dependencies/requirements.lock
+RUN python -m pip install --require-hashes -r dependencies/requirements.lock
+ARG SDK_MANIFEST_SHA256
+COPY .cache/wheels/${SDK_MANIFEST_SHA256}/ /srv/wheels/
+COPY dependencies/releases.json dependencies/releases.json
+COPY src/ src/
+COPY scripts/ scripts/
+COPY lab_runner/ lab_runner/
+COPY assets/ assets/
+RUN python scripts/install_dependencies.py --manifest dependencies/releases.json --wheel-dir /srv/wheels --expected-sha ${SDK_MANIFEST_SHA256}
+RUN python scripts/audit_install.py --manifest dependencies/releases.json --wheel-dir /srv/wheels --expected-sha ${SDK_MANIFEST_SHA256}
+ENV PYTHONPATH=/srv/lab/src:/srv/lab
+ENV PYTHONDONTWRITEBYTECODE=1
+RUN groupadd --gid 10001 lab && useradd --uid 10001 --gid 10001 --no-create-home lab
 USER 10001:10001
+CMD ["python", "-m", "prosaic_integration_lab", "--version"]
 LABEL io.prosaic.lab.dependency-mode="candidate"
-LABEL io.prosaic.lab.candidate-manifest=${CANDIDATE_MANIFEST_SHA256}
+LABEL io.prosaic.lab.sdk-manifest=${SDK_MANIFEST_SHA256}
+LABEL io.prosaic.lab.candidate-manifest=${SDK_MANIFEST_SHA256}

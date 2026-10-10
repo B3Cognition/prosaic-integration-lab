@@ -14,6 +14,9 @@ from .stack import OwnedStack
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, required=True)
+    parser.add_argument('--manifest', type=Path, required=True,
+                        help='Complete candidate SDK manifest used by build_consumer.py')
+    parser.add_argument('--consumer-image', required=True, help='Immutable candidate image ID')
     parser.add_argument('--postgres-version', type=int, choices=[16,18], default=16)
     parser.add_argument('--library', choices=['runtime','harness'], default='runtime')
     args = parser.parse_args()
@@ -21,7 +24,8 @@ def main():
     required = 'test_readiness_postgres.py' if args.library == 'runtime' else 'test_registration.py'
     if not (source / 'adapters/postgres/tests' / required).is_file():
         parser.error('source must contain the candidate readiness regression suite')
-    stack = OwnedStack('docker', args.postgres_version)
+    stack = OwnedStack('docker', args.postgres_version, candidate=True,
+                       candidate_manifest=args.manifest, consumer_image=args.consumer_image)
     result = {'owner':stack.owner, 'mode':f'unpublished-{args.library}-candidate', 'passed':False,
               'cleanup':'pending', 'postgres_major':args.postgres_version}
     started = time.monotonic()

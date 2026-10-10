@@ -64,10 +64,10 @@ modules; the terminal stack runner also requires those repository assets.
 uv venv --python 3.12 .venv
 uv pip sync --python .venv/bin/python --require-hashes dependencies/requirements.lock
 .venv/bin/python scripts/prepare_dependencies.py
-uv pip install --python .venv/bin/python --no-deps .cache/wheels/prosaic-*.whl .cache/wheels/prosaic_runtime-*.whl .cache/wheels/prosaic_harness-*.whl
-uv pip install --python .venv/bin/python --no-deps .cache/wheels/prosaic_runtime_postgres-*.whl .cache/wheels/prosaic_harness_postgres-*.whl
-.venv/bin/python scripts/audit_install.py dependencies/releases.json .cache/wheels
-docker build -f containers/Dockerfile -t prosaic-integration-lab:dev .
+.venv/bin/python -m ensurepip
+.venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
+.venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+.venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
 .venv/bin/python -m pytest -q
 .venv/bin/python -m lab_runner test --mode deterministic --postgres-version 16
 .venv/bin/python -m lab_runner test --mode recovery --postgres-version 16
@@ -85,6 +85,23 @@ their original verified wheels without dependency resolution after installing
 the hash-locked third-party graph. The payload audit verifies all five installed
 release wheels, avoiding upstream VCS resolution without changing METADATA.
 No sibling checkout or private library API is used.
+
+Wheel caches are isolated by the SHA256 of the exact selected manifest bytes:
+`.cache/wheels/<manifest-sha256>/`. The installer passes only the five verified
+manifest filenames to pip and rejects legacy/renamed SDK mixtures. Historical
+Lab 0.2.0 pins remain byte-identical in `dependencies/releases-lab-0.2.0.json`.
+The active pins are still the historical release family. Future `b3-prosaic*`
+distribution names retain the same Python imports; migration requires a fresh
+environment. PyPI's unrelated `prosaic` is never a migration shortcut.
+
+Use `--manifest path/to/candidate.json --dependency-mode candidate` with the
+build helper for explicit candidates. Supply the complete five-wheel candidate
+family through `--wheel-dir` or its manifest digest cache; unpublished artifacts
+must be supplied explicitly. Candidate images start from the same pinned Python
+base as released images. The build snapshots exact manifest bytes and selected
+wheels in a temporary public context, aborts on concurrent manifest changes,
+and prints the immutable image ID. Installed-payload audit supports the historic
+positional arguments as well as `--manifest` and `--wheel-dir`.
 
 ## See the accounting evidence
 
@@ -238,7 +255,7 @@ application-owned PostgreSQL outbox. Replicas receive no Lago key; the exporter
 uses a separate restricted database role. Existing default lanes need no Lago.
 
 ```sh
-docker build -f containers/Dockerfile -t prosaic-integration-lab:dev .
+.venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
 .venv/bin/python -m lab_runner test --mode lago --postgres-version 16
 .venv/bin/python -m lab_runner test --mode lago --postgres-version 18
 ```

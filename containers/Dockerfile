@@ -3,20 +3,18 @@ FROM ${PYTHON_IMAGE}
 WORKDIR /srv/lab
 COPY dependencies/requirements.lock dependencies/requirements.lock
 RUN python -m pip install --require-hashes -r dependencies/requirements.lock
-COPY .cache/wheels/ /srv/wheels/
+ARG SDK_MANIFEST_SHA256
+COPY .cache/wheels/${SDK_MANIFEST_SHA256}/ /srv/wheels/
 COPY dependencies/releases.json dependencies/releases.json
-ARG RELEASE_MANIFEST_SHA256=f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472
-RUN python -c "import hashlib,os; from pathlib import Path; assert hashlib.sha256(Path('dependencies/releases.json').read_bytes()).hexdigest() == os.environ['RELEASE_MANIFEST_SHA256']"
-LABEL io.prosaic.lab.release-manifest=${RELEASE_MANIFEST_SHA256}
+LABEL io.prosaic.lab.sdk-manifest=${SDK_MANIFEST_SHA256}
+LABEL io.prosaic.lab.release-manifest=${SDK_MANIFEST_SHA256}
 LABEL io.prosaic.lab.dependency-mode="released"
 COPY src/ src/
 COPY scripts/ scripts/
 COPY lab_runner/ lab_runner/
 COPY assets/ assets/
-RUN PYTHONPATH=src python -c "from pathlib import Path; from prosaic_integration_lab.dependencies import verify_dependencies; verify_dependencies(Path('dependencies/releases.json'), Path('/srv/wheels'))"
-RUN python -m pip install --no-deps /srv/wheels/prosaic-*.whl /srv/wheels/prosaic_runtime-*.whl /srv/wheels/prosaic_harness-*.whl
-RUN python -m pip install --no-deps /srv/wheels/prosaic_runtime_postgres-*.whl /srv/wheels/prosaic_harness_postgres-*.whl
-RUN python scripts/audit_install.py dependencies/releases.json /srv/wheels
+RUN python scripts/install_dependencies.py --manifest dependencies/releases.json --wheel-dir /srv/wheels --expected-sha ${SDK_MANIFEST_SHA256}
+RUN python scripts/audit_install.py --manifest dependencies/releases.json --wheel-dir /srv/wheels --expected-sha ${SDK_MANIFEST_SHA256}
 ENV PYTHONPATH=/srv/lab/src:/srv/lab
 ENV PYTHONDONTWRITEBYTECODE=1
 RUN groupadd --gid 10001 lab && useradd --uid 10001 --gid 10001 --no-create-home lab
