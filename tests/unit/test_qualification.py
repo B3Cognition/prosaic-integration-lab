@@ -30,7 +30,8 @@ def test_aggregate_success_does_not_hide_tenant_starvation(starved_windows):
     assert result['qualified'] is False
 
 @pytest.mark.parametrize('key,value', [('duration_s',float('nan')),('duration_s',True),
-    ('duration_s',3601),('arrivals_per_second',-1),('concurrency',65),
+    ('duration_s',3601),pytest.param('duration_s',10**1000,id='huge-integral-duration'),
+    ('arrivals_per_second',-1),('concurrency',65),
     ('maximum_calls',0),('maximum_records',10001),('maximum_report_bytes',262145),
     ('provider_latency_s',6),('window_s',0),('extra',1)])
 def test_profile_rejects_unbounded_values(key,value):

@@ -15,7 +15,7 @@ INTEGERS={'concurrency','users','maximum_calls','maximum_records','maximum_repor
 
 def number(value,low,high,*,integer=False):
     return (type(value) in ({int} if integer else {int,float}) and
-        math.isfinite(value) and low<=value<=high)
+        low<=value<=high and math.isfinite(value))
 
 def validate_profile(data):
     if (type(data) is not dict or set(data)!={'version','suite',*BOUNDS} or
