@@ -59,6 +59,13 @@ def export(item):
         value = item.get(key)
         result[key] = value if type(value) is int and 0 <= value <= 100000 else None
     result['failed_count'] = len(item.get('failed_tests',[])) if isinstance(item.get('failed_tests'),list) else None
+    if item.get('mode')=='qualification' and type(item.get('failed_tests')) is list:
+        # Fixed public phase codes identify the two owned cases. Never copy a
+        # testcase name, parameter, error message or captured private output.
+        cases={'test_real_fairness_reads_growth_and_usage_are_measured':'capacity',
+            'test_real_restore_cli_reports_measured_markers_and_verified_cleanup':'restore'}
+        result['failed_cases']=sorted({cases.get(name,'unknown') if type(name) is str else 'unknown'
+            for name in item['failed_tests']})
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner

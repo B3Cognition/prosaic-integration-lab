@@ -12,7 +12,7 @@ MAX_GENERATIONS = 64
 def read_runtime_config(source):
     data = json.loads(Path(source).read_text())
     required = {'namespace','environment','assets','harness_dsn','accounting_dsn','app_dsn'}
-    if not isinstance(data,dict) or not required <= set(data) or set(data)-required-{'principals','fixture_events_url','http_bounds','authentication','deployment_mode','metrics_token','capacity'}:
+    if not isinstance(data,dict) or not required <= set(data) or set(data)-required-{'principals','fixture_events_url','http_bounds','authentication','deployment_mode','metrics_token','capacity','native','legacy_bundles'}:
         raise ValueError('invalid runtime config')
     return data
 

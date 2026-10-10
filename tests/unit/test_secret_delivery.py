@@ -17,6 +17,42 @@ def test_runtime_delivery_allows_only_service_config(tmp_path):
     source.write_text(json.dumps(data))
     assert read_runtime_config(source) == data
 
+
+@pytest.mark.parametrize('settings',['native','legacy','both'])
+def test_delivery_accepts_exact_host_native_and_retained_legacy_config(tmp_path,monkeypatch,settings):
+    from lab_runner.native_scenarios import native_configuration
+    from lab_runner.legacy_upgrade import BASELINE_ASSETS_SHA256
+    from prosaic_integration_lab.config import load_config
+    data={'namespace':'fixture','environment':'sandbox','assets':'/srv/lab/assets',
+        'principals':{},'harness_dsn':'runtime','accounting_dsn':'runtime','app_dsn':'runtime'}
+    if settings in {'native','both'}:data['native']=native_configuration('effects-fixture')
+    if settings in {'legacy','both'}:
+        data['legacy_bundles']={BASELINE_ASSETS_SHA256:{'assets':'/srv/lab/assets/legacy-0.2.0'}}
+    source=tmp_path/'service.json';source.write_text(json.dumps(data))
+    monkeypatch.setenv('LAB_CONFIG',str(source))
+    assert load_config()==data
+    assert read_runtime_config(source)==data
+    # Exercise the real private generation installation after initial delivery
+    # and redelivery, retaining the original host settings without mutation.
+    monkeypatch.setattr(secret_delivery,'RUNTIME_UID',os.getuid())
+    monkeypatch.setattr(secret_delivery,'RUNTIME_GID',os.getgid())
+    directory=tmp_path/'private-volume';directory.mkdir(mode=0o700)
+    target=directory/'service.json'
+    first=secret_delivery.install(source,target)
+    assert json.loads(target.read_text())==data
+    second=secret_delivery.install(source,target)
+    assert first!=second and json.loads(target.read_text())==data
+
+
+@pytest.mark.parametrize('field',['migration_dsn','billing_dsn','candidate_manifest','fixture_manifest','unknown'])
+def test_new_host_bindings_do_not_allow_operator_or_unknown_delivery_fields(tmp_path,field):
+    from lab_runner.native_scenarios import native_configuration
+    data={'namespace':'fixture','environment':'sandbox','assets':'/srv/lab/assets',
+        'principals':{},'harness_dsn':'runtime','accounting_dsn':'runtime','app_dsn':'runtime',
+        'native':native_configuration('effects-fixture'),'legacy_bundles':{},field:'PRIVATE'}
+    source=tmp_path/'service.json';source.write_text(json.dumps(data))
+    with pytest.raises(ValueError,match='^invalid runtime config$'):read_runtime_config(source)
+
 def test_final_file_ownership_is_synced_before_publication(tmp_path,monkeypatch):
     events = []
     sync = os.fsync

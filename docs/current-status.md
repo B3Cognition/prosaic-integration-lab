@@ -36,6 +36,43 @@ The old and new distributions share import paths. The active manifest remains
 `dependencies/releases-lab-0.2.0.json`. No predicted release URL or checksum has
 been inserted into either manifest.
 
+For a checkout of this candidate branch, the supported pre-publication path
+curates those exact successful runs into a separate manifest. Use Python 3.12
+and an environment containing the hash-locked third-party dependencies; the
+`gh` CLI must be authorized to read the public Actions artifacts:
+
+```sh
+python3.12 -m venv .venv-candidate
+.venv-candidate/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+.venv-candidate/bin/python scripts/prepare_sdk_candidates.py \
+  --core-run-id 38047286885 --core-source aad4bf45ae1c242f4451700ca59b27280010573a \
+  --runtime-run-id 38054282584 --runtime-source da3b43e12027b78d60b846c427021559b4927ba4 \
+  --harness-run-id 38055081837 --harness-source 5b1e2bc0f56041122014a70e5865ff925e6559ab \
+  --manifest .cache/sdk-candidate/manifest.json
+.venv-candidate/bin/python scripts/install_dependencies.py --manifest .cache/sdk-candidate/manifest.json
+.venv-candidate/bin/python scripts/audit_install.py --manifest .cache/sdk-candidate/manifest.json
+.venv-candidate/bin/python -m pip check
+export PATH="$PWD/.venv-candidate/bin:$PATH"
+```
+
+With Docker running, build the immutable candidate consumer and run a required
+owned stack cell:
+
+```sh
+.venv-candidate/bin/python scripts/build_consumer.py \
+  --manifest .cache/sdk-candidate/manifest.json --dependency-mode candidate \
+  --tag prosaic-integration-lab:candidate
+.venv-candidate/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+.venv-candidate/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
+.venv-candidate/bin/python scripts/required_acceptance.py \
+  --candidate --candidate-manifest .cache/sdk-candidate/manifest.json \
+  --postgres-version 16 --export reports/candidate-pg16.json
+```
+
+Repeat with PostgreSQL 18 on the actual host architecture. The four-cell CI
+matrix separately verifies both Linux architectures. The private owned outputs
+remain under `.lab`; only the sanitized gate summary is suitable for sharing.
+
 ## Implemented application behavior
 
 The service can admit generated graphs composed from approved specialists,

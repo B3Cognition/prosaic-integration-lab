@@ -48,3 +48,24 @@ def test_safe_export_does_not_copy_arbitrary_receipt_fields():
     item=receipt(); item.update(token='PRIVATE',error='PRIVATE',failed_tests=['PRIVATE'])
     assert 'PRIVATE' not in str(export(item))
     assert export(item)['passed'] is False
+
+
+def test_qualification_failures_export_closed_cases_from_sanitized_junit(tmp_path):
+    import json
+    from lab_runner.results import sanitize_junit
+    junit=tmp_path/'private.xml'
+    junit.write_text('<testsuites><testsuite>'
+        '<testcase name="test_real_fairness_reads_growth_and_usage_are_measured"><failure>PRIVATE_DSN</failure></testcase>'
+        '<testcase name="test_real_restore_cli_reports_measured_markers_and_verified_cleanup"><error>PRIVATE_TOKEN</error></testcase>'
+        '<testcase name="PRIVATE_PATH"><failure>PRIVATE_CONFIG</failure></testcase>'
+        '</testsuite></testsuites>')
+    item=receipt();item.update(mode='qualification',passed=False,test_returncode=1,
+        **sanitize_junit(junit))
+    safe=export(item)
+    assert safe['failed_cases']==['capacity','restore','unknown']
+    assert safe['failed_count']==3 and safe['passed'] is False
+    assert 'PRIVATE' not in json.dumps(safe)
+    # A fabricated parameter suffix must never turn into a public test identity.
+    item['failed_tests']=['test_real_fairness_reads_growth_and_usage_are_measured[PRIVATE]']
+    assert export(item)['failed_cases']==['unknown']
+    assert 'PRIVATE' not in json.dumps(export(item))
