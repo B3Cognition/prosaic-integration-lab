@@ -16,8 +16,10 @@ def catalog():
     return tables, columns, constraints
 
 
-def test_valid_application_contract_is_admitted():
-    app_schema.validate_catalog(*catalog())
+def test_archived_application_contract_requires_explicit_version():
+    app_schema.validate_catalog(*catalog(), version=2)
+    with pytest.raises(ValueError):
+        app_schema.validate_catalog(*catalog())
 
 
 @pytest.mark.parametrize('fault', ['unique','nullability','type','unlogged','phase','unvalidated'])
@@ -30,5 +32,5 @@ def test_wrong_application_contract_fails_without_echoing_values(fault):
     elif fault == 'phase': constraints[-1] = ('runs','CHECK (TRUE)',True,'c')
     else: constraints[0] = ('schema_version','PRIMARY KEY (version)',False,'p')
     with pytest.raises(ValueError) as error:
-        app_schema.validate_catalog(tables,columns,constraints)
+        app_schema.validate_catalog(tables,columns,constraints,version=2)
     assert 'PRIVATE_TYPE' not in str(error.value)

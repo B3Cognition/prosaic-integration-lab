@@ -48,6 +48,7 @@
     "src/prosaic_integration_lab/billing_projection.py",
     "src/prosaic_integration_lab/billing_scan.py",
     "src/prosaic_integration_lab/billing_store.py",
+    "src/prosaic_integration_lab/bundles.py",
     "src/prosaic_integration_lab/capacity.py",
     "src/prosaic_integration_lab/config.py",
     "src/prosaic_integration_lab/dependencies.py",
@@ -59,7 +60,9 @@
     "src/prosaic_integration_lab/migrations.py",
     "src/prosaic_integration_lab/observability.py",
     "src/prosaic_integration_lab/oidc.py",
+    "src/prosaic_integration_lab/proposals.py",
     "src/prosaic_integration_lab/retention.py",
+    "src/prosaic_integration_lab/tool_journal.py",
     "src/prosaic_integration_lab/views.py"
   ]
 }

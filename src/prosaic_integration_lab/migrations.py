@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 import psycopg
 from psycopg import sql
-from .app_schema import COLUMNS,validate_catalog
+from .app_schema import COLUMNS, TEXT_LIMITS, validate_catalog
 
 def scope_plan(run_ids,records):
     if not run_ids and records is None:
@@ -37,15 +37,31 @@ def check_shape(connection,version):
         FROM pg_catalog.pg_constraint k JOIN pg_catalog.pg_class c ON c.oid=k.conrelid
         JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
         WHERE n.nspname='lab_app' AND c.relname = ANY(%s)''',(list(COLUMNS),)).fetchall()
-    if version == 1:
-        actual = {(table,name) for table,name,_,_ in columns}
-        expected = {(table,name) for table,names in COLUMNS.items() for name in names}
-        legacy = {('runs','namespace'),('runs','environment')}
-        if actual != expected-legacy: raise ValueError('incompatible legacy application schema')
-        # V1 differs only in these two absent scope columns. Validate all other
-        # physical properties against the same application-owned catalog contract.
-        columns.extend([('runs',name,'text',True) for name in ('namespace','environment')])
-    validate_catalog(tables,columns,constraints)
+    validate_catalog(tables,columns,constraints,version=version)
+
+
+def create_native_tables(connection):
+    connection.execute('''CREATE TABLE lab_app.proposals (
+        proposal_id text PRIMARY KEY,tenant_id text NOT NULL,actor_id text NOT NULL,
+        idempotency_key text NOT NULL,request_digest text NOT NULL,proposal_json text NOT NULL,
+        bundle_version text NOT NULL,bundle_identity text NOT NULL,policy_digest text NOT NULL,
+        workflow_fingerprint text NOT NULL,reference jsonb NOT NULL,
+        UNIQUE(tenant_id,actor_id,idempotency_key), UNIQUE(proposal_id,tenant_id,actor_id),
+        CHECK(octet_length(reference::text)<=4096))''')
+    connection.execute('''CREATE TABLE lab_app.native_runs (
+        run_id text PRIMARY KEY REFERENCES lab_app.runs(run_id), proposal_id text NOT NULL,
+        tenant_id text NOT NULL,actor_id text NOT NULL,
+        FOREIGN KEY(proposal_id,tenant_id,actor_id) REFERENCES lab_app.proposals(proposal_id,tenant_id,actor_id))''')
+    connection.execute('''CREATE TABLE lab_app.tool_operations (
+        operation_namespace text NOT NULL,operation_key text NOT NULL,signature text NOT NULL,
+        claim_token text NOT NULL,state text NOT NULL CHECK(state IN ('uncertain','completed')),outcome jsonb,
+        PRIMARY KEY(operation_namespace,operation_key),
+        CHECK((state='uncertain' AND outcome IS NULL) OR (state='completed' AND outcome IS NOT NULL)),
+        CHECK(octet_length(outcome::text)<=262144))''')
+    for table, limits in TEXT_LIMITS.items():
+        for field, maximum in limits.items():
+            connection.execute(sql.SQL('ALTER TABLE lab_app.{} ADD CHECK (octet_length({}) <= {})').format(
+                sql.Identifier(table),sql.Identifier(field),sql.Literal(maximum)))
 
 def migrate(dsn,*,scope_records=None,runtime_role=None):
     with psycopg.connect(dsn,connect_timeout=5,
@@ -68,7 +84,7 @@ def migrate(dsn,*,scope_records=None,runtime_role=None):
             connection.execute('INSERT INTO lab_app.schema_version VALUES (2)')
         else:
             versions = connection.execute('SELECT version FROM lab_app.schema_version FOR UPDATE').fetchall()
-            if versions not in ([(1,)],[(2,)]): raise ValueError('unsupported application schema version')
+            if versions not in ([(1,)],[(2,)],[(3,)]): raise ValueError('unsupported application schema version')
             version = versions[0][0]
             check_shape(connection,version)
             if version == 1:
@@ -80,12 +96,15 @@ def migrate(dsn,*,scope_records=None,runtime_role=None):
                         (namespace,environment,identifier))
                 connection.execute('ALTER TABLE lab_app.runs ALTER COLUMN namespace SET NOT NULL,ALTER COLUMN environment SET NOT NULL')
                 connection.execute('UPDATE lab_app.schema_version SET version=2 WHERE version=1')
-        check_shape(connection,2)
-        if version == 2 and scope_records is not None:
+        check_shape(connection,3 if version == 3 else 2)
+        if version in (2,3) and scope_records is not None:
             existing_scope = {row[0]:(row[1],row[2]) for row in connection.execute(
                 'SELECT run_id,namespace,environment FROM lab_app.runs').fetchall()}
             if scope_plan(list(existing_scope),scope_records) != existing_scope:
                 raise ValueError('existing frozen scope cannot be changed')
+        if version != 3:
+            create_native_tables(connection)
+            check_shape(connection,3)
         rows = connection.execute('SELECT count(*) FROM lab_app.runs').fetchone()[0]
         if runtime_role is not None:
             if type(runtime_role) is not str or not re.fullmatch('[A-Za-z_][A-Za-z0-9_]{0,62}',runtime_role):
@@ -95,7 +114,11 @@ def migrate(dsn,*,scope_records=None,runtime_role=None):
             connection.execute(sql.SQL('GRANT SELECT ON lab_app.schema_version TO {}').format(role))
             connection.execute(sql.SQL('GRANT SELECT,INSERT ON lab_app.runs TO {}').format(role))
             connection.execute(sql.SQL('GRANT UPDATE(phase) ON lab_app.runs TO {}').format(role))
-    return {'from_version':version,'to_version':2,'rows_preserved':rows}
+            connection.execute(sql.SQL('GRANT SELECT,INSERT ON lab_app.proposals,lab_app.native_runs,lab_app.tool_operations TO {}').format(role))
+            connection.execute(sql.SQL('GRANT UPDATE(state,outcome) ON lab_app.tool_operations TO {}').format(role))
+        if version != 3:
+            connection.execute('UPDATE lab_app.schema_version SET version=3 WHERE version=2')
+    return {'from_version':version,'to_version':3,'rows_preserved':rows}
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

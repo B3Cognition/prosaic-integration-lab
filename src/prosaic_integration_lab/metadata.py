@@ -21,6 +21,19 @@ def canonical_request(request):
 class RequestConflict(ValueError):
     pass
 
+
+def canonical_native_request(proposal_id, inputs):
+    from .proposals import bounded_text, canonical_proposal
+    try:
+        bounded_text(proposal_id)
+        if type(inputs) is not dict:
+            raise ValueError('invalid_request')
+        body = json.dumps({'proposal_id':proposal_id, 'inputs':inputs}, ensure_ascii=False,
+                          sort_keys=True, separators=(',', ':'), allow_nan=False)
+        return 'native-run-v1\n' + canonical_proposal(body)
+    except (ValueError,TypeError,UnicodeError,RecursionError,OverflowError):
+        raise ValueError('invalid_request') from None
+
 class Metadata:
     def __init__(self, dsn):
         self.dsn = dsn
@@ -88,6 +101,53 @@ class Metadata:
         with self.connection() as conn:
             return conn.execute('SELECT * FROM lab_app.runs WHERE run_id=%s AND tenant_id=%s AND actor_id=%s',
                                 (run_id, principal.tenant_id, principal.actor_id)).fetchone()
+
+    def reserve_native(self, principal, key, proposal, inputs, *, namespace, environment,
+                       max_runs=10000, max_tenant_runs=10000):
+        from .proposals import bounded_text, capacity
+        proposal_id = proposal['proposal_id']
+        content = canonical_native_request(proposal_id, inputs)
+        request_hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+        lookup = 'SELECT * FROM lab_app.runs WHERE tenant_id=%s AND actor_id=%s AND idempotency_key=%s'
+        identity = (principal.tenant_id, principal.actor_id, key)
+        with self.connection() as connection:
+            def replay():
+                row = connection.execute(lookup, identity).fetchone()
+                if row is not None and row['request_hash'] != request_hash:
+                    raise RequestConflict('idempotency_conflict')
+                return row
+            row = replay()
+            if row is not None:
+                return row
+            capacity(max_runs,max_tenant_runs)
+            for value in (*identity, principal.billing_account_id, namespace):
+                bounded_text(value)
+            if environment not in {'sandbox','production'}:
+                raise ValueError('invalid_request')
+            connection.execute('SELECT pg_advisory_xact_lock(%s::bigint)', (RESERVATION_LOCK_ID,))
+            row = replay()
+            if row is not None:
+                return row
+            owned = connection.execute('''SELECT * FROM lab_app.proposals
+                WHERE proposal_id=%s AND tenant_id=%s AND actor_id=%s''',
+                (proposal_id, principal.tenant_id, principal.actor_id)).fetchone()
+            if owned is None:
+                raise HTTPException(404,'not_found')
+            counts = connection.execute('''SELECT count(*) AS total,
+                count(*) FILTER (WHERE tenant_id=%s) AS tenant FROM lab_app.runs''',
+                (principal.tenant_id,)).fetchone()
+            if counts['total'] >= max_runs or counts['tenant'] >= max_tenant_runs:
+                raise HTTPException(503,'retention_capacity_exhausted')
+            run_id = uuid.uuid4().hex
+            connection.execute('''INSERT INTO lab_app.runs
+                (run_id,tenant_id,actor_id,billing_account_id,idempotency_key,request_hash,
+                 request,workflow,assets_hash,phase,namespace,environment)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,'native',%s,'reserved',%s,%s)''',
+                (run_id,principal.tenant_id,principal.actor_id,principal.billing_account_id,key,request_hash,
+                 Jsonb({'proposal_id':proposal_id,'inputs':inputs}),owned['bundle_identity'],namespace,environment))
+            connection.execute('''INSERT INTO lab_app.native_runs(run_id,proposal_id,tenant_id,actor_id)
+                VALUES (%s,%s,%s,%s)''',(run_id,proposal_id,principal.tenant_id,principal.actor_id))
+            return replay()
 
     def claim_start(self, run_id):
         with self.connection() as conn:

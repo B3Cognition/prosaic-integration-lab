@@ -55,7 +55,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','operations','budget','lago','ingress','observability','capacity'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
@@ -120,6 +120,8 @@ def main():
         parser.error('ingress mode requires test')
     if args.mode == 'lago' and args.command != 'test':
         parser.error('lago mode requires test')
+    if args.mode == 'native-persistence' and args.command != 'test':
+        parser.error('native-persistence mode requires test')
     stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} or operational else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
         observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None)
@@ -130,12 +132,14 @@ def main():
     result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} or operational else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
+    if args.mode == 'native-persistence':
+        result['qualification'] = 'not_qualified'
     if operational:
         from .qualification import receipt
         result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
     try:
         stack.start()
-        if args.command in {'demo', 'run','stress'} or operational or args.mode != 'provisioning':
+        if args.command in {'demo', 'run','stress'} or operational or args.mode not in {'provisioning','native-persistence'}:
             stack.start_model()
             stack.start_replica('a')
             stack.start_replica('b')
@@ -183,6 +187,8 @@ def main():
         if args.mode == 'lago':
             files = ['tests/acceptance/test_provisioning.py','tests/acceptance/test_lago.py',
                      'tests/acceptance/test_billing_outbox.py']
+        if args.mode == 'native-persistence':
+            files = ['tests/acceptance/test_native_persistence.py','tests/acceptance/test_tool_journal.py']
         if args.command=='qualify':
             from .qualification import run
             result.update(run(config,profile,events))
@@ -235,6 +241,8 @@ def main():
             result['passed'] = False
             if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
+        if args.mode == 'native-persistence' and result['passed']:
+            result['qualification'] = 'qualified'
         result['images'] = stack.manifest['images']
         result['released_manifest_sha256'] = stack.manifest.get('released_manifest_sha256')
         result['payload_audit'] = stack.manifest.get('payload_audit')

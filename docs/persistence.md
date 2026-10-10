@@ -27,7 +27,7 @@ tools separately for Harness/Runtime storage. `scripts/provision.py` is only the
 fresh owned fixture bootstrap. It now delegates application DDL to the same
 versioned migration implementation.
 
-The application supports fresh schema creation and v1→v2 upgrade. An advisory
+The application supports fresh schema v3 creation and explicit v1/v2→v3 upgrade. An advisory
 transaction lock serializes operators; shape validation rejects unknown or
 incompatible versions before repair. Every DDL/backfill/ledger/grant operation is
 one transaction. Identity, idempotency key/hash, request, workflow/assets and
@@ -49,7 +49,66 @@ PYTHONPATH=src .venv/bin/python -m prosaic_integration_lab.migrations \
 Coverage must be exact, with no duplicate/extra runs or identity overrides. The
 file is bounded to 1 MiB and 10000 records. Missing or ambiguous attribution aborts;
 the migrator never derives it from a current request, token or missing receipt.
-V2 reruns preserve existing frozen scope and reject a conflicting supplied plan.
+V2/v3 reruns preserve existing frozen scope and reject a conflicting supplied plan.
+
+V3 adds immutable owned proposals, native run references and an application-owned
+business operation journal. The legacy `runs` fields and YAML request hash remain
+unchanged. The migration validates the archived v1/v2 physical contract first,
+adds v3 tables and restricted grants, and advances the version last in the same
+transaction. Native references use a composite proposal/tenant/actor foreign key.
+Runtime roles receive SELECT/INSERT on proposals and native references, with no
+UPDATE/DELETE privileges. Journal updates are limited to state and outcome;
+signatures and claim tokens are immutable. Readiness rejects broader mutation or
+schema creation grants.
+
+`ProposalStore` records exact canonical UTF-8 proposal TEXT and the public SDK
+reference. Owner/key/body replay returns the original row before new retention
+checks, including after a host bundle upgrade. The internal `policy_digest`
+column stores the public reference's `bundleIdentity`: it identifies the whole
+immutable admission/binding bundle, which includes policy, rather than a separate
+policy-only projection. Current host authorization and revocation are independent.
+Proposal transport is bounded to 65536 raw/canonical bytes, depth 64 and 65536
+expanded nodes; duplicate keys, nonfinite numbers and invalid Unicode fail with
+`invalid_request`. Harness alone admits graph/schema/tool semantics. References
+are bounded to 4096 serialized bytes.
+
+Populate `BundleRegistry` at trusted host startup with packaged immutable public
+`WorkflowBundle` objects. Resolve the exact retained `(version, identity)` pair;
+missing material raises `bundle_unavailable`, changed declarations raise
+`bundle_conflict`. Neither a proposal nor a stored reference selects imports,
+callbacks, directories or endpoints. Native reservation uses a separate
+`native-run-v1` hash recipe and atomically inserts legacy ownership plus its
+native proposal reference. Replays preserve original billing, namespace and
+environment.
+
+Construct `PgToolJournal(app_dsn, identity=...)` with a stable trusted logical
+ledger identity, never a credential-bearing DSN as identity. A committed new row
+starts uncertain; only the worker whose INSERT commits receives a `new` claim
+token. Matching uncertain rows never grant dispatch permission. Commit compares
+the opaque token and uncertain state; stale tokens cannot amend a completed
+outcome. Matching completed claims return the bounded original outcome. Results
+are limited to 262144 JSON bytes; invalid/oversized post-effect results preserve
+uncertainty. Lost acknowledgement may conceal a committed result, so subsequent
+claim reads evidence without redispatching. There are no expiring claims or
+automatic reconciliation routes. Authoritative domain no-effect, idempotency or
+fencing evidence remains an operator obligation; the journal does not make an
+external effect atomic with outcome recording.
+
+The dedicated required lane uses only owned persistence/journal tests:
+
+```sh
+.venv/bin/python -m lab_runner test --mode native-persistence --postgres-version 16
+.venv/bin/python -m lab_runner test --mode native-persistence --postgres-version 18
+```
+
+This lane needs a consumer image containing the reviewed public SDK bundle and
+ToolClaim APIs. Historical dependency pins remain unchanged until the separate
+SDK release qualification step. The lane does not start a model or HTTP replicas.
+Its owned databases exercise races, lost acknowledgements, token fencing,
+immutable grants and preserved v2 phases. Missing infrastructure returns a
+nonzero `not_qualified` receipt rather than a skip. Local Docker preflights on
+2026-10-10 timed out after 15 seconds on both majors; no SQL or architecture
+qualification is claimed from the collected tests or source-overlay unit suite.
 
 Before upgrades: stop/drain write admission, take a protected consistent logical
 backup and verify restore into a separate database. Keep original ownership,
@@ -60,7 +119,7 @@ private prompts/state; use restricted storage and the deployment's encryption
 and retention policy, never public test artifacts.
 
 Rollback means restoring the reviewed pre-upgrade backup and compatible pinned
-application/library image. There is no destructive v2→v1 downgrade command:
+application/library image. There is no destructive schema downgrade command:
 dropping frozen scope would discard authority. A running old image must not write
 an incompatible newer schema. If validation fails, keep the database and evidence
 intact and resolve the incompatibility before reopening write admission.

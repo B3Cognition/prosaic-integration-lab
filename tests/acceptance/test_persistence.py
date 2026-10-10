@@ -32,8 +32,18 @@ def test_fresh_wrong_database_cannot_silently_ignore_legacy_scope_plan(lab):
     with psycopg.connect(dsn) as connection:
         assert connection.execute("SELECT to_regnamespace('lab_app')").fetchone() == (None,)
 
-def test_versioned_upgrade_requires_scope_and_preserves_every_existing_field(lab):
+def test_versioned_upgrade_requires_scope_and_preserves_every_existing_field(lab,owned_database):
+    # Preserve the active fixture and every original run; mutate only a new database.
+    from psycopg.types.json import Jsonb
     with psycopg.connect(lab['migration_dsn']) as connection:
+        source_rows = connection.execute('SELECT * FROM lab_app.runs ORDER BY run_id').fetchall()
+    lab = owned_database('legacy_v1')
+    migrate(lab['migration_dsn'],runtime_role='app_runtime')
+    with psycopg.connect(lab['migration_dsn']) as connection:
+        for row in source_rows:
+            connection.execute('INSERT INTO lab_app.runs VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+                tuple(Jsonb(value) if isinstance(value,dict) else value for value in row))
+        connection.execute('DROP TABLE lab_app.native_runs,lab_app.proposals,lab_app.tool_operations')
         columns = [row[0] for row in connection.execute("SELECT column_name FROM information_schema.columns WHERE table_schema='lab_app' AND table_name='runs' ORDER BY ordinal_position")]
         rows = connection.execute('SELECT * FROM lab_app.runs ORDER BY run_id').fetchall()
         records = [{'run_id':row[columns.index('run_id')],'namespace':row[columns.index('namespace')],
@@ -49,8 +59,8 @@ def test_versioned_upgrade_requires_scope_and_preserves_every_existing_field(lab
             assert connection.execute('SELECT version FROM lab_app.schema_version').fetchall() == [(1,)]
             assert [list(row) for row in connection.execute('SELECT * FROM lab_app.runs ORDER BY run_id')] == originals
         result = migrate(lab['migration_dsn'],scope_records=records,runtime_role='app_runtime')
-        assert result == {'from_version':1,'to_version':2,'rows_preserved':len(rows)}
-        assert migrate(lab['migration_dsn'],scope_records=records)['from_version'] == 2
+        assert result == {'from_version':1,'to_version':3,'rows_preserved':len(rows)}
+        assert migrate(lab['migration_dsn'],scope_records=records)['from_version'] == 3
         Metadata(lab['app_dsn']).check_ready()
         with psycopg.connect(lab['migration_dsn']) as connection:
             assert connection.execute('SELECT * FROM lab_app.runs ORDER BY run_id').fetchall() == rows
@@ -64,7 +74,7 @@ def test_migration_cli_works_only_with_explicit_operator_credentials(lab):
     command_line = [sys.executable,'-m','prosaic_integration_lab.migrations','--dsn-env','LAB_OPERATOR_DSN']
     accepted = subprocess.run(command_line,env=environment,capture_output=True,text=True,timeout=20)
     assert accepted.returncode == 0
-    assert json.loads(accepted.stdout)['to_version'] == 2
+    assert json.loads(accepted.stdout)['to_version'] == 3
     environment['LAB_OPERATOR_DSN'] = lab['app_dsn']
     denied = subprocess.run(command_line,env=environment,capture_output=True,text=True,timeout=20)
     assert denied.returncode == 1
