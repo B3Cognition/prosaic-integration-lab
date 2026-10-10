@@ -87,6 +87,26 @@ def test_native_reservation_keeps_original_owner_billing_scope_and_inputs(lab,pr
     assert error.value.status_code == 404
 
 
+@pytest.mark.parametrize('value',[None,True,42,1.25,'hello',['hello'],{'x':1},
+    {'z':[{'ž':True},None],'a':['hello',42]}],
+    ids=['null','boolean','integer','float','string','array','object','nested'])
+def test_public_json_input_type_survives_native_reservation_and_replay(lab,proposals,principal,prepared_finish,value):
+    original = reserve(proposals,principal,prepared_finish)
+    metadata = Metadata(lab['app_dsn'])
+    key = uuid.uuid4().hex
+    inputs = prepared_finish.workflow.prepare_inputs(value)
+    first = metadata.reserve_native(principal,key,original,inputs,namespace='original-json',environment='sandbox')
+    assert first['request']['inputs'] == value and type(first['request']['inputs']) is type(value)
+    replay = metadata.reserve_native(principal,key,original,prepared_finish.workflow.prepare_inputs(value),
+        namespace='current-default',environment='production',max_runs=1,max_tenant_runs=1)
+    assert replay == first
+    changed = True if value is None else None
+    with pytest.raises(RequestConflict):
+        metadata.reserve_native(principal,key,original,prepared_finish.workflow.prepare_inputs(changed),
+            namespace='original-json',environment='sandbox')
+    assert metadata.owned(principal,first['run_id']) == first
+
+
 def test_runtime_role_cannot_mutate_immutable_proposals_or_migrate(lab,proposals,principal,prepared_v1):
     row = reserve(proposals,principal,prepared_v1)
     for statement in ('UPDATE lab_app.proposals SET proposal_json=proposal_json WHERE proposal_id=%s',

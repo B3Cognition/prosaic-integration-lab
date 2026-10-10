@@ -1,6 +1,13 @@
 import pytest
 
 
+INPUT_VALUES = [None, True, 42, 1.25, 'hello', ['hello'], {'x':1},
+    {'z':[{'ž':True},None],'a':['hello',42]}]
+INPUT_IDS = ['null','boolean','integer','float','string','array','object','nested']
+INPUT_CANONICAL = ['null','true','42','1.25','"hello"','["hello"]','{"x":1}',
+    '{"a":["hello",42],"z":[{"ž":true},null]}']
+
+
 def canonical(text):
     from prosaic_integration_lab.proposals import canonical_proposal
     return canonical_proposal(text)
@@ -39,6 +46,69 @@ def test_native_request_hash_uses_separate_original_recipe():
     assert canonical_native_request('a'*32, {'ž':1.0}) == ('native-run-v1\n'+
         '{"inputs":{"ž":1.0},"proposal_id":"'+ 'a'*32 +'"}')
     assert canonical_request({'task':'ž','workflow':'approval'}) == '{"task":"\\u017e","workflow":"approval"}'
+
+
+@pytest.mark.parametrize('value,expected',list(zip(INPUT_VALUES,INPUT_CANONICAL)),ids=INPUT_IDS)
+def test_public_prepared_json_value_has_canonical_native_recipe(prepared_finish,value,expected):
+    from prosaic_integration_lab.metadata import canonical_native_request
+    prepared = prepared_finish.workflow.prepare_inputs(value)
+    assert canonical_native_request('a'*32,prepared) == (
+        'native-run-v1\n{"inputs":'+expected+',"proposal_id":"'+ 'a'*32 +'"}')
+
+
+@pytest.mark.parametrize('value',INPUT_VALUES,ids=INPUT_IDS)
+def test_public_prepared_json_value_reservation_replay_and_conflict(persistence,prepared_finish,value):
+    from prosaic_integration_lab.metadata import RequestConflict
+    proposals,metadata,principal = persistence
+    proposal = store(proposals,principal,prepared_finish)
+    inputs = prepared_finish.workflow.prepare_inputs(value)
+    first = metadata.reserve_native(principal,'json-value',proposal,inputs,namespace='original',environment='sandbox')
+    replay = metadata.reserve_native(principal,'json-value',proposal,prepared_finish.workflow.prepare_inputs(value),
+        namespace='current',environment='production',max_runs=1,max_tenant_runs=1)
+    assert replay == first
+    assert first['request']['inputs'] == value and type(first['request']['inputs']) is type(value)
+    assert first['namespace'] == 'original' and first['environment'] == 'sandbox'
+    changed = True if value is None else None
+    with pytest.raises(RequestConflict):
+        metadata.reserve_native(principal,'json-value',proposal,prepared_finish.workflow.prepare_inputs(changed),
+            namespace='original',environment='sandbox')
+    assert metadata.owned(principal,first['run_id']) == first
+    with metadata.connection() as connection:
+        assert connection.execute('SELECT count(*) AS count FROM lab_app.runs').fetchone()['count'] == 1
+
+
+def test_public_nested_input_snapshot_and_stored_input_have_independent_ownership(persistence,prepared_finish):
+    proposals,metadata,principal = persistence
+    proposal = store(proposals,principal,prepared_finish)
+    original = {'nested':[{'text':['ž',None]}]}
+    prepared = prepared_finish.workflow.prepare_inputs(original)
+    original['nested'][0]['text'].append('caller-mutation')
+    first = metadata.reserve_native(principal,'snapshot',proposal,prepared,namespace='original',environment='sandbox')
+    prepared['nested'][0]['text'].append('prepared-mutation')
+    expected = {'nested':[{'text':['ž',None]}]}
+    assert first['request']['inputs'] == expected
+    assert metadata.owned(principal,first['run_id'])['request']['inputs'] == expected
+    assert metadata.reserve_native(principal,'snapshot',proposal,prepared_finish.workflow.prepare_inputs(expected),
+        namespace='original',environment='sandbox') == first
+
+
+def test_native_outer_transport_cap_stays_65536_bytes_after_scalar_input_fix(prepared_finish):
+    from prosaic_integration_lab.metadata import canonical_native_request
+    value = prepared_finish.workflow.prepare_inputs('x'*65474)
+    encoded = canonical_native_request('a'*32,value)
+    assert len(encoded.removeprefix('native-run-v1\n').encode('utf-8')) == 65536
+    too_large = prepared_finish.workflow.prepare_inputs('x'*65475)
+    with pytest.raises(ValueError,match='^invalid_request$'):
+        canonical_native_request('a'*32,too_large)
+
+
+@pytest.mark.parametrize('value',[float('inf'),float('-inf'),float('nan'),[float('nan')],
+    {'nested':float('inf')},'x'*65536,object(),b'not-json'],
+    ids=['infinity','negative-infinity','nan','nested-nan','nested-infinity','oversize','object','bytes'])
+def test_native_nonfinite_unserializable_and_oversized_json_values_still_fail(value):
+    from prosaic_integration_lab.metadata import canonical_native_request
+    with pytest.raises(ValueError,match='^invalid_request$'):
+        canonical_native_request('a'*32,value)
 
 
 @pytest.mark.parametrize('inputs', [float('nan'), {'a':'x'*65536}, {'a':object()}, {'a':'\ud800'}])

@@ -29,3 +29,9 @@ def prepared_v1(bundle_factory, proposal_text):
 @pytest.fixture
 def prepared_v2(bundle_factory, proposal_text):
     return bundle_factory('v2', max_calls=11).prepare_json(proposal_text)
+
+
+@pytest.fixture
+def prepared_finish(bundle_factory):
+    return bundle_factory().prepare_json(
+        '{"definition":{"version":1,"start":"done","steps":{"done":{"kind":"finish"}}}}')

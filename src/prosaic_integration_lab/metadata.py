@@ -26,7 +26,7 @@ def canonical_native_request(proposal_id, inputs):
     from .proposals import bounded_text, canonical_proposal
     try:
         bounded_text(proposal_id)
-        if type(inputs) is not dict:
+        if type(inputs) not in (type(None),bool,int,float,str,list,dict):
             raise ValueError('invalid_request')
         body = json.dumps({'proposal_id':proposal_id, 'inputs':inputs}, ensure_ascii=False,
                           sort_keys=True, separators=(',', ':'), allow_nan=False)

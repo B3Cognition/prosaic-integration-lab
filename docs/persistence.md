@@ -81,6 +81,16 @@ callbacks, directories or endpoints. Native reservation uses a separate
 native proposal reference. Replays preserve original billing, namespace and
 environment.
 
+Native inputs consume the public `Workflow.prepare_inputs` snapshot: any finite
+JSON value, including null, booleans, numbers, strings, arrays and objects. Stored
+values and owner/key replay retain their original JSON type and nested content;
+changed inputs conflict. The canonical outer proposal-ID/input record retains
+the existing 65536-byte, depth-64 and expanded-node-65536 persistence bounds.
+Workflow-specific input bounds apply during public preparation. The separate
+native HTTP route remains planned with the existing 8192-byte run body limit;
+this persistence API does not expand that transport limit or change the legacy
+YAML task/object request recipe.
+
 Construct `PgToolJournal(app_dsn, identity=...)` with a stable trusted logical
 ledger identity, never a credential-bearing DSN as identity. A committed new row
 starts uncertain; only the worker whose INSERT commits receives a `new` claim
