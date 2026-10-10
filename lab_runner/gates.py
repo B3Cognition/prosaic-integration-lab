@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native':37,'legacy-upgrade':10,'qualification':2}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native':39,'legacy-upgrade':10,'qualification':2}
 
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')

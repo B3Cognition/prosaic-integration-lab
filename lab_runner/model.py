@@ -61,7 +61,7 @@ def stats():
 def control(body: Control):
     global scenario,result_text,maximum_calls,allowance_start,allowance_rejected,provider_latency_s,tool_samples
     if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
-                             'native','native_rejected','native_effect','native_revisit'} or body.effect_gate not in {None,*barriers}:
+                             'native','native_rejected','native_effect','native_effect_batch','native_revisit'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -130,7 +130,7 @@ def completions(body: dict | None = None):
     # All values are fixture constants; no product lookup or model-selected URL.
     prose = json.dumps((body or {}).get('messages',[]))
     arguments=native_arguments((body or {}).get('messages',[]))
-    if selected in {'native','native_rejected','native_effect','native_revisit'}:
+    if selected in {'native','native_rejected','native_effect','native_effect_batch','native_revisit'}:
         entity=arguments.get('request',{}).get('entity_id')
         if type(entity) is not str or not 0<len(entity)<=64:
             from fastapi import HTTPException
@@ -164,9 +164,10 @@ def completions(body: dict | None = None):
         prompt = 500 if selected == 'large_usage' else 100
         result['usage'] = {'prompt_tokens': prompt, 'completion_tokens': 25, 'total_tokens': prompt+25,
                            'prompt_tokens_details': {'cached_tokens': 20}}
-    if selected=='native_effect' and not any(message.get('role')=='tool' for message in (body or {}).get('messages',[])):
+    if selected in {'native_effect','native_effect_batch'} and not any(message.get('role')=='tool' for message in (body or {}).get('messages',[])):
         result['choices'][0]['finish_reason']='tool_calls'
         result['choices'][0]['message']={'role':'assistant','content':None,'tool_calls':[
-            {'id':f'effect-{call_id}','type':'function','function':{'name':'fixture_apply',
-             'arguments':json.dumps({'amount':getattr(app.state,'effect_amount',1)})}}]}
+            {'id':f'effect-{call_id}-{index}','type':'function','function':{'name':'fixture_apply',
+             'arguments':json.dumps({'amount':getattr(app.state,'effect_amount',1)})}}
+            for index in range(2 if selected=='native_effect_batch' else 1)]}
     return result

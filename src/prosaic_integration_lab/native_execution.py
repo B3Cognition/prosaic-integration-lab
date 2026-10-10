@@ -60,12 +60,16 @@ class NativeExecution:
         if type(native) is not dict or set(native) != {'bundles','tenants'} or not native['bundles']:
             raise ValueError('invalid native configuration')
         for definition in native['bundles']:
-            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version'}:
+            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version','fixture_provider_request_limit'}:
                 raise ValueError('invalid native configuration')
             if type(definition.get('fixture_effects',False)) is not bool:
                 raise ValueError('invalid native configuration')
             if definition.get('fixture_effect_version','v1') not in {'v1','v2'}:
                 raise ValueError('invalid fixture semantic version')
+            if 'fixture_provider_request_limit' in definition and (
+                not definition.get('fixture_effects') or type(definition['fixture_provider_request_limit']) is not int or
+                definition['fixture_provider_request_limit'] not in {1,2}):
+                raise ValueError('invalid fixture provider limit')
             material = self.material(definition)
             # Historical grants travel with each retained host bundle. Never rebuild
             # an old identity using mutable current tenant grants on a fresh worker.
@@ -127,7 +131,7 @@ class NativeExecution:
                 journal=FixtureJournal(self.host.config['app_dsn'],identity=definition['journal_identity'])
         bindings = WorkflowBindings(config=config,custom_tools=tools,validators={'approved':Validator('1.0.0',approved)},
             operation_namespace=definition['operation_namespace'],tool_journal=journal)
-        return catalog, bindings
+        return catalog, bindings, definition.get('fixture_provider_request_limit',2 if effects else 1)
 
     def effect_event(self,name):
         import httpx
@@ -158,14 +162,14 @@ class NativeExecution:
 
     @staticmethod
     def factory(material, setting):
-        catalog, bindings = material
+        catalog, bindings, provider_cap = material
         policy = WorkflowPolicy(allowed_agents=frozenset(setting['agents']),allowed_schemas=frozenset(setting['schemas']),
             allowed_tools=frozenset(setting['tools']),
             allowed_validators=frozenset(setting['validators']),allowed_model_tiers=frozenset(setting['model_tiers']),
             allow_agent_composition=setting['composition'],allow_inline_agents=setting['inline'],
             max_proposal_bytes=65536,max_run_input_bytes=4096,max_human_response_bytes=8192,
             max_calls=3,max_tokens=4096,max_run_s=120,timeout_s=30,max_attempts=1,
-            max_provider_requests_per_invocation=2 if setting['tools'] else 1,
+            max_provider_requests_per_invocation=provider_cap if setting['tools'] else 1,
             max_tool_calls_per_invocation=1 if setting['tools'] else 0)
         return WorkflowFactory(catalog=catalog,bindings=bindings,policy=policy)
 

@@ -59,3 +59,45 @@ def test_missing_image_fails_gate_with_safe_summary_before_owned_resources(monke
     assert json.loads(target.read_text()) == {'passed':False,'postgres_major':16,'lanes':[],
         'event':'required_image_unavailable'}
     assert 'PRIVATE' not in capsys.readouterr().out
+
+def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path):
+    import hashlib
+    import io
+    import tarfile
+    import yaml
+    root=Path(__file__).resolve().parents[2]
+    workflow=yaml.safe_load((root/'.github/workflows/required-acceptance.yml').read_text())
+    checkout=next(step for step in workflow['jobs']['acceptance']['steps'] if 'checkout@' in step.get('uses',''))
+    depth=checkout.get('with',{}).get('fetch-depth',1)
+    source=tmp_path/'fresh-shallow'
+    if not (root/'.git').exists():
+        # Source/SDist archives do not carry historical Git objects. This test
+        # requires the original repository, supplied explicitly by the caller.
+        import os
+        root=Path(os.environ['LAB_HISTORY_TEST_REPOSITORY'])
+    # Actions checks out a detached exact commit. Exercise that state too,
+    # without touching the caller's branch or assuming a named current branch.
+    detached=tmp_path/'detached-origin'
+    commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+    subprocess.run(['git','clone','--no-checkout',root.as_uri(),str(detached)],
+        check=True,capture_output=True,timeout=30)
+    subprocess.run(['git','checkout','--detach',commit],cwd=detached,
+        check=True,capture_output=True,timeout=30)
+    subprocess.run(['git','clone','--depth=1','--single-branch','--no-tags',
+        detached.as_uri(),str(source)],check=True,capture_output=True,timeout=30)
+    baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
+    missing=subprocess.run(['git','cat-file','-e',baseline+'^{commit}'],cwd=source,capture_output=True)
+    assert missing.returncode!=0,'regression must start with the historical object absent'
+    if depth==0:
+        subprocess.run(['git','fetch','--unshallow','--no-tags','origin'],cwd=source,
+            check=True,capture_output=True,timeout=30)
+    elif depth!=1:
+        subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin'],cwd=source,
+            check=True,capture_output=True,timeout=30)
+    result=subprocess.run(['git','archive',baseline],cwd=source,capture_output=True,timeout=30)
+    assert result.returncode==0,result.stderr.decode()
+    with tarfile.open(fileobj=io.BytesIO(result.stdout)) as archive:
+        manifest=archive.extractfile('dependencies/releases.json').read()
+        assert hashlib.sha256(manifest).hexdigest()=='f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472'
+        for filename in ('approval.yml','runtime.yml','schemas/result.json','subagents/author.md','synthetic.yml'):
+            assert archive.extractfile('assets/'+filename).read()==(root/'assets/legacy-0.2.0'/filename).read_bytes()

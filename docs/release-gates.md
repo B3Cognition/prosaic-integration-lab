@@ -37,7 +37,7 @@ remain unchanged. It never substitutes a branch checkout or published URL.
 Updating the acceptance suite also requires reviewing its count contract.
 
 The reviewed collection contracts are audit88, identity20, ingress5, Lago25,
-native37, legacy-upgrade10 and qualification2. Counts must match exactly, with
+native39, legacy-upgrade10 and qualification2. Counts must match exactly, with
 zero skips. Native exercises actual HTTP inference, two specialists and artifact
 provenance, check/gate, structured approval, current grants and retained bundles,
 fresh-process receipt adoption, finite budgets and a consequential fixture tool.
@@ -46,11 +46,19 @@ namespace/business key; journal claims and commits use real PostgreSQL. Separate
 observable barriers cover claim, handler entry, effect persistence and outcome
 commit, including worker loss and lost acknowledgement. No expiry or automatic
 reconciliation is permitted.
+Two budget cases exercise a batch of two valid tool attempts under the registered
+tool cap of one and a separate denied provider follow-up. Both retain the first
+completed domain/journal effect and incurred usage; receipt failure reasons,
+independent handler barriers and actual HTTP counts prove the cap stopped dispatch.
+The lower provider cap is a fixture-only trusted host binding in the frozen policy.
 
 The legacy lane builds immutable Lab0.2.0 commit
 `59752bef3e6b3ffde0ecbf38f34815d184043e20` with the five exact historical wheels
-from `dependencies/releases-lab-0.2.0.json`. Public routes and original critical
-fault gates produce five old states. All old replicas stop before explicit
+from `dependencies/releases-lab-0.2.0.json`.
+CI's pinned checkout fetches full history so that exact historical object is
+available; a regression starts from a real depth-one clone, applies the configured
+history acquisition and verifies the archived original manifest and assets.
+Public routes and original critical fault gates produce five old states. All old replicas stop before explicit
 application schema v2→v3 migration. New workers use the same owned database and
 the five byte-identical retained historical assets, selected by original
 assets_hash. Original SQL receipts/accounting are compared, never fabricated with

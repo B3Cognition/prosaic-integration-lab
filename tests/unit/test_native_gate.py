@@ -9,7 +9,7 @@ from test_release_gates import receipt
 from test_native_execution import native
 
 
-@pytest.mark.parametrize('mode,count',[('native',37),('legacy-upgrade',10),('qualification',2)])
+@pytest.mark.parametrize('mode,count',[('native',39),('legacy-upgrade',10),('qualification',2)])
 def test_new_required_lanes_reject_partial_collection(mode,count):
     item=receipt(); item.update(mode=mode,test_count=count)
     if mode=='legacy-upgrade':
@@ -81,6 +81,7 @@ def test_legacy_native_default_registers_no_tool_and_zero_tool_budget(native):
     view=execution.catalogue(a)['manifest']
     assert view['tools']=={}
     assert view['limits']['maxToolCallsPerInvocation']==0
+    assert view['limits']['maxProviderRequestsPerInvocation']==1
 
 
 def test_current_inline_tool_revocation_blocks_retained_proposal_before_execution(native):
@@ -143,3 +144,61 @@ def test_real_public_sdk_runs_receive_provider_provenance_and_finite_limits(nati
         assert run['status']==wanted
         assert fixture.get('/stats').json()['calls']==before+cost
         fixture.post('/control',json={})
+
+@pytest.mark.parametrize('scenario,provider_cap,reason',[
+    ('native_effect_batch',2,'tool_call_limit'),('native_effect',1,'provider_request_limit')])
+def test_real_http_fixture_exhausts_public_host_invocation_caps(native,scenario,provider_cap,reason):
+    import json
+    import socket
+    import threading
+    import time
+    import httpx
+    import uvicorn
+    from lab_runner import model
+    from prosaic_integration_lab.native_execution import NativeExecution
+    from prosaic_runtime import CustomTool,EndpointConfig,ProsaicArtifact,ProsaicRuntime,RunPolicy,RuntimeConfig
+    execution,a,_=native
+    listener=socket.socket();listener.bind(('127.0.0.1',0));listener.listen(128)
+    url='http://127.0.0.1:'+str(listener.getsockname()[1])
+    server=uvicorn.Server(uvicorn.Config(model.app,log_level='error',lifespan='off'))
+    worker=threading.Thread(target=server.run,kwargs={'sockets':[listener]},daemon=True);worker.start()
+    try:
+        deadline=time.monotonic()+5
+        while not server.started:
+            assert time.monotonic()<deadline;time.sleep(.01)
+        response=httpx.post(url+'/control',json={'scenario':scenario});assert response.status_code==200
+        definition=execution.host.config['native']['bundles'][0]
+        definition.update(fixture_effects=True,journal_identity='fixture-journal',model_url=url+'/v1',
+            fixture_provider_request_limit=provider_cap)
+        definition['policies']['a'].update(agents=['effecter'],tools=['fixture_apply'])
+        execution.host.config['native']['tenants']['a'].update(agents=['effecter'],tools=['fixture_apply'])
+        execution.host.config['fixture_events_url']=url+'/events'
+        current=NativeExecution(execution.host)
+        limits=current.catalogue(a)['manifest']['limits']
+        assert limits['maxProviderRequestsPerInvocation']==provider_cap and limits['maxToolCallsPerInvocation']==1
+        identity=current.factories[('a','synthetic-v1')][0].identity
+        definition.pop('fixture_provider_request_limit')
+        default=NativeExecution(execution.host)
+        assert default.catalogue(a)['manifest']['limits']['maxProviderRequestsPerInvocation']==2
+        assert (identity==default.factories[('a','synthetic-v1')][0].identity)==(provider_cap==2)
+        seen=[]
+        tool=CustomTool('fixture_apply','Synthetic effect',{'type':'object','properties':{'amount':{
+            'type':'integer','minimum':1,'maximum':2}},'required':['amount'],'additionalProperties':False},
+            lambda arguments:seen.append(arguments) or {'applied':True},'fixture-v1')
+        config=RuntimeConfig({'fixture':EndpointConfig(url+'/v1','test-model',features={'streaming':False})},
+            {},'fixture',allowed_tools=frozenset({'fixture_apply'}))
+        artifact=ProsaicArtifact.from_inspection({'id':'fixture.md','type':'subagent',
+            'frontmatter':{'tools':['fixture_apply']},'body':'{{args}}'})
+        before=httpx.get(url+'/stats').json()['calls']
+        result=ProsaicRuntime(config,custom_tools={'fixture_apply':tool}).run(artifact,
+            json.dumps({'request':{'entity_id':'budget-case'}}),policy=RunPolicy(allowed_tools=frozenset({'fixture_apply'}),
+                max_provider_requests=limits['maxProviderRequestsPerInvocation'],max_tool_calls=limits['maxToolCallsPerInvocation']))
+        assert result.exit_code!=0 and result.metadata.get('failure_reason')==reason,result.metadata
+        assert result.metadata['invocation_budgets_v1']['tool_calls']==1
+        assert result.metadata['invocation_budgets_v1']['provider_requests']==1
+        assert result.token_usage==125 and seen==[{'amount':1}]
+        assert httpx.get(url+'/stats').json()['calls']==before+1
+    finally:
+        if server.started:httpx.post(url+'/control',json={})
+        server.should_exit=True;worker.join(5);listener.close()
+        assert not worker.is_alive()

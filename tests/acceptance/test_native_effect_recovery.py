@@ -127,6 +127,46 @@ def test_concurrent_native_claims_execute_only_one_domain_handler(lab):
     stats=httpx.get(lab['model']+'/stats',timeout=5);stats.raise_for_status()
     assert stats.json()['barriers']['tool-handler']==entered+1
 
+@pytest.mark.parametrize('budget,scenario,reason',[('tools','native_effect_batch','tool_call_limit'),
+    ('provider','native_effect','provider_request_limit')])
+def test_native_invocation_cap_blocks_next_dispatch_and_retains_real_sql_evidence(lab,budget,scenario,reason):
+    settings=copy.deepcopy(lab['native']);key=uuid.uuid4().hex
+    try:
+        if budget=='provider':
+            limited=copy.deepcopy(settings)
+            for bundle in limited['bundles']:bundle['fixture_provider_request_limit']=1
+            replace_worker(lab,native=limited)
+        control(lab,scenario=scenario)
+        before=calls(lab)
+        stats=httpx.get(lab['model']+'/stats',timeout=5);stats.raise_for_status()
+        barriers=stats.json()['barriers']
+        run=effect(lab,key,worker='b')
+        assert run['status']=='blocked' and calls(lab)==before+1
+        stats=httpx.get(lab['model']+'/stats',timeout=5);stats.raise_for_status()
+        assert stats.json()['barriers']['tool-handler']==barriers['tool-handler']+1
+        assert stats.json()['barriers']['tool-claimed']==barriers['tool-claimed']+1
+        assert stats.json()['barriers']['tool-committed']==barriers['tool-committed']+1
+        assert domain(lab,key)==[(namespace(lab),key,1)]
+        with psycopg.connect(lab['app_dsn']) as connection:
+            assert connection.execute('SELECT state,outcome FROM lab_app.tool_operations WHERE operation_namespace=%s AND operation_key=%s',
+                (namespace(lab),key)).fetchall()==[('completed',{'status':'ok','result':{'applied':True}})]
+        with psycopg.connect(lab['harness_dsn']) as connection:
+            receipts=connection.execute('SELECT document FROM prosaic_harness.receipts WHERE run_id=%s',(run['run_id'],)).fetchall()
+        assert len(receipts)==1
+        result=json.loads(receipts[0][0])['result']
+        assert result['exit_code']!=0 and result['metadata']['failure_reason']==reason
+        assert result['metadata']['invocation_budgets_v1']['tool_calls']==1
+        assert result['metadata']['invocation_budgets_v1']['provider_requests']==1
+        assert result['token_usage']==125
+        original=http(lab,'GET','/runs/'+run['run_id']+'/usage',worker='b')
+        assert original['total_calls']==1 and original['complete_calls']==1 and original['unresolved_calls']==0
+        replace_worker(lab)
+        assert http(lab,'GET','/runs/'+run['run_id'],worker='b')['status']=='blocked'
+        assert http(lab,'GET','/runs/'+run['run_id']+'/usage',worker='b')==original
+        assert calls(lab)==before+1
+    finally:
+        if budget=='provider':replace_worker(lab,native=settings)
+
 
 def test_stale_fence_cannot_overwrite_original_committed_native_result(lab):
     key=uuid.uuid4().hex
