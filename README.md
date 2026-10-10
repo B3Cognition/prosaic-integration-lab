@@ -100,7 +100,13 @@ family through `--wheel-dir` or its manifest digest cache; unpublished artifacts
 must be supplied explicitly. Candidate images start from the same pinned Python
 base as released images. The build snapshots exact manifest bytes and selected
 wheels in a temporary public context, aborts on concurrent manifest changes,
-and prints the immutable image ID. Installed-payload audit supports the historic
+and prints the immutable image ID. The packaged explicit inventory at
+`dependencies/public-build-inputs.json` selects public files in both Git
+checkouts and complete source archives; adding a runtime file requires updating
+that inventory. Extra local files never enter the context. The audit validates
+any executable SDK cache against the verified source code, including hash-based
+and optimized caches, without deleting existing installed files.
+Installed-payload audit supports the historic
 positional arguments as well as `--manifest` and `--wheel-dir`.
 
 ## See the accounting evidence

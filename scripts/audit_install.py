@@ -4,7 +4,10 @@ from email.parser import BytesParser
 import hashlib
 from importlib.metadata import distributions
 from importlib.machinery import PathFinder
+from importlib.util import cache_from_source, MAGIC_NUMBER
+import marshal
 from pathlib import Path
+from types import CodeType
 import zipfile
 import sys
 ROOT = Path(__file__).resolve().parents[1]
@@ -73,6 +76,46 @@ def installed_family(payloads):
     return installed
 
 
+def verify_cached_payload(cache, sources):
+    """Check executable cache code against the verified source, not its header."""
+    selected = sources.get(cache)
+    if selected is None:
+        raise ValueError('unexpected cached import payload')
+    source, expected_hash, optimization = selected
+    if file_digest(source) != expected_hash:
+        raise ValueError('installed release payload mismatch before cache validation')
+    with cache.open('rb') as stream:
+        payload = stream.read(MAX_ARTIFACT_BYTES + 1)
+    if (len(payload) > MAX_ARTIFACT_BYTES or len(payload) < 16 or payload[:4] != MAGIC_NUMBER or
+            int.from_bytes(payload[4:8], 'little') not in {0, 1, 3}):
+        raise ValueError('invalid cached import payload')
+    try:
+        cached = marshal.loads(payload[16:])
+        if not isinstance(cached, CodeType):
+            raise ValueError('cache does not contain code')
+        # co_filename is diagnostic metadata. Using it for compilation permits
+        # equivalent caches generated through an environment path alias; no
+        # cached code is executed. Marshal reference/interning encodings are not
+        # canonical, so compare code semantics and metadata recursively instead.
+        expected = compile(source.read_bytes(), cached.co_filename, 'exec',
+                           dont_inherit=True, optimize=optimization)
+        if not same_executable_code(cached, expected):
+            raise ValueError('cache code differs from verified source')
+    except (ValueError, TypeError, EOFError) as error:
+        raise ValueError('modified cached import payload') from error
+
+
+def same_executable_code(cached, expected):
+    # Code equality compares typed constants and executable attributes, but
+    # excludes diagnostic/exception-table fields on some Python versions.
+    if (cached != expected or cached.co_filename != expected.co_filename or
+            cached.co_linetable != expected.co_linetable or
+            cached.co_exceptiontable != expected.co_exceptiontable):
+        return False
+    return all(not isinstance(actual, CodeType) or same_executable_code(actual, wanted)
+               for actual, wanted in zip(cached.co_consts, expected.co_consts, strict=True))
+
+
 def audit(manifest: Path, wheel_dir: Path, *, expected_sha=None):
     if expected_sha is not None and manifest_digest(manifest) != expected_sha:
         raise ValueError('manifest checksum mismatch')
@@ -95,10 +138,20 @@ def audit(manifest: Path, wheel_dir: Path, *, expected_sha=None):
                 root = target.parent
                 expected_files = {Path(dist.locate_file(filename)).resolve() for filename in files
                                   if Path(filename).parts[0] == module}
+                cache_sources = {}
+                for source_name, source_hash in files.items():
+                    if Path(source_name).parts[0] == module and source_name.endswith('.py'):
+                        source = Path(dist.locate_file(source_name))
+                        for optimization in range(3):
+                            cache_path = Path(cache_from_source(str(source),
+                                optimization='' if optimization == 0 else str(optimization)))
+                            cache_sources[cache_path] = (source, source_hash, optimization)
                 for actual in root.rglob('*'):
                     if actual.is_symlink():
                         raise ValueError(f'unexpected import payload symlink: {module}')
                     if '__pycache__' in actual.relative_to(root).parts:
+                        if actual.is_file():
+                            verify_cached_payload(actual, cache_sources)
                         continue
                     if actual.is_symlink() or (actual.is_file() and actual.resolve() not in expected_files):
                         raise ValueError(f'unexpected import payload: {module}/{actual.relative_to(root)}')

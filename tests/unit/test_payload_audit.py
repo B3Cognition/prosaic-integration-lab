@@ -83,6 +83,50 @@ def test_audit_rejects_additional_sourceless_import_code(tmp_path, monkeypatch):
         audit(manifest, cache)
 
 
+@pytest.mark.parametrize('optimization', [0, 1, 2])
+@pytest.mark.parametrize('mode', ['TIMESTAMP', 'UNCHECKED_HASH'])
+def test_audit_cannot_certify_an_altered_executable_hash_cache(tmp_path, monkeypatch, optimization, mode):
+    import os
+    import py_compile
+    import subprocess
+    import sys
+    audit, manifest, cache, site = audit_fixture(tmp_path, monkeypatch)
+    source = site / 'prosaic/__init__.py'
+    original = source.read_bytes()
+    source.write_text('VALUE = "modified"\n')
+    timestamp = source.stat().st_mtime_ns
+    py_compile.compile(str(source), doraise=True,
+                       invalidation_mode=getattr(py_compile.PycInvalidationMode, mode),
+                       optimize=optimization)
+    source.write_bytes(original)
+    os.utime(source, ns=(timestamp, timestamp))
+    with pytest.raises(ValueError, match='cached import payload'):
+        audit(manifest, cache)
+    flags = ['-' + 'O' * optimization] if optimization else []
+    imported = subprocess.run([sys.executable, '-B', *flags, '-c', 'import prosaic; print(prosaic.VALUE)'],
+                              env={**os.environ, 'PYTHONPATH': str(site)}, cwd=tmp_path,
+                              capture_output=True, text=True, check=True)
+    assert imported.stdout.strip() == 'modified'
+
+
+@pytest.mark.parametrize('optimization', [0, 1, 2])
+@pytest.mark.parametrize('mode', ['TIMESTAMP', 'CHECKED_HASH', 'UNCHECKED_HASH'])
+def test_verified_source_cache_remains_auditable_and_imports_verified_code(tmp_path, monkeypatch, optimization, mode):
+    import os
+    import py_compile
+    import subprocess
+    import sys
+    audit, manifest, cache, site = audit_fixture(tmp_path, monkeypatch)
+    py_compile.compile(str(site / 'prosaic/__init__.py'), doraise=True, optimize=optimization,
+                       invalidation_mode=getattr(py_compile.PycInvalidationMode, mode))
+    audit(manifest, cache)
+    flags = ['-' + 'O' * optimization] if optimization else []
+    imported = subprocess.run([sys.executable, '-B', *flags, '-c', 'import prosaic; print(prosaic.VALUE)'],
+                              env={**os.environ, 'PYTHONPATH': str(site)}, cwd=tmp_path,
+                              capture_output=True, text=True, check=True)
+    assert imported.stdout.strip() == 'verified'
+
+
 def test_audit_rejects_conflicting_import_files_between_selected_wheels(tmp_path, monkeypatch):
     import zipfile
     audit, manifest, cache, _ = audit_fixture(tmp_path, monkeypatch)

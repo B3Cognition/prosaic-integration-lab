@@ -108,9 +108,7 @@ def test_build_uses_private_exact_context_and_immutable_image_id(tmp_path, monke
     manifest, cache, _ = wheel_family(tmp_path)
     (cache / 'historical.whl').write_bytes(b'never copy')
     calls = []
-    original_run = module.subprocess.run
     def docker(argv, **kwargs):
-        if argv[0] == 'git': return original_run(argv, **kwargs)
         calls.append(argv)
         context = Path(argv[-1])
         expected = hashlib.sha256(manifest.read_bytes()).hexdigest()
@@ -193,10 +191,11 @@ def test_build_excludes_untracked_files_inside_public_directories(tmp_path, monk
     for filename in ('scripts/install_dependencies.py', 'scripts/build_consumer.py', 'scripts/audit_install.py',
                      'dependencies/requirements.lock', 'containers/Dockerfile'):
         (checkout / filename).write_text('# public\n')
+    (checkout / 'dependencies/public-build-inputs.json').write_text(json.dumps({'version': 1, 'files': [
+        'src/app.py', 'dependencies/requirements.lock', 'containers/Dockerfile',
+        'scripts/install_dependencies.py', 'scripts/build_consumer.py', 'scripts/audit_install.py']}))
     monkeypatch.setattr(module, 'ROOT', checkout)
     def external(argv, **kwargs):
-        if argv[0] == 'git':
-            return subprocess.CompletedProcess(argv, 0, stdout='src/app.py\0dependencies/requirements.lock\0containers/Dockerfile\0')
         context = Path(argv[-1])
         assert (context / 'src/app.py').exists()
         assert not (context / 'src/private-research.txt').exists()
@@ -204,3 +203,44 @@ def test_build_excludes_untracked_files_inside_public_directories(tmp_path, monk
         return subprocess.CompletedProcess(argv, 0)
     monkeypatch.setattr(module.subprocess, 'run', external)
     assert module.build(manifest, cache, 'fixture:dev', 'released') == 'sha256:' + '2' * 64
+
+
+def test_build_from_extracted_release_archive_excludes_extra_private_files(tmp_path, monkeypatch):
+    import importlib.util
+    import io
+    import shutil
+    import tarfile
+    if (ROOT / '.git').exists():
+        archive_bytes = subprocess.run(['git', 'archive', 'HEAD'], cwd=ROOT, capture_output=True, check=True).stdout
+    else:
+        # The same suite is usable when the caller already has a release
+        # archive. Repack only its explicit public inputs for this fixture.
+        buffer = io.BytesIO()
+        files = json.loads((ROOT / 'dependencies/public-build-inputs.json').read_text())['files']
+        with tarfile.open(fileobj=buffer, mode='w') as archive:
+            for filename in [*files, 'dependencies/public-build-inputs.json']:
+                archive.add(ROOT / filename, arcname=filename)
+        archive_bytes = buffer.getvalue()
+    checkout = tmp_path / 'source-archive'; checkout.mkdir()
+    with tarfile.open(fileobj=io.BytesIO(archive_bytes)) as archive:
+        archive.extractall(checkout, filter='data')
+    # Apply this release's reviewed helper/inventory to the last committed
+    # source archive. After commit these copies are identical to archive bytes.
+    shutil.copyfile(ROOT / 'scripts/build_consumer.py', checkout / 'scripts/build_consumer.py')
+    shutil.copyfile(ROOT / 'dependencies/public-build-inputs.json', checkout / 'dependencies/public-build-inputs.json')
+    assert not (checkout / '.git').exists()
+    (checkout / 'src/private-research.txt').write_text('never upload\n')
+    spec = importlib.util.spec_from_file_location('archive_build_consumer', checkout / 'scripts/build_consumer.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    manifest, cache, _ = wheel_family(tmp_path)
+    original_run = subprocess.run
+    def external(argv, **kwargs):
+        if argv[0] == 'git': return original_run(argv, **kwargs)
+        context = Path(argv[-1])
+        assert (context / 'src/prosaic_integration_lab/app.py').exists()
+        assert not (context / 'src/private-research.txt').exists()
+        assert not (context / '.git').exists()
+        Path(argv[argv.index('--iidfile') + 1]).write_text('sha256:' + '3' * 64)
+        return subprocess.CompletedProcess(argv, 0)
+    monkeypatch.setattr(module.subprocess, 'run', external)
+    assert module.build(manifest, cache, 'archive:dev', 'released') == 'sha256:' + '3' * 64

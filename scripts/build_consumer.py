@@ -1,6 +1,7 @@
 """Build an immutable consumer from an isolated public context and exact wheels."""
 import argparse
 import hashlib
+import json
 from pathlib import Path
 import re
 import shutil
@@ -31,14 +32,19 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
         # Only public runtime inputs enter the context; caches, runs, credentials,
         # research and the Git checkout cannot be uploaded to the engine.
         public_directories = ('src', 'scripts', 'lab_runner', 'assets', 'containers')
-        listing = subprocess.run(['git', 'ls-files', '-z', '--', *public_directories,
-                                  'dependencies/requirements.lock'], cwd=ROOT,
-                                 capture_output=True, text=True, check=True, timeout=15)
-        # These explicitly named new helpers may not yet be committed during
-        # local development; all other inputs must already be tracked.
-        public_files = set(listing.stdout.split('\0')) - {''}
-        public_files.update({'scripts/install_dependencies.py', 'scripts/build_consumer.py',
-                             'scripts/audit_install.py'})
+        inventory = ROOT / 'dependencies/public-build-inputs.json'
+        if inventory.is_symlink():
+            raise ValueError('public build inventory must not be a symlink')
+        with inventory.open('rb') as source:
+            inventory_bytes = source.read(65537)
+        if len(inventory_bytes) > 65536:
+            raise ValueError('public build inventory exceeds size limit')
+        data = json.loads(inventory_bytes)
+        public_files = data.get('files') if isinstance(data, dict) and data.get('version') == 1 else None
+        if (not isinstance(public_files, list) or not 1 <= len(public_files) <= 1024 or
+                any(not isinstance(name, str) or not name for name in public_files) or
+                len(set(public_files)) != len(public_files)):
+            raise ValueError('invalid public build inventory')
         for filename in sorted(public_files):
             relative = Path(filename)
             if (relative.is_absolute() or '..' in relative.parts or
