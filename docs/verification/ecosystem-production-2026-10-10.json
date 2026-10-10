@@ -134,6 +134,26 @@
     "public_build_input_byte_parity_count": 78,
     "original_legacy_asset_byte_parity_count": 5
   },
+  "core_promotion": {
+    "run_id": "38063003741",
+    "run_url": "https://github.com/B3Cognition/prosaic/actions/runs/38063003741",
+    "source_commit": "aad4bf45ae1c242f4451700ca59b27280010573a",
+    "ref": "refs/tags/v0.4.0",
+    "original_candidate_run_id": "38047286885",
+    "qualified_records_passed": 15,
+    "original_distribution_and_receipt_bytes": "identical",
+    "conclusion": "failure",
+    "publisher_error_code": "invalid-publisher",
+    "expected_publisher": {
+      "project": "b3-prosaic",
+      "owner": "B3Cognition",
+      "repository": "prosaic",
+      "workflow": "publish.yml",
+      "environment": "pypi"
+    },
+    "package_uploads": "not_started",
+    "github_release": "skipped"
+  },
   "limits": [
     "candidate artifacts; ordinary public-index installation remains unverified",
     "synthetic bounded capacity and logical restore fixture only",

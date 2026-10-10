@@ -122,6 +122,20 @@ Runtime and its adapter in `prosaic-runtime`, Harness and its adapter in
 [SDK package-channel guide](https://github.com/B3Cognition/prosaic/blob/codex/ecosystem-production/docs/package-index.md).
 No long-lived token is needed in chat.
 
+The guarded Core promotion
+[38063003741](https://github.com/B3Cognition/prosaic/actions/runs/38063003741)
+passed all 15 qualification records on the original bytes, then PyPI refused
+the token exchange with `invalid-publisher`: no publisher matched the expected
+Core repository/workflow/environment claims. No package files were uploaded;
+GitHub release was skipped. Configure the initial `b3-prosaic` pending publisher
+in the authenticated PyPI owner account before repeating that promotion.
+
+Bootstrap the paired SDKs in stages: PyPI permits only one pending entry per
+repository/workflow/environment tuple. Register the main Runtime/Harness project
+first; after its first exchange converts the pending publisher, register its
+adapter and repeat the same original-byte promotion. The package-channel guide
+details partial-upload verification and the complete-pair GitHub release gate.
+
 The candidate lab gate has succeeded. After registration is confirmed, promotion publishes
 the original qualified bytes in dependency order: Core, Runtime/recorder,
 Harness/store. Both GitHub and index downloads must match the receipts. Lab

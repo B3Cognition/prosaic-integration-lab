@@ -121,9 +121,29 @@ remote native evidence is recorded separately.
 ## Remaining publication work
 
 GitHub `pypi` environments restrict deployment to version tags. The authenticated
-PyPI owner must verify or create the five pending trusted publishers listed in
+PyPI owner must verify or create the five publisher bindings in the documented
+stages listed in
 the [package-channel guide](https://github.com/B3Cognition/prosaic/blob/codex/ecosystem-production/docs/package-index.md).
 No public-index or stable-release publication has been verified at this checkpoint.
+
+The actual guarded Core promotion
+[38063003741](https://github.com/B3Cognition/prosaic/actions/runs/38063003741)
+ran on stable tag `v0.4.0` at the same qualified Core source. It downloaded the
+original candidate bytes, passed all 15 required records again and produced
+byte-identical wheel, sdist and release receipt. PyPI then rejected the valid
+OIDC claims with `invalid-publisher` before attestation or package upload:
+`B3Cognition/prosaic`, workflow `publish.yml`, environment `pypi`. GitHub release
+was skipped. This is a concrete external publisher configuration failure,
+not an inferred failure from a public index 404. The duplicate automatic tag
+preparation run was cancelled; it provides no qualification evidence.
+
+PyPI permits one pending project per owner/repository/workflow/environment tuple.
+Initial registration therefore selects the three main SDK projects; each adapter
+is registered after its main project's first token exchange converts the pending
+publisher. Repeat the guarded paired promotion after adapter registration to
+complete any matching partial upload. The updated SDK guides explain this staged
+bootstrap; the final normal publisher can authorize both projects. Documentation
+follow-ups do not change the original qualified source/artifact identities.
 
 Once registration is present, promote these original qualified bytes in order:
 Core 0.4.0; Runtime 0.8.0 and recorder 0.2.0; Harness 0.7.0 and store 0.2.0.
