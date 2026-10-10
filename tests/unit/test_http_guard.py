@@ -71,3 +71,19 @@ def test_unexpected_dispatch_error_is_curated_without_rethrow_or_message_leak(ca
     async def failed(*args): raise RuntimeError('PRIVATE_CREDENTIAL_SENTINEL')
     assert asyncio.run(invoke(HttpGuard(failed,IDENTITY))) == 503
     assert 'PRIVATE_CREDENTIAL_SENTINEL' not in caplog.text
+
+def test_only_exact_post_proposal_route_gets_64k_authenticated_ceiling():
+    async def scenario(path,size):
+        async def body(): return {'type':'http.request','body':b'x'*size,'more_body':False}
+        async def downstream(scope,receive,send):
+            assert len((await receive())['body']) == size
+            await send({'type':'http.response.start','status':204,'headers':[]})
+        messages=[]
+        async def send(message): messages.append(message)
+        await HttpGuard(downstream,IDENTITY)({'type':'http','method':'POST','path':path,
+            'headers':[(b'authorization',b'Bearer token')]},body,send)
+        return messages[0]['status']
+    assert asyncio.run(scenario('/workflow-proposals',65536)) == 204
+    assert asyncio.run(scenario('/workflow-proposals',65537)) == 413
+    for path in ('/runs','/native-runs','/workflow-proposals/','/workflow-proposals/x'):
+        assert asyncio.run(scenario(path,8193)) == 413

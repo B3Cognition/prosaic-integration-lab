@@ -16,7 +16,7 @@ def configuration(upstreams):
     if len(addresses) != 2 or any(':' in address for address in addresses):
         raise ValueError('two IPv4 replica addresses required')
     servers = '\n'.join(f'        server {address}:8080;' for address in addresses)
-    return '''worker_processes 1;
+    result = '''worker_processes 1;
 pid /tmp/nginx.pid;
 error_log /dev/null crit;
 worker_shutdown_timeout 15s;
@@ -68,6 +68,10 @@ http {
     }
 }
 '''
+    # Exact route only. Preserve every ownership/header/timeout/no-retry setting.
+    location = result.split('        location / {',1)[1].split('        }',1)[0]
+    proposal = '        location = /workflow-proposals {\n            client_max_body_size 64k;' + location + '        }\n'
+    return result.replace('        location / {',proposal+'        location / {',1)
 
 def deliver():
     files = json.loads(Path('/run/source/ingress.json').read_text())

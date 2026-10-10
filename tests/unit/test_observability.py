@@ -24,3 +24,13 @@ def test_unknown_accounting_observations_are_not_zero_or_unique_invoice_counts()
     metrics.unknown(2)
     metrics.unknown(2)
     assert 'lab_accounting_unknown_observations_total 4' in metrics.render()
+
+def test_optional_observer_consumes_closed_public_dictionary_record(monkeypatch):
+    from prosaic_integration_lab.observability import workflow_observation,logger
+    records=[]
+    monkeypatch.setattr(logger,'info',records.append)
+    with request_context(Metrics()):
+        workflow_observation({'version':1,'source':'harness','event':'waiting_committed',
+            'revision':'1'*64,'labels':{'private':'PRIVATE_LABEL'},'reason':'PRIVATE_ERROR'})
+    assert len(records)==1 and 'waiting_committed' in records[0]
+    assert 'PRIVATE' not in records[0]

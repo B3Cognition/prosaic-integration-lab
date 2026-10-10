@@ -4,14 +4,14 @@ import math
 from fastapi import HTTPException
 from prosaic_harness import Harness, RunNotFound, Workflow
 from prosaic_harness_postgres import PostgresRunStore
-from prosaic_runtime import ExecutionContext, RateCard
+from prosaic_runtime import ExecutionContext, RateCard, ProsaicRuntime
 from prosaic_runtime_postgres import PostgresRecorder
 from .config import assets_hash
 from .metadata import Metadata
 from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
-from .observability import bind_run,accounting_observation
+from .observability import bind_run,accounting_observation,workflow_observation
 from .capacity import policy
 
 def validate_workflow_limits(definition):
@@ -40,6 +40,12 @@ class Execution:
             environment=config['environment'], rate_card=RateCard('synthetic-v1', 'test-model', '2', '8', '0.5'))
         self.operations = Admission(self.capacity['writes'],metrics=metrics,per_tenant=self.capacity['per_tenant'])
         self.reads = Admission(self.capacity['reads'],metrics=metrics,pool_name='reads')
+        self.observer = (workflow_observation if metrics is not None and
+            'observer_v1' in getattr(ProsaicRuntime,'capabilities',()) else None)
+        self.native = None
+        if config.get('native'):
+            from .native_execution import NativeExecution
+            self.native = NativeExecution(self)
 
     def ready(self):
         self.metadata.check_ready()
@@ -52,6 +58,8 @@ class Execution:
         self.store.close()
 
     def harness(self, reservation):
+        if reservation['workflow'] == 'native':
+            return self.native.harness(reservation)
         self.check_scope(reservation)
         if reservation['assets_hash'] != self.fingerprint:
             raise HTTPException(409, 'asset_conflict')
@@ -59,6 +67,7 @@ class Execution:
             actor_id=reservation['actor_id'], billing_account_id=reservation['billing_account_id'], request_id=reservation['run_id'])
         return Harness(self.workflows[reservation['workflow']], store=self.store,
                        run_id=reservation['run_id'], context=context, accounting=self.recorder,
+                       **({'observer':self.observer} if self.observer is not None else {}),
                        on_event=self.fixture_event if self.config.get('fixture_events_url') else None)
 
     def check_scope(self, reservation):
@@ -75,6 +84,7 @@ class Execution:
 
     def status(self, reservation):
         bind_run(reservation)
+        if reservation['workflow'] == 'native': return self.native.status(reservation)
         try:
             snapshot = self.harness(reservation).status()
         except RunNotFound:
@@ -107,8 +117,12 @@ class Execution:
             return self.status(reservation)
         return self.start(reservation)
 
-    def resume(self, reservation, revision, choice, retry):
+    def resume(self, reservation, revision, choice, retry, response=None):
         bind_run(reservation)
+        if reservation.get('workflow') == 'native':
+            return self.native.resume(reservation,revision,choice,response,retry)
+        if choice not in (None,'approve','reject') or response is not None:
+            raise ValueError('invalid_request')
         if choice is not None:
             reviewed = self.status(reservation)
             if reviewed.get('status') == 'waiting' and not reviewed.get('review'):

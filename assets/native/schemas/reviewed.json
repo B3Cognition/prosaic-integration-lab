@@ -1,0 +1,1 @@
+{"type":"object","properties":{"entity_id":{"type":"string","maxLength":64},"approved":{"type":"boolean"}},"required":["entity_id","approved"],"additionalProperties":false}

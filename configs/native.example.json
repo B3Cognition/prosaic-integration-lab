@@ -1,0 +1,28 @@
+{
+  "namespace": "synthetic-pilot",
+  "environment": "sandbox",
+  "assets": "/app/assets",
+  "app_dsn": "postgresql://lab_app@postgres/lab",
+  "harness_dsn": "postgresql://lab_harness@postgres/lab",
+  "accounting_dsn": "postgresql://lab_accounting@postgres/lab",
+  "principals": {
+    "tenant-a-token": {"tenant_id": "a", "actor_id": "alice", "billing_account_id": "synthetic-a"},
+    "tenant-b-token": {"tenant_id": "b", "actor_id": "bob", "billing_account_id": "synthetic-b"}
+  },
+  "native": {
+    "bundles": [{
+      "version": "synthetic-v1",
+      "model_url": "http://model:8080/v1",
+      "operation_namespace": "synthetic-business-v1",
+      "journal_identity": "synthetic-journal-v1",
+      "policies": {
+        "a": {"composition": true, "inline": false, "review_outputs": true, "response_schema": true},
+        "b": {"composition": false, "inline": false}
+      }
+    }],
+    "tenants": {
+      "a": {"bundle_version": "synthetic-v1", "composition": true, "inline": false, "review_outputs": true, "response_schema": true},
+      "b": {"bundle_version": "synthetic-v1", "composition": false, "inline": false}
+    }
+  }
+}

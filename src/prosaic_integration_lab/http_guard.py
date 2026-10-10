@@ -62,13 +62,14 @@ class HttpGuard:
                 return await reject(429,'rate_limited')
             if scope['method'] == 'POST':
                 content = bytearray()
+                maximum = 65536 if scope['path'] == '/workflow-proposals' else 8192
                 async def collect():
                     while True:
                         message = await receive()
                         if message['type'] == 'http.disconnect':
                             return 400
                         chunk = message.get('body',b'')
-                        if len(content)+len(chunk) > 8192:
+                        if len(content)+len(chunk) > maximum:
                             return 413
                         content.extend(chunk)
                         if not message.get('more_body',False):

@@ -33,3 +33,19 @@ def test_missing_review_blocks_sdk_approval_before_resume():
         execution.resume({},'revision','approve',False)
     assert error.value.status_code == 409
     assert error.value.detail == 'approval_view_unavailable'
+
+def test_legacy_harness_constructor_receives_no_unsupported_optional_observer(monkeypatch):
+    from prosaic_integration_lab import execution as module
+    execution=object.__new__(Execution)
+    execution.observer=None
+    execution.config={}
+    execution.fingerprint='fixture'
+    execution.check_scope=lambda reservation:None
+    execution.workflows={'approval':object()}
+    execution.store=execution.recorder=None
+    def legacy(workflow,*,store,run_id,context,accounting,on_event):
+        return 'legacy-harness'
+    monkeypatch.setattr(module,'Harness',legacy)
+    reservation={'workflow':'approval','assets_hash':'fixture','run_id':'r',
+        'tenant_id':'a','actor_id':'alice','billing_account_id':'payer'}
+    assert execution.harness(reservation)=='legacy-harness'

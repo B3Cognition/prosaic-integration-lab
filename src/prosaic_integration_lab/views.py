@@ -1,3 +1,13 @@
+def public_native_interaction(source, *, include_response_schema=False):
+    allowed = ('version','runId','revision','stepId','question','choices','deadline','responseSchemaDigest')
+    result = {name:source[name] for name in allowed if name in source}
+    if include_response_schema and 'responseSchema' in source:
+        result['responseSchema'] = source['responseSchema']
+    reviewed = source.get('reviewOutputs',{}).get('review')
+    if type(reviewed) is dict:
+        result['reviewOutputs'] = {'review':{name:reviewed[name] for name in ('entity_id','approved') if name in reviewed}}
+    return result
+
 def public_run(run_id, state, revision, *, workflow=None):
     result = {'run_id': run_id, 'status': state['status'], 'current_step': state['current'],
               'revision': revision, 'recovery_status': {

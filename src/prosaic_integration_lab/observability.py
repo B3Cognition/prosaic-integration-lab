@@ -23,6 +23,9 @@ logger.propagate = False
 def route(path):
     if path in {'/healthz','/readyz'}: return path[1:]
     if path == '/runs': return 'runs_start'
+    if path == '/workflow-catalogue': return 'workflow_catalogue'
+    if path == '/workflow-proposals': return 'workflow_proposals'
+    if path == '/native-runs': return 'native_runs_start'
     match = re.fullmatch('/runs/[0-9a-f]{32}(?:/(resume|usage))?',path)
     return ('run_'+(match.group(1) or 'status')) if match else 'unknown'
 
@@ -121,6 +124,17 @@ def accounting_observation(report,calls):
     references=[item['metrics'].reference(call['intent']['provider_call_id']) for call in calls[:3]]
     logger.info(json.dumps({'event':'accounting_observed',**correlation(),
         'unknown_calls':unknown,'call_refs':references}))
+
+def workflow_observation(record):
+    # ObserverEmitter owns exception isolation. Keep only its closed kind/source
+    # and bounded committed revision, never source exception text or payloads.
+    item = _context.get()
+    if item is None: return
+    if type(record) is not dict or record.get('source') != 'harness': return
+    kind = record.get('event')
+    if kind not in {'run_started','transition_committed','waiting_committed','blocked_committed',
+                    'run_completed','recovery_committed'}: return
+    logger.info(json.dumps({'event':'workflow_observed',**correlation(),'kind':kind}))
 
 class Observability:
     def __init__(self,app,*,metrics,operator_token=None):

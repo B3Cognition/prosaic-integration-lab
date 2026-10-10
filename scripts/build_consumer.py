@@ -49,7 +49,8 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
             relative = Path(filename)
             if (relative.is_absolute() or '..' in relative.parts or
                     (relative.parts[0] not in public_directories and filename not in {
-                        'dependencies/requirements.lock','configs/qualification.synthetic.json'})):
+                            'dependencies/requirements.lock','configs/qualification.synthetic.json',
+                            'configs/native.example.json'})):
                 raise ValueError('unsafe public build input')
             if '__pycache__' in relative.parts or relative.suffix == '.pyc':
                 continue

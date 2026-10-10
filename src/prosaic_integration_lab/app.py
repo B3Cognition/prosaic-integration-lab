@@ -4,7 +4,7 @@ from typing import Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 from prosaic_harness import StoreError
 from .config import load_config
 from .execution import Execution
@@ -23,8 +23,15 @@ class StartRequest(BaseModel):
 class ResumeRequest(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     expected_revision: str = Field(min_length=1, max_length=512)
-    choice: Literal['approve', 'reject'] | None = None
+    choice: str | None = Field(default=None,min_length=1,max_length=64)
+    response: JsonValue = None
     retry_interrupted: bool = False
+
+
+class NativeStartRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid',strict=True)
+    proposal_id: str = Field(min_length=1,max_length=128)
+    inputs: JsonValue
 
 
 def create_app():
@@ -75,6 +82,14 @@ def create_app():
 
     @app.exception_handler(ValueError)
     async def value_error(request, error):
+        # New native diagnostics are already closed and redacted by the SDK.
+        # Import lazily so the legacy application still starts on historical pins.
+        if config.get('native'):
+            from prosaic_harness import HumanResponseError,WorkflowAdmissionError
+            if isinstance(error,HumanResponseError):
+                return JSONResponse({'detail':error.to_dict()},status_code=422)
+            if isinstance(error,WorkflowAdmissionError):
+                return JSONResponse({'detail':{'code':error.code,'location':error.location}},status_code=422)
         return JSONResponse({'detail': 'invalid_request'}, status_code=422)
 
     @app.exception_handler(Exception)
@@ -105,6 +120,28 @@ def create_app():
         execution = request.app.state.execution
         return await execution.admitted(execution.start_request,actor,idempotency_key,body.model_dump())
 
+    def native(execution):
+        if execution.native is None: raise HTTPException(404,'not_found')
+        return execution.native
+
+    @app.get('/workflow-catalogue')
+    def catalogue(request: Request, actor=Depends(principal)):
+        execution = request.app.state.execution
+        return execution.read(native(execution).catalogue,actor)
+
+    @app.post('/workflow-proposals')
+    async def propose(request: Request, actor=Depends(principal),
+                      idempotency_key: str = Header(min_length=1,max_length=128)):
+        execution = request.app.state.execution
+        text = await request.body()
+        return await execution.admitted(native(execution).propose,actor,idempotency_key,text)
+
+    @app.post('/native-runs')
+    async def native_start(body: NativeStartRequest, request: Request, actor=Depends(principal),
+                           idempotency_key: str = Header(min_length=1,max_length=128)):
+        execution = request.app.state.execution
+        return await execution.admitted(native(execution).start_request,actor,idempotency_key,body.proposal_id,body.inputs)
+
     @app.get('/runs/{run_id}')
     def status(run_id: str, request: Request, actor=Depends(principal)):
         execution = request.app.state.execution
@@ -115,7 +152,7 @@ def create_app():
         execution = request.app.state.execution
         reservation = await execution.inspected(owned,execution,actor,run_id)
         return await execution.admitted(execution.resume, reservation, body.expected_revision,
-                                        body.choice, body.retry_interrupted)
+                                        body.choice, body.retry_interrupted, body.response)
 
     @app.get('/runs/{run_id}/usage')
     def usage(run_id: str, request: Request, actor=Depends(principal)):

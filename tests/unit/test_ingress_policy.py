@@ -17,3 +17,11 @@ def test_ingress_policy_bounds_transport_and_never_retries_mutations():
 def test_ingress_configuration_rejects_injected_upstream():
     import pytest
     with pytest.raises(ValueError): configuration(('10.0.0.2; include /secret;','10.0.0.3'))
+
+def test_proposal_route_has_exact_location_64k_ceiling_with_same_no_retry_proxy_policy():
+    policy = configuration(('10.0.0.2','10.0.0.3'))
+    assert 'location = /workflow-proposals {' in policy
+    location = policy.split('location = /workflow-proposals {')[1].split('}',1)[0]
+    assert 'client_max_body_size 64k;' in location
+    assert 'proxy_next_upstream off;' in location
+    assert 'proxy_request_buffering off;' in location

@@ -79,7 +79,7 @@ def accepted():
     return {'status': 'observed'}
 
 @app.post('/v1/chat/completions')
-def completions():
+def completions(body: dict | None = None):
     global calls,allowance_rejected
     with lock:
         if maximum_calls is not None and calls-allowance_start>=maximum_calls:
@@ -93,9 +93,16 @@ def completions():
         from fastapi import HTTPException
         raise HTTPException(504, 'fixture_gate_timeout')
     time.sleep(delay)
+    # These two explicit synthetic specialist instructions belong to this fixture.
+    # All values are fixture constants; no product lookup or model-selected URL.
+    prose = json.dumps((body or {}).get('messages',[]))
+    native_output = ({'entity_id':'synthetic-entity','approved':True}
+        if 'ALWAYS review the synthetic finder input.' in prose else
+        {'entity_id':'synthetic-entity'} if 'ALWAYS use the synthetic fixture entity only.' in prose else
+        {'result':output})
     result = {'id': f'fixture-{call_id}', 'object': 'chat.completion', 'created': 1,
               'model': 'test-model', 'choices': [{'index': 0, 'finish_reason': 'stop',
-                'message': {'role': 'assistant', 'content': json.dumps({'result':output})
+                'message': {'role': 'assistant', 'content': json.dumps(native_output)
                             if selected != 'invalid_output' else 'invalid fixture output'}}]}
     if selected != 'missing_usage':
         prompt = 500 if selected == 'large_usage' else 100
