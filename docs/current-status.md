@@ -35,6 +35,13 @@ receipts above apply to their original sources. See the
 [hardening ledger](verification/hardening-2026-10-10.md) for exact sources,
 artifact hashes and consumer verification. Public APIs and formats are unchanged.
 
+A later Lab CLI correction lets the default container `--version` command report
+the actual installed B3 SDK family while retaining the legacy-family command.
+Its two isolated CLI regressions and all 539 source tests pass. The native
+hardening receipt above still qualifies its original `94f313e` source. The
+corrected Lab source must complete the released-package matrix before Lab 0.3.0
+publication; see the [publication preparation ledger](verification/publication-preparation-2026-10-10.md).
+
 Start with the [runnable native consumption guide](consume-native-workflows.md),
 [native workflow usage](native-workflows.md), [persistence and
 migration](persistence.md), [required release gates](release-gates.md) and

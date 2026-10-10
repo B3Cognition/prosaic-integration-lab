@@ -3,6 +3,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -43,6 +44,28 @@ def wheel_family(tmp_path, *, renamed=False, install=False):
                           'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
     manifest.write_text(json.dumps({'artifacts': artifacts}))
     return manifest, cache, site
+
+
+@pytest.mark.parametrize(('renamed', 'expected'), [
+    (False, {'prosaic': '1.0', 'prosaic-runtime': '1.0',
+             'prosaic-runtime-postgres': '1.0', 'prosaic-harness': '1.0',
+             'prosaic-harness-postgres': '1.0'}),
+    (True, {'b3-prosaic': '1.0', 'b3-prosaic-runtime': '1.0',
+            'b3-prosaic-runtime-postgres': '1.0', 'b3-prosaic-harness': '1.0',
+            'b3-prosaic-harness-postgres': '1.0'}),
+], ids=['legacy-only', 'b3-only'])
+def test_version_cli_reports_the_actual_installed_distribution_family(tmp_path, renamed, expected):
+    _, _, site = wheel_family(tmp_path, renamed=renamed, install=True)
+    shutil.copytree(ROOT / 'src/prosaic_integration_lab', site / 'prosaic_integration_lab',
+                    ignore=shutil.ignore_patterns('__pycache__'))
+    # Use real wheel metadata and a fresh process with no host site packages,
+    # editable source imports, PYTHONPATH or alternate SDK family to mask errors.
+    result = subprocess.run([sys.executable, '-I', '-S', '-c',
+        'import runpy, sys; sys.path.insert(0, sys.argv.pop(1)); '
+        'runpy.run_module("prosaic_integration_lab", run_name="__main__")',
+        str(site), '--version'], cwd=tmp_path, capture_output=True, text=True, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert json.loads(result.stdout) == expected
 
 
 def run_installer(manifest, cache, tmp_path, *, installed_site=None):
