@@ -1,0 +1,142 @@
+{
+  "version": 1,
+  "date": "2026-10-10",
+  "phase": "qualified_candidate",
+  "public_publication": "not_verified",
+  "lab_source_commit": "0feb56b02f4c3dfb21c8fe7487bd1d3216e86dec",
+  "lab_run_id": "38061354170",
+  "lab_run_url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170",
+  "candidate_manifest_sha256": "e963b7a1e4b00194b8fdf6fbebb1d0dbcba659befe96a7144ebf204a608dfc1b",
+  "candidate_lineage_sha256": "34b5769f7ae7ef5f8a620d99549c0a442226707c28df8c301359fa289cb0b721",
+  "baseline_source_commit": "59752bef3e6b3ffde0ecbf38f34815d184043e20",
+  "baseline_manifest_sha256": "f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472",
+  "sdk_candidates": [
+    {
+      "repository": "B3Cognition/prosaic",
+      "source_commit": "aad4bf45ae1c242f4451700ca59b27280010573a",
+      "run_id": "38047286885",
+      "release_receipt_sha256": "5dfa08967ce54ab15bedd797d65d09df6b35c0c50b90a40d49dc2b6eb27c28b8"
+    },
+    {
+      "repository": "B3Cognition/prosaic-runtime",
+      "source_commit": "da3b43e12027b78d60b846c427021559b4927ba4",
+      "run_id": "38054282584",
+      "release_receipt_sha256": "d1564503fc83fbb3a678230de0215ef9c045c4857b8838ae220050a1a5f97a97"
+    },
+    {
+      "repository": "B3Cognition/prosaic-harness",
+      "source_commit": "5b1e2bc0f56041122014a70e5865ff925e6559ab",
+      "run_id": "38055081837",
+      "release_receipt_sha256": "f6a535e9d37e36fd6dcd90fe80c86de31a563da9c6a40e70fb86408dd172a8d7"
+    }
+  ],
+  "lane_counts_per_cell": {
+    "audit": 88,
+    "identity": 20,
+    "ingress": 5,
+    "lago": 25,
+    "native-persistence": 26,
+    "native": 39,
+    "legacy-upgrade": 10,
+    "qualification": 2
+  },
+  "acceptance_tests_passed": 860,
+  "failed": 0,
+  "skipped": 0,
+  "verified_cleanup_checks": 32,
+  "cells": [
+    {
+      "name": "acceptance-ubuntu-24.04-arm-pg16",
+      "architecture": "aarch64",
+      "postgres_major": 16,
+      "job_url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170/job/114240101485",
+      "source_tests_passed": 522,
+      "acceptance_tests_passed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "verified_cleanup_checks": 8,
+      "payload_audit": "verified",
+      "artifact_id": 11673318158,
+      "artifact_archive_digest": "sha256:fee7bdeb0ee26be536adeee7d73817f75b01d36cc1faaf01634b98e1ca167105",
+      "original_safe_receipt_sha256": "2e09b4ab60ce2aafea4b8908c86bd68ba42cbb9530a2ec9cfe8cc0bf6a79f3c3",
+      "consumer_image": "sha256:acb80a3cdbe470cb4d4a4da8d1809f06f51da44aebdc85e30d3e4728cc6ff911",
+      "baseline_image": "sha256:63d110dc0df1955449bbe6ea8926881493c0f5fe7ca46e7236273a118cf80d48",
+      "postgres_image": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+      "migration": "v2-to-v3",
+      "original_legacy_fixture_count": 5
+    },
+    {
+      "name": "acceptance-ubuntu-24.04-arm-pg18",
+      "architecture": "aarch64",
+      "postgres_major": 18,
+      "job_url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170/job/114240101314",
+      "source_tests_passed": 522,
+      "acceptance_tests_passed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "verified_cleanup_checks": 8,
+      "payload_audit": "verified",
+      "artifact_id": 11673746828,
+      "artifact_archive_digest": "sha256:0755a0422f60cfae30935641d7d0d0882fe2f0de75a1c2dfafefd8016f339ffb",
+      "original_safe_receipt_sha256": "5603db65cc2ab3ebd5405572afb88679ad5eb3f3e85708f0a63225dfc44115dd",
+      "consumer_image": "sha256:78fb3e76a9017a73c313486ce0801bde395cf44c8405e8a853deb18b2252aa28",
+      "baseline_image": "sha256:164ee69bdaede6c0f3bdf53467d40115ed0e4b9bd74eb90117a2c68947680cde",
+      "postgres_image": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+      "migration": "v2-to-v3",
+      "original_legacy_fixture_count": 5
+    },
+    {
+      "name": "acceptance-ubuntu-24.04-pg16",
+      "architecture": "x86_64",
+      "postgres_major": 16,
+      "job_url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170/job/114240101498",
+      "source_tests_passed": 522,
+      "acceptance_tests_passed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "verified_cleanup_checks": 8,
+      "payload_audit": "verified",
+      "artifact_id": 11673158296,
+      "artifact_archive_digest": "sha256:084bc54915d0a893d5cc89c97a678f38c889440fa4545077a7f168fcec31292c",
+      "original_safe_receipt_sha256": "cf2cb7d8aa23f4eece7ae977803c2184bbe38d7ee5fee22f1ca0b9528ff1011e",
+      "consumer_image": "sha256:e54bcd5807d5e3323d167bbb87c4b6da4bd9085efca910a94ba4fef443186f38",
+      "baseline_image": "sha256:fe076cf40de7c520301df68ba30861fd54f881e7328ae3cf4de910f7886731d3",
+      "postgres_image": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d",
+      "migration": "v2-to-v3",
+      "original_legacy_fixture_count": 5
+    },
+    {
+      "name": "acceptance-ubuntu-24.04-pg18",
+      "architecture": "x86_64",
+      "postgres_major": 18,
+      "job_url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170/job/114240101490",
+      "source_tests_passed": 522,
+      "acceptance_tests_passed": 215,
+      "failed": 0,
+      "skipped": 0,
+      "verified_cleanup_checks": 8,
+      "payload_audit": "verified",
+      "artifact_id": 11672948440,
+      "artifact_archive_digest": "sha256:8800f107173104759ff9b01cc4a8be07012118a189909afc47824d9f42d31312",
+      "original_safe_receipt_sha256": "beb5452a875b020a5ff609ce828b0304bbbe3409395b09963ecaf05379bff046",
+      "consumer_image": "sha256:f67ea2c9f249d46b1cae1cf9fcd42549faa08a469c68bfda3cfa9606a49ee458",
+      "baseline_image": "sha256:2e1ee9effa04f3579e485c76a8595df9f23bab3f575e786fe111c06698102f78",
+      "postgres_image": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+      "migration": "v2-to-v3",
+      "original_legacy_fixture_count": 5
+    }
+  ],
+  "local_lab_checks": {
+    "source_tests_passed": 522,
+    "installed_app_focused_tests_passed": 153,
+    "immutable_source_archive_focused_tests_passed": 153,
+    "module_byte_parity_count": 50,
+    "public_build_input_byte_parity_count": 78,
+    "original_legacy_asset_byte_parity_count": 5
+  },
+  "limits": [
+    "candidate artifacts; ordinary public-index installation remains unverified",
+    "synthetic bounded capacity and logical restore fixture only",
+    "no live provider, real customer billing, deployment staging, long soak, HA or PITR certification"
+  ]
+}

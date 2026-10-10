@@ -4,6 +4,12 @@ Checkpoint: 2026-10-10. The released application remains Lab **0.2.0**. The
 `codex/ecosystem-production` branch implements the next ecosystem milestones;
 public SDK publication and Lab 0.3.0 adoption are pending.
 
+The candidate train passed all four required native Linux cells in
+[run 38061354170](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170),
+at Lab source `0feb56b02f4c3dfb21c8fe7487bd1d3216e86dec`. See the
+[current verification ledger](verification/ecosystem-production-2026-10-10.md)
+for exact artifacts, counts, image identities and publication prerequisites.
+
 Start with [native workflow usage](native-workflows.md), [persistence and
 migration](persistence.md), [required release gates](release-gates.md) and
 [bounded operational qualification](qualification.md). The
@@ -88,34 +94,35 @@ original billing and bundle identity; an uncertain start or effect needs explici
 operator reconciliation. The native fixture tests also cover incurred usage,
 provider/tool budgets, receipt adoption and independent SQL effect uniqueness.
 
-The complete local candidate source suite passed **497 tests** after the final
-choice-transport correction. The corrected installed application and an exact
-committed source archive each passed **89 focused tests** with the five original
-qualified SDK wheels. The subsequent CI PATH correction has its own real
-installed-CLI regression. Source/archive/wheel/installed parity covers 50 Python
+The complete candidate source suite passed **522 tests**, locally and in each
+native CI cell. The installed application and an exact committed source archive
+each passed **153 focused tests** with the five original qualified SDK wheels.
+Source/archive/wheel/installed parity covers 50 Python
 modules, 78 public build inputs and the five original retained legacy assets.
 
-The initial four-cell candidate run
-[38055696518](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38055696518)
-verified all five SDK artifacts but failed before container testing because CI
-had not selected the installed `prosaic` command. The corrected run
-[38055931623](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38055931623)
-is the current qualification attempt. A started run is not a successful result.
-Required cells are Linux AMD64/ARM64 × PostgreSQL 16/18, using the original Lab
-0.2.0 implementation to generate upgrade fixtures. Local Docker preflight timed
-out at its 15-second bound; no local native success is inferred.
+The successful matrix ran **215 acceptance cases in each of four cells**, Linux
+AMD64/ARM64 × PostgreSQL 16/18: **860 cases**, zero failures or skips, with all
+**32 lane cleanup and payload/provenance gates verified**. Its eight lanes cover
+audit, identity, ingress, Lago, native SQL persistence, native HTTP/effect
+recovery, original-release upgrade and bounded operational qualification.
+The original Lab 0.2.0 implementation generated five durable upgrade fixtures
+per cell; all ten recovery assertions passed after explicit schema v2→v3 migration.
+Earlier failed attempts are retained in the verification ledger. Local Docker
+preflight timed out at its 15-second bound; the passing native evidence comes
+from the hosted CI runners.
 
 ## Publication and deployment boundaries
 
-The GitHub `pypi` environments and tag restrictions are configured. An authorized
-PyPI owner must register all five pending publishers using owner `B3Cognition`,
+The GitHub `pypi` environments and tag restrictions are configured. Pending
+publisher registration is not publicly visible. An authorized PyPI owner must
+verify or create all five publishers using owner `B3Cognition`,
 workflow `publish.yml` and environment `pypi`: Core in repository `prosaic`,
 Runtime and its adapter in `prosaic-runtime`, Harness and its adapter in
 `prosaic-harness`. Follow the
 [SDK package-channel guide](https://github.com/B3Cognition/prosaic/blob/codex/ecosystem-production/docs/package-index.md).
 No long-lived token is needed in chat.
 
-After the candidate lab gate and owner registration succeed, promotion publishes
+The candidate lab gate has succeeded. After registration is confirmed, promotion publishes
 the original qualified bytes in dependency order: Core, Runtime/recorder,
 Harness/store. Both GitHub and index downloads must match the receipts. Lab
 0.3.0 then adopts verified public pins, builds a fresh consumer and reruns all

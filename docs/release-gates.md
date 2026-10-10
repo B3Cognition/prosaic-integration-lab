@@ -1,7 +1,7 @@
 # Required release gates
 
 CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
-`native`, `legacy-upgrade` and `qualification` lanes
+`native-persistence`, `native`, `legacy-upgrade` and `qualification` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload
@@ -81,7 +81,11 @@ fixes. The original 0.6 baseline is preserved in
 historical evidence. Local candidate receipts cannot authorize a release.
 Current released-mode evidence is recorded in
 [the release ledger](verification/release-train-2026-10-09.md), with final native
-results in the GitHub release notes. Repository rules must still require the
+results in the GitHub release notes. The unpublished SDK train's successful
+eight-lane matrix is recorded separately in
+[the candidate verification ledger](verification/ecosystem-production-2026-10-10.md);
+Lab 0.3.0 must rerun the matrix against verified public pins.
+Repository rules must still require the
 four matrix checks for future protected merges; publication does not configure
 branch protection.
 

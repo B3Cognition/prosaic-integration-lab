@@ -47,13 +47,15 @@ counts reconciled against public recorder deltas. Reaching a budget with unknown
 usage never becomes reconciliation success. `stress` retains its existing
 correctness/SLO fields and overload policy.
 
-Recovery seeds waiting normal and unknown-usage fixtures and durable sequence/time
-markers, takes a consistent `pg_dump`, stops one exact owned replica to simulate
+Recovery seeds a waiting normal fixture, a blocked unknown-usage fixture and
+durable sequence/time markers, takes a consistent `pg_dump`, stops one exact owned replica to simulate
 loss, and restores into a second database on the owned primary. RTO runs from
 simulated loss through verified restored readiness. RPO compares the last
 acknowledged marker to the last restored acknowledged marker; missing or
 inconsistent marker/time evidence fails. Restored public owner views, revisions,
-review/choices and unknown usage must match; independent model counts must remain
+review/choices and unknown usage must match. The finite-budget unknown-usage
+block and its revision survive restore; approval cannot clear that block.
+Independent model counts must remain
 unchanged through restore. No run starts or resumes during restoration. This is
 logical backup/restore evidence for that fixture/profile, not HA, PITR or actual
 primary destruction. Private dump and DSNs remain in the private owned directory

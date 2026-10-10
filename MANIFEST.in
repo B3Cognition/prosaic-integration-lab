@@ -8,6 +8,7 @@ include configs/alerts.example.yml configs/auth0.example.json configs/oidc.examp
 include containers/Dockerfile containers/Candidate.Dockerfile
 recursive-include dependencies *.json *.lock
 recursive-include docs *.md
+include docs/verification/ecosystem-production-2026-10-10.json
 recursive-include scripts *.py
 recursive-include tests *.py *.json *.yml *.md
 global-exclude __pycache__ *.py[cod]
