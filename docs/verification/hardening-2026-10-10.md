@@ -78,12 +78,16 @@ remain unchanged. The earlier candidate manifest SHA256 remains
 
 Runtime [38077973408](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38077973408)
 at source `bfcb3e82e38f9b95c2c8d03e11503882246fd45c` failed two macOS Python
-3.13 HTTP-timeout fixtures. A 30 ms invocation budget legitimately expired
-during preparation before dispatch, so the fixture's one-request expectation
-was invalid. The final source adjusts only that fixture to a 500 ms budget and
-1.5 s provider delay, asserting one actual attempt and elapsed time below one
-second. Production timeout checks, retry behavior, selectors and skips were
-unchanged. The failed run is preserved and is not selected by the recipe.
+3.13 HTTP-timeout fixtures. Those CI logs reported zero server requests but did
+not print actual attempts, so they do not establish whether preparation exhausted
+the 30 ms budget or loopback delivery was delayed. A controlled reproduction
+with 50 ms of preparation verified zero actual attempts after that budget
+expired. This demonstrates a valid preparation-expiry path; no production
+defect was demonstrated by the original CI failure. The final source adjusts
+only that fixture to a 500 ms budget and 1.5 s provider delay, asserting one
+actual attempt and elapsed time below one second. Production timeout checks,
+retry behavior, selectors and skips were unchanged. The failed run is preserved
+and is not selected by the recipe.
 
 Sandbox-only verification failures are retained privately: the historical
 `.venv` lacks current public SDK APIs; restricted loopback binds and PyPI DNS
