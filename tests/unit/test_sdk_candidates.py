@@ -11,9 +11,13 @@ def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan
 
 @pytest.fixture
 def candidate_set(tmp_path):
-    from scripts.prepare_sdk_candidates import EXPECTED
+    # This fixture describes the independently selected hardening artifacts.
+    expected_versions={
+        'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
+        'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1'},
+        'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}}
     candidates=[]
-    for index,(repository,expected) in enumerate(EXPECTED.items()):
+    for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
         artifacts=[]
         for name,version in expected.items():

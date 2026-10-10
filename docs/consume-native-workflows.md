@@ -10,7 +10,9 @@ the five original qualified SDK candidate wheels, builds a clean consumer and
 exercises the actual HTTP service with synthetic inference and owned PostgreSQL.
 The candidate profile is [dependencies/sdk-candidates.json](../dependencies/sdk-candidates.json).
 It selects successful SDK qualification runs and exact source commits rather
-than mutable SDK branches. Public-index release and Lab 0.3.0 remain pending;
+than mutable SDK branches. The patch recipe uses `.cache/sdk-hardening/manifest.json`
+and a fresh `.venv-hardening` environment; previous candidate evidence stays
+under its original manifest and receipts. Public-index release and Lab 0.3.0 remain pending;
 see [current status](current-status.md). Actions artifacts have 90-day retention.
 
 ## What the client sends
@@ -75,11 +77,11 @@ authorization. Canonical prose validation checks structure, while the host
 policy and execution limits enforce capability access.
 
 The detailed SDK contract is in the qualified
-[Harness workflow factory guide](https://github.com/B3Cognition/prosaic-harness/blob/5b1e2bc0f56041122014a70e5865ff925e6559ab/docs/workflow-factory.md).
+[Harness workflow factory guide](https://github.com/B3Cognition/prosaic-harness/blob/cba77d09d1844ff624911295aecd58021b457c08/docs/workflow-factory.md).
 Its examples cover trusted in-memory assembly, composition, inline agents,
 retained bundles, input snapshots, structured human interaction and contextual
 tools. See the qualified
-[Runtime accounting guide](https://github.com/B3Cognition/prosaic-runtime/blob/da3b43e12027b78d60b846c427021559b4927ba4/docs/accounting.md)
+[Runtime accounting guide](https://github.com/B3Cognition/prosaic-runtime/blob/3566731c39a3fff2837acd93a96baa2187764206/docs/accounting.md)
 for usage and invocation scope, and the Lab
 [persistence guide](persistence.md) for explicit schema migration and separate
 database roles.

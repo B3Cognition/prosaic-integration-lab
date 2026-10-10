@@ -13,6 +13,9 @@ records the exact qualified SDKs and release evidence.
 ## Try the native workflow
 
 This branch consumes the five original qualified `b3-prosaic` candidate wheels.
+The patch train contains seven upstream reliability fixes. Its setup uses a new
+environment and `.cache/sdk-hardening/manifest.json`, preserving the earlier
+candidate manifest and verification receipts.
 Public package-index publication is blocked by PyPI publisher setup; Lab 0.3.0
 has not been released. The explicit candidate path below works independently of
 that publication step. Python imports and CLI names remain unchanged.
@@ -25,20 +28,20 @@ accepted by the runner but is not a verified path here.
 ```sh
 git clone --branch codex/ecosystem-production https://github.com/B3Cognition/prosaic-integration-lab.git
 cd prosaic-integration-lab
-python3.12 -m venv .venv-candidate
-.venv-candidate/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
-.venv-candidate/bin/python scripts/prepare_sdk_candidates.py \
+python3.12 -m venv .venv-hardening
+.venv-hardening/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+.venv-hardening/bin/python scripts/prepare_sdk_candidates.py \
   --profile dependencies/sdk-candidates.json \
-  --manifest .cache/sdk-candidate/manifest.json
-.venv-candidate/bin/python scripts/install_dependencies.py --manifest .cache/sdk-candidate/manifest.json
-.venv-candidate/bin/python scripts/audit_install.py --manifest .cache/sdk-candidate/manifest.json
-.venv-candidate/bin/python -m pip check
-export PATH="$PWD/.venv-candidate/bin:$PATH"
-.venv-candidate/bin/python scripts/build_consumer.py \
-  --manifest .cache/sdk-candidate/manifest.json --dependency-mode candidate \
+  --manifest .cache/sdk-hardening/manifest.json
+.venv-hardening/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
+.venv-hardening/bin/python scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
+.venv-hardening/bin/python -m pip check
+export PATH="$PWD/.venv-hardening/bin:$PATH"
+.venv-hardening/bin/python scripts/build_consumer.py \
+  --manifest .cache/sdk-hardening/manifest.json --dependency-mode candidate \
   --tag prosaic-integration-lab:candidate
-.venv-candidate/bin/python -m lab_runner demo --mode native \
-  --candidate --candidate-manifest .cache/sdk-candidate/manifest.json \
+.venv-hardening/bin/python -m lab_runner demo --mode native \
+  --candidate --candidate-manifest .cache/sdk-hardening/manifest.json \
   --postgres-version 16
 ```
 
@@ -46,11 +49,11 @@ The profile selects these exact original artifacts:
 
 | Distribution | Version |
 | --- | --- |
-| `b3-prosaic` | 0.4.0 |
-| `b3-prosaic-runtime` | 0.8.0 |
-| `b3-prosaic-runtime-postgres` | 0.2.0 |
-| `b3-prosaic-harness` | 0.7.0 |
-| `b3-prosaic-harness-postgres` | 0.2.0 |
+| `b3-prosaic` | 0.4.1 |
+| `b3-prosaic-runtime` | 0.8.1 |
+| `b3-prosaic-runtime-postgres` | 0.2.1 |
+| `b3-prosaic-harness` | 0.7.1 |
+| `b3-prosaic-harness-postgres` | 0.2.1 |
 
 Preparation verifies successful source-specific SDK qualification, original
 wheel/source hashes and embedded upstream receipts. Installation uses only those
@@ -96,16 +99,16 @@ estimates and two-replica approval. The HTML/JSON reports survive verified
 teardown; `--open-report` opens the saved accounting report.
 
 ```sh
-.venv-candidate/bin/python -m lab_runner demo \
-  --candidate --candidate-manifest .cache/sdk-candidate/manifest.json \
+.venv-hardening/bin/python -m lab_runner demo \
+  --candidate --candidate-manifest .cache/sdk-hardening/manifest.json \
   --postgres-version 16 --open-report
 ```
 
 For a bounded multiuser terminal workload:
 
 ```sh
-.venv-candidate/bin/python -m lab_runner run \
-  --candidate --candidate-manifest .cache/sdk-candidate/manifest.json \
+.venv-hardening/bin/python -m lab_runner run \
+  --candidate --candidate-manifest .cache/sdk-hardening/manifest.json \
   --postgres-version 16 --users 10 --runs-per-user 20 --concurrency 2
 ```
 
@@ -113,7 +116,7 @@ Its first line prints a command for another terminal. Copy that command, or use
 the printed exact ownership directory:
 
 ```sh
-.venv-candidate/bin/python -m lab_runner watch \
+.venv-hardening/bin/python -m lab_runner watch \
   --directory .lab/PRINTED_OWNER_ID --stream accounting
 ```
 
@@ -122,7 +125,7 @@ Use `--stream requests` for HTTP operation/status/latency events. The workload
 checks foreign-owner isolation and reconciles independent provider counters with
 recorded calls; it is a closed-loop fixture, not an arrival-rate benchmark.
 See [capacity and retention](docs/capacity-retention.md) and the
-[SDK accounting contract](https://github.com/B3Cognition/prosaic-runtime/blob/da3b43e12027b78d60b846c427021559b4927ba4/docs/accounting.md).
+[SDK accounting contract](https://github.com/B3Cognition/prosaic-runtime/blob/3566731c39a3fff2837acd93a96baa2187764206/docs/accounting.md).
 These demonstrations make no real-model calls or customer charges.
 
 ## Run the required acceptance gates
@@ -130,11 +133,11 @@ These demonstrations make no real-model calls or customer charges.
 After candidate setup and image build above:
 
 ```sh
-.venv-candidate/bin/python -m pytest -q
-.venv-candidate/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
-.venv-candidate/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
-.venv-candidate/bin/python scripts/required_acceptance.py \
-  --candidate --candidate-manifest .cache/sdk-candidate/manifest.json \
+.venv-hardening/bin/python -m pytest -q
+.venv-hardening/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+.venv-hardening/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
+.venv-hardening/bin/python scripts/required_acceptance.py \
+  --candidate --candidate-manifest .cache/sdk-hardening/manifest.json \
   --postgres-version 16 --export reports/candidate-pg16.json
 ```
 
@@ -143,7 +146,9 @@ commit. Repeat with PostgreSQL 18. CI separately runs both Linux AMD64 and ARM64
 a local run verifies the actual host architecture. All eight lanes require exact
 counts, zero skips, installed-payload provenance and verified cleanup. See
 [release gates](docs/release-gates.md) and the
-[native adoption ledger](docs/verification/native-adoption-2026-10-10.md).
+[hardening ledger](docs/verification/hardening-2026-10-10.md). The
+[earlier native adoption ledger](docs/verification/native-adoption-2026-10-10.md)
+preserves its original qualification evidence.
 Share the filtered native demo receipt or sanitized gate summaries; private
 `.lab` configurations, raw logs and backups stay local.
 

@@ -17,9 +17,9 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'src'))
 from prosaic_integration_lab.dependencies import cache_directory,file_digest,sdk_manifest,verified_wheel_paths
 
-EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.0'},
-    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.8.0','b3-prosaic-runtime-postgres':'0.2.0'},
-    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.7.0','b3-prosaic-harness-postgres':'0.2.0'}}
+EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
+    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1'},
+    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
