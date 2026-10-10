@@ -52,7 +52,7 @@
 
 L1 and L2 can execute independently. L3 waits for installed public WorkflowBundle/WorkflowReference and ToolClaim contracts; L4 waits for L3 plus Harness H2–H5 and Runtime invocation budgets/context. L5 consumes L1–L4. L6 is last and waits for root-confirmed published artifacts and required native evidence. Shared files, particularly runner CLI/stack, execution and CI, have one active editor at a time.
 
-## L1: Manifest-driven installation and cache-isolated payload audit
+### Task 1: L1 — Manifest-driven installation and cache-isolated payload audit
 
 **Files:** Modify src/prosaic_integration_lab/dependencies.py, scripts/prepare_dependencies.py, scripts/audit_install.py, containers/Dockerfile, containers/Candidate.Dockerfile, lab_runner/stack.py, lab_runner/verify_candidate.py, .github/workflows/required-acceptance.yml and README.md. Create scripts/install_dependencies.py, scripts/build_consumer.py and dependencies/releases-lab-0.2.0.json. Test tests/unit/test_dependencies.py, test_payload_audit.py, test_released_provenance.py and tests/functional/test_dependency_install.py.
 
@@ -131,7 +131,7 @@ The build helper selects the exact manifest copied to dependencies/releases.json
 The prepare/install defaults remain the active releases.json manifest and digest-addressed cache. Preparing a candidate requires an explicit candidate manifest; no fallback to editable sources.
 - [ ] L1.7 Review diff/provenance, record commands and commit only L1 files with message "fix: isolate installed SDK wheels by manifest identity". No pin promotion or external publication occurs here.
 
-## L2: Bounded fairness, soak, restore and staging qualification
+### Task 2: L2 — Bounded fairness, soak, restore and staging qualification
 
 **Files:** Create lab_runner/qualification.py, recovery_qualification.py, staging_qualification.py, configs/qualification.synthetic.json and docs/qualification.md. Modify lab_runner/load_profile.py, model.py, __main__.py, stack.py, docs/capacity-retention.md, persistence.md, identity.md and ingress.md. Test tests/unit/test_qualification.py, test_recovery_qualification.py, test_staging_qualification.py; tests/functional/test_qualification_cli.py; tests/acceptance/test_operational_qualification.py.
 
@@ -200,7 +200,7 @@ Private staging configuration supplies exact HTTPS approved origins, private tok
 Record actual latency/growth/fairness/RPO/RTO, profile and immutable image/manifest identities, bounded workload and verified cleanup. Soak uses a separate explicit profile; default CI uses short deterministic cases. No qualify-staging command with real configuration runs as part of this task.
 - [ ] L2.8 Commit reviewed L2 files with message "feat: add bounded operational qualification profiles".
 
-## L3: Schema v3, immutable proposals, retained bundles and business journal
+### Task 3: L3 — Schema v3, immutable proposals, retained bundles and business journal
 
 **Files:** Create src/prosaic_integration_lab/proposals.py, bundles.py, tool_journal.py. Modify app_schema.py, migrations.py, metadata.py, config.py, scripts/provision.py, lab_runner/__main__.py and stack.py. Test tests/unit/test_proposals.py, test_bundles.py, test_tool_journal.py, test_app_schema.py, test_migrations.py; tests/acceptance/test_native_persistence.py and test_tool_journal.py.
 
@@ -288,7 +288,7 @@ Claim uses INSERT ON CONFLICT DO NOTHING, an opaque random fencing token and tra
 
 Add native-persistence mode to runner using only test_native_persistence.py and test_tool_journal.py and the same owned provisioning/cleanup path. Test runtime role migration denial, same-scope concurrent claims, changed signatures, lost acknowledgement, oversized/post-effect-invalid results and unchanged uncertain rows. Record evidence and commit L3 files with message "feat: persist admitted proposals and fenced tool operations".
 
-## L4: Native catalogue/proposal/run routes and generic human views
+### Task 4: L4 — Native catalogue/proposal/run routes and generic human views
 
 **Files:** Create src/prosaic_integration_lab/native_execution.py, assets/native/agents/finder.md, reviewer.md and schemas/found.json, reviewed.json, decision.json; configs/native.example.json; docs/native-workflows.md. Modify app.py, http_guard.py, execution.py, config.py, views.py, observability.py and lab_runner/model.py. Test tests/unit/test_native_execution.py, test_native_views.py; tests/functional/test_native_http.py, test_http_auth.py, test_start_admission.py and test_http_guard.py.
 
@@ -352,7 +352,7 @@ Keep /runs StartRequest workflow Literal approval|synthetic and its legacy task 
 
 Tests include tenant projection, zero-callback admission, composition/inline independence, omitted host-default tier, configured+allowed explicit tiers, input copy ownership, proposal-key replay under changed policy, body/key limits, private sentinels, invalid/stale human choices and current revocation before native start/resume. Commit reviewed L4 files with message "feat: serve owner-scoped generated native workflows".
 
-## L5: Required native service and actual legacy release upgrade acceptance
+### Task 5: L5 — Required native service and actual legacy release upgrade acceptance
 
 **Files:** Create lab_runner/native_scenarios.py, legacy_upgrade.py; tests/acceptance/test_native_workflows.py, test_native_effect_recovery.py, test_legacy_release_upgrade.py; tests/unit/test_legacy_upgrade.py and test_native_gate.py. Modify lab_runner/stack.py, model.py, gates.py, __main__.py, scripts/required_acceptance.py, .github/workflows/required-acceptance.yml, MANIFEST.in and docs/release-gates.md.
 
@@ -415,7 +415,7 @@ Drain/stop baseline replicas before schema migration. Retain exact legacy assets
 Root dispatches required four-cell native CI after review. Local architecture success cannot stand in for another architecture. No paid provider lane or shared staging configuration is required for these gates.
 - [ ] L5.8 Commit reviewed L5 files with message "test: qualify native workflows and released legacy upgrades". Preserve baseline manifest/images and receipts independently of active SDK cache.
 
-## L6: Published dependency adoption and current delivery evidence
+### Task 6: L6 — Published dependency adoption and current delivery evidence
 
 **Files:** Modify dependencies/releases.json, pyproject.toml, MANIFEST.in, README.md, docs/handoff.md, release-gates.md, capacity-retention.md, persistence.md, recovery.md, identity.md and ingress.md. Create docs/current-status.md and docs/verification/ecosystem-production-2026-10-10.md. Add sanitized JSON receipts only after actual executions. Tests: tests/unit/test_released_provenance.py and test_release_gates.py; source/wheel installed checks.
 
