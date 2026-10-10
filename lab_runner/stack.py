@@ -382,6 +382,24 @@ class OwnedStack:
             time.sleep(0.2)
 
     def stop(self):
+        # Acceptance and recovery subprocesses can register fresh workers. The
+        # durable inventory is authoritative; never overwrite it with this
+        # process's older snapshot or omit its still-attached resources.
+        current=json.loads((self.directory/'ownership.json').read_text())
+        resources=current.get('resources') if type(current) is dict else None
+        if (type(current) is not dict or current.get('owner')!=self.owner or
+            current.get('engine')!=self.engine or type(resources) is not list or
+            any(type(item) is not dict or set(item)!={'kind','id'} or
+                item['kind'] not in {'container','volume','network'} or
+                type(item['id']) is not str or not item['id'] for item in resources) or
+            any(item not in resources for item in self.manifest['resources'])):
+            raise ValueError('durable resource ownership mismatch; refusing mutation')
+        pending=current.get('pending_resources',[])
+        if (type(pending) is not list or any(type(item) is not dict or set(item)!={'kind','name'} or
+            item['kind'] not in {'container','volume','network'} or
+            type(item['name']) is not str or not item['name'] for item in pending)):
+            raise ValueError('invalid durable resource intention; refusing mutation')
+        self.manifest=current
         failures = []
         try:
             self._reconcile_intents()

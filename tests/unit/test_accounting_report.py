@@ -31,3 +31,24 @@ def test_report_sums_decimal_estimates_and_counts_independent_dispatches(tmp_pat
     path = write_report(report, tmp_path)
     assert '$0.000740' in path.read_text()
     assert '2 / 2' in path.read_text()
+def test_accounting_snapshot_preserves_all_evidence_except_report_time():
+    import copy
+    import pytest
+    from lab_runner import accounting_report
+    from prosaic_integration_lab.views import public_usage
+    report=public_usage({'version':1,'total_calls':2,'complete_calls':1,'unresolved_calls':1,
+        'quarantined_calls':0,'unsupported_calls':0,'partial_calls':0,
+        'unavailable_assessment_calls':0,'excluded_resources':[],
+        'estimated_amounts':{'USD':'0.00037'},'coverage':{'known':1},'fully_costed':False,
+        'billing_eligible':False,'as_of':'2026-10-10T10:00:00+00:00'})
+    later=copy.deepcopy(report);later['as_of']='2026-10-10T10:00:01+00:00'
+    assert report!=later
+    assert accounting_report.accounting_snapshot(report)==accounting_report.accounting_snapshot(later)
+    for key,value in [('total_calls',3),('unresolved_calls',0),('estimated_amounts',{}),
+                      ('fully_costed',True),('coverage',{}),('billing_eligible',True)]:
+        changed=copy.deepcopy(later);changed[key]=value
+        assert accounting_report.accounting_snapshot(report)!=accounting_report.accounting_snapshot(changed)
+    for timestamp in (None,'private','2026-10-10T10:00:01'):
+        changed=copy.deepcopy(later);changed['as_of']=timestamp
+        with pytest.raises(ValueError):accounting_report.accounting_snapshot(changed)
+    assert report['as_of']=='2026-10-10T10:00:00+00:00'

@@ -69,3 +69,19 @@ def test_qualification_failures_export_closed_cases_from_sanitized_junit(tmp_pat
     item['failed_tests']=['test_real_fairness_reads_growth_and_usage_are_measured[PRIVATE]']
     assert export(item)['failed_cases']==['unknown']
     assert 'PRIVATE' not in json.dumps(export(item))
+
+
+@pytest.mark.parametrize('mode,names,codes',[
+    ('native',['test_native_saved_receipt_adoption_durable_usage_and_no_duplicate_provider',
+        'test_worker_loss_claim_effect_commit_never_infers_redispatch[tool-effect-1-uncertain]',
+        'test_worker_loss_claim_effect_commit_never_infers_redispatch[PRIVATE]','PRIVATE'],
+        ['effect_recovery','saved_receipt','unknown']),
+    ('legacy-upgrade',['test_original_synthetic_waiting_recovers_exact_frozen_accounting',
+        'test_original_missing_usage_stays_unknown_after_approval','PRIVATE'],
+        ['legacy_unknown_usage','legacy_waiting','unknown'])])
+def test_workflow_failure_codes_only_match_fixed_owned_cases(mode,names,codes):
+    import json
+    item=receipt();item.update(mode=mode,failed_tests=names,passed=False,test_returncode=1)
+    safe=export(item)
+    assert safe['failed_cases']==codes and safe['passed'] is False
+    assert 'PRIVATE' not in json.dumps(safe)

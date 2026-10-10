@@ -82,12 +82,14 @@ def run(stack,profile):
     with httpx.Client(timeout=15,follow_redirects=False) as client:
         client.post(config['model']+'/control',json={'maximum_calls':2}).raise_for_status()
         try:
-            for scenario in ('normal','missing_usage'):
+            for scenario,status in (('normal','waiting'),('missing_usage','blocked')):
                 client.post(config['model']+'/control',json={'scenario':scenario,'preserve_allowance':True}).raise_for_status()
                 response=client.post(config['a']+'/runs',headers={**headers,'Idempotency-Key':uuid.uuid4().hex},
                     json={'workflow':'synthetic','task':'Neutral logical restore fixture'})
                 response.raise_for_status();state=response.json()
-                if state['status']!='waiting':raise ValueError('waiting receipt required')
+                if (state['status']!=status or scenario=='missing_usage' and
+                    state.get('recovery_status')!='usage_reconciliation_required'):
+                    raise ValueError('expected frozen recovery state required')
                 states.append(state)
             evidence['calls_before']=count(client)
             with psycopg.connect(config['migration_dsn'],connect_timeout=5,options='-c statement_timeout=5000') as connection:
@@ -139,7 +141,8 @@ def run(stack,profile):
                 path='/runs/'+state['run_id']
                 view=client.get(config['b']+path,headers=headers);view.raise_for_status();view=view.json()
                 evidence['revision_verified'] &= view['revision']==state['revision']
-                evidence['receipt_verified'] &= (view['status']=='waiting' and view['run_id']==state['run_id'] and
+                evidence['receipt_verified'] &= (view['status']==state['status'] and view['run_id']==state['run_id'] and
+                    view.get('recovery_status')==state.get('recovery_status') and
                     view.get('review')==state.get('review') and view.get('choices')==state.get('choices') and
                     view.get('current_step')==state.get('current_step'))
                 for suffix in ('','/usage'):

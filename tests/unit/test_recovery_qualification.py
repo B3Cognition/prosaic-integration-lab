@@ -80,6 +80,8 @@ def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_pa
         if path=='/stats':return httpx.Response(200,json={'calls':2})
         if path=='/runs':
             state={'status':'waiting','run_id':str(len(states)),'revision':'v1','review':{},'choices':['approve']}
+            if states:
+                state.update(status='blocked',recovery_status='usage_reconciliation_required',review=None,choices=[])
             states.append(state);return httpx.Response(200,json=state)
         if request.url.port!=2002:raise httpx.ConnectError('closed previous ephemeral port',request=request)
         if path=='/readyz':return httpx.Response(200,json={})

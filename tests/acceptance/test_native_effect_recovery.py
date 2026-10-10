@@ -11,6 +11,7 @@ import pytest
 
 from lab_runner.native_scenarios import control,calls,effect_proposal,owned,replace_worker
 from lab_runner.stack import command
+from lab_runner.accounting_report import accounting_snapshot
 from prosaic_integration_lab.tool_journal import PgToolJournal
 from test_native_workflows import http,propose,start,approved_proposal
 from test_recovery import wait_for
@@ -162,7 +163,7 @@ def test_native_invocation_cap_blocks_next_dispatch_and_retains_real_sql_evidenc
         assert original['total_calls']==1 and original['complete_calls']==1 and original['unresolved_calls']==0
         replace_worker(lab)
         assert http(lab,'GET','/runs/'+run['run_id'],worker='b')['status']=='blocked'
-        assert http(lab,'GET','/runs/'+run['run_id']+'/usage',worker='b')==original
+        assert accounting_snapshot(http(lab,'GET','/runs/'+run['run_id']+'/usage',worker='b'))==accounting_snapshot(original)
         assert calls(lab)==before+1
     finally:
         if budget=='provider':replace_worker(lab,native=settings)
@@ -208,7 +209,7 @@ def test_native_saved_receipt_adoption_durable_usage_and_no_duplicate_provider(l
     usage=http(lab,'GET','/runs/'+run_id+'/usage',worker='b')
     assert usage['total_calls']==2 and usage['complete_calls']==2
     replace_worker(lab)
-    assert http(lab,'GET','/runs/'+run_id+'/usage',worker='b')==usage
+    assert accounting_snapshot(http(lab,'GET','/runs/'+run_id+'/usage',worker='b'))==accounting_snapshot(usage)
     assert calls(lab)==before+2
 
 

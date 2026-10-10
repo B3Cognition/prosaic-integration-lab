@@ -8,6 +8,7 @@ import pytest
 
 from lab_runner.legacy_upgrade import BASELINE_COMMIT,BASELINE_SHA256,snapshot
 from lab_runner.native_scenarios import calls,replace_worker
+from lab_runner.accounting_report import accounting_snapshot
 from prosaic_integration_lab.migrations import migrate
 from test_approval import headers
 from test_recovery import wait_for
@@ -64,7 +65,7 @@ def test_original_synthetic_waiting_recovers_exact_frozen_accounting(lab,histori
     row=item(historical,'synthetic');before=calls(lab);original=usage(lab,row)
     assert original['total_calls']==1 and original['complete_calls']==1
     assert resume(lab,row,choice='approve')['status']=='completed'
-    assert usage(lab,row)==original and calls(lab)==before
+    assert accounting_snapshot(usage(lab,row))==accounting_snapshot(original) and calls(lab)==before
 
 
 def test_original_saved_receipt_adopted_by_fresh_worker_without_inference_or_new_receipt(lab,historical):
@@ -83,7 +84,7 @@ def test_original_missing_usage_stays_unknown_after_approval(lab,historical):
     original=usage(lab,row)
     assert original['unresolved_calls']==1 and original['fully_costed'] is False
     assert resume(lab,row,choice='approve')['status']=='completed'
-    assert usage(lab,row)==original and calls(lab)==before
+    assert accounting_snapshot(usage(lab,row))==accounting_snapshot(original) and calls(lab)==before
 
 
 def test_original_starting_dispatch_uncertainty_requires_consent_and_no_retry(lab,historical):

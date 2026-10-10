@@ -3,6 +3,21 @@ from decimal import Decimal
 from html import escape
 import json
 from pathlib import Path
+from datetime import datetime
+
+
+def accounting_snapshot(report):
+    """Compare durable accounting while retaining a valid report-time witness."""
+    timestamp=report.get('as_of')
+    if type(timestamp) is not str:
+        raise ValueError('accounting report time required')
+    try:
+        observed=datetime.fromisoformat(timestamp)
+    except ValueError:
+        raise ValueError('invalid accounting report time') from None
+    if observed.tzinfo is None or observed.utcoffset() is None:
+        raise ValueError('accounting report time must include timezone')
+    return {key:value for key,value in report.items() if key!='as_of'}
 
 
 def write_report(report, directory):
