@@ -72,7 +72,7 @@ def evaluate(profile,observations):
             values['completed']/values['offered'] if values['offered'] else None)
     c=counts
     consistency=(c['completed']+c['approval_deferred']==c['accepted'] and
-        c['accepted']+c['rejected']+c['client_shed']<=c['offered'] and
+        c['accepted']+c['rejected']+c['client_shed']==c['offered'] and
         sum(v['offered'] for v in tenants.values())==c['offered'] and
         sum(v['completed'] for v in tenants.values())==c['completed'])
     reconciled=c['independent_model_calls']==c['ledger_calls']==c['accepted'] and c['unknown_usage']==0

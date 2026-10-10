@@ -76,6 +76,13 @@ def test_wrong_profile_cannot_relabel_success():
     data=observations();data.update(profile_sha256='a'*64)
     assert evaluate(profile(),data)['reason']=='evidence_identity_mismatch'
 
+def test_unclassified_arrivals_cannot_pass_accounting_correctness():
+    from lab_runner.qualification import evaluate
+    data=observations();data.update(accepted=21,completed=19,independent_model_calls=21,ledger_calls=21,
+        latencies_s=[.1]*19)
+    data['tenant_counts']['a']['completed']=19
+    assert evaluate(profile(),data)['correctness_passed'] is False
+
 def test_report_hashes_hostile_labels_and_bounds_maximum_observations():
     from lab_runner.qualification import evaluate
     data=observations();data['tenant_counts']={'secret\n<script>':{'offered':22,'completed':20}}
