@@ -26,8 +26,10 @@ def test_real_fairness_reads_growth_and_usage_are_measured(lab):
 def test_real_restore_cli_reports_measured_markers_and_verified_cleanup(lab,tmp_path):
     manifest=json.loads(Path(lab['fixture_manifest']).read_text())
     profile=tmp_path/'restore-profile.json';profile.write_text(json.dumps(short_profile()))
-    process=subprocess.run([sys.executable,'-m','lab_runner','qualify-recovery','--profile',str(profile),
-        '--postgres-version',str(manifest['postgres_major']),'--consumer-image',manifest['images']['consumer']],
+    arguments=[sys.executable,'-m','lab_runner','qualify-recovery','--profile',str(profile),
+        '--postgres-version',str(manifest['postgres_major']),'--consumer-image',manifest['images']['consumer']]
+    if lab.get('dependency_mode')=='candidate':arguments+=['--candidate','--candidate-manifest',lab['candidate_manifest']]
+    process=subprocess.run(arguments,
         capture_output=True,text=True,timeout=300)
     result=next(json.loads(line) for line in process.stdout.splitlines() if line.startswith('{'))
     assert process.returncode==0 and result['qualification']=='qualified'

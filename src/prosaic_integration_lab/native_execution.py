@@ -35,15 +35,15 @@ def approved_proposal():
 def grants(value):
     """Trusted configuration; no request or model data enters this projection."""
     allowed = {'bundle_version','composition','inline','agents','schemas','validators','model_tiers',
-               'review_outputs','response_schema'}
+               'review_outputs','response_schema','tools'}
     if type(value) is not dict or set(value) - allowed:
         raise ValueError('invalid native configuration')
     result = {'composition':False,'inline':False,'agents':['finder','reviewer'],
         'schemas':['found','reviewed','decision'],'validators':['approved'],'model_tiers':[],
-        'review_outputs':False,'response_schema':False, **value}
+        'review_outputs':False,'response_schema':False,'tools':[], **value}
     for name in ('composition','inline','review_outputs','response_schema'):
         if type(result[name]) is not bool: raise ValueError('invalid native configuration')
-    for name in ('agents','schemas','validators','model_tiers'):
+    for name in ('agents','schemas','validators','model_tiers','tools'):
         if type(result[name]) is not list or any(type(v) is not str for v in result[name]):
             raise ValueError('invalid native configuration')
     return result
@@ -60,8 +60,12 @@ class NativeExecution:
         if type(native) is not dict or set(native) != {'bundles','tenants'} or not native['bundles']:
             raise ValueError('invalid native configuration')
         for definition in native['bundles']:
-            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets'}:
+            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version'}:
                 raise ValueError('invalid native configuration')
+            if type(definition.get('fixture_effects',False)) is not bool:
+                raise ValueError('invalid native configuration')
+            if definition.get('fixture_effect_version','v1') not in {'v1','v2'}:
+                raise ValueError('invalid fixture semantic version')
             material = self.material(definition)
             # Historical grants travel with each retained host bundle. Never rebuild
             # an old identity using mutable current tenant grants on a fresh worker.
@@ -89,31 +93,80 @@ class NativeExecution:
             agents[alias] = ProsaicArtifact.from_inspection({'id':f'native/agents/{alias}.md',
                 'type':'subagent','frontmatter':{'name':alias,'description':f'Synthetic {alias}',
                 'tools':[]},'body':(directory/'agents'/f'{alias}.md').read_text()})
+        effects=definition.get('fixture_effects',False)
+        if effects:
+            if not self.host.config.get('fixture_events_url') or not definition.get('journal_identity'):
+                raise ValueError('fixture effects require explicit fixture bindings')
+            agents['effecter']=ProsaicArtifact.from_inspection({'id':'native/agents/effecter.md',
+                'type':'subagent','frontmatter':{'name':'effecter','description':'Synthetic domain operation',
+                'tools':['fixture_apply']},'body':'ALWAYS execute fixture_apply once, then return the request entity_id as JSON.'})
         schemas = {name:json.loads((directory/'schemas'/f'{name}.json').read_text())
             for name in ('found','reviewed','decision')}
+        tools=self.effect_tools(definition.get('fixture_effect_version','v1')) if effects else {}
         catalog = WorkflowCatalog(agents=agents,schemas=schemas,public_metadata={
             'agents':{name:{'description':f'Synthetic {name} fixture'} for name in agents},
             'schemas':{name:{'description':f'Closed synthetic {name} value'} for name in schemas},
             'validators':{'approved':{'description':'Synthetic approved flag check'}}})
         config = RuntimeConfig({'fixture':EndpointConfig(definition['model_url'],'test-model',
-            features={'streaming':False})},definition.get('routes',{}),'fixture')
+            features={'streaming':False})},definition.get('routes',{}),'fixture',
+            allowed_tools=frozenset(tools))
         journal = None
         if 'journal_identity' in definition:
             from .tool_journal import PgToolJournal
             journal = PgToolJournal(self.host.config['app_dsn'],identity=definition['journal_identity'])
-        bindings = WorkflowBindings(config=config,custom_tools={},validators={'approved':Validator('1.0.0',approved)},
+            if effects:
+                native=self
+                class FixtureJournal(PgToolJournal):
+                    def claim(self,*args):
+                        result=super().claim(*args)
+                        if result.state=='new':native.effect_event('tool-claimed')
+                        return result
+                    def commit(self,*args):
+                        super().commit(*args)
+                        native.effect_event('tool-committed')
+                journal=FixtureJournal(self.host.config['app_dsn'],identity=definition['journal_identity'])
+        bindings = WorkflowBindings(config=config,custom_tools=tools,validators={'approved':Validator('1.0.0',approved)},
             operation_namespace=definition['operation_namespace'],tool_journal=journal)
         return catalog, bindings
+
+    def effect_event(self,name):
+        import httpx
+        result=httpx.post(self.host.config['fixture_events_url']+'/'+name,timeout=35)
+        result.raise_for_status()
+
+    def effect_tools(self,version):
+        from prosaic_runtime import CustomTool
+        def business_key(arguments,context):
+            # Trusted SDK scope identifies an already owner-authorized reservation.
+            with self.host.metadata.connection() as connection:
+                row=connection.execute('SELECT request FROM lab_app.runs WHERE run_id=%s',
+                    (context.scope.run_id,)).fetchone()
+            entity=row['request']['inputs']['entity_id']
+            return bounded_text(entity)
+        def apply(arguments,context):
+            self.effect_event('tool-handler')
+            with self.host.metadata.connection() as connection:
+                connection.execute('''INSERT INTO lab_fixture.effects(namespace,business_key,amount)
+                    VALUES (%s,%s,%s)''',(context.scope.operation_namespace,context.operation_key,
+                        arguments['amount']*(2 if version=='v2' else 1)))
+            self.effect_event('tool-effect')
+            return {'applied':True}
+        return {'fixture_apply':CustomTool('fixture_apply','Synthetic owned consequential operation',
+            {'type':'object','properties':{'amount':{'type':'integer','minimum':1,'maximum':2}},
+             'required':['amount'],'additionalProperties':False},apply,'fixture-domain-'+version+'-key-resolver-v1',
+            with_context=True,operation_key=business_key,max_result_bytes=4096)}
 
     @staticmethod
     def factory(material, setting):
         catalog, bindings = material
         policy = WorkflowPolicy(allowed_agents=frozenset(setting['agents']),allowed_schemas=frozenset(setting['schemas']),
+            allowed_tools=frozenset(setting['tools']),
             allowed_validators=frozenset(setting['validators']),allowed_model_tiers=frozenset(setting['model_tiers']),
             allow_agent_composition=setting['composition'],allow_inline_agents=setting['inline'],
             max_proposal_bytes=65536,max_run_input_bytes=4096,max_human_response_bytes=8192,
             max_calls=3,max_tokens=4096,max_run_s=120,timeout_s=30,max_attempts=1,
-            max_provider_requests_per_invocation=1,max_tool_calls_per_invocation=0)
+            max_provider_requests_per_invocation=2 if setting['tools'] else 1,
+            max_tool_calls_per_invocation=1 if setting['tools'] else 0)
         return WorkflowFactory(catalog=catalog,bindings=bindings,policy=policy)
 
     def current(self, principal):
@@ -128,7 +181,7 @@ class NativeExecution:
         effective = {**setting}
         for name in ('composition','inline'):
             effective[name] = frozen[name] and setting[name]
-        for name in ('agents','schemas','validators','model_tiers'):
+        for name in ('agents','schemas','validators','model_tiers','tools'):
             effective[name] = sorted(set(frozen[name]) & set(setting[name]))
         # Discovery uses the registered bundle's public immutable material. It
         # never reads changed files or creates a replacement proposal identity.
@@ -168,6 +221,7 @@ class NativeExecution:
             if step.get('kind') == 'agent':
                 alias = step.get('agent')
                 if type(alias) is str and alias not in setting['agents'] and alias not in inline: denied = True
+                if any(tool not in setting['tools'] for tool in step.get('tools',[])):denied=True
             values = step.get('validators',[])
             if type(values) is list and any(name not in setting['validators'] for name in values): denied = True
         # Inline tiers must remain currently authorized independently of composition.
@@ -175,7 +229,9 @@ class NativeExecution:
             for artifact in inline.values():
                 if type(artifact) is not dict: continue
                 fm = artifact.get('frontmatter',{})
-                if type(fm) is dict and 'model_tier' in fm and fm['model_tier'] not in setting['model_tiers']: denied = True
+                if type(fm) is dict:
+                    if 'model_tier' in fm and fm['model_tier'] not in setting['model_tiers']:denied=True
+                    if isinstance(fm.get('tools',[]),list) and any(tool not in setting['tools'] for tool in fm.get('tools',[])):denied=True
         if denied: raise HTTPException(403,'native_access_denied')
         return setting
 

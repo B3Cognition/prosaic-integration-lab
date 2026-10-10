@@ -1,6 +1,7 @@
 # Required release gates
 
-CI runs unit/functional tests and owned `audit`, `identity`, `ingress` and `lago` lanes
+CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
+`native`, `legacy-upgrade` and `qualification` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload
@@ -24,9 +25,39 @@ payload before any database/network/model fixture is allocated. Candidate images
 are rejected in the released lane even when retagged.
 Every lane
 runs even if another fails. Missing/incomplete receipts fail; `--candidate` is
-an explicit local development mode and requires the candidate manifest hash.
-CI has no candidate fallback and never upgrades dependencies to make a red gate
-green. Updating the acceptance suite also requires reviewing its count contract.
+an explicit development mode and requires a complete candidate manifest.
+The optional candidate workflow dispatch requires three successful exact-source
+`Publish SDK` run IDs and source commits. It downloads each original
+`qualified-release` artifact, verifies all wheel/sdist hashes and the exact five
+renamed distributions, and requires Runtime's embedded Core receipt and Harness's
+embedded Core/Runtime receipts to match the chosen upstream candidates. Missing
+cross-repository Actions access fails the candidate job. It uses a separate
+digest cache, manifest and clean image; active and historical release manifests
+remain unchanged. It never substitutes a branch checkout or published URL.
+Updating the acceptance suite also requires reviewing its count contract.
+
+The reviewed collection contracts are audit88, identity20, ingress5, Lago25,
+native37, legacy-upgrade10 and qualification2. Counts must match exactly, with
+zero skips. Native exercises actual HTTP inference, two specialists and artifact
+provenance, check/gate, structured approval, current grants and retained bundles,
+fresh-process receipt adoption, finite budgets and a consequential fixture tool.
+The application owns that fixture's restricted SQL domain table with unique
+namespace/business key; journal claims and commits use real PostgreSQL. Separate
+observable barriers cover claim, handler entry, effect persistence and outcome
+commit, including worker loss and lost acknowledgement. No expiry or automatic
+reconciliation is permitted.
+
+The legacy lane builds immutable Lab0.2.0 commit
+`59752bef3e6b3ffde0ecbf38f34815d184043e20` with the five exact historical wheels
+from `dependencies/releases-lab-0.2.0.json`. Public routes and original critical
+fault gates produce five old states. All old replicas stop before explicit
+application schema v2→v3 migration. New workers use the same owned database and
+the five byte-identical retained historical assets, selected by original
+assets_hash. Original SQL receipts/accounting are compared, never fabricated with
+new serializers. The public summary contains only counts, outcome codes and
+image/manifest/source digests; the private fixture stays under its owned directory.
+An unavailable engine records `not_qualified`; host checks alone prove neither
+PostgreSQL behavior nor either required Linux architecture.
 
 The release manifest now pins Runtime 0.7.0/recorder 0.1.1 and Harness
 0.6.1/store 0.1.1, including schema/grant readiness and atomic lease registration

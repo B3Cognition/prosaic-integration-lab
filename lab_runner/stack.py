@@ -62,7 +62,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,baseline_image=None):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -78,6 +78,8 @@ class OwnedStack:
             import re
             if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
         self.consumer_image = consumer_image
+        self.native_fixture=native
+        self.baseline_image=baseline_image
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
         self.directory.mkdir(parents=True, mode=0o700)
@@ -187,8 +189,18 @@ class OwnedStack:
                 labels.get('io.prosaic.lab.dependency-mode') != mode or
                 (not self.candidate and 'io.prosaic.lab.candidate-manifest' in labels)):
             raise EngineError(f'{mode} image provenance mismatch')
+        if self.baseline_image is not None:
+            from .legacy_upgrade import BASELINE_MANIFEST,validate_baseline
+            validate_baseline(json.loads(command(self.engine,'image','inspect',self.baseline_image))[0],BASELINE_MANIFEST)
         self.manifest['candidate_manifest_sha256' if self.candidate else 'released_manifest_sha256'] = expected
         self.manifest['sdk_manifest_sha256'] = expected
+        if self.candidate:
+            self.manifest['released_manifest_sha256']=hashlib.sha256((ROOT/'dependencies/releases.json').read_bytes()).hexdigest()
+            selected=json.loads(manifest.read_text())
+            lineage=selected.get('candidate_lineage')
+            if lineage is not None:
+                self.manifest['candidate_lineage_sha256']=hashlib.sha256(
+                    (json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest()
         self.manifest['images']['consumer'] = image['Id']
         self._save()
         audit_name = f'prosaic-lab-{self.owner}-payload-audit'
@@ -202,6 +214,17 @@ class OwnedStack:
         command(self.engine,'start','-a',audit_job)
         self.manifest['payload_audit'] = 'verified'
         self._save()
+        if self.baseline_image is not None:
+            from .legacy_upgrade import BASELINE_SHA256,BASELINE_COMMIT
+            name=f'prosaic-lab-{self.owner}-baseline-audit'
+            job=self._create('container',name,'create','--name',name,'--label',
+                f'io.prosaic.lab.owner={self.owner}','--network','none','--read-only','--cap-drop','ALL',
+                '--security-opt','no-new-privileges',self.baseline_image,'python','scripts/audit_install.py',
+                'dependencies/releases.json','/srv/wheels',BASELINE_SHA256)
+            command(self.engine,'start','-a',job)
+            self.manifest.update(baseline_payload_audit='verified',baseline_manifest_sha256=BASELINE_SHA256,
+                                 baseline_source=BASELINE_COMMIT)
+            self.manifest['images']['baseline']=self.baseline_image;self._save()
         images = json.loads((ROOT / 'dependencies/images.json').read_text())
         pg_image = images[f'postgres{self.major}']
         command(self.engine, 'pull', pg_image)
@@ -243,7 +266,12 @@ class OwnedStack:
         self._secret('provision.json', json.dumps({'admin_password': admin, 'roles': credentials}))
         container_config = {'namespace': f'lab-{self.owner}', 'environment': 'sandbox', 'assets': '/srv/lab/assets',
                             'fixture_events_url': 'http://model:8000/events'}
+        if self.native_fixture:
+            from .native_scenarios import native_configuration
+            container_config['native']=native_configuration('effects-'+self.owner)
         host_config = dict(container_config)
+        host_config['dependency_mode']='candidate' if self.candidate else 'released'
+        if self.candidate:host_config['candidate_manifest']=str(self.candidate_manifest.resolve())
         if self.capacity_policy is not None:
             container_config['capacity']=host_config['capacity']=self.capacity_policy
         if self.observability:
@@ -270,8 +298,11 @@ class OwnedStack:
             '--user','0','--read-only','--cap-drop','ALL','--cap-add','DAC_OVERRIDE',
             '--security-opt','no-new-privileges','--pids-limit','128','--memory','512m','-v',
             f'{self.secrets / "provision.json"}:/run/secrets/provision.json:ro',
-            self.manifest['images']['consumer'], 'python', 'scripts/provision.py')
+            self.baseline_image or self.manifest['images']['consumer'], 'python', 'scripts/provision.py')
         command(self.engine, 'start', '-a', provision)
+        if self.native_fixture:
+            from .native_scenarios import provision_effects
+            provision_effects(host_config['migration_dsn'])
         runtime_name = name+'-runtime-config'
         runtime_volume = self._create('volume',runtime_name,'volume','create','--label',
             f'io.prosaic.lab.owner={self.owner}',runtime_name)
@@ -293,7 +324,9 @@ class OwnedStack:
         self._save()
         return self.manifest
 
-    def start_replica(self, name):
+    def start_replica(self, name,*,image=None):
+        if image is not None and image not in {self.manifest['images']['consumer'],self.manifest['images'].get('baseline')}:
+            raise ValueError('unverified replica image')
         replica_name = f'prosaic-lab-{self.owner}-replica-{name}'
         identifier = self._create('container', replica_name, 'run', '-d', '--name', replica_name, '--label',
             f'io.prosaic.lab.owner={self.owner}', '--network', self.manifest['network_id'],
@@ -301,7 +334,7 @@ class OwnedStack:
             '--memory','512m','--cpus','2','--pids-limit','128',
             '--tmpfs','/tmp:rw,noexec,nosuid,size=64m,mode=1777',
             '-p', '127.0.0.1::8080', '-v', f'{self.manifest["runtime_config_volume"]}:/run/secrets:ro',
-            '-e', 'LAB_CONFIG=/run/secrets/service.json', self.manifest['images']['consumer'],
+            '-e', 'LAB_CONFIG=/run/secrets/service.json', image or self.manifest['images']['consumer'],
             'python', '-m', 'uvicorn', 'prosaic_integration_lab.app:create_app', '--factory',
             '--host', '0.0.0.0', '--port', '8080', '--no-access-log',
             '--timeout-keep-alive','5','--h11-max-incomplete-event-size','16384',

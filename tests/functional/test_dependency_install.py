@@ -273,6 +273,13 @@ def test_real_sdist_contains_all_public_build_inputs_and_builds_exact_snapshot(t
     assert missing==[],f'missing public build inputs: {missing}'
     assert (checkout/'configs/native.example.json').read_bytes()==(ROOT/'configs/native.example.json').read_bytes()
     assert not (checkout/'.git').exists()
+    # New acceptance tools must start from the distributed public tree without
+    # the caller's checkout or an editable app import supplying missing files.
+    for script in ('prepare_sdk_candidates.py','required_acceptance.py'):
+        started=subprocess.run([sys.executable,'-I',str(checkout/'scripts'/script),'--help'],
+            cwd=tmp_path,capture_output=True,text=True,timeout=15,
+            env={name:value for name,value in os.environ.items() if name!='PYTHONPATH'})
+        assert started.returncode==0,started.stdout+started.stderr
     spec=importlib.util.spec_from_file_location('sdist_build_consumer',checkout/'scripts/build_consumer.py')
     module=importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

@@ -4,9 +4,9 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native':37,'legacy-upgrade':10,'qualification':2}
 
-def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
+def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
     if (mode not in COUNTS or item.get('mode') != mode or
         item.get('passed') is not True or item.get('cleanup') != 'verified' or
@@ -23,6 +23,13 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if mode=='lago':
         image=json.loads((Path(__file__).resolve().parents[1]/'dependencies/lago.json').read_text())['image']
         if images.get('lago')!=image: raise ValueError('billing image provenance missing')
+    if mode=='legacy-upgrade':
+        from .legacy_upgrade import BASELINE_COMMIT,BASELINE_SHA256
+        if (item.get('baseline_source')!=BASELINE_COMMIT or item.get('baseline_manifest_sha256')!=BASELINE_SHA256 or
+            item.get('baseline_payload_audit')!='verified' or item.get('migration')!='v2-to-v3' or
+            item.get('legacy_fixture_count')!=5 or
+            not re.fullmatch(r'sha256:[0-9a-f]{64}',images.get('baseline',''))):
+            raise ValueError('historical upgrade provenance missing')
     expected = 'candidate' if candidate else 'released'
     if item.get('dependency_mode') != expected:
         raise ValueError('dependency provenance differs from required lane')
@@ -32,13 +39,17 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None):
     if candidate and (not isinstance(manifest_sha,str) or not re.fullmatch('[0-9a-f]{64}',manifest_sha) or
         item.get('candidate_manifest_sha256') != manifest_sha):
         raise ValueError('candidate manifest provenance missing')
+    if candidate and mode in {'native','legacy-upgrade','qualification'} and (
+        not isinstance(lineage_sha,str) or not re.fullmatch('[0-9a-f]{64}',lineage_sha) or
+        item.get('candidate_lineage_sha256')!=lineage_sha):
+        raise ValueError('qualified candidate lineage missing')
 
 def export(item):
     # Only known scalars survive; arbitrary errors/failure names/paths never do.
     if not isinstance(item,dict): item = {}
     result = {'passed':item.get('passed') is True and 'error' not in item and
         item.get('cleanup') == 'verified' and item.get('failed_tests') == [] and item.get('skipped') == 0 and
-        type(item.get('test_count')) is int and item['test_count'] > 0 and
+        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == COUNTS[item['mode']] and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
     for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
@@ -62,11 +73,14 @@ def export(item):
             'engine_unavailable','network_timeout','permission_denied','engine_failed'} and
             (code is None or type(code) is int and -128 <= code <= 255) and diagnostic.get('outcome')=='unknown'):
             result['engine_diagnostic']={'operation':operation,'return_code':code,'category':category,'outcome':'unknown'}
-    for key in ('released_manifest_sha256','candidate_manifest_sha256'):
+    for key in ('released_manifest_sha256','candidate_manifest_sha256','baseline_manifest_sha256','candidate_lineage_sha256'):
         value = item.get(key)
         if isinstance(value,str) and re.fullmatch('[0-9a-f]{64}',value): result[key] = value
+    if item.get('baseline_source')=='59752bef3e6b3ffde0ecbf38f34815d184043e20':result['baseline_source']=item['baseline_source']
+    for key,value in {'baseline_payload_audit':'verified','migration':'v2-to-v3','legacy_fixture_count':5}.items():
+        if item.get(key)==value:result[key]=value
     images = item.get('images',{})
     if not isinstance(images,dict): images = {}
-    result['images'] = {key:value for key,value in images.items() if key in {'consumer','postgres','keycloak','ingress','lago'}
+    result['images'] = {key:value for key,value in images.items() if key in {'consumer','postgres','keycloak','ingress','lago','baseline'}
         and isinstance(value,str) and re.fullmatch(r'(?:[a-z0-9./:-]+@)?sha256:[0-9a-f]{64}',value)}
     return result

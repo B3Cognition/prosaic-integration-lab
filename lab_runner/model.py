@@ -20,6 +20,11 @@ provider_latency_s = 0
 tool_samples = 0
 receipt_gate = threading.Event()
 receipt_gate.set()
+barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed')}
+for event in barriers.values():event.set()
+barrier_counts={name:0 for name in barriers}
+provenance_calls=0
+finder_seen={}
 
 class Control(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -30,6 +35,8 @@ class Control(BaseModel):
     provider_latency_s: float = Field(default=0,ge=0,le=5,strict=True,allow_inf_nan=False)
     maximum_calls: int | None = Field(default=None,ge=1,le=10000,strict=True)
     preserve_allowance: bool = Field(default=False,strict=True)
+    effect_gate: str | None = None
+    effect_amount: int = Field(default=1,ge=1,le=2,strict=True)
 
 class Operation(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -47,12 +54,14 @@ def operation(body: Operation):
 def stats():
     with lock:
         return {'calls': calls, 'blocked': not gate.is_set(), 'accepted_events': accepted_events,
-                'allowance_rejected':allowance_rejected,'tool_samples':tool_samples}
+                'allowance_rejected':allowance_rejected,'tool_samples':tool_samples,
+                'provenance_calls':provenance_calls,'barriers':dict(barrier_counts)}
 
 @app.post('/control')
 def control(body: Control):
     global scenario,result_text,maximum_calls,allowance_start,allowance_rejected,provider_latency_s,tool_samples
-    if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage'}:
+    if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
+                             'native','native_rejected','native_effect','native_revisit'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -64,8 +73,11 @@ def control(body: Control):
             allowance_rejected=0
         provider_latency_s=body.provider_latency_s
         tool_samples=0
+        finder_seen.clear()
+        app.state.effect_amount=body.effect_amount
     gate.clear() if body.blocked else gate.set()
     receipt_gate.clear() if body.accepted_gate else receipt_gate.set()
+    for name,event in barriers.items():event.clear() if name==body.effect_gate else event.set()
     return {'status': 'configured'}
 
 @app.post('/events/accepted')
@@ -78,9 +90,30 @@ def accepted():
         raise HTTPException(504, 'receipt_gate_timeout')
     return {'status': 'observed'}
 
+@app.post('/events/{name}')
+def effect_event(name: str):
+    from fastapi import HTTPException
+    if name not in barriers:raise HTTPException(404,'unknown_fixture_event')
+    with lock:barrier_counts[name]+=1
+    if not barriers[name].wait(30):raise HTTPException(504,'effect_gate_timeout')
+    return {'status':'observed'}
+
+
+def native_arguments(messages):
+    decoder=json.JSONDecoder()
+    for message in messages:
+        content=message.get('content')
+        if not isinstance(content,str):continue
+        # Runtime appends the actual public Harness arguments to specialist prose.
+        content=content.split('## Arguments\n')[-1]
+        try:value=decoder.raw_decode(content.strip())[0]
+        except (ValueError,TypeError):continue
+        if isinstance(value,dict) and 'request' in value:return value
+    return {}
+
 @app.post('/v1/chat/completions')
 def completions(body: dict | None = None):
-    global calls,allowance_rejected
+    global calls,allowance_rejected,provenance_calls
     with lock:
         if maximum_calls is not None and calls-allowance_start>=maximum_calls:
             allowance_rejected+=1
@@ -96,7 +129,30 @@ def completions(body: dict | None = None):
     # These two explicit synthetic specialist instructions belong to this fixture.
     # All values are fixture constants; no product lookup or model-selected URL.
     prose = json.dumps((body or {}).get('messages',[]))
-    native_output = ({'entity_id':'synthetic-entity','approved':True}
+    arguments=native_arguments((body or {}).get('messages',[]))
+    if selected in {'native','native_rejected','native_effect','native_revisit'}:
+        entity=arguments.get('request',{}).get('entity_id')
+        if type(entity) is not str or not 0<len(entity)<=64:
+            from fastapi import HTTPException
+            raise HTTPException(422,'native_input_missing')
+        if 'ALWAYS review the synthetic finder input.' in prose:
+            import hashlib
+            artifact=arguments.get('artifacts',{}).get('find')
+            binding=arguments.get('artifact_bindings',{}).get('find')
+            expected=hashlib.sha256(json.dumps(artifact,sort_keys=True,allow_nan=False).encode()).hexdigest()
+            if (artifact!={'entity_id':entity} or not isinstance(binding,dict) or
+                not isinstance(binding.get('id'),str) or not binding['id'] or
+                binding.get('sha256')!=expected or binding.get('dependencies')!={}):
+                from fastapi import HTTPException
+                raise HTTPException(422,'native_provenance_missing')
+            with lock:provenance_calls+=1
+            native_output={'entity_id':entity,'approved':selected!='native_rejected'}
+        else:
+            with lock:
+                finder_seen[entity]=finder_seen.get(entity,0)+1
+                seen=finder_seen[entity]
+            native_output={'entity_id':entity+'-revisit' if selected=='native_revisit' and seen>1 else entity}
+    else:native_output = ({'entity_id':'synthetic-entity','approved':True}
         if 'ALWAYS review the synthetic finder input.' in prose else
         {'entity_id':'synthetic-entity'} if 'ALWAYS use the synthetic fixture entity only.' in prose else
         {'result':output})
@@ -108,4 +164,9 @@ def completions(body: dict | None = None):
         prompt = 500 if selected == 'large_usage' else 100
         result['usage'] = {'prompt_tokens': prompt, 'completion_tokens': 25, 'total_tokens': prompt+25,
                            'prompt_tokens_details': {'cached_tokens': 20}}
+    if selected=='native_effect' and not any(message.get('role')=='tool' for message in (body or {}).get('messages',[])):
+        result['choices'][0]['finish_reason']='tool_calls'
+        result['choices'][0]['message']={'role':'assistant','content':None,'tool_calls':[
+            {'id':f'effect-{call_id}','type':'function','function':{'name':'fixture_apply',
+             'arguments':json.dumps({'amount':getattr(app.state,'effect_amount',1)})}}]}
     return result

@@ -42,7 +42,9 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary():
     steps=job['steps']
     uploads=[step for step in steps if 'upload-artifact@' in step.get('uses','')]
     assert len(uploads)==1 and uploads[0]['with']['path'].startswith('reports/required-')
-    assert all('--candidate' not in step.get('run','') for step in steps)
+    candidates=[step for step in steps if '--candidate' in step.get('run','')]
+    assert candidates and all("github.event_name == 'workflow_dispatch' && inputs.candidate" in step.get('if','') for step in candidates)
+    assert job['permissions']=={'contents':'read','actions':'read'}
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
 def test_missing_image_fails_gate_with_safe_summary_before_owned_resources(monkeypatch,tmp_path,capsys):

@@ -31,6 +31,7 @@ def test_candidate_from_fresh_base_audits_selected_snapshot(monkeypatch, tmp_pat
     dependencies = tmp_path / 'dependencies'; dependencies.mkdir()
     source = Path(__file__).resolve().parents[2] / 'dependencies/accounting-candidate.json'
     (dependencies / 'accounting-candidate.json').write_bytes(source.read_bytes())
+    (dependencies / 'releases.json').write_bytes((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_bytes())
     digest = hashlib.sha256(source.read_bytes()).hexdigest()
     fixture = stack.OwnedStack(candidate=True)
     calls = []

@@ -4,6 +4,35 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      candidate:
+        description: Qualify exact unpublished SDK artifacts without changing release pins
+        type: boolean
+        default: false
+      core_run_id:
+        description: Successful exact-source Core Publish SDK run
+        type: string
+        default: ''
+      core_source:
+        description: Exact qualified Core commit
+        type: string
+        default: ''
+      runtime_run_id:
+        description: Successful exact-source Runtime Publish SDK run
+        type: string
+        default: ''
+      runtime_source:
+        description: Exact qualified Runtime commit
+        type: string
+        default: ''
+      harness_run_id:
+        description: Successful exact-source Harness Publish SDK run
+        type: string
+        default: ''
+      harness_source:
+        description: Exact qualified Harness commit
+        type: string
+        default: ''
 permissions:
   contents: read
 jobs:
@@ -15,7 +44,10 @@ jobs:
         runner: [ubuntu-24.04, ubuntu-24.04-arm]
         postgres: [16, 18]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -28,16 +60,44 @@ jobs:
           python -m venv .venv
           .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
       - name: Verify and install released Prosaic wheels
+        if: ${{ !inputs.candidate }}
         run: |
           .venv/bin/python scripts/prepare_dependencies.py
           .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
           .venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+      - name: Verify exact candidate source runs and curate original SDK bytes
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CORE_RUN: ${{ inputs.core_run_id }}
+          CORE_SOURCE: ${{ inputs.core_source }}
+          RUNTIME_RUN: ${{ inputs.runtime_run_id }}
+          RUNTIME_SOURCE: ${{ inputs.runtime_source }}
+          HARNESS_RUN: ${{ inputs.harness_run_id }}
+          HARNESS_SOURCE: ${{ inputs.harness_source }}
+        run: |
+          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-candidate/manifest.json
+          .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-candidate/manifest.json
+          .venv/bin/python scripts/audit_install.py --manifest .cache/sdk-candidate/manifest.json
+          .venv/bin/python -m pip check
       - name: Unit and functional regressions
         run: .venv/bin/python -m pytest -q
       - name: Build immutable consumer
+        if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
+      - name: Build isolated immutable candidate consumer
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        run: .venv/bin/python scripts/build_consumer.py --manifest .cache/sdk-candidate/manifest.json --dependency-mode candidate --tag prosaic-integration-lab:candidate
+      - name: Build exact released Lab 0.2.0 baseline
+        run: |
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+          .venv/bin/python -c "from lab_runner.legacy_upgrade import build_baseline; build_baseline()"
       - name: Required real-stack gates
+        if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/required_acceptance.py --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
+      - name: Required exact candidate real-stack gates
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        run: .venv/bin/python scripts/required_acceptance.py --candidate --candidate-manifest .cache/sdk-candidate/manifest.json --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

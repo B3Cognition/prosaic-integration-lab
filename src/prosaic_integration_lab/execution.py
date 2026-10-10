@@ -24,6 +24,18 @@ def validate_workflow_limits(definition):
     if type(duration) not in {float,int} or not math.isfinite(duration) or not 0 < duration <= 120:
         raise ValueError('finite service execution duration is required')
 
+def retained_workflows(config):
+    retained={}
+    for identity,definition in config.get('legacy_bundles',{}).items():
+        if (type(definition) is not dict or set(definition)!={'assets'} or
+                type(identity) is not str or assets_hash(definition['assets'])!=identity):
+            raise ValueError('retained legacy assets conflict')
+        workflows={name:Workflow.load(Path(definition['assets'])/(name+'.yml'))
+                   for name in ('approval','synthetic')}
+        for workflow in workflows.values():validate_workflow_limits(workflow.definition)
+        retained[identity]=workflows
+    return retained
+
 class Execution:
     def __init__(self, config, *, metrics=None):
         self.config = config
@@ -32,6 +44,7 @@ class Execution:
         self.workflows = {name: Workflow.load(Path(config['assets']) / (name + '.yml')) for name in ('approval', 'synthetic')}
         for workflow in self.workflows.values():
             validate_workflow_limits(workflow.definition)
+        self.legacy_bundles=retained_workflows(config)
         self.metadata = Metadata(config['app_dsn'])
         self.store = PostgresRunStore(config['harness_dsn'], namespace=config['namespace'], max_active_leases=2,
             lease_s=15, renew_s=3, operation_timeout_s=5, pool_timeout_s=2, connect_timeout_s=3,
@@ -61,11 +74,11 @@ class Execution:
         if reservation['workflow'] == 'native':
             return self.native.harness(reservation)
         self.check_scope(reservation)
-        if reservation['assets_hash'] != self.fingerprint:
-            raise HTTPException(409, 'asset_conflict')
+        workflows=self.workflows if reservation['assets_hash']==self.fingerprint else self.legacy_bundles.get(reservation['assets_hash'])
+        if workflows is None:raise HTTPException(409, 'asset_conflict')
         context = ExecutionContext(application_id='integration-lab', tenant_id=reservation['tenant_id'],
             actor_id=reservation['actor_id'], billing_account_id=reservation['billing_account_id'], request_id=reservation['run_id'])
-        return Harness(self.workflows[reservation['workflow']], store=self.store,
+        return Harness(workflows[reservation['workflow']], store=self.store,
                        run_id=reservation['run_id'], context=context, accounting=self.recorder,
                        **({'observer':self.observer} if self.observer is not None else {}),
                        on_event=self.fixture_event if self.config.get('fixture_events_url') else None)

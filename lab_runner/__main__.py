@@ -55,12 +55,21 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity','native','legacy-upgrade','qualification'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
     parser.add_argument('--consumer-image',help='immutable consumer sha256 image ID; manifest and installed payload still verified')
+    parser.add_argument('--candidate-manifest',type=__import__('pathlib').Path,help='explicit complete candidate SDK manifest')
+    parser.add_argument('--baseline-image',help='immutable historical Lab0.2.0 image; otherwise build exact committed baseline')
     args = parser.parse_args()
+    if args.candidate_manifest is not None and not args.candidate:
+        parser.error('candidate manifest requires --candidate')
+    if args.baseline_image is not None and (args.mode!='legacy-upgrade' or
+            not __import__('re').fullmatch('sha256:[0-9a-f]{64}',args.baseline_image)):
+        parser.error('baseline image requires legacy-upgrade and an immutable image ID')
+    if args.candidate and args.mode in {'native','legacy-upgrade','qualification'} and args.candidate_manifest is None:
+        parser.error('new required candidate lanes require an explicit complete SDK manifest')
     profile=None
     operational=args.command in {'qualify','qualify-recovery'}
     if operational:
@@ -124,7 +133,8 @@ def main():
         parser.error('native-persistence mode requires test')
     stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} or operational else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
-        observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None)
+        observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None,
+        candidate_manifest=args.candidate_manifest,native=args.mode=='native',baseline_image=args.baseline_image)
     events = workload.Events(stack.directory) if args.command in {'run','stress','qualify'} else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
@@ -132,17 +142,24 @@ def main():
     result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} or operational else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
-    if args.mode == 'native-persistence':
+    if args.mode in {'native-persistence','native','legacy-upgrade','qualification'}:
         result['qualification'] = 'not_qualified'
     if operational:
         from .qualification import receipt
         result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
     try:
+        if args.mode=='legacy-upgrade' and stack.baseline_image is None:
+            from .legacy_upgrade import build_baseline
+            stack.baseline_image=build_baseline()
         stack.start()
         if args.command in {'demo', 'run','stress'} or operational or args.mode not in {'provisioning','native-persistence'}:
             stack.start_model()
-            stack.start_replica('a')
-            stack.start_replica('b')
+            stack.start_replica('a',image=stack.baseline_image)
+            stack.start_replica('b',image=stack.baseline_image)
+        if args.mode=='legacy-upgrade':
+            from .legacy_upgrade import generate,upgrade,BASELINE_MANIFEST
+            historical=generate(stack,baseline_manifest=BASELINE_MANIFEST,baseline_image=stack.baseline_image)
+            upgrade(stack,historical)
         config_path = stack.secrets / 'host.json'
         config = json.loads(config_path.read_text())
         config.update(stack.manifest['endpoints'])
@@ -189,6 +206,10 @@ def main():
                      'tests/acceptance/test_billing_outbox.py']
         if args.mode == 'native-persistence':
             files = ['tests/acceptance/test_native_persistence.py','tests/acceptance/test_tool_journal.py']
+        if args.mode=='native':
+            files=['tests/acceptance/test_native_workflows.py','tests/acceptance/test_native_effect_recovery.py']
+        if args.mode=='legacy-upgrade':files=['tests/acceptance/test_legacy_release_upgrade.py']
+        if args.mode=='qualification':files=['tests/acceptance/test_operational_qualification.py']
         if args.command=='qualify':
             from .qualification import run
             result.update(run(config,profile,events))
@@ -213,7 +234,7 @@ def main():
             test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
                 f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
                 env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True,
-                timeout=600 if args.mode == 'lago' else 180)
+                timeout=600 if args.mode in {'lago','native','legacy-upgrade','qualification'} else 180)
             result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__
@@ -241,13 +262,21 @@ def main():
             result['passed'] = False
             if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
-        if args.mode == 'native-persistence' and result['passed']:
+        from .gates import COUNTS
+        if args.mode in COUNTS and result.get('test_count')!=COUNTS[args.mode]:result['passed']=False
+        if args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and result['passed']:
             result['qualification'] = 'qualified'
+        if args.mode=='legacy-upgrade' and 'historical' in locals():
+            from .legacy_upgrade import public_summary
+            result.update(public_summary(historical))
         result['images'] = stack.manifest['images']
         result['released_manifest_sha256'] = stack.manifest.get('released_manifest_sha256')
         result['payload_audit'] = stack.manifest.get('payload_audit')
         if args.candidate:
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
+            result['candidate_lineage_sha256']=stack.manifest.get('candidate_lineage_sha256')
+            if args.mode in {'native','legacy-upgrade','qualification'} and not result['candidate_lineage_sha256']:
+                result['passed']=False;result['qualification']='not_qualified'
         if operational and len(json.dumps(result).encode())>profile['maximum_report_bytes']:
             from .qualification import receipt
             result={**receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False,
