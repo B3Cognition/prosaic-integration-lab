@@ -66,7 +66,10 @@ Public routes and original critical fault gates produce five old states. All old
 application schema v2→v3 migration. New workers use the same owned database and
 the five byte-identical retained historical assets, selected by original
 assets_hash. Original SQL receipts/accounting are compared, never fabricated with
-new serializers. The public summary contains only counts, outcome codes and
+new serializers. A missing-usage run retains its original finite-budget block,
+revision and unknown accounting even when approval is attempted; human choices
+cannot authorize an inference retry or manufacture known usage. The public
+summary contains only counts, outcome codes and
 image/manifest/source digests; the private fixture stays under its owned directory.
 An unavailable engine records `not_qualified`; host checks alone prove neither
 PostgreSQL behavior nor either required Linux architecture.

@@ -81,9 +81,15 @@ def test_original_saved_receipt_adopted_by_fresh_worker_without_inference_or_new
 
 def test_original_missing_usage_stays_unknown_after_approval(lab,historical):
     row=item(historical,'unknown-usage');before=calls(lab)
+    original_view=view(lab,row)
+    assert original_view['status']=='blocked'
+    assert original_view['recovery_status']=='usage_reconciliation_required'
+    assert original_view['revision']==row['view']['revision']
     original=usage(lab,row)
     assert original['unresolved_calls']==1 and original['fully_costed'] is False
-    assert resume(lab,row,choice='approve')['status']=='completed'
+    # A human choice cannot waive the original finite token budget's unknown
+    # usage. Approval preserves the exact blocked checkpoint and accounting.
+    assert resume(lab,row,choice='approve')==original_view
     assert accounting_snapshot(usage(lab,row))==accounting_snapshot(original) and calls(lab)==before
 
 

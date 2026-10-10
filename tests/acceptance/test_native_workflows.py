@@ -127,7 +127,12 @@ def test_omitted_model_tier_uses_host_default_with_empty_explicit_allowlist(lab)
 
 def test_inline_grant_never_implies_tools(lab):
     before=calls(lab)
-    propose(lab,inline(tools=['fixture_apply']),actor='carol',status=422)
+    # Prose requests are independently denied by current host entitlement.
+    body=inline(tools=['fixture_apply'])
+    propose(lab,body,actor='carol',status=403)
+    # Explicit graph capability requests are denied during SDK admission.
+    body['definition']['steps']['one']['tools']=['fixture_apply']
+    propose(lab,body,actor='carol',status=422)
     assert calls(lab)==before
 
 
@@ -210,7 +215,11 @@ def test_original_proposal_replay_new_bundle_and_reordered_reference_json(lab):
             (Jsonb(dict(reversed(list(original['reference'].items())))),original['proposal_id']))
     settings=copy.deepcopy(lab['native']);new=copy.deepcopy(settings)
     for bundle in copy.deepcopy(new['bundles']):
-        bundle['version']='synthetic-v2';new['bundles'].append(bundle)
+        bundle['version']='synthetic-v2'
+        # A label alone preserves identity. Change actual retained host material
+        # to exercise replay across a different semantic bundle.
+        bundle['fixture_effect_version']='v2'
+        new['bundles'].append(bundle)
     for grant in new['tenants'].values():grant['bundle_version']='synthetic-v2'
     try:
         replace_worker(lab,native=new)

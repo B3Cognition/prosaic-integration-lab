@@ -353,3 +353,40 @@ def test_retained_unsupported_choice_keeps_identity_but_cannot_allocate_run(nati
     assert response.status_code==422 and response.json()=={'detail':'invalid_request'}
     assert native.proposals.owned(principal,row['proposal_id'])==row
     assert counters['reservations']==counters['models']==counters['validators']==0
+
+
+def test_inline_prose_and_step_tools_require_independent_grants(native_client,monkeypatch):
+    import urllib.request
+    client,native,counters=native_client
+    host=native.host
+    connect=native.proposals.connection
+    host.config['fixture_events_url']='http://127.0.0.1:9/events'
+    definition=host.config['native']['bundles'][0]
+    definition['fixture_effects']=True
+    definition['policies']['b']={'composition':False,'inline':True,'tools':[]}
+    host.config['native']['tenants']['b']={'bundle_version':'synthetic-v1',
+        'composition':False,'inline':True,'tools':[]}
+    native.__init__(host);native.proposals.connection=connect
+    def forbidden(*args,**kwargs):raise AssertionError('execution during denied admission')
+    monkeypatch.setattr(urllib.request.OpenerDirector,'open',forbidden)
+    body={'definition':{'version':1,'start':'one','steps':{
+        'one':{'kind':'agent','agent':'inline','schema':'found','next':'done'},
+        'done':{'kind':'finish','requires':['one']}}},
+        'inline_agents':{'inline':{'type':'subagent','frontmatter':{
+            'name':'inline','description':'Synthetic inline','tools':['fixture_apply']},
+            'body':'ALWAYS return the request entity_id as JSON.'}}}
+    headers={**HEADERS,'Authorization':'Bearer tenant-b-token'}
+    denied=client.post('/workflow-proposals',json=body,headers=headers)
+    assert denied.status_code==403 and denied.json()=={'detail':'native_access_denied'}
+    body['definition']['steps']['one']['tools']=['fixture_apply']
+    denied=client.post('/workflow-proposals',json=body,headers=headers)
+    assert denied.status_code==422 and denied.json()['detail']['code']=='policy_denied'
+    with native.proposals.connection() as connection:
+        assert connection.execute('SELECT count(*) AS count FROM lab_app.proposals').fetchone()['count']==0
+    assert counters['reservations']==counters['models']==counters['validators']==0
+    # Both frozen admission and current host grants must permit the tool.
+    definition['policies']['b']['tools']=['fixture_apply']
+    host.config['native']['tenants']['b']['tools']=['fixture_apply']
+    native.__init__(host);native.proposals.connection=connect
+    assert client.post('/workflow-proposals',json=body,headers=headers).status_code==200
+    assert counters['reservations']==counters['models']==counters['validators']==0
