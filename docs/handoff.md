@@ -4,6 +4,10 @@ Checkpoint: 2026-10-09, first working synthetic consumer on a local feature bran
 
 ## Release checkpoint
 
+For the 2026-10-10 ecosystem implementation and pending public-channel promotion,
+read [the current delivery status](current-status.md). The checkpoint and release
+ledger below retain their historical versions and evidence.
+
 The maintainer subsequently authorized committing all repository changes and
 publishing new releases. The earlier no-publication statements below describe
 their historical tasks. Read [the release ledger](verification/release-train-2026-10-09.md)

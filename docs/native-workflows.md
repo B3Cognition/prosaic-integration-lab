@@ -65,6 +65,12 @@ Use the same authenticated owner for every request. The gateway authenticates
 before consuming a body. Only exact `POST /workflow-proposals` accepts 64 KiB;
 other POST routes retain 8 KiB. Keys are required for proposals and starts and
 are bounded to 128 UTF-8 bytes. Unknown fields are rejected.
+Pause-choice names are limited to 64 characters by the host transport contract.
+The catalogue's proposal schema includes that constraint, and admission rejects
+unsupported names before persistence. A retained unsupported proposal keeps its
+original reference but fails before a native run is reserved. Unicode and
+escaped names within the limit round-trip through the existing 8 KiB resume
+body limit.
 
 1. `GET /workflow-catalogue` with `Authorization: Bearer tenant-a-token` returns
    `bundle_version`, `manifest` and `proposal_schema`. The current tenant's public

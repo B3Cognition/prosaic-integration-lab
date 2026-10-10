@@ -5,6 +5,9 @@ Harness workflows, shared PostgreSQL persistence and customer usage accounting.
 
 ## Current status
 
+Read [the current delivery status](docs/current-status.md) for the implemented
+ecosystem milestones, qualified SDK candidates and remaining publication gates.
+
 Version **0.2.0** combines the hardened multiuser blueprint and Lago metering.
 Two identical HTTP replicas use shared PostgreSQL, separate restricted roles,
 owner-only views, durable idempotency and installed release wheels. Default
