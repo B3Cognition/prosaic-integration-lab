@@ -28,7 +28,9 @@ def capacity_response(response):
     return response.status_code==503 and response.json().get('detail') in {
         'capacity_exhausted','http_capacity_exhausted','retention_capacity_exhausted'}
 
-def run(config,users,duration,rate,concurrency,events,*,p95_target=2,max_rejection=.05,allow_overload=False):
+def run(config,users,duration,rate,concurrency,events,*,p95_target=2,max_rejection=.05,allow_overload=False,qualification_profile=None):
+    if qualification_profile is not None:
+        return run_qualification(config,qualification_profile,events)
     validate(duration,rate,concurrency,p95_target,max_rejection)
     principals=list(config['principals'].items())[:users]
     if len(principals)!=users: raise ValueError('insufficient trusted identities')
@@ -109,4 +111,121 @@ def run(config,users,duration,rate,concurrency,events,*,p95_target=2,max_rejecti
     result['passed']=result['correctness_passed'] and (allow_overload or result['slo_passed'])
     events.emit('accounting',scope='profile_delta',calls=report['total_calls']-previous['total_calls'],
         unknown=max(0,report['unresolved_calls']-previous['unresolved_calls']),billing_eligible=False)
+    return result
+
+def run_qualification(config,profile,events):
+    """Fixed arrivals with bounded admission reservations, concurrent owner reads."""
+    import hashlib
+    import json
+    import psycopg
+    from .qualification import validate_profile,digest
+    profile=validate_profile(profile)
+    principals=list(config['principals'].items())[:profile['users']]
+    if len(principals)!=profile['users']:raise ValueError('insufficient trusted identities')
+    def identity(principal):
+        return json.dumps([principal['tenant_id'],principal['actor_id']],separators=(',',':'))
+    # Identity includes tenant even if different tenants use the same actor name.
+    actors={identity(p):{'offered':0,'completed':0} for _,p in principals}
+    def growth():
+        with psycopg.connect(config['migration_dsn'],connect_timeout=5,
+                options='-c statement_timeout=5000') as connection:
+            rows=connection.execute('SELECT count(*) FROM lab_app.runs').fetchone()[0]
+            size=connection.execute('SELECT pg_database_size(current_database())').fetchone()[0]
+            return rows,size
+    rows_before,bytes_before=growth()
+    recorder=PostgresRecorder(config['accounting_dsn'],namespace=config['namespace'],environment=config['environment'])
+    previous=recorder.report(application_id='integration-lab')
+    def stats(client):
+        response=client.get(config['model']+'/stats');response.raise_for_status();return response.json()
+    with httpx.Client(timeout=10,follow_redirects=False) as client:
+        before=stats(client)['calls']
+        client.post(config['model']+'/control',json={'maximum_calls':profile['maximum_calls'],
+            'provider_latency_s':profile['provider_latency_s']}).raise_for_status()
+    read_samples=read_failures=0
+    def one(index):
+        token,principal=principals[index%len(principals)];actor=identity(principal)
+        headers={'Authorization':'Bearer '+token};a,b=('a','b') if index%2==0 else ('b','a')
+        item=dict(actor=actor,accepted=0,completed=0,rejected=0,approval_deferred=0,errors=0,
+            latency=None,read_samples=0,read_failures=0,tool_samples=0,completed_at=None,tool_latency=None)
+        began=time.monotonic()
+        try:
+            with httpx.Client(timeout=15,follow_redirects=False) as client:
+                response=client.post(config[a]+'/runs',headers={**headers,'Idempotency-Key':uuid.uuid4().hex},
+                    json={'workflow':'synthetic','task':'Neutral bounded operational fixture'})
+                if capacity_response(response):item['rejected']=1;return item
+                response.raise_for_status();state=response.json();item['accepted']=1
+                if state['status']!='waiting':raise ValueError('unexpected state')
+                path='/runs/'+state['run_id']
+                # Read in parallel with the resume worker, no mutation retry queue.
+                with ThreadPoolExecutor(max_workers=1) as reader:
+                    future=reader.submit(client.get,config[a]+path,headers=headers)
+                    operation=client.post(config['model']+'/operation',json={'latency_s':profile['tool_latency_s']})
+                    operation.raise_for_status();item['tool_samples']=1;item['tool_latency']=operation.json()['seconds']
+                    approval=client.post(config[b]+path+'/resume',headers=headers,
+                        json={'choice':'approve','expected_revision':state['revision']})
+                    read=future.result();item['read_samples']=1
+                    if read.status_code!=200:item['read_failures']=1
+                if capacity_response(approval):item['approval_deferred']=1
+                else:
+                    approval.raise_for_status()
+                    if approval.json()['status']!='completed':raise ValueError('unexpected completion')
+                    item['completed']=1;item['latency']=time.monotonic()-began;item['completed_at']=time.monotonic()
+                usage=client.get(config[b]+path+'/usage',headers=headers);usage.raise_for_status()
+                usage=usage.json()
+                if (usage['total_calls']!=1 or usage['complete_calls']!=1 or usage['unresolved_calls']!=0 or
+                    not usage['fully_costed'] or usage['billing_eligible']):
+                    raise ValueError('accounting mismatch')
+                if len(principals)>1:
+                    other=principals[(index+1)%len(principals)][0]
+                    for suffix in ('','/usage'):
+                        if client.get(config[a]+path+suffix,headers={'Authorization':'Bearer '+other}).status_code!=404:
+                            raise ValueError('owner isolation failed')
+        except Exception:item['errors']=1
+        return item
+    outcomes=[];pending=set();offered=shed=submitted=0;began=time.monotonic()
+    deadline=began+profile['duration_s'];next_arrival=began;stop='duration';window_offers={}
+    try:
+        with ThreadPoolExecutor(max_workers=profile['concurrency']) as pool:
+            while time.monotonic()<deadline:
+                done={f for f in pending if f.done()};outcomes.extend(f.result() for f in done);pending-=done
+                now=time.monotonic()
+                # Reserve one call and one application row before scheduling each start.
+                if submitted>=profile['maximum_calls']:stop='calls';break
+                if rows_before+submitted>=profile['maximum_records']:stop='records';break
+                if offered>=math.ceil(profile['duration_s']*profile['arrivals_per_second']):
+                    time.sleep(min(.05,max(0,deadline-now)));continue
+                if now<next_arrival:time.sleep(min(.05,next_arrival-now));continue
+                actor=identity(principals[offered%len(principals)][1]);actors[actor]['offered']+=1
+                window=int((now-began)//profile['window_s'])
+                window_offers.setdefault(window,set()).add(actor)
+                if len(pending)<profile['concurrency']:
+                    pending.add(pool.submit(one,offered));submitted+=1
+                else:shed+=1
+                offered+=1;next_arrival+=1/profile['arrivals_per_second']
+            outcomes.extend(f.result() for f in pending)
+        rows_after,bytes_after=growth()
+        report=recorder.report(application_id='integration-lab')
+        with httpx.Client(timeout=10,follow_redirects=False) as client:after=stats(client)
+    finally:
+        # Restore fixture timing/scenario even when accounting/HTTP work fails.
+        with httpx.Client(timeout=10,follow_redirects=False) as client:
+            client.post(config['model']+'/control',json={'preserve_allowance':True}).raise_for_status()
+    for item in outcomes:actors[item['actor']]['completed']+=item['completed']
+    totals={field:sum(item[field] for item in outcomes) for field in
+        ('accepted','completed','rejected','approval_deferred','errors','read_samples','read_failures','tool_samples')}
+    # Only fully observed windows count; a completion outside its offered window does not hide starvation.
+    elapsed=time.monotonic()-began
+    full_windows=[w for w in window_offers if (w+1)*profile['window_s']<=elapsed]
+    starved=sum(1 for w in full_windows for actor in window_offers[w] if not any(
+        item['actor']==actor and item['completed_at'] is not None and
+        w*profile['window_s']<=item['completed_at']-began<(w+1)*profile['window_s'] for item in outcomes))
+    result=dict(totals,offered=offered,client_shed=shed,
+        latencies_s=[i['latency'] for i in outcomes if i['latency'] is not None],tenant_counts=actors,
+        starved_windows=starved,window_samples=len(full_windows),
+        independent_model_calls=after['calls']-before,ledger_calls=report['total_calls']-previous['total_calls'],
+        unknown_usage=max(0,report['unresolved_calls']-previous['unresolved_calls']),
+        records_before=rows_before,records_after=rows_after,bytes_before=bytes_before,bytes_after=bytes_after,
+        allowance_rejected=after['allowance_rejected'],stop_bound=stop)
+    result['tool_latencies_s']=[i['tool_latency'] for i in outcomes if i['tool_latency'] is not None]
+    result.update(suite=profile['suite'],profile_sha256=digest(profile),elapsed_s=elapsed)
     return result

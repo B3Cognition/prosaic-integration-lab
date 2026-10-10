@@ -1,5 +1,11 @@
 # Persistent deployment and upgrades
 
+The owned `qualify-recovery` measurement is documented in
+[qualification.md](qualification.md). Durable acknowledged markers, a consistent
+logical dump, restored readiness, public receipt/owner/revision/usage checks and
+unchanged independent model counts are required. It neither resumes restored
+runs nor certifies HA/PITR. Native measurements remain pending on this host.
+
 `lab_runner` owns disposable fixtures and tears them down. A deployed service uses
 a separately managed persistent PostgreSQL database and private runtime config;
 its lifecycle is independent of the disposable runner. Never point the runner at

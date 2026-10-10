@@ -39,7 +39,8 @@ def command(engine, *args):
     if operation in {'network','volume','image'} and len(args)>1 and args[1] in {'create','inspect','rm','ls'}:
         operation+='_'+args[1]
     try:
-        result = subprocess.run([engine, *args], capture_output=True, text=True, timeout=180)
+        result = subprocess.run([engine, *args], capture_output=True, text=True,
+            timeout=15 if operation=='info' else 180)
     except subprocess.TimeoutExpired:
         raise EngineError('engine unavailable or command timed out',diagnostic={
             'operation':operation,'return_code':None,'category':'command_timeout','outcome':'unknown'}) from None
@@ -91,6 +92,16 @@ class OwnedStack:
         temporary = self.directory / 'ownership.tmp'
         temporary.write_text(json.dumps(self.manifest, indent=2) + '\n')
         temporary.replace(self.directory / 'ownership.json')
+
+    def verify_owned(self):
+        """Verify every exact container identity before operational fault work."""
+        if not self.manifest.get('database_id') or self.manifest.get('payload_audit')!='verified':
+            raise ValueError('verified owned stack required')
+        recorded={r['id'] for r in self.manifest['resources'] if r['kind']=='container'}
+        if self.manifest['database_id'] not in recorded:raise ValueError('unrecorded database')
+        for identifier in recorded:
+            validate_resource(json.loads(command(self.engine,'inspect',identifier))[0],identifier,self.owner)
+        return True
 
     def _record(self, kind, identifier):
         self.manifest['resources'].append({'kind': kind, 'id': identifier})

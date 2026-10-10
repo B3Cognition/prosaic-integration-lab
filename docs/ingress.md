@@ -1,5 +1,11 @@
 # TLS ingress and deployment drain
 
+The private opt-in deployment lane in [qualification.md](qualification.md)
+requires an approved HTTPS origin, token/CA/key references and explicit
+backend-isolation/drain observations. Redirects are rejected. The lane never
+stops a shared gateway or manufactures deployment cases from owned NGINX tests.
+Missing deployment inputs remain `not_qualified` without contacting a gateway.
+
 Run the owned reference without paid inference:
 
 ```sh

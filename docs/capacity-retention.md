@@ -1,5 +1,11 @@
 # Capacity and retention pilot
 
+Versioned bounded fairness/soak profiles are documented in
+[qualification.md](qualification.md). `qualify` separates synthetic fixture
+correctness from profile qualification, checks tenant-plus-actor progress and
+owner-read liveness, measures database growth, and reports its stopping bound.
+The historical pilot below remains evidence only for its recorded parameters.
+
 Run synthetic traffic from the terminal (no paid inference):
 
 ```sh

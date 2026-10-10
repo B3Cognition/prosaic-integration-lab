@@ -228,6 +228,13 @@ def test_build_from_extracted_release_archive_excludes_extra_private_files(tmp_p
     # source archive. After commit these copies are identical to archive bytes.
     shutil.copyfile(ROOT / 'scripts/build_consumer.py', checkout / 'scripts/build_consumer.py')
     shutil.copyfile(ROOT / 'dependencies/public-build-inputs.json', checkout / 'dependencies/public-build-inputs.json')
+    # New approved runtime inputs may not be in HEAD before this change is committed.
+    # Overlay only missing files from the explicit public inventory, never a directory tree.
+    for filename in json.loads((ROOT / 'dependencies/public-build-inputs.json').read_text())['files']:
+        destination=checkout/filename
+        if not destination.exists():
+            destination.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(ROOT/filename,destination)
     assert not (checkout / '.git').exists()
     (checkout / 'src/private-research.txt').write_text('never upload\n')
     spec = importlib.util.spec_from_file_location('archive_build_consumer', checkout / 'scripts/build_consumer.py')

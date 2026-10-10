@@ -25,7 +25,10 @@ def load_lago():
 
 def main():
     parser = argparse.ArgumentParser(description='Required owned synthetic acceptance; no paid calls')
-    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover','metrics','retention','stress'])
+    parser.add_argument('command', choices=['test', 'demo', 'run', 'watch','recover','metrics','retention','stress',
+        'qualify','qualify-recovery','qualify-staging'])
+    parser.add_argument('--profile')
+    parser.add_argument('--staging-opt-in',action='store_true')
     parser.add_argument('--url',help='recovery service origin; HTTPS unless explicit loopback lab mode')
     parser.add_argument('--token-env',default='LAB_API_TOKEN')
     parser.add_argument('--run-id')
@@ -58,6 +61,25 @@ def main():
     parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
     parser.add_argument('--consumer-image',help='immutable consumer sha256 image ID; manifest and installed payload still verified')
     args = parser.parse_args()
+    profile=None
+    operational=args.command in {'qualify','qualify-recovery'}
+    if operational:
+        from pathlib import Path
+        from .qualification import validate_profile
+        try:
+            if not args.profile or Path(args.profile).stat().st_size>65536:raise ValueError('bounded profile required')
+            profile=validate_profile(json.loads(Path(args.profile).read_text()))
+        except (OSError,ValueError):parser.error('invalid qualification profile')
+        args.users=profile['users']
+    if args.command=='qualify-staging':
+        from .staging_qualification import load_private_config,run
+        config=None
+        if args.staging_opt_in and args.config:
+            try:config=load_private_config(args.config)
+            except (OSError,ValueError):pass
+        result=run(config,enabled=args.staging_opt_in)
+        print(json.dumps(result))
+        return 0 if result['qualified'] else 1
     if args.consumer_image is not None:
         import re
         if not re.fullmatch('sha256:[0-9a-f]{64}',args.consumer_image):
@@ -98,19 +120,22 @@ def main():
         parser.error('ingress mode requires test')
     if args.mode == 'lago' and args.command != 'test':
         parser.error('lago mode requires test')
-    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} else 3,
+    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} or operational else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
         observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None)
-    events = workload.Events(stack.directory) if args.command in {'run','stress'} else None
+    events = workload.Events(stack.directory) if args.command in {'run','stress','qualify'} else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
     started = time.monotonic()
-    result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} else args.mode, 'host_architecture': platform.machine(),
+    result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} or operational else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
+    if operational:
+        from .qualification import receipt
+        result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
     try:
         stack.start()
-        if args.command in {'demo', 'run','stress'} or args.mode != 'provisioning':
+        if args.command in {'demo', 'run','stress'} or operational or args.mode != 'provisioning':
             stack.start_model()
             stack.start_replica('a')
             stack.start_replica('b')
@@ -158,7 +183,15 @@ def main():
         if args.mode == 'lago':
             files = ['tests/acceptance/test_provisioning.py','tests/acceptance/test_lago.py',
                      'tests/acceptance/test_billing_outbox.py']
-        if args.command == 'stress':
+        if args.command=='qualify':
+            from .qualification import run
+            result.update(run(config,profile,events))
+            result['passed']=result['qualified']
+        elif args.command=='qualify-recovery':
+            from .recovery_qualification import run
+            result.update(run(stack,profile))
+            result['passed']=result['qualified']
+        elif args.command == 'stress':
             from .load_profile import run as profile
             result.update(profile(config,args.users,args.duration,args.rate,args.concurrency,events,
                 p95_target=args.p95_target,max_rejection=args.max_rejection_rate,allow_overload=args.allow_overload))
@@ -178,6 +211,7 @@ def main():
             result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__
+        if operational:result.update(qualified=False,qualification='not_qualified',reason='execution_unavailable')
         from .stack import EngineError
         if isinstance(error,EngineError) and error.diagnostic is not None:
             result['engine_diagnostic']=error.diagnostic
@@ -199,12 +233,17 @@ def main():
         except Exception:
             result['cleanup'] = 'failed'
             result['passed'] = False
+            if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
         result['images'] = stack.manifest['images']
         result['released_manifest_sha256'] = stack.manifest.get('released_manifest_sha256')
         result['payload_audit'] = stack.manifest.get('payload_audit')
         if args.candidate:
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
+        if operational and len(json.dumps(result).encode())>profile['maximum_report_bytes']:
+            from .qualification import receipt
+            result={**receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False,
+                reason='report_limit'),'passed':False,'cleanup':result['cleanup']}
         if events:
             events.finish(result)
         (stack.directory / 'result.json').write_text(json.dumps(result, indent=2) + '\n')

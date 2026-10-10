@@ -1,0 +1,6 @@
+{"version":1,"suite":"synthetic-capacity-v1","duration_s":20,
+ "arrivals_per_second":1,"concurrency":2,"users":6,
+ "maximum_calls":40,"maximum_records":40,"maximum_report_bytes":262144,
+ "window_s":10,"p95_target_s":2,"maximum_rejection_ratio":0.05,
+ "minimum_tenant_completion_ratio":0.8,"provider_latency_s":0,
+ "tool_latency_s":0,"maximum_rpo_s":0,"maximum_rto_s":60}

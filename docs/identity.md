@@ -1,5 +1,11 @@
 # Configurable authentication
 
+For private deployment identity evidence use the explicit opt-in inputs in
+[qualification.md](qualification.md). Expected issuer/audience/lifetime and
+operator-provided rotation/outage observations are validated independently of
+fixture identity tests. Missing deployment inputs remain `not_qualified` and
+cause no network work.
+
 The service supports explicit lab fixture authentication and a configurable OIDC
 provider and an explicit Auth0 JWT profile. Keycloak is the online-introspection
 reference. Other introspecting issuers configure the same
