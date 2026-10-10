@@ -10,6 +10,22 @@ from psycopg.types.json import Jsonb
 from .metadata import Metadata, RequestConflict, RESERVATION_LOCK_ID
 
 
+MAX_CHOICE_CHARACTERS = 64
+
+
+def proposal_transport_schema():
+    """Host HTTP limits, independent of the SDK's graph admission contract."""
+    return {'properties':{'definition':{'properties':{'steps':{
+        'additionalProperties':{'properties':{'choices':{
+            'propertyNames':{'maxLength':MAX_CHOICE_CHARACTERS}}}}}}}}}
+
+
+def validate_proposal_transport(content):
+    from jsonschema import Draft202012Validator
+    if not Draft202012Validator(proposal_transport_schema()).is_valid(json.loads(content)):
+        raise ValueError('invalid_request')
+
+
 def canonical_proposal(text: str | bytes) -> str:
     """Validate JSON transport only; graph admission belongs to Harness."""
     def invalid():

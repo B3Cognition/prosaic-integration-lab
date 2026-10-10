@@ -291,3 +291,65 @@ def test_large_waiting_view_can_start_status_replay_and_resume(native_client):
     assert counters['models']==counters['validators']==0
     # The expanded public view does not expand incoming run/resume body limits.
     assert client.post('/runs/'+run['run_id']+'/resume',content=' '*8193,headers=HEADERS).status_code==413
+
+
+@pytest.mark.parametrize('choice',['x'*65,'x'*9000,'x'*60000,'😀'*65],
+    ids=['field-boundary','body-boundary','proposal-boundary','unicode-boundary'])
+def test_unsupported_choice_is_rejected_by_catalogue_and_admission_before_writes(native_client,monkeypatch,choice):
+    from jsonschema import Draft202012Validator
+    client,native,counters=native_client
+    body={'definition':{'version':1,'start':'ask','steps':{
+        'ask':{'kind':'pause','question':'Confirm?','choices':{choice:'done'}},
+        'done':{'kind':'finish'}}}}
+    writes=[]
+    reserve=native.proposals.reserve
+    def observed(*args,**kwargs):
+        writes.append(True)
+        return reserve(*args,**kwargs)
+    monkeypatch.setattr(native.proposals,'reserve',observed)
+    schema=client.get('/workflow-catalogue',headers=HEADERS).json()['proposal_schema']
+    assert not Draft202012Validator(schema).is_valid(body)
+    response=client.post('/workflow-proposals',json=body,headers=HEADERS)
+    assert response.status_code==422 and response.json()=={'detail':'invalid_request'}
+    assert writes==[] and counters['reservations']==counters['models']==counters['validators']==0
+
+
+@pytest.mark.parametrize('choice',['x'*64,'😀'*64,'"\\\n\t'*16],ids=['ascii','unicode','escaped'])
+def test_choice_at_transport_boundary_round_trips_with_supported_response(native_client,choice):
+    from jsonschema import Draft202012Validator
+    client,_,counters=native_client
+    body={'definition':{'version':1,'start':'ask','steps':{
+        'ask':{'kind':'pause','question':'Confirm?','choices':{choice:'done'},'response_schema':'decision'},
+        'done':{'kind':'finish'}}}}
+    schema=client.get('/workflow-catalogue',headers=HEADERS).json()['proposal_schema']
+    assert Draft202012Validator(schema).is_valid(body)
+    proposed=client.post('/workflow-proposals',json=body,headers=HEADERS)
+    assert proposed.status_code==200,proposed.text
+    started=client.post('/native-runs',json={'proposal_id':proposed.json()['proposal_id'],'inputs':{}},
+        headers={**HEADERS,'Idempotency-Key':'boundary-choice'})
+    assert started.status_code==200,started.text
+    run=started.json()
+    assert run['interaction']['choices']==[choice]
+    resumed=client.post('/runs/'+run['run_id']+'/resume',headers=HEADERS,
+        json={'expected_revision':run['revision'],'choice':choice,'response':{'confirmed':True}})
+    assert resumed.status_code==200 and resumed.json()['status']=='completed'
+    assert counters['models']==counters['validators']==0
+    assert client.post('/runs/'+run['run_id']+'/resume',content=' '*8193,headers=HEADERS).status_code==413
+
+
+def test_retained_unsupported_choice_keeps_identity_but_cannot_allocate_run(native_client):
+    from prosaic_integration_lab.identity import Principal
+    client,native,counters=native_client
+    principal=Principal('a','alice','payer')
+    body={'definition':{'version':1,'start':'ask','steps':{
+        'ask':{'kind':'pause','question':'Confirm?','choices':{'x'*65:'done'}},
+        'done':{'kind':'finish'}}}}
+    bundle,_=native.factories[('a','synthetic-v1')]
+    prepared=bundle.prepare_json(json.dumps(body))
+    row=native.proposals.reserve(principal,'retained-choice',prepared,
+        maximum_records=100,maximum_tenant_records=100)
+    response=client.post('/native-runs',json={'proposal_id':row['proposal_id'],'inputs':{}},
+        headers={**HEADERS,'Idempotency-Key':'retained-choice-run'})
+    assert response.status_code==422 and response.json()=={'detail':'invalid_request'}
+    assert native.proposals.owned(principal,row['proposal_id'])==row
+    assert counters['reservations']==counters['models']==counters['validators']==0

@@ -12,7 +12,8 @@ from prosaic_runtime import EndpointConfig, ExecutionContext, ProsaicArtifact, R
 from .bundles import BundleRegistry
 from .identity import Principal
 from .observability import bind_run
-from .proposals import ProposalStore, bounded_text, canonical_proposal
+from .proposals import (ProposalStore, bounded_text, canonical_proposal,
+    proposal_transport_schema, validate_proposal_transport)
 from .views import public_native_interaction, public_run, uncertain_run
 
 
@@ -190,8 +191,10 @@ class NativeExecution:
         # Discovery uses the registered bundle's public immutable material. It
         # never reads changed files or creates a replacement proposal identity.
         factory = self.factory(self._materials[key],effective)
+        schema=factory.proposal_schema()
+        schema.setdefault('allOf',[]).append(proposal_transport_schema())
         return {'bundle_version':setting['bundle_version'],'manifest':factory.describe(),
-                'proposal_schema':factory.proposal_schema()}
+                'proposal_schema':schema}
 
     def propose(self, principal, key, text):
         bounded_text(key)
@@ -203,6 +206,7 @@ class NativeExecution:
             setting = self.current(principal)
             bundle, _ = self.factories[(principal.tenant_id,setting['bundle_version'])]
             prepared = bundle.prepare_json(content)
+            validate_proposal_transport(prepared.proposal_json)
             self.authorize(principal,content)
             row = self.proposals.reserve(principal,key,prepared,
                 maximum_records=self.host.capacity['max_runs'],maximum_tenant_records=self.host.capacity['max_tenant_runs'])
@@ -244,6 +248,9 @@ class NativeExecution:
         row = self.proposals.owned(principal,proposal_id)
         if row is None: raise HTTPException(404,'not_found')
         self.authorize(principal,row['proposal_json'])
+        # Older retained proposals keep their original immutable reference. An
+        # unsupported HTTP choice fails before run reservation or execution.
+        validate_proposal_transport(row['proposal_json'])
         try:
             bundle = self.registry.resolve(row['bundle_version'],row['bundle_identity'])
         except ValueError:

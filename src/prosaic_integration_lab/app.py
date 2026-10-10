@@ -12,6 +12,7 @@ from .http_guard import HttpGuard
 from .identity import make_authenticator
 from .metadata import RequestConflict
 from .observability import Metrics,Observability
+from .proposals import MAX_CHOICE_CHARACTERS
 
 
 class StartRequest(BaseModel):
@@ -23,7 +24,7 @@ class StartRequest(BaseModel):
 class ResumeRequest(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     expected_revision: str = Field(min_length=1, max_length=512)
-    choice: str | None = Field(default=None,min_length=1,max_length=64)
+    choice: str | None = Field(default=None,min_length=1,max_length=MAX_CHOICE_CHARACTERS)
     response: JsonValue = None
     retry_interrupted: bool = False
 

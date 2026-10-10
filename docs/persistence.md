@@ -86,10 +86,15 @@ JSON value, including null, booleans, numbers, strings, arrays and objects. Stor
 values and owner/key replay retain their original JSON type and nested content;
 changed inputs conflict. The canonical outer proposal-ID/input record retains
 the existing 65536-byte, depth-64 and expanded-node-65536 persistence bounds.
-Workflow-specific input bounds apply during public preparation. The separate
-native HTTP route remains planned with the existing 8192-byte run body limit;
-this persistence API does not expand that transport limit or change the legacy
-YAML task/object request recipe.
+Workflow-specific input bounds apply during public preparation. Native HTTP run
+and resume requests use the existing 8192-byte body limit. The service adds a
+host transport constraint of 64 characters per pause-choice name to the SDK's
+proposal schema returned by `/workflow-catalogue`. It enforces that constraint
+after SDK admission and before proposal persistence, so every advertised choice
+fits the resume field. Unicode and escaped names count as characters. Retained
+proposals with unsupported names keep their immutable references but fail with
+`invalid_request` before a run reservation or execution. The existing YAML
+task/object request recipe remains compatible.
 
 Construct `PgToolJournal(app_dsn, identity=...)` with a stable trusted logical
 ledger identity, never a credential-bearing DSN as identity. A committed new row
