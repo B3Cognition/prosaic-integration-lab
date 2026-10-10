@@ -47,6 +47,31 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary():
     assert job['permissions']=={'contents':'read','actions':'read'}
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
+
+def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):
+    import os
+    import yaml
+    from prosaic import __version__
+    root=Path(__file__).resolve().parents[2]
+    workflow=yaml.safe_load((root/'.github/workflows/required-acceptance.yml').read_text())
+    steps=workflow['jobs']['acceptance']['steps']
+    command=next((step.get('run','') for step in steps
+        if step.get('name')=='Select installed CLI bindings'),'')
+    bin_directory=tmp_path/'.venv/bin'
+    bin_directory.mkdir(parents=True)
+    installed_cli=Path(sys.executable).parent/'prosaic'
+    assert installed_cli.is_file(),'the selected SDK wheel must install its public CLI'
+    (bin_directory/'prosaic').symlink_to(installed_cli)
+    path_file=tmp_path/'github-path'
+    environment={'PATH':'/usr/bin:/bin','GITHUB_PATH':str(path_file)}
+    subprocess.run(['/bin/bash','-e','-c',command],cwd=tmp_path,env=environment,
+        check=True,capture_output=True,timeout=10)
+    selected=path_file.read_text().splitlines() if path_file.exists() else []
+    environment['PATH']=os.pathsep.join([*selected,environment['PATH']])
+    result=subprocess.run(['prosaic','--version'],cwd=tmp_path,env=environment,
+        check=True,capture_output=True,text=True,timeout=10)
+    assert __version__ in result.stdout
+
 def test_missing_image_fails_gate_with_safe_summary_before_owned_resources(monkeypatch,tmp_path,capsys):
     source=Path(__file__).resolve().parents[2]/'scripts/required_acceptance.py'
     spec=importlib.util.spec_from_file_location('required_missing_image',source)

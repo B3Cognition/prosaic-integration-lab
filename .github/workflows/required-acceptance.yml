@@ -81,6 +81,8 @@ jobs:
           .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-candidate/manifest.json
           .venv/bin/python scripts/audit_install.py --manifest .cache/sdk-candidate/manifest.json
           .venv/bin/python -m pip check
+      - name: Select installed CLI bindings
+        run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Unit and functional regressions
         run: .venv/bin/python -m pytest -q
       - name: Build immutable consumer
