@@ -417,6 +417,15 @@ Root dispatches required four-cell native CI after review. Local architecture su
 
 ### Task 6: L6 — Published dependency adoption and current delivery evidence
 
+The user's follow-up requests a usable Lab adoption path while package-index
+publisher registration is pending. Implement the explicit candidate setup
+profile and native demo first: reuse verified original SDK artifacts and the
+owned stack, drive catalogue/proposal/start/structured response through public
+HTTP APIs, export only checked synthetic fields, and retain verified cleanup.
+Document host bindings and service integration, and qualify the same demo
+helper and CLI on all four native cells. This is candidate onboarding; L6.2's
+published pins and L6.3's 0.3.0 release still require actual ordered publication.
+
 **Files:** Modify dependencies/releases.json, pyproject.toml, MANIFEST.in, README.md, docs/handoff.md, release-gates.md, capacity-retention.md, persistence.md, recovery.md, identity.md and ingress.md. Create docs/current-status.md and docs/verification/ecosystem-production-2026-10-10.md. Add sanitized JSON receipts only after actual executions. Tests: tests/unit/test_released_provenance.py and test_release_gates.py; source/wheel installed checks.
 
 **Interfaces:** Root supplies downloaded, qualified published artifacts and immutable source/tag/checksum/verification identities. Active manifest continues the existing artifacts contract (distribution, version, filename, sha256, source_commit, url, checksum_url), with b3-prosaic family names and exact release versions. Historical releases-lab-0.2.0.json is never overwritten. Status index links current evidence and labels prior documents as historical checkpoints without rewriting old measurements.

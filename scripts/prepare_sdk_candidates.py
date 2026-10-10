@@ -101,20 +101,51 @@ def curate(candidates,manifest,cache_root):
     return data
 
 
-def main():
+def load_profile(path):
+    """Host-owned convenience recipe; every selected run is still reverified."""
+    value,_=read(Path(path))
+    prefixes=('core','runtime','harness')
+    if (type(value) is not dict or set(value)!={'version',*prefixes} or
+            type(value['version']) is not int or value['version']!=1):
+        raise ValueError('invalid candidate profile')
+    selected=[]
+    for prefix,repository in zip(prefixes,EXPECTED):
+        entry=value[prefix]
+        if type(entry) is not dict or set(entry)!={'run_id','source_commit'}:
+            raise ValueError('invalid candidate profile')
+        run_id,commit=entry['run_id'],entry['source_commit']
+        if (type(run_id) is not str or not re.fullmatch('[1-9][0-9]*',run_id) or
+                type(commit) is not str or not re.fullmatch('[0-9a-f]{40}',commit)):
+            raise ValueError('invalid candidate identity')
+        selected.append((repository,run_id,commit))
+    return selected
+
+
+def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--profile',type=Path,help='pinned Core/Runtime/Harness run and source recipe')
     for prefix in ('core','runtime','harness'):
-        parser.add_argument('--'+prefix+'-run-id',required=True)
-        parser.add_argument('--'+prefix+'-source',required=True)
+        parser.add_argument('--'+prefix+'-run-id')
+        parser.add_argument('--'+prefix+'-source')
     parser.add_argument('--manifest',type=Path,required=True)
     parser.add_argument('--cache-root',type=Path,default=ROOT/'.cache/wheels')
-    args=parser.parse_args()
+    args=parser.parse_args(argv)
+    manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
+            for field in ('run_id','source')]
+    if args.profile is not None and any(value is not None for value in manual):
+        parser.error('--profile cannot be combined with manual SDK identities')
+    if args.profile is None and any(value is None for value in manual):
+        parser.error('supply --profile or all three SDK run/source pairs')
     try:
+        selected=load_profile(args.profile) if args.profile is not None else [
+            (repository,getattr(args,prefix+'_run_id'),getattr(args,prefix+'_source'))
+            for prefix,repository in zip(('core','runtime','harness'),EXPECTED)]
+        for _,run_id,commit in selected:
+            if not re.fullmatch('[1-9][0-9]*',run_id) or not re.fullmatch('[0-9a-f]{40}',commit):
+                raise ValueError('invalid candidate identity')
         with tempfile.TemporaryDirectory(prefix='lab-sdk-candidates-') as temporary:
             candidates=[]
-            for prefix,repository in zip(('core','runtime','harness'),EXPECTED):
-                run_id=getattr(args,prefix+'_run_id');commit=getattr(args,prefix+'_source')
-                if not re.fullmatch('[1-9][0-9]*',run_id):raise ValueError('invalid candidate run ID')
+            for prefix,(repository,run_id,commit) in zip(('core','runtime','harness'),selected):
                 result=subprocess.run(['gh','api','repos/'+repository+'/actions/runs/'+run_id],
                     capture_output=True,text=True,check=True,timeout=60)
                 validate_run(json.loads(result.stdout),commit)

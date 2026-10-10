@@ -37,7 +37,7 @@ remain unchanged. It never substitutes a branch checkout or published URL.
 Updating the acceptance suite also requires reviewing its count contract.
 
 The reviewed collection contracts are audit88, identity20, ingress5, Lago25,
-native-persistence26, native39, legacy-upgrade10 and qualification2. Counts must
+native-persistence26, native40, legacy-upgrade10 and qualification2. Counts must
 match exactly, with zero skips. Native persistence verifies actual SQL ownership,
 immutable grants and storage bounds, concurrent migrations/reservations, every
 supported JSON input type, journal fencing and lost acknowledgements. It requires
@@ -50,6 +50,14 @@ namespace/business key; journal claims and commits use real PostgreSQL. Separate
 observable barriers cover claim, handler entry, effect persistence and outcome
 commit, including worker loss and lost acknowledgement. No expiry or automatic
 reconciliation is permitted.
+The native lane also runs the same adoption demo used by `demo --mode native`:
+catalogue and proposal admission, idempotent start, a structured human pause,
+invalid-response preservation, cross-replica completion, owner isolation and
+two calls reconciled with the synthetic provider. Its public receipt excludes
+fixture credentials, endpoints and private runtime state.
+Every matrix cell separately runs the documented demo command after the eight
+required lanes. This checks the fresh CLI entry point and its own verified
+cleanup; the demo is a consumption example, not an extra qualification lane.
 Two budget cases exercise a batch of two valid tool attempts under the registered
 tool cap of one and a separate denied provider follow-up. Both retain the first
 completed domain/journal effect and incurred usage; receipt failure reasons,

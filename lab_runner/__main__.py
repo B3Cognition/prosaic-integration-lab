@@ -58,7 +58,7 @@ def main():
     parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity','native','legacy-upgrade','qualification'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
-    parser.add_argument('--candidate', action='store_true', help='explicitly use the checksummed unpublished accounting adapter candidate')
+    parser.add_argument('--candidate', action='store_true', help='explicitly use checksummed unpublished SDK candidates')
     parser.add_argument('--consumer-image',help='immutable consumer sha256 image ID; manifest and installed payload still verified')
     parser.add_argument('--candidate-manifest',type=__import__('pathlib').Path,help='explicit complete candidate SDK manifest')
     parser.add_argument('--baseline-image',help='immutable historical Lab0.2.0 image; otherwise build exact committed baseline')
@@ -118,6 +118,20 @@ def main():
         parser.error(str(error))
     if args.open_report and args.command != 'demo':
         parser.error('--open-report requires demo')
+    if args.open_report and args.mode == 'native':
+        parser.error('native demo writes a JSON receipt; --open-report is unsupported')
+    if args.command == 'demo' and args.mode == 'native':
+        # The runner consumes this checkout's application code; all SDKs stay
+        # installed from the manifest. A fresh SDK-only venv has no Lab package.
+        source = str(ROOT / 'src')
+        if source not in sys.path:
+            sys.path.insert(0,source)
+        if args.candidate:
+            from prosaic_integration_lab.dependencies import sdk_manifest
+            try:
+                sdk_manifest(args.candidate_manifest)
+            except (OSError,ValueError,KeyError,TypeError):
+                parser.error('native demo requires a valid complete five-SDK manifest')
     capacity_policy={}
     if args.tenant_capacity is not None: capacity_policy['per_tenant']=args.tenant_capacity
     if args.max_reservations is not None:
@@ -142,8 +156,10 @@ def main():
     result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} or operational else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
-    if args.mode in {'native-persistence','native','legacy-upgrade','qualification'}:
+    if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification'}:
         result['qualification'] = 'not_qualified'
+    if args.command == 'demo' and args.mode == 'native':
+        result['fixture'] = 'native-workflow-demonstration'
     if operational:
         from .qualification import receipt
         result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
@@ -225,11 +241,20 @@ def main():
         elif args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':
-            report = capture_accounting(config, stack.owner)
-            report_path = write_report(report, stack.directory / 'report')
-            result.update(passed=True, report_html=str(report_path),
-                          report_json=str(report_path.with_suffix('.json')),
-                          independent_model_calls=report['independent_model_calls'])
+            if args.mode == 'native':
+                from .native_demo import capture_native
+                report = capture_native(config)
+                report_path = stack.directory / 'report' / 'native-workflow.json'
+                report_path.parent.mkdir(parents=True,exist_ok=True)
+                report_path.write_text(json.dumps(report,indent=2)+'\n')
+                result.update(passed=True,report_json=str(report_path),
+                    independent_model_calls=report['independent_model_calls'])
+            else:
+                report = capture_accounting(config, stack.owner)
+                report_path = write_report(report, stack.directory / 'report')
+                result.update(passed=True, report_html=str(report_path),
+                              report_json=str(report_path.with_suffix('.json')),
+                              independent_model_calls=report['independent_model_calls'])
         else:
             test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
                 f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
@@ -263,8 +288,8 @@ def main():
             if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
         from .gates import COUNTS
-        if args.mode in COUNTS and result.get('test_count')!=COUNTS[args.mode]:result['passed']=False
-        if args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and result['passed']:
+        if args.command == 'test' and args.mode in COUNTS and result.get('test_count')!=COUNTS[args.mode]:result['passed']=False
+        if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and result['passed']:
             result['qualification'] = 'qualified'
         if args.mode=='legacy-upgrade' and 'historical' in locals():
             from .legacy_upgrade import public_summary
@@ -276,7 +301,8 @@ def main():
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
             result['candidate_lineage_sha256']=stack.manifest.get('candidate_lineage_sha256')
             if args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and not result['candidate_lineage_sha256']:
-                result['passed']=False;result['qualification']='not_qualified'
+                result['passed']=False
+                if args.command == 'test':result['qualification']='not_qualified'
         if operational and len(json.dumps(result).encode())>profile['maximum_report_bytes']:
             from .qualification import receipt
             result={**receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False,
@@ -287,13 +313,18 @@ def main():
         print(json.dumps(result))
         print(f'Evidence: {stack.directory}')
         if args.command == 'demo' and result['passed']:
-            for run in report['runs']:
-                usage = run['usage']
-                amount = usage['estimated_amounts'].get('USD', 'Unknown')
-                print(f"{run['actor']:6} | {run['case']:20} | calls={usage['total_calls']} "
-                      f"complete={usage['complete_calls']} unknown={usage['unresolved_calls']} "
-                      f"known USD={amount}")
-            print(f"Report: {result['report_html']}")
+            if args.mode == 'native':
+                print('Native workflow: discover -> admit -> start -> review -> resume -> completed')
+                print(json.dumps(report))
+                print(f"Report: {result['report_json']}")
+            else:
+                for run in report['runs']:
+                    usage = run['usage']
+                    amount = usage['estimated_amounts'].get('USD', 'Unknown')
+                    print(f"{run['actor']:6} | {run['case']:20} | calls={usage['total_calls']} "
+                          f"complete={usage['complete_calls']} unknown={usage['unresolved_calls']} "
+                          f"known USD={amount}")
+                print(f"Report: {result['report_html']}")
     if args.open_report and result['passed']:
         import webbrowser
         from pathlib import Path

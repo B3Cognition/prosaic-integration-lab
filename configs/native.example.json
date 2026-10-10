@@ -12,7 +12,7 @@
   "native": {
     "bundles": [{
       "version": "synthetic-v1",
-      "model_url": "http://model:8080/v1",
+      "model_url": "http://model:8000/v1",
       "operation_namespace": "synthetic-business-v1",
       "journal_identity": "synthetic-journal-v1",
       "policies": {

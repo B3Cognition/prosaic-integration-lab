@@ -27,6 +27,7 @@
     "lab_runner/accounting_report.py",
     "lab_runner/gates.py",
     "lab_runner/native_scenarios.py",
+    "lab_runner/native_demo.py",
     "lab_runner/legacy_upgrade.py",
     "lab_runner/ingress.py",
     "lab_runner/keycloak.py",

@@ -1,8 +1,15 @@
 # Synthetic native workflow HTTP example
 
+For a complete runnable example, follow the
+[candidate installation and native demo](../README.md#try-the-native-workflow).
+The demo creates its own database, model fixture and replicas, drives the routes
+below, handles generated credentials privately and verifies cleanup. The
+[consumer guide](consume-native-workflows.md) maps these routes to supported
+public SDK integration patterns.
+
 Native execution is opt-in private service configuration. The example in
-`configs/native.example.json` selects the exact-owned `lab_runner.model` fixture
-and two packaged specialists. It contains illustrative local fixture identities
+`configs/native.example.json` illustrates the `lab_runner.model` fixture on
+`model:8000` and two packaged specialists. It contains illustrative fixture identities
 and DSNs; provision separate migration/runtime roles and deliver the real private
 configuration using the existing secret-delivery path. Fixture tokens are
 lab-only authentication. The example uses the shipped `/srv/lab/assets` directory
@@ -10,9 +17,11 @@ in both consumer images. These endpoints exercise synthetic find, review, check,
 gate, pause and finish; they access no product data or external business service.
 
 This implementation consumes the new public SDK factory/bundle/interaction APIs.
-The historical release manifest remains unchanged until the later installed-stack
-qualification and public artifact promotion. This example is not evidence of
-PostgreSQL/architecture qualification or a live provider certification.
+The candidate train passed the required native Linux AMD64/ARM64 × PostgreSQL
+16/18 matrix; see the [verification ledger](verification/ecosystem-production-2026-10-10.md).
+Public SDK publication and Lab 0.3.0 remain pending. The historical release
+manifest is preserved; use the explicit candidate manifest for this branch.
+Synthetic fixture qualification does not certify a live provider or deployment.
 
 ## Host authority and retained bundles
 
@@ -31,8 +40,8 @@ native content. Omission selects the packaged `assets/native` fixture. These pat
 are host configuration and never accepted in client proposals.
 
 `native.tenants` selects each tenant's current bundle version and current grants.
-Grant fields are `composition`, `inline`, `agents`, `schemas`, `validators` and
-`model_tiers`. Catalogue and proposal-schema discovery project the intersection
+Grant fields are `composition`, `inline`, `agents`, `schemas`, `validators`,
+`model_tiers` and `tools`. Catalogue and proposal-schema discovery project the intersection
 of current grants and the selected retained bundle's frozen admission grants,
 using its exact captured public catalogue/bindings without rereading files.
 Current authorization cannot expand a frozen bundle's capabilities. To enable a
@@ -53,13 +62,30 @@ namespaces, journal identities or invocation scope. This lab supplies no
 filesystem `base_dir`; native proposals cannot opt into one. No application code
 imports private SDK APIs or executes catalogue manifests.
 
-The host selects three workflow invocations, 4,096 reported tokens and 120 seconds
-per workflow; each invocation has at most one provider request and zero tool
-calls. The SDK forwards remaining time/tokens and derives invocation/run/step
+The example host selects three workflow invocations, 4,096 reported tokens and
+120 seconds per workflow; its no-tool catalogue allows at most one provider
+request and zero tool calls per invocation. The owned native fixture separately
+registers a consequential tool with its own grants, journal and finite call caps.
+The SDK forwards remaining time/tokens and derives invocation/run/step
 references from persisted execution state. Input snapshots are owned JSON values
 with a 4 KiB workflow cap; the HTTP run/resume transport cap remains 8 KiB.
 
 ## Catalogue, proposal, execution and human response
+
+The following requests assume an already running native-enabled fixture service.
+Set `LAB_URL` to its loopback HTTP replica origin and `LAB_API_TOKEN` to an owner
+token supplied by that service's trusted fixture setup. Its host operator must
+select provider scenario `native` before these requests. The native demo does
+this automatically and tears its stack down; it does not leave a service running
+for later curl requests. The illustrative JSON configuration alone does not
+provision a service. From this checkout's candidate environment:
+
+```sh
+: "${LAB_URL:?Set the configured native service origin}"
+: "${LAB_API_TOKEN:?Set its owner token}"
+curl --fail -sS "$LAB_URL/workflow-catalogue" \
+  -H "Authorization: Bearer $LAB_API_TOKEN"
+```
 
 Use the same authenticated owner for every request. The gateway authenticates
 before consuming a body. Only exact `POST /workflow-proposals` accepts 64 KiB;
@@ -72,7 +98,7 @@ original reference but fails before a native run is reserved. Unicode and
 escaped names within the limit round-trip through the existing 8 KiB resume
 body limit.
 
-1. `GET /workflow-catalogue` with `Authorization: Bearer tenant-a-token` returns
+1. `GET /workflow-catalogue` with that owner's bearer token returns
    `bundle_version`, `manifest` and `proposal_schema`. The current tenant's public
    aliases/permissions are projected from the actual SDK factory. Descriptions are
    explicitly synthetic metadata; private prose, endpoints and journal bindings
@@ -80,9 +106,9 @@ body limit.
 2. Save the fixture proposal with the public application helper:
 
    ```sh
-   python -c 'import json; from prosaic_integration_lab.native_execution import approved_proposal; print(json.dumps(approved_proposal()))' > proposal.json
-   curl -sS "$LAB_URL/workflow-proposals" \
-     -H 'Authorization: Bearer tenant-a-token' \
+   PYTHONPATH=src .venv-candidate/bin/python -c 'import json; from prosaic_integration_lab.native_execution import approved_proposal; print(json.dumps(approved_proposal()))' > proposal.json
+   curl --fail -sS "$LAB_URL/workflow-proposals" \
+     -H "Authorization: Bearer $LAB_API_TOKEN" \
      -H 'Idempotency-Key: synthetic-proposal-1' \
      -H 'Content-Type: application/json' --data-binary @proposal.json
    ```
@@ -95,11 +121,11 @@ body limit.
 3. Start using that `proposal_id`:
 
    ```sh
-   curl -sS "$LAB_URL/native-runs" \
-     -H 'Authorization: Bearer tenant-a-token' \
+   curl --fail -sS "$LAB_URL/native-runs" \
+     -H "Authorization: Bearer $LAB_API_TOKEN" \
      -H 'Idempotency-Key: synthetic-run-1' \
      -H 'Content-Type: application/json' \
-     --data '{"proposal_id":"REPLACE_WITH_SAVED_ID","inputs":{"task":"synthetic"}}'
+     --data '{"proposal_id":"REPLACE_WITH_SAVED_ID","inputs":{"entity_id":"sample-1"}}'
    ```
 
    SDK input preparation happens before reservation or dispatch. The worker
@@ -120,8 +146,8 @@ body limit.
 5. Resume with the exact interaction revision and schema-conforming response:
 
    ```sh
-   curl -sS "$LAB_URL/runs/REPLACE_WITH_RUN_ID/resume" \
-     -H 'Authorization: Bearer tenant-a-token' \
+   curl --fail -sS "$LAB_URL/runs/REPLACE_WITH_RUN_ID/resume" \
+     -H "Authorization: Bearer $LAB_API_TOKEN" \
      -H 'Content-Type: application/json' \
      --data '{"expected_revision":"REPLACE_WITH_INTERACTION_REVISION","choice":"accept","response":{"confirmed":true}}'
    ```

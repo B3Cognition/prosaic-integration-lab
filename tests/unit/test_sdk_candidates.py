@@ -79,3 +79,43 @@ def test_unqualified_run_metadata_cannot_supply_candidate_bytes(changes):
     validate_run(run,'1'*40)
     run.update(changes)
     with pytest.raises(ValueError):validate_run(run,'1'*40)
+
+
+def test_profile_selects_pinned_sources_without_replacing_run_or_byte_verification(tmp_path):
+    from scripts.prepare_sdk_candidates import load_profile
+    path=tmp_path/'profile.json'
+    path.write_text(json.dumps({'version':1,'core':{'run_id':'101','source_commit':'1'*40},
+        'runtime':{'run_id':'102','source_commit':'2'*40},
+        'harness':{'run_id':'103','source_commit':'3'*40}}))
+    assert load_profile(path)==[
+        ('B3Cognition/prosaic','101','1'*40),
+        ('B3Cognition/prosaic-runtime','102','2'*40),
+        ('B3Cognition/prosaic-harness','103','3'*40)]
+
+
+@pytest.mark.parametrize('change',['mutable_source','missing_sdk','external_repository','extra_binding'])
+def test_invalid_profile_fails_before_any_github_access(tmp_path,monkeypatch,change,capsys):
+    import scripts.prepare_sdk_candidates as cli
+    value={'version':1,**{prefix:{'run_id':'101','source_commit':'1'*40}
+                       for prefix in ('core','runtime','harness')}}
+    if change=='mutable_source':value['core']['source_commit']='main'
+    elif change=='missing_sdk':del value['runtime']
+    elif change=='external_repository':value['core']['repository']='other/project'
+    else:value['endpoint']='https://other.invalid'
+    profile=tmp_path/'profile.json';profile.write_text(json.dumps(value))
+    def forbidden(*args,**kwargs):raise AssertionError('network before input validation')
+    monkeypatch.setattr(cli.subprocess,'run',forbidden)
+    manifest=tmp_path/'candidate.json'
+    assert cli.main(['--profile',str(profile),'--manifest',str(manifest)])==1
+    assert json.loads(capsys.readouterr().out)['category']=='ValueError'
+    assert not manifest.exists()
+
+
+def test_profile_cannot_be_partially_overridden_with_manual_sources(tmp_path,monkeypatch):
+    import scripts.prepare_sdk_candidates as cli
+    def forbidden(*args,**kwargs):raise AssertionError('network before input validation')
+    monkeypatch.setattr(cli.subprocess,'run',forbidden)
+    with pytest.raises(SystemExit) as error:
+        cli.main(['--profile',str(tmp_path/'profile.json'),'--core-run-id','999',
+                  '--manifest',str(tmp_path/'manifest.json')])
+    assert error.value.code==2

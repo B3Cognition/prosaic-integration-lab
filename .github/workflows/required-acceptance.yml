@@ -101,6 +101,12 @@ jobs:
       - name: Required exact candidate real-stack gates
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python scripts/required_acceptance.py --candidate --candidate-manifest .cache/sdk-candidate/manifest.json --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
+      - name: Run documented native adoption demo with released SDKs
+        if: ${{ !inputs.candidate }}
+        run: .venv/bin/python -m lab_runner demo --mode native --postgres-version ${{ matrix.postgres }}
+      - name: Run documented native adoption demo with exact candidate SDKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        run: .venv/bin/python -m lab_runner demo --mode native --candidate --candidate-manifest .cache/sdk-candidate/manifest.json --postgres-version ${{ matrix.postgres }}
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

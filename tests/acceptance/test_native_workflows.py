@@ -66,6 +66,25 @@ def test_native_graph_cross_worker_fresh_process_pause_approval_and_provenance(l
     assert usage['total_calls']==2 and usage['complete_calls']==2
 
 
+def test_native_adoption_demo_runs_public_protocol_and_filtered_receipt(lab):
+    from lab_runner.native_demo import capture_native
+    before=calls(lab)
+    report=capture_native(lab)
+    assert report['status']=='completed' and report['independent_model_calls']==2
+    assert calls(lab)==before+2
+    assert report['usage']=={'total_calls':2,'complete_calls':2,'unresolved_calls':0,'billing_eligible':False}
+    assert report['checks']=={'admission_without_model_calls':True,'proposal_replay':True,
+        'start_replay':True,'invalid_response_unchanged':True,'stale_revision_unchanged':True,
+        'owner_isolation':True,'resume_without_model_calls':True}
+    assert report['interaction']['stepId']=='confirm'
+    assert report['interaction']['reviewOutputs']=={'review':{'entity_id':'sample-1','approved':True}}
+    exported=json.dumps(report)
+    assert all(token not in exported for token in lab['principals'])
+    assert all(lab[name] not in exported for name in ('a','b','model','app_dsn','harness_dsn','accounting_dsn'))
+    assert set(report)=={'version','fixture','status','catalogue','steps','proposal_id','run_id',
+                        'interaction','checks','usage','independent_model_calls'}
+
+
 @pytest.mark.parametrize('response',[{'confirmed':'bad'},{'confirmed':True,'private':'injected'}])
 def test_invalid_structured_response_preserves_committed_revision(lab,response):
     run=start(lab);before=calls(lab)

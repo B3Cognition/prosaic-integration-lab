@@ -10,7 +10,15 @@ at Lab source `0feb56b02f4c3dfb21c8fe7487bd1d3216e86dec`. See the
 [current verification ledger](verification/ecosystem-production-2026-10-10.md)
 for exact artifacts, counts, image identities and publication prerequisites.
 
-Start with [native workflow usage](native-workflows.md), [persistence and
+The native adoption entry point now has a pinned candidate setup recipe and
+`demo --mode native`, with a public client walkthrough and host integration
+guide. Its new regression extends the native collection contract to 40 cases;
+the separate demo CLI also runs in each native CI cell. The earlier 860-case
+receipt remains evidence for its original source, not for these additions.
+Fresh qualification of the adoption additions is in progress.
+
+Start with the [runnable native consumption guide](consume-native-workflows.md),
+[native workflow usage](native-workflows.md), [persistence and
 migration](persistence.md), [required release gates](release-gates.md) and
 [bounded operational qualification](qualification.md). The
 [2026-10-09 release ledger](verification/release-train-2026-10-09.md) records
@@ -51,9 +59,7 @@ and an environment containing the hash-locked third-party dependencies; the
 python3.12 -m venv .venv-candidate
 .venv-candidate/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
 .venv-candidate/bin/python scripts/prepare_sdk_candidates.py \
-  --core-run-id 38047286885 --core-source aad4bf45ae1c242f4451700ca59b27280010573a \
-  --runtime-run-id 38054282584 --runtime-source da3b43e12027b78d60b846c427021559b4927ba4 \
-  --harness-run-id 38055081837 --harness-source 5b1e2bc0f56041122014a70e5865ff925e6559ab \
+  --profile dependencies/sdk-candidates.json \
   --manifest .cache/sdk-candidate/manifest.json
 .venv-candidate/bin/python scripts/install_dependencies.py --manifest .cache/sdk-candidate/manifest.json
 .venv-candidate/bin/python scripts/audit_install.py --manifest .cache/sdk-candidate/manifest.json
