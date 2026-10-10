@@ -1,5 +1,6 @@
 """Private, opt-in deployment observations; synthetic fixtures cannot substitute."""
 import json
+import asyncio
 import os
 from pathlib import Path
 import stat
@@ -9,6 +10,23 @@ from urllib.parse import urlsplit
 from .qualification import digest,number
 
 CASES={'rotation','outage','backend_isolation','drain'}
+
+async def readiness_status(origin,token,context,deadline):
+    """Cancellation bounds the whole exchange; readiness consumes zero body bytes."""
+    import httpx
+    remaining=deadline-time.monotonic()
+    if remaining<=0:raise TimeoutError
+    async with asyncio.timeout(remaining):
+        async with httpx.AsyncClient(verify=context,timeout=min(10,remaining),
+                follow_redirects=False) as client:
+            remaining=deadline-time.monotonic()
+            if remaining<=0:raise TimeoutError
+            async with client.stream('GET',origin+'/readyz',headers={'Authorization':'Bearer '+token},
+                    timeout=min(10,remaining)) as response:
+                if time.monotonic()>=deadline:raise TimeoutError
+                # No aread/aiter call: status alone is the contract. Closing this
+                # streamed response cancels any arbitrarily large/trickling body.
+                return response.status_code
 
 def private_bytes(path,maximum=65536):
     """Read an owned regular private file without following a final symlink."""
@@ -80,17 +98,20 @@ def run(config,*,enabled=False):
     # CA bytes are read/validated before constructing the client. No token acquisition or paid dispatch.
     import ssl
     import httpx
+    result['response_bytes']=0
     try:
+        began=time.monotonic();deadline=began+config['duration_s']
         context=ssl.create_default_context(cadata=ca.decode())
-        began=time.monotonic()
-        with httpx.Client(verify=context,timeout=min(10,config['duration_s']),follow_redirects=False) as client:
-            response=client.get(config['origin']+'/readyz',headers={'Authorization':'Bearer '+token})
-        if 300<=response.status_code<400:return {**result,'reason':'redirect_rejected'}
-        passed=(response.status_code==200 and time.monotonic()-began<=config['duration_s'] and
+        status=asyncio.run(readiness_status(config['origin'],token,context,deadline))
+        if time.monotonic()>=deadline:raise TimeoutError
+        if 300<=status<400:return {**result,'reason':'redirect_rejected'}
+        passed=(status==200 and
             all(item['passed'] for item in config['cases'].values()))
         result.update(qualified=passed,qualification='qualified' if passed else 'not_qualified',
             reason='operator_observations_verified' if passed else 'deployment_cases_failed',
             calls=1,case_evidence={name:item['evidence_sha256'] for name,item in config['cases'].items()})
+    except TimeoutError:result['reason']='deployment_deadline_exceeded'
+    except httpx.TimeoutException:result['reason']='deployment_probe_timeout'
     except Exception:result['reason']='deployment_probe_failed'
     if len(json.dumps(result).encode())>config['maximum_report_bytes']:
         return {key:value for key,value in {**result,'qualified':False,'qualification':'not_qualified',

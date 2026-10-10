@@ -12,6 +12,22 @@ from psycopg.conninfo import conninfo_to_dict,make_conninfo
 
 from .qualification import digest,number,receipt,validate_profile
 from .stack import OwnedStack,command
+from .manifest import validate_resource
+
+def refresh_replica_endpoint(stack,name):
+    identifier=stack.manifest['replica_ids'][name]
+    state=json.loads(command(stack.engine,'inspect',identifier))[0]
+    validate_resource(state,identifier,stack.owner)
+    ports=state.get('NetworkSettings',{}).get('Ports',{}).get('8080/tcp')
+    if (type(ports) is not list or len(ports)!=1 or type(ports[0]) is not dict or
+        ports[0].get('HostIp')!='127.0.0.1' or type(ports[0].get('HostPort')) is not str or
+        not ports[0]['HostPort'].isascii() or not ports[0]['HostPort'].isdigit() or
+        not 1<=int(ports[0]['HostPort'])<=65535):
+        raise ValueError('owned loopback replica endpoint required')
+    endpoint='http://127.0.0.1:'+ports[0]['HostPort']
+    stack.manifest['endpoints'][name]=endpoint
+    stack._save()
+    return endpoint
 
 def evaluate(profile,evidence):
     profile=validate_profile(profile)
@@ -105,6 +121,7 @@ def run(stack,profile):
             service.write_text(json.dumps(replacement));changed=True
             command(engine,'start','-a',stack.manifest['runtime_config_job'])
             command(engine,'start',replica)
+            config['b']=refresh_replica_endpoint(stack,'b')
             deadline=time.monotonic()+min(60,profile['maximum_rto_s']+1)
             while True:
                 try:
@@ -140,3 +157,4 @@ def run(stack,profile):
                 command(engine,'start','-a',stack.manifest['runtime_config_job'])
                 command(engine,'stop','--time','10',stack.manifest['replica_ids']['b'])
                 command(engine,'start',stack.manifest['replica_ids']['b'])
+                config['b']=refresh_replica_endpoint(stack,'b')

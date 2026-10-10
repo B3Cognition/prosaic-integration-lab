@@ -59,6 +59,12 @@ logical backup/restore evidence for that fixture/profile, not HA, PITR or actual
 primary destruction. Private dump and DSNs remain in the private owned directory
 until verified cleanup.
 
+After each replica restart, recovery inspects and verifies the same exact owned
+container and its loopback port. The local endpoint and ownership manifest are
+updated before readiness and owner reads, including the final restart on the
+original configuration. Ephemeral port changes therefore do not become stale
+readiness probes.
+
 ## Private staging inputs
 
 ```sh
@@ -84,7 +90,12 @@ Each operator-controlled observation has a boolean `passed`, a lowercase
 64-character `evidence_sha256`, and `observed_at` within the last hour. The tool
 does not manufacture those observations or execute rotation/outage operations.
 It makes one bounded HTTPS readiness read with the supplied token and CA; all
-redirects are rejected. It acquires no tokens, changes no issuer settings and
+redirects are rejected. An overall cancellation deadline covers connection, TLS
+and response headers, with remaining time applied to HTTP operations. Readiness
+uses status only: the response body limit is zero bytes, and the streamed response
+and client close without consuming the body. Frequent header bytes cannot extend
+the deadline; expiry returns `not_qualified` with a fixed reason. It acquires no
+tokens, changes no issuer settings and
 makes no paid inference calls. Public receipts include only configuration/case
 digests, counts and fixed reasons; URLs, JWT claims, tokens and key paths remain
 private. Qualification is limited to the supplied observations and that read.
