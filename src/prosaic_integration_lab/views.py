@@ -40,3 +40,19 @@ def public_usage(report):
                'unsupported_calls', 'partial_calls', 'unavailable_assessment_calls', 'estimated_amounts',
                'fully_costed', 'billing_eligible', 'coverage', 'excluded_resources', 'as_of')
     return {name: report[name] for name in allowed}
+
+
+def public_conversation_history(session_id,messages,*,max_bytes=4194304+512):
+    """Only the public role-aware message contract may leave the host."""
+    import json
+    documents=[]
+    for message in messages:
+        item=message.to_dict()
+        if (type(item) is not dict or item.get('role') not in {'user','assistant','tool'} or
+                set(item)-{'role','content','turnStatus','failureCode'}):
+            raise ValueError('invalid conversation history')
+        documents.append(item)
+    result={'version':1,'sessionId':session_id,'messages':documents}
+    if len(json.dumps(result,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8'))>max_bytes:
+        raise ValueError('conversation history limit')
+    return result

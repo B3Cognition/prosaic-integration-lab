@@ -59,16 +59,22 @@ class Execution:
         if config.get('native'):
             from .native_execution import NativeExecution
             self.native = NativeExecution(self)
+        self.conversation=None
+        if config.get('conversation'):
+            from .conversation_execution import ConversationExecution
+            self.conversation=ConversationExecution(self)
 
     def ready(self):
         self.metadata.check_ready()
         self.store.check_ready()
         self.recorder.check_ready()
+        if self.conversation is not None:self.conversation.ready()
 
     def close(self):
         self.operations.close()
         self.reads.close()
         self.store.close()
+        if self.conversation is not None:self.conversation.close()
 
     def harness(self, reservation):
         if reservation['workflow'] == 'native':

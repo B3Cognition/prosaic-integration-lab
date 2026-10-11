@@ -25,6 +25,13 @@ def main():
         raise RuntimeError('Harness explicit migration failed')
     PostgresRecorder(migration, namespace='provision', environment='sandbox').initialize()
     migrate(migration,runtime_role='app_runtime')
+    if 'conversation_runtime' in config['roles']:
+        from prosaic_harness_postgres import PostgresSessionStore
+        from prosaic_integration_lab.conversation_schema import initialize
+        store=PostgresSessionStore(migration,namespace='provision')
+        try:store.initialize()
+        finally:store.close()
+        initialize(migration,runtime_role='app_runtime')
     if 'billing_exporter' in config['roles']:
         from prosaic_integration_lab.billing_store import migrate as migrate_billing
         migrate_billing(migration)
@@ -34,6 +41,11 @@ def main():
         conn.execute('GRANT SELECT ON ALL TABLES IN SCHEMA prosaic_harness TO harness_runtime')
         conn.execute('GRANT INSERT,UPDATE ON prosaic_harness.leases,prosaic_harness.runs TO harness_runtime')
         conn.execute('GRANT INSERT ON prosaic_harness.receipts TO harness_runtime')
+        if 'conversation_runtime' in config['roles']:
+            conn.execute('GRANT USAGE ON SCHEMA prosaic_harness_conversations TO conversation_runtime')
+            conn.execute('GRANT SELECT ON prosaic_harness_conversations.schema_version TO conversation_runtime')
+            conn.execute('GRANT SELECT,INSERT,UPDATE ON prosaic_harness_conversations.leases,prosaic_harness_conversations.sessions TO conversation_runtime')
+            conn.execute('GRANT SELECT,INSERT ON prosaic_harness_conversations.receipts TO conversation_runtime')
         conn.execute('GRANT SELECT,INSERT ON prosaic_metering_intents,prosaic_metering_observations TO accounting_runtime')
         conn.execute('GRANT UPDATE ON prosaic_metering_intents TO accounting_runtime')
         conn.execute('GRANT USAGE ON SCHEMA lab_app TO app_runtime')

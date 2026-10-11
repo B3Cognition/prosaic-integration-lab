@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "sourceMessageId": {"type": "string", "minLength": 1, "maxLength": 128},
+    "interactionRef": {"type": "string", "minLength": 1, "maxLength": 512},
+    "choice": {"type": ["string", "null"], "maxLength": 128},
+    "response": {"type": ["object", "null"]},
+    "ambiguous": {"type": "boolean"}
+  },
+  "required": ["sourceMessageId", "interactionRef", "ambiguous"],
+  "additionalProperties": false
+}
