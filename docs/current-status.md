@@ -14,10 +14,14 @@ The documentation-only checkpoint `e283752` records the qualified `59ea44b`
 source and its original release assets. Prior candidate receipts retain their
 original sources.
 
-Unreleased milestones 1 and 2 extend native transport/SQL fault coverage,
+Milestones 1 and 2 extend native transport/SQL fault coverage,
 populated native logical restoration, tier routing and ordinary public-index
-consumer adoption. Their new collection contract is 230 cases per required cell;
-it needs separate exact-source qualification. Current verification and limits are
+consumer adoption. Source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc` passed the
+[four-cell matrix](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38128089071):
+230 cases per cell / 920 total, zero failures/errors/test skips, 32 lane and four
+demo cleanups verified. Each cell passed 744 source tests and fresh public-index
+adoption. Actual local Qwen default/balanced 7B and strong 27B routing passed.
+These Lab changes are not a new SDK release. Current verification and limits are
 recorded in the [milestone ledger](verification/production-readiness-m1-m2-2026-10-11.md).
 
 The earlier candidate train passed all four required native Linux cells in

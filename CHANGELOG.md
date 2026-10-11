@@ -10,6 +10,11 @@
   smoke, and required ordinary PyPI consumer adoption with dependency resolution.
 - New acceptance collection contract of 230 cases per platform/database cell;
   actual qualification is recorded separately in the milestone ledger.
+- Correct native recovery CLI application imports in SDK-only environments and
+  public adoption isolation from mixed-case/system proxies, netrc and keyring.
+- Qualify milestones 1 and 2 at source `8f60c58`: 920 required cases across four
+  Linux/database cells, zero failures/test skips, 32+4 verified cleanups; 744
+  source tests per cell and actual local Qwen tier routing passed.
 
 ## 0.3.0 — 2026-10-11
 

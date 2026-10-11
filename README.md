@@ -221,6 +221,10 @@ are described in [release gates](docs/release-gates.md) and
 cases per platform/database cell; the Lab 0.3.0 release retains its original
 864-case evidence. Current milestone evidence and remaining limits are in the
 [production readiness ledger](docs/verification/production-readiness-m1-m2-2026-10-11.md).
+The added checks passed all 920 cases on Linux AMD64/ARM64 × PostgreSQL 16/18
+at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; use the ledger's pinned
+checkout instructions to reproduce that suite. Actual local routing also passed
+default/balanced Qwen 7B and strong Qwen 27B. SDK release pins remain unchanged.
 
 The eight lanes cover adversarial service inputs, identity, TLS ingress, Lago,
 native SQL persistence, native execution/effect recovery, original-release
