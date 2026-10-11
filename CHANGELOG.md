@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0 — in preparation
+
 - Native provider transport faults before/after consequential tools and live SQL
   partition recovery with observed lease takeover and late-owner fencing.
 - Populated native logical restoration of proposals, structured pauses, saved
