@@ -89,6 +89,19 @@ the direct native recovery CLI lacked the native demo's source setup. This is a
 Lab runner defect; the public SDK pins do not need a change. Its correction must
 be verified outside pytest's path setup and through actual restore acceptance.
 
+The corrected native CLI reuses the native demo's current-application source
+setup while retaining installed SDK imports and existing candidate checks. Its
+isolated `python -I` subprocess regression starts without the application,
+admits the actual approved graph and loads the public journal before allocation.
+The source suite reached 741 passes, zero skips and one existing warning; narrow
+independent review found no substantive issue.
+The [corrected direct restore run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38126892849)
+at `eba4ea7a448b6002a97d3b1eba6ac7bbecd20f23` qualified all four cells, with
+verified cleanup in all four original safe receipts. The temporary diagnostic
+workflow input is now removed; normal required checks and all eight lanes are
+restored for the complete matrix rerun. Direct success alone does not close the
+milestones.
+
 Logical restoration uses a second database on the same owned primary and a fresh
 replica. It does not certify primary destruction, HA/PITR, long native soak,
 external-effect rollback, deployment identity/TLS or customer invoices.
