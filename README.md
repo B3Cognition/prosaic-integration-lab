@@ -44,13 +44,24 @@ owned PostgreSQL and measured synthetic inference.
 
 ## Try the native workflow
 
-The [Lab 0.3.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+The [Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
 consumes the five published `b3-prosaic`
 patch wheels through the exact-version [active manifest](dependencies/releases.json).
 The patch train contains seven upstream reliability fixes. Use a new environment;
 historical manifests, candidate caches and verification receipts are preserved.
-The [public adoption ledger](docs/verification/public-release-adoption-2026-10-11.md#released-package-native-qualification)
-records successful [run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605)
+The [release closure](docs/verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure)
+records [run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985)
+at source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`: all four Linux
+AMD64/ARM64 × PostgreSQL 16/18 cells, 920 required cases, zero failures/errors/
+test skips and all 32 lane plus four separate demo cleanups verified. Each cell
+passed 744 source tests and ordinary public-index adoption. This release adds
+native fault/restoration qualification and tier-routing checks; SDK pins stay
+unchanged.
+
+The historical [Lab 0.3.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+remains recorded in the
+[public adoption ledger](docs/verification/public-release-adoption-2026-10-11.md#released-package-native-qualification):
+successful [run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605)
 at release source `59ea44b97224415e22fec64c2b9bf39bd9503276`: all four native
 cells, 864 required cases, zero failures/errors/skips and all 32 lane plus four
 demo cleanups verified. The earlier
@@ -64,7 +75,7 @@ distributions share import paths and must not be installed together. Podman is
 accepted by the runner but is not a verified path here.
 
 ```sh
-git clone --branch v0.3.0 https://github.com/B3Cognition/prosaic-integration-lab.git
+git clone --branch v0.4.0 https://github.com/B3Cognition/prosaic-integration-lab.git
 cd prosaic-integration-lab
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
@@ -104,8 +115,10 @@ real-model calls are made. Repeat with `--postgres-version 18` if needed.
 
 The normal package-index channel no longer depends on retained Actions artifacts.
 [The publication checkpoint](docs/current-status.md#publication-and-deployment-boundaries)
-records verified SDK and Lab 0.3.0 publication. This documentation follow-up
-records the qualified `59ea44b` source; it does not rebuild or retag the release.
+records the SDK and Lab release evidence. The earlier documentation-only
+checkpoint `e283752` records the qualified Lab 0.3.0 source `59ea44b`; its tag
+and original assets remain unchanged. The current documentation records the
+separate Lab 0.4.0 source and original builds.
 
 ### Retained candidate recipe
 
@@ -221,9 +234,10 @@ are described in [release gates](docs/release-gates.md) and
 cases per platform/database cell; the Lab 0.3.0 release retains its original
 864-case evidence. Current milestone evidence and remaining limits are in the
 [production readiness ledger](docs/verification/production-readiness-m1-m2-2026-10-11.md).
-The added checks passed all 920 cases on Linux AMD64/ARM64 × PostgreSQL 16/18
-at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; use the ledger's pinned
-checkout instructions to reproduce that suite. Actual local routing also passed
+The original milestone checks passed all 920 cases on Linux AMD64/ARM64 ×
+PostgreSQL 16/18 at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; the
+ledger retains that source's pinned checkout instructions. Lab 0.4.0 passed its
+own exact-source matrix at `f47328d` as recorded above. Actual local routing passed
 default/balanced Qwen 7B and strong Qwen 27B. SDK release pins remain unchanged.
 
 The eight lanes cover adversarial service inputs, identity, TLS ingress, Lago,

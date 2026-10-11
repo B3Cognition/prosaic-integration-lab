@@ -4,8 +4,10 @@ Checkpoint: 2026-10-09, first working synthetic consumer on a local feature bran
 
 ## Release checkpoint
 
-For the current published ecosystem and Lab 0.3.0 release, read
+For the current published ecosystem and Lab 0.4.0 release at `f47328d`, read
 [the current delivery status](current-status.md) and
+[the release closure](verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure).
+The historical Lab 0.3.0 release remains recorded in
 [the public adoption ledger](verification/public-release-adoption-2026-10-11.md).
 The checkpoint and release ledger below retain their historical versions and
 evidence.

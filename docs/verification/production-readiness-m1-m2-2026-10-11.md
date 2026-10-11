@@ -5,6 +5,10 @@ The maintainer authorized native faults/restoration, ordinary public-index
 adoption and local Qwen tier routing. SDK release pins remain unchanged.
 This ledger records new work; Lab 0.3.0 historical evidence is preserved.
 
+The [Lab 0.4.0 release closure](#lab-040-release-closure) below records a separate
+final source, matrix and package build. The milestone evidence that follows
+retains its original `8f60c58` source and local Qwen proof.
+
 Milestones 1 and 2 are qualified at source
 `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`. The final four-cell matrix passed
 920 required cases, zero failures/errors/test skips, 32 lane cleanups and four
@@ -215,3 +219,96 @@ three-call opt-in and host-owned endpoint/credential configuration.
 Logical restoration uses a second database on the same owned primary and a fresh
 replica. It does not certify primary destruction, HA/PITR, long native soak,
 external-effect rollback, deployment identity/TLS or customer invoices.
+
+## Lab 0.4.0 release closure
+
+Release: [Lab 0.4.0](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0),
+source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`.
+[Required integration acceptance run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985),
+attempt 1, passed all four normal Linux AMD64/ARM64 × PostgreSQL 16/18 cells.
+Original run/job/artifact records and downloaded summary bytes bind this result
+to the exact source: 230 required cases per cell / 920 total, zero failures/
+errors/test skips, all 32 lane cleanups and four separate demo cleanups verified.
+Each job passed 744 source tests with one known Starlette TestClient deprecation
+warning and ordinary public-index adoption. Every separate demo completed two
+independently counted synthetic calls, zero unresolved calls and no billing
+eligibility. Conditional candidate steps were skipped; no required test was skipped.
+
+| Cell | Artifact ID | Original archive SHA256 | Required receipt SHA256 |
+| --- | --- | --- | --- |
+| ARM64 / PostgreSQL 16 | 11706385936 | `c9d65635eb27267db3be3242ce5860769c529ac097d78579ff23a959eb04a560` | `b3a7856366a8f9cefcab296cffbd3e72185148f37bf31d0e8047b0737226d948` |
+| ARM64 / PostgreSQL 18 | 11706036357 | `9050035f6884fa6cf28d610e68751fdd59280a9f6b07a076a112c50a7e937fc4` | `3bf33c14601b4214d9e0cc994b6e0c8285b146a68285e48f7146cdf6a3463bcc` |
+| AMD64 / PostgreSQL 16 | 11706146485 | `fd4c69d3fc5c09a383a090bb236944edff4df44b994af63063b8be67a3885c75` | `4fcc6f58a8028f8a7f8171d78d12c673691236161350bedb243f1feec756f057` |
+| AMD64 / PostgreSQL 18 | 11705571408 | `2b61d9e8867c471bf212f45102463bde3b485a9c9d5a82d7ed4c69313d819d75` | `8a2f5acabd0a2934c7854b24c93ff3daeba230bd80fc2b4c840ee2705d15962a` |
+
+The capacity fixture now uses six seconds of offered work across two
+three-second fairness windows and 18 workflows. Its two-second P95 target,
+correctness, row-growth, read and accounting assertions remain required; the
+recovery profiles are unchanged. Passing summaries establish that the assertions
+passed at this source. The safe CI upload omits private measured capacity and
+restore scalars, so it does not establish an exact measured P95. Prior failed
+receipts remain historical evidence; their omitted failure details were not
+recovered from the safe summaries.
+
+The SDK manifest remains
+`37a7b0dcf7bffa1c64481aafc7173e947c1e083616adcf50112e53022d589aca`:
+Core 0.4.1, Runtime 0.8.1/recorder 0.2.1 and Harness 0.7.1/store 0.2.1.
+The earlier three-call local Qwen proof remains separate; the release matrix
+makes no additional real-model or deployment certification claim.
+
+Clean exact-source builds and release metadata have the following hashes:
+
+| Artifact | SHA256 |
+| --- | --- |
+| `prosaic_integration_lab-0.4.0-py3-none-any.whl` | `9ad6584e1c8ffa8ed59fff5b60cd20d6d282c3419fac2bc1767beba68e7a8c79` |
+| `prosaic_integration_lab-0.4.0.tar.gz` | `4a6ac1ea1496e34727cea61ff9fc9f30440e46a6c70ff81c5c15301f5dbb8731` |
+| `SHA256SUMS-0.4.0.txt` | `1203db0cf94a7b717dc3ed5a1c8831054b75e8578350e14bf153ccfca4a596cf` |
+| `VERIFICATION-0.4.0.json` | `b4ed5aed15cd69ea5a73fb30452cf45b8fa58bb2dd59eea5c99666b8ecadf0a9` |
+| Exact-source Git archive, `source.tar` | `08a2cdff5a7449437ecd5af9241236df5d0a8f272bf4cd5c42fcb06490cfdc4f` |
+
+The annotated `v0.4.0` tag points to the qualified source. All four published
+release assets were downloaded into a fresh directory and matched the original
+bytes, GitHub API sizes/digests and checksum entries. Lab 0.3.0's tag and original
+package/verification digests remain unchanged. This documentation checkpoint
+does not rebuild the released packages or move either tag.
+
+The Git archive matches all 256 tracked files. The sdist retains 251 tracked
+files byte-for-byte plus seven standard generated metadata files; its unchanged
+manifest omits five historical JSON receipts that remain in Git and the source
+archive. All 82 public build inputs, the three host extras, 40 Markdown documents
+and 15 assets are retained. The 59-file wheel contains all 27 application and
+27 runner Python modules byte-for-byte plus five standard metadata files, with
+verified `RECORD` hashes and sizes. No private logs, credentials, local run state,
+virtual environments or caches enter the artifacts.
+
+A fresh wheel install passed version/import ownership and CLI startup checks
+from a neutral directory. The extracted sdist passed all 744 tests with zero
+failures/errors/skips when supplied an explicit `LAB_HISTORY_TEST_REPOSITORY`:
+the historical upgrade regression needs a separate Git checkout containing
+the original Lab 0.2.0 commit, which packaging does not embed.
+
+To reproduce the release, clone the stable tag and follow the
+[fresh public environment and image recipe](../../README.md#try-the-native-workflow).
+`git rev-parse HEAD` must report the full `f47328d` source above. After that setup:
+
+```sh
+.venv-public/bin/python -m pytest -q
+.venv-public/bin/python scripts/verify_public_adoption.py \
+  --manifest dependencies/releases.json --export reports/public-adoption.json
+.venv-public/bin/python -m build
+.venv-public/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+.venv-public/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
+.venv-public/bin/python scripts/required_acceptance.py \
+  --postgres-version 16 --export reports/required-pg16.json
+.venv-public/bin/python scripts/required_acceptance.py \
+  --postgres-version 18 --export reports/required-pg18.json
+.venv-public/bin/python -m lab_runner demo --mode native --postgres-version 18
+```
+
+CI verifies both native Linux architectures. Local acceptance qualifies only
+the actual host architecture. For extracted-sdist tests, set
+`LAB_HISTORY_TEST_REPOSITORY` to the absolute path of this full-history checkout
+before running the pytest command. Logical restoration still uses a second database
+on the same owned primary and a fresh replica; HA/PITR, primary destruction,
+long soak capacity, live deployment identity/TLS and customer invoicing require
+separate acceptance. Lab 0.3.0 assets and all earlier evidence remain unchanged.

@@ -12,10 +12,19 @@ The active [release manifest](../dependencies/releases.json) pins actual public
 download URLs, exact versions, original wheel hashes and qualified source
 commits. It selects Core 0.4.1, Runtime 0.8.1/recorder 0.2.1 and Harness
 0.7.1/store 0.2.1, whose PyPI and GitHub bytes match the qualified originals.
-Use a fresh `.venv-public` environment. [Lab 0.3.0 is published](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+Use a fresh `.venv-public` environment. The current
+[Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
+is at source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`, qualified by
+[run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985):
+920 required cases across four Linux/database cells, zero failures/errors/test
+skips and all 32 lane plus four separate demo cleanups verified. See its
+[release closure](verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure).
+The SDK pins above remain unchanged.
+
+The historical [Lab 0.3.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0) was published
 at source `59ea44b97224415e22fec64c2b9bf39bd9503276`, qualified by released-mode
 [run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605).
-This documentation follow-up records that exact release; see
+Its original source and artifacts remain preserved; see
 [current status](current-status.md). The separate
 [candidate profile](../dependencies/sdk-candidates.json), candidate cache and
 earlier receipts remain available for reproducing their original evidence.

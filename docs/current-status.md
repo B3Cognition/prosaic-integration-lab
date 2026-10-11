@@ -1,6 +1,20 @@
 # Current delivery status
 
-Checkpoint: 2026-10-11. [Lab **0.3.0** is published](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+Checkpoint: 2026-10-11. [Lab **0.4.0**](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
+is the current release at source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`.
+[Released-package run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985),
+attempt 1, passed all four Linux AMD64/ARM64 × PostgreSQL 16/18 cells: 230
+required cases per cell / 920 total, zero failures/errors/test skips, 32 lane
+cleanups and four separate demo cleanups verified. Each cell passed 744 source
+tests with one known Starlette deprecation warning and fresh ordinary-index
+adoption. The release retains the same five public SDK pins. Its capacity fixture
+measures 18 workflows across two three-second fairness windows while retaining
+the two-second latency target and existing correctness/accounting gates; recovery
+profiles remain unchanged. The safe CI summaries do not expose an exact measured
+P95. Package hashes and reproduction commands are in the
+[release closure](verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure).
+
+The prior [Lab **0.3.0** release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0) was published
 at source `59ea44b97224415e22fec64c2b9bf39bd9503276` with the verified public SDK
 patch train. [Released-package run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605)
 passed all four Linux AMD64/ARM64 × PostgreSQL 16/18 cells: 864 required cases,
@@ -21,8 +35,8 @@ consumer adoption. Source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc` passed the
 230 cases per cell / 920 total, zero failures/errors/test skips, 32 lane and four
 demo cleanups verified. Each cell passed 744 source tests and fresh public-index
 adoption. Actual local Qwen default/balanced 7B and strong 27B routing passed.
-These Lab changes are not a new SDK release. Current verification and limits are
-recorded in the [milestone ledger](verification/production-readiness-m1-m2-2026-10-11.md).
+These Lab changes are not a new SDK release. That milestone's verification and
+limits are recorded in the [milestone ledger](verification/production-readiness-m1-m2-2026-10-11.md).
 
 The earlier candidate train passed all four required native Linux cells in
 [run 38061354170](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170),
@@ -193,6 +207,13 @@ gate at `59ea44b`. The remote annotated `v0.3.0` tag resolves to that exact
 source. Actual public wheel/sdist, checksum and verification downloads match
 the original release assets. Their identities and native receipts are recorded
 in the [public adoption ledger](verification/public-release-adoption-2026-10-11.md).
+
+Lab 0.4.0 has a separate tag and original wheel/sdist builds at `f47328d` with
+the successful final matrix recorded above. This documentation follow-up records
+that release; it does not rebuild its assets or move either Lab release tag.
+The earlier `8f60c58` milestone measurements and local Qwen proof retain their
+original sources and scope. See the
+[release closure](verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure).
 
 Synthetic fixture success does not certify a live provider, customer billing,
 deployment identity/TLS, long soak capacity, HA or PITR. Those qualifications
