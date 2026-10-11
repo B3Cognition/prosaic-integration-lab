@@ -62,7 +62,23 @@ Local Docker Desktop was opened, but both the engine and desktop status timed
 out; its UI inspection also timed out. No fixture was allocated, and no shared
 container or engine restart was performed. Exact-source Linux AMD64/ARM64 ×
 PostgreSQL 16/18 CI remains required before the new native cases can be claimed
-qualified. Actual matrix receipts and independent review will be appended here.
+qualified.
+
+The first [full matrix run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38124891877)
+tested exact source `13d52d28bff0ce7cad24174b4c82e0244b987570`. All four cells
+passed the 730 source tests, ordinary public-index adoption, immutable consumer
+build and exact Lab 0.2.0 baseline build. Seven required lanes passed in every
+cell, including all 53 native cases with provider faults and live SQL partition
+takeover. The qualification lane ran all three cases but failed native restore
+in every cell: 916 passes and four failures across the required 920 cases, zero
+test skips, and all 32 outer lane cleanups verified. Native adoption demos did
+not run after the gate failure. The milestones remain unqualified.
+
+Diagnosis uses closed phase/category receipts, with no arbitrary exception
+messages or captured state exported. A temporary direct native restore dispatch
+uses distinct `diagnostic-native-restore-*` check names and cannot satisfy the
+normal required acceptance checks. The complete matrix must be rerun after a
+confirmed correction; diagnostic success alone is insufficient.
 
 Logical restoration uses a second database on the same owned primary and a fresh
 replica. It does not certify primary destruction, HA/PITR, long native soak,

@@ -9,6 +9,10 @@ on:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
         default: false
+      native_restore_diagnostic:
+        description: Diagnose native logical restore with separate non-acceptance check names
+        type: boolean
+        default: false
       core_run_id:
         description: Successful exact-source Core Publish SDK run
         type: string
@@ -37,7 +41,7 @@ permissions:
   contents: read
 jobs:
   acceptance:
-    name: acceptance-${{ matrix.runner }}-pg${{ matrix.postgres }}
+    name: ${{ inputs.native_restore_diagnostic && 'diagnostic-native-restore' || 'acceptance' }}-${{ matrix.runner }}-pg${{ matrix.postgres }}
     strategy:
       fail-fast: false
       matrix:
@@ -53,6 +57,9 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Reject mixed candidate and diagnostic modes
+        if: ${{ inputs.candidate && inputs.native_restore_diagnostic }}
+        run: exit 1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
@@ -95,28 +102,61 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest .cache/sdk-hardening/manifest.json --dependency-mode candidate --tag prosaic-integration-lab:candidate
       - name: Build exact released Lab 0.2.0 baseline
+        if: ${{ !inputs.native_restore_diagnostic }}
         run: |
           .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
           .venv/bin/python -c "from lab_runner.legacy_upgrade import build_baseline; build_baseline()"
       - name: Required real-stack gates
-        if: ${{ !inputs.candidate }}
+        if: ${{ !inputs.candidate && !inputs.native_restore_diagnostic }}
         run: .venv/bin/python scripts/required_acceptance.py --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
       - name: Required exact candidate real-stack gates
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && !inputs.native_restore_diagnostic }}
         run: .venv/bin/python scripts/required_acceptance.py --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
       - name: Run documented native adoption demo with released SDKs
-        if: ${{ !inputs.candidate }}
+        if: ${{ !inputs.candidate && !inputs.native_restore_diagnostic }}
         run: .venv/bin/python -m lab_runner demo --mode native --postgres-version ${{ matrix.postgres }}
       - name: Run documented native adoption demo with exact candidate SDKs
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && !inputs.native_restore_diagnostic }}
         run: .venv/bin/python -m lab_runner demo --mode native --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Diagnose native logical restore
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_restore_diagnostic && !inputs.candidate }}
+        run: |
+          mkdir -p reports
+          .venv/bin/python - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+          result = subprocess.run([sys.executable, '-m', 'lab_runner', 'qualify-recovery',
+              '--mode', 'native', '--profile', 'configs/qualification.synthetic.json',
+              '--postgres-version', '${{ matrix.postgres }}'], capture_output=True, text=True)
+          receipts = []
+          for line in result.stdout.splitlines():
+              try:
+                  value = json.loads(line)
+              except ValueError:
+                  continue
+              if type(value) is dict and 'passed' in value:
+                  receipts.append(value)
+          if len(receipts) != 1:
+              safe = {'passed': False, 'reason': 'missing_diagnostic_receipt'}
+          else:
+              fields = ('qualified', 'qualification', 'fixture_passed', 'reason',
+                  'logical_restore_only', 'native_restore_diagnostic', 'passed', 'cleanup')
+              safe = {key: receipts[0][key] for key in fields if key in receipts[0]}
+          Path('reports/native-restore-pg${{ matrix.postgres }}.json').write_text(json.dumps(safe)+'\n')
+          sys.exit(result.returncode or (0 if safe.get('passed') is True else 1))
+          PY
+        # The CLI exports closed diagnostics and still verifies owned cleanup.
+      - name: Show safe native restore diagnostic
+        if: ${{ always() && inputs.native_restore_diagnostic }}
+        run: cat reports/native-restore-pg${{ matrix.postgres }}.json
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: acceptance-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          name: ${{ inputs.native_restore_diagnostic && 'diagnostic-native-restore' || 'acceptance' }}-${{ matrix.runner }}-pg${{ matrix.postgres }}
           path: |
             reports/required-pg${{ matrix.postgres }}.json
             reports/public-adoption-pg${{ matrix.postgres }}.json
+            reports/native-restore-pg${{ matrix.postgres }}.json
           if-no-files-found: error
           retention-days: 14

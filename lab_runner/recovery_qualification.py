@@ -114,6 +114,7 @@ def run(stack,profile):
         response=client.get(config['model']+'/stats');response.raise_for_status();return response.json()['calls']
     with httpx.Client(timeout=15,follow_redirects=False) as client:
         client.post(config['model']+'/control',json={'maximum_calls':required_calls}).raise_for_status()
+        current_phase='legacy_seed'
         try:
             for scenario,status in (('normal','waiting'),('missing_usage','blocked')):
                 client.post(config['model']+'/control',json={'scenario':scenario,'preserve_allowance':True}).raise_for_status()
@@ -127,6 +128,7 @@ def run(stack,profile):
             fixture=None
             if native:
                 from .native_restore import seed
+                current_phase='native_seed'
                 fixture=seed(stack,config,client)
                 evidence['native_mode']=True
             evidence['calls_before']=count(client)
@@ -136,6 +138,7 @@ def run(stack,profile):
                 for sequence in (1,2):
                     connection.execute('INSERT INTO lab_qualification.markers VALUES (%s,%s)',(sequence,time.time()))
             # pg_dump creates one transactionally consistent database snapshot.
+            current_phase='logical_backup'
             exported=subprocess.run([engine,'exec',identifier,'pg_dump','-U','postgres','-Fc','lab'],
                 capture_output=True,timeout=30)
             if exported.returncode or not exported.stdout or len(exported.stdout)>128*1024*1024:
@@ -151,7 +154,9 @@ def run(stack,profile):
             command(engine,'stop','--time','10',replica)
             b_stopped=True
             database='qualification_'+stack.owner
+            current_phase='new_database'
             command(engine,'exec',identifier,'createdb','-U','postgres','--owner=lab_migration',database)
+            current_phase='logical_restore'
             restored=subprocess.run([engine,'exec','-i',identifier,'pg_restore','-U','postgres',
                 '--exit-on-error','-d',database],input=archived.read_bytes(),capture_output=True,timeout=30)
             if restored.returncode:raise ValueError('logical restore failed')
@@ -160,13 +165,16 @@ def run(stack,profile):
                 parameters=conninfo_to_dict(replacement[key]);parameters['dbname']=database
                 replacement[key]=make_conninfo(**parameters)
             service.write_text(json.dumps(replacement));changed=True
+            current_phase='deliver_configuration'
             command(engine,'start','-a',stack.manifest['runtime_config_job'])
             if native:
+                current_phase='fresh_replica'
                 fresh='restored-'+uuid.uuid4().hex
                 config['b']=stack.start_replica(fresh)
             else:
                 command(engine,'start',replica)
                 config['b']=refresh_replica_endpoint(stack,'b')
+            current_phase='readiness'
             deadline=time.monotonic()+min(60,profile['maximum_rto_s']+1)
             while True:
                 try:
@@ -179,6 +187,7 @@ def run(stack,profile):
             with psycopg.connect(make_conninfo(**parameters),connect_timeout=5,options='-c statement_timeout=5000') as connection:
                 evidence['restored']=[row[0] for row in connection.execute('SELECT sequence FROM lab_qualification.markers ORDER BY sequence')]
             evidence.update(owner_verified=True,revision_verified=True,receipt_verified=True)
+            current_phase='legacy_verification'
             other=list(config['principals'])[1]
             for state in states:
                 path='/runs/'+state['run_id']
@@ -196,6 +205,7 @@ def run(stack,profile):
             evidence['unknown_usage_verified']=usage['unresolved_calls']==1 and usage['fully_costed'] is False
             if native:
                 from .native_restore import verify
+                current_phase='native_verification'
                 restored_config=dict(config)
                 for key in ('migration_dsn','harness_dsn','accounting_dsn','app_dsn'):
                     parameters=conninfo_to_dict(config[key]);parameters['dbname']=database
@@ -204,7 +214,14 @@ def run(stack,profile):
                 native_evidence['owner_verified'] &= evidence['owner_verified']
                 evidence.update(native_evidence)
             evidence['calls_after']=count(client)
+            current_phase='evaluation'
             return evaluate(profile,evidence,native_mode=native)
+        except Exception as error:
+            if not native:raise
+            from .native_restore import failure
+            diagnostic=failure(current_phase,error).diagnostic
+            return receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False,
+                reason='native_restore_failed',logical_restore_only=True,native_restore_diagnostic=diagnostic)
         finally:
             try:
                 client.post(config['model']+'/control',json={'preserve_allowance':True}).raise_for_status()

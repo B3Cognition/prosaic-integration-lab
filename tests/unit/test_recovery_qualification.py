@@ -2,6 +2,7 @@
 import pytest
 import hashlib
 import json
+from test_native_execution import native
 
 def identity():
     from test_qualification import profile
@@ -197,6 +198,77 @@ def test_native_capture_requires_committed_or_uncertain_outcome_contract(prepare
         validate_capture(captured,['a','b','c','d'],['p','q','r'])
 
 
+@pytest.mark.parametrize('field,mutation,category',[
+    ('receipts','empty','receipts_count'),('proposals','empty','proposals_count'),
+    ('proposals','identity','proposal_identity'),('reservations','identity','reservation_identity'),
+    ('snapshots','document','snapshot_contract'),('receipts','hash','receipt_integrity'),
+    ('journal','outcome','journal_contract'),('domain','amount','domain_contract')])
+def test_native_capture_failure_reports_only_closed_phase_and_category(prepared_v1,field,mutation,category):
+    from lab_runner.native_restore import validate_capture
+    captured=populated_capture(prepared_v1)
+    if mutation=='empty':captured[field]=[]
+    elif mutation=='identity':captured[field][0]['bundle_identity' if field=='proposals' else 'assets_hash']='PRIVATE_DSN'
+    elif mutation=='document':captured[field][0]['document']=None
+    elif mutation=='hash':captured[field][0]['sha256']='PRIVATE_SNAPSHOT'
+    elif mutation=='outcome':captured[field][0]['outcome']=None
+    elif mutation=='amount':captured[field][0]['amount']=2
+    with pytest.raises(ValueError) as failure:
+        validate_capture(captured,['a','b','c','d'],['p','q','r'])
+    assert getattr(failure.value,'diagnostic',None)=={'phase':'capture_validation','category':category}
+    assert 'PRIVATE' not in str(failure.value)
+
+
+def test_native_seed_waiting_check_matches_actual_sdk_filtered_interaction(native,monkeypatch):
+    """Exercise the real admitted graph/provider/view before the process-loss gate."""
+    import io
+    import urllib.request
+    import httpx
+    from fastapi.testclient import TestClient
+    from lab_runner import model,native_restore
+    from prosaic_integration_lab.native_execution import NativeExecution
+    execution,principal,_=native
+    definition=execution.host.config['native']['bundles'][0]
+    execution.host.config['fixture_events_url']='http://fixture/events'
+    definition.update(fixture_effects=True,journal_identity='fixture-journal-v1')
+    settings={'composition':True,'agents':['finder','reviewer','effecter'],'tools':['fixture_apply'],
+        'review_outputs':True,'response_schema':True}
+    definition['policies']['a']=settings
+    execution.host.config['native']['tenants']['a']={'bundle_version':'synthetic-v1',**settings}
+    current=NativeExecution(execution.host);current.proposals.connection=execution.proposals.connection
+    def stop_after_waiting(*args,**kwargs):raise RuntimeError('PRIVATE_SENTINEL')
+    monkeypatch.setattr(native_restore,'_crash',stop_after_waiting)
+    with TestClient(model.app) as fixture:
+        fixture.post('/control',json={'maximum_calls':8}).raise_for_status()
+        def transport(self,request,timeout):
+            response=fixture.post('/v1/chat/completions',json=json.loads(request.data))
+            response.raise_for_status()
+            class Response(io.BytesIO):
+                status=200
+                headers={'content-type':'application/json'}
+            return Response(response.content)
+        monkeypatch.setattr(urllib.request.OpenerDirector,'open',transport)
+        def service(request):
+            if request.url.path in ('/control','/stats'):
+                response=fixture.request(request.method,request.url.path,
+                    json=json.loads(request.content) if request.content else None)
+                return httpx.Response(response.status_code,json=response.json())
+            body=json.loads(request.content)
+            key=request.headers['Idempotency-Key']
+            if request.url.path=='/workflow-proposals':result=current.propose(principal,key,json.dumps(body))
+            elif request.url.path=='/native-runs':result=current.start_request(principal,key,body['proposal_id'],body['inputs'])
+            else:raise AssertionError('unexpected test route')
+            return httpx.Response(200,json=result)
+        before=fixture.get('/stats').json()['calls']
+        with httpx.Client(transport=httpx.MockTransport(service)) as client:
+            with pytest.raises(native_restore.NativeRestoreFailure) as failure:
+                native_restore.seed(object(),{'a':'http://app','b':'http://app','model':'http://model',
+                    'principals':{'owner':{},'other':{}}},client)
+        assert failure.value.diagnostic=={'phase':'receipt_barrier','category':'unexpected_failure'}
+        assert fixture.get('/stats').json()['calls']==before+2
+        assert 'PRIVATE_SENTINEL' not in str(failure.value)
+        fixture.post('/control',json={}).raise_for_status()
+
+
 def test_native_verifier_uses_public_journal_replay_and_uncertain_claim_without_permission(monkeypatch,prepared_v1):
     import copy
     import httpx
@@ -228,8 +300,8 @@ def test_native_verifier_uses_public_journal_replay_and_uncertain_claim_without_
     assert restored==original
     assert all(value is True for field,value in result.items() if field.endswith('_verified'))
 
-@pytest.mark.parametrize('restore_fails',[False,True])
-def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_path,monkeypatch,restore_fails):
+@pytest.mark.parametrize('failure_stage',['none','logical_restore','native_seed'])
+def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_path,monkeypatch,failure_stage):
     """Engine restart may reassign the same verified container's published port."""
     import httpx
     from types import SimpleNamespace
@@ -237,6 +309,7 @@ def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_pa
     from lab_runner.stack import OwnedStack
     from test_qualification import profile
     stack=object.__new__(OwnedStack)
+    stack.native_fixture=failure_stage=='native_seed'
     stack.directory=tmp_path;stack.secrets=tmp_path;stack.owner='a'*32;stack.engine='fixture-engine'
     stack.manifest={'owner':stack.owner,'database_id':'db','replica_ids':{'b':'replica-b'},
         'runtime_config_job':'delivery','endpoints':{'a':'http://127.0.0.1:1001',
@@ -245,6 +318,10 @@ def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_pa
         'harness_dsn':'dbname=lab','accounting_dsn':'dbname=lab','app_dsn':'dbname=lab'}
     (tmp_path/'host.json').write_text(json.dumps(config));(tmp_path/'service.json').write_text(json.dumps(config))
     monkeypatch.setattr(OwnedStack,'verify_owned',lambda self:True)
+    if failure_stage=='native_seed':
+        from lab_runner import native_restore
+        def failing_seed(*args):raise native_restore.NativeRestoreFailure('waiting_run','invalid_fixture')
+        monkeypatch.setattr(native_restore,'seed',failing_seed)
     class Connection:
         def __enter__(self):return self
         def __exit__(self,*args):pass
@@ -253,7 +330,7 @@ def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_pa
             if 'SELECT sequence' in query:return [(1,10.0),(2,11.0)]
     monkeypatch.setattr(recovery.psycopg,'connect',lambda *a,**k:Connection())
     def subprocess_run(arguments,**kwargs):
-        return SimpleNamespace(returncode=int(restore_fails and 'pg_restore' in arguments),stdout=b'fixture dump')
+        return SimpleNamespace(returncode=int(failure_stage=='logical_restore' and 'pg_restore' in arguments),stdout=b'fixture dump')
     monkeypatch.setattr(recovery.subprocess,'run',subprocess_run)
     clock={'value':0};port={'value':1002}
     def monotonic():clock['value']+=.1;return clock['value']
@@ -280,7 +357,14 @@ def test_restore_refreshes_owned_port_through_readiness_and_final_restart(tmp_pa
         return httpx.Response(200,json=states[int(path.split('/')[2])])
     real_client=httpx.Client
     monkeypatch.setattr(httpx,'Client',lambda **kwargs:real_client(transport=httpx.MockTransport(service),**kwargs))
-    if restore_fails:
+    if failure_stage=='native_seed':
+        result=recovery.run(stack,profile())
+        assert result['qualification']=='not_qualified' and result['qualified'] is False
+        assert result['native_restore_diagnostic']=={'phase':'waiting_run','category':'invalid_fixture'}
+        assert json.loads((tmp_path/'service.json').read_text())==config
+        assert stack.manifest['endpoints']['b']=='http://127.0.0.1:1002'
+        return
+    if failure_stage=='logical_restore':
         with pytest.raises(ValueError,match='logical restore failed'):recovery.run(stack,profile())
         assert stack.manifest['endpoints']['b']=='http://127.0.0.1:2002'
         assert json.loads((tmp_path/'service.json').read_text())==config
