@@ -205,6 +205,23 @@ preserves its original qualification evidence.
 Share the filtered native demo receipt or sanitized gate summaries; private
 `.lab` configurations, raw logs and backups stay local.
 
+To verify ordinary consumer installation independently of the locked image:
+
+```sh
+.venv-public/bin/python scripts/verify_public_adoption.py \
+  --manifest dependencies/releases.json --export reports/public-adoption.json
+```
+
+This resolves the supported five public packages with dependencies enabled in a
+fresh isolated environment, audits the exact wheel bytes and import ownership,
+and runs CLI, `pip check` and public workflow construction checks. Released CI
+requires it. Native transport/SQL fault tests and populated native logical restore
+are described in [release gates](docs/release-gates.md) and
+[qualification](docs/qualification.md). Their new collection contract is 230
+cases per platform/database cell; the Lab 0.3.0 release retains its original
+864-case evidence. Current milestone evidence and remaining limits are in the
+[production readiness ledger](docs/verification/production-readiness-m1-m2-2026-10-11.md).
+
 The eight lanes cover adversarial service inputs, identity, TLS ingress, Lago,
 native SQL persistence, native execution/effect recovery, original-release
 upgrade and bounded operational qualification. Synthetic fixture success does

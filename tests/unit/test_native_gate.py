@@ -9,7 +9,7 @@ from test_release_gates import receipt
 from test_native_execution import native
 
 
-@pytest.mark.parametrize('mode,count',[('native-persistence',26),('native',40),('legacy-upgrade',10),('qualification',2)])
+@pytest.mark.parametrize('mode,count',[('native-persistence',26),('native',53),('legacy-upgrade',10),('qualification',3)])
 def test_new_required_lanes_reject_partial_collection(mode,count):
     item=receipt(); item.update(mode=mode,test_count=count)
     if mode=='legacy-upgrade':

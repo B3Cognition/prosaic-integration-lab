@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Native provider transport faults before/after consequential tools and live SQL
+  partition recovery with observed lease takeover and late-owner fencing.
+- Populated native logical restoration of proposals, structured pauses, saved
+  receipts and completed/uncertain tool evidence on a fresh replica.
+- Deterministic default/balanced/strong tier routing, bounded opted-in local Qwen
+  smoke, and required ordinary PyPI consumer adoption with dependency resolution.
+- New acceptance collection contract of 230 cases per platform/database cell;
+  actual qualification is recorded separately in the milestone ledger.
+
 ## 0.3.0 — 2026-10-11
 
 - Native workflow catalogue, proposal admission and execution through public

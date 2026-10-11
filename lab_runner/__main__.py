@@ -223,7 +223,8 @@ def main():
         if args.mode == 'native-persistence':
             files = ['tests/acceptance/test_native_persistence.py','tests/acceptance/test_tool_journal.py']
         if args.mode=='native':
-            files=['tests/acceptance/test_native_workflows.py','tests/acceptance/test_native_effect_recovery.py']
+            files=['tests/acceptance/test_native_workflows.py','tests/acceptance/test_native_effect_recovery.py',
+                   'tests/acceptance/test_native_faults.py']
         if args.mode=='legacy-upgrade':files=['tests/acceptance/test_legacy_release_upgrade.py']
         if args.mode=='qualification':files=['tests/acceptance/test_operational_qualification.py']
         if args.command=='qualify':

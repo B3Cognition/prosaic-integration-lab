@@ -36,8 +36,17 @@ digest cache, manifest and clean image; active and historical release manifests
 remain unchanged. It never substitutes a branch checkout or published URL.
 Updating the acceptance suite also requires reviewing its count contract.
 
-The reviewed collection contracts are audit88, identity20, ingress5, Lago25,
-native-persistence26, native40, legacy-upgrade10 and qualification2. Counts must
+Released CI also installs the exact supported five-package train in a separate
+fresh environment through the ordinary PyPI resolver with dependencies enabled
+and caches disabled. It verifies archive and installed-payload hashes, isolated
+import ownership, CLI startup, `pip check` and public workflow construction. Its
+sanitized receipt is exported separately; unpublished candidates cannot pass a
+public-index adoption check by substituting their local artifacts.
+
+The current collection contracts are audit88, identity20, ingress5, Lago25,
+native-persistence26, native53, legacy-upgrade10 and qualification3 (230 per cell).
+The Lab 0.3.0 released evidence below retains its original 216-case contract;
+the added cases require fresh qualification of this source. Counts must
 match exactly, with zero skips. Native persistence verifies actual SQL ownership,
 immutable grants and storage bounds, concurrent migrations/reservations, every
 supported JSON input type, journal fencing and lost acknowledgements. It requires
@@ -45,6 +54,11 @@ the same exact candidate lineage as the HTTP and recovery lanes.
 Native exercises actual HTTP inference, two specialists and artifact
 provenance, check/gate, structured approval, current grants and retained bundles,
 fresh-process receipt adoption, finite budgets and a consequential fixture tool.
+Thirteen further cases cover accepted provider reset, truncated JSON, 429/503,
+malformed responses and deadline expiry before/after a committed tool, plus a
+live worker's SQL partition, observed lease expiry, takeover and late-owner
+fencing. Independent acceptance, usage and domain counts must reconcile; unknown
+usage never authorizes retry. The proxy belongs to the exact-owned inventory.
 The application owns that fixture's restricted SQL domain table with unique
 namespace/business key; journal claims and commits use real PostgreSQL. Separate
 observable barriers cover claim, handler entry, effect persistence and outcome

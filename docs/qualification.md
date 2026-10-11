@@ -10,6 +10,8 @@ execution. A profile is a strict version-1 JSON object; start with
 .venv/bin/python -m lab_runner qualify --profile configs/qualification.synthetic.json --postgres-version 18
 .venv/bin/python -m lab_runner qualify-recovery --profile configs/qualification.synthetic.json --postgres-version 16
 .venv/bin/python -m lab_runner qualify-recovery --profile configs/qualification.synthetic.json --postgres-version 18
+.venv/bin/python -m lab_runner qualify-recovery --mode native --profile configs/qualification.synthetic.json --postgres-version 16
+.venv/bin/python -m lab_runner qualify-recovery --mode native --profile configs/qualification.synthetic.json --postgres-version 18
 ```
 
 No lane skips an unavailable engine or missing deployment input. Reports retain
@@ -61,6 +63,20 @@ logical backup/restore evidence for that fixture/profile, not HA, PITR or actual
 primary destruction. Private dump and DSNs remain in the private owned directory
 until verified cleanup.
 
+`qualify-recovery --mode native` additionally requires allowances for eight
+provider calls and six run records before seeding. Three actual HTTP-admitted
+proposals create four native states: a composed structured-approval pause, a saved
+receipt before checkpoint, a completed consequential tool and an uncertain tool
+whose domain effect has persisted. The two legacy fixtures remain included.
+Restored reads use a fresh replica process against the second database on the
+same owned primary. Private bounded captures compare proposal/reference/bundle
+identity, frozen attribution and inputs, snapshots/revisions, receipt documents,
+interaction/usage, tool signatures/outcomes and domain rows. Completed journal
+claims replay; uncertain claims grant no dispatch token. Provider and handler
+counts cannot change during verification. Public output contains fixed
+verification booleans and populated counts; missing evidence cannot qualify.
+Original worker configuration is restored even if backup/restore fails.
+
 After each replica restart, recovery inspects and verifies the same exact owned
 container and its loopback port. The local endpoint and ownership manifest are
 updated before readiness and owner reads, including the final restart on the
@@ -102,5 +118,7 @@ makes no paid inference calls. Public receipts include only configuration/case
 digests, counts and fixed reasons; URLs, JWT claims, tokens and key paths remain
 private. Qualification is limited to the supplied observations and that read.
 
-Current native limitation: this host's Docker daemon timed out at the 15-second
-preflight. Native fairness, growth, latency and restore measurements are pending.
+The published Lab 0.3.0 matrix qualified the prior synthetic profiles; see
+[public adoption](verification/public-release-adoption-2026-10-11.md). New native
+fault/restore cases need their own exact-source matrix, recorded in the
+[milestone ledger](verification/production-readiness-m1-m2-2026-10-11.md).

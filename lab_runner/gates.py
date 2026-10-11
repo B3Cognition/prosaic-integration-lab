@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':40,'legacy-upgrade':10,'qualification':2}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3}
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
@@ -27,7 +27,8 @@ FAILURE_CASES={
         'test_restricted_role_cannot_replace_signature_or_fencing_token':'journal_role'},
     'qualification':{
         'test_real_fairness_reads_growth_and_usage_are_measured':'capacity',
-        'test_real_restore_cli_reports_measured_markers_and_verified_cleanup':'restore'},
+        'test_real_restore_cli_reports_measured_markers_and_verified_cleanup[legacy]':'restore',
+        'test_real_restore_cli_reports_measured_markers_and_verified_cleanup[native]':'native_restore'},
     'native':{
         'test_native_adoption_demo_runs_public_protocol_and_filtered_receipt':'native_demo',
         'test_native_graph_cross_worker_fresh_process_pause_approval_and_provenance':'native_graph',
@@ -56,7 +57,8 @@ FAILURE_CASES={
         'test_changed_operation_signature_conflicts_without_mutating_effect_evidence[arguments]':'effect_signature',
         'test_changed_operation_signature_conflicts_without_mutating_effect_evidence[version]':'effect_signature',
         'test_native_saved_receipt_adoption_durable_usage_and_no_duplicate_provider':'saved_receipt',
-        'test_native_interrupted_provider_requires_consent_and_preserves_unknown_usage':'interrupted_provider'},
+        'test_native_interrupted_provider_requires_consent_and_preserves_unknown_usage':'interrupted_provider',
+        'test_native_live_sql_partition_takeover_fences_late_a_and_allows_fresh_session':'live_sql_fence'},
     'legacy-upgrade':{
         'test_actual_baseline_generated_all_five_states_before_schema_upgrade':'legacy_states',
         'test_original_approval_revision_owner_and_zero_model_calls':'legacy_approval',
@@ -76,6 +78,10 @@ for name,parameters,code in (
     ('test_worker_loss_claim_effect_commit_never_infers_redispatch',
      ('tool-claimed-0-uncertain','tool-effect-1-uncertain','tool-committed-1-replay'),'effect_recovery')):
     FAILURE_CASES['native'].update({name+'['+parameter+']':code for parameter in parameters})
+FAILURE_CASES['native'].update({
+    'test_native_accepted_transport_fault_never_redispatches_or_duplicates_effect['+fault+'-'+phase+']':'provider_transport'
+    for fault in ('reset','truncated_json','429','503','malformed_shape','slow')
+    for phase in ('first','post-tool')})
 for name,parameters,code in (
     ('test_public_json_input_type_survives_native_reservation_and_replay',
      ('null','boolean','integer','float','string','array','object','nested'),'json_inputs'),

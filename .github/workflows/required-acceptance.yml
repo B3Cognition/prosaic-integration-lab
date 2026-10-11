@@ -83,6 +83,9 @@ jobs:
           .venv/bin/python -m pip check
       - name: Select installed CLI bindings
         run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Verify ordinary public-index consumer adoption
+        if: ${{ !inputs.candidate }}
+        run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
       - name: Unit and functional regressions
         run: .venv/bin/python -m pytest -q
       - name: Build immutable consumer
@@ -112,6 +115,8 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: acceptance-${{ matrix.runner }}-pg${{ matrix.postgres }}
-          path: reports/required-pg${{ matrix.postgres }}.json
+          path: |
+            reports/required-pg${{ matrix.postgres }}.json
+            reports/public-adoption-pg${{ matrix.postgres }}.json
           if-no-files-found: error
           retention-days: 14
