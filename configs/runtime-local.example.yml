@@ -7,10 +7,19 @@ limits:
   max_tool_rounds: 1
 routes:
   fast: local
+  balanced: local
+  strong: local-strong
 profiles:
   local:
     base_url: http://127.0.0.1:8000/v1
     model: mlx-community--Qwen2.5-Coder-7B-Instruct-4bit
+    api_key_file: ~/.omlx_token
+    max_tokens: 512
+    features:
+      streaming: false
+  local-strong:
+    base_url: http://127.0.0.1:8000/v1
+    model: ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ
     api_key_file: ~/.omlx_token
     max_tokens: 512
     features:
