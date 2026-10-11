@@ -38,7 +38,9 @@ Updating the acceptance suite also requires reviewing its count contract.
 
 Released CI also installs the exact supported five-package train in a separate
 fresh environment through the ordinary PyPI resolver with dependencies enabled
-and caches disabled. It verifies archive and installed-payload hashes, isolated
+and caches disabled. The verifier clears case-insensitive proxy variables,
+bypasses system proxies and disables netrc/keyring authentication and prompts.
+It verifies archive and installed-payload hashes, isolated
 import ownership, CLI startup, `pip check` and public workflow construction. Its
 sanitized receipt is exported separately; unpublished candidates cannot pass a
 public-index adoption check by substituting their local artifacts.

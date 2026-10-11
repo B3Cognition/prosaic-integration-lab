@@ -56,14 +56,18 @@ def verify_report(report, manifest):
 def isolated_environment():
     # Pip --isolated also ignores user configuration; remove inherited interpreter,
     # installer, proxy and TLS overrides before creating the fresh environment.
-    excluded = {'VIRTUAL_ENV', '__PYVENV_LAUNCHER__', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY',
-        'NO_PROXY', 'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy', 'REQUESTS_CA_BUNDLE',
+    excluded = {'VIRTUAL_ENV', '__PYVENV_LAUNCHER__', 'REQUESTS_CA_BUNDLE',
         'CURL_CA_BUNDLE', 'SSL_CERT_FILE', 'SSL_CERT_DIR'}
     environment = {name: value for name, value in os.environ.items()
-        if not name.startswith(('PYTHON', 'PIP_')) and name not in excluded}
+        if not name.startswith(('PYTHON', 'PIP_')) and not name.lower().endswith('_proxy')
+        and name not in excluded}
     # Pip honors this special file selector even with --isolated. It disables
     # system/site configuration too, including an unexpected extra index.
     environment['PIP_CONFIG_FILE'] = os.devnull
+    # Pip's session still trusts ambient Requests/urllib configuration under
+    # --isolated. Explicit bypass also blocks system proxies; NETRC prevents
+    # Requests and pip's own auth layer from consulting user credential files.
+    environment.update(no_proxy='*', NO_PROXY='*', NETRC=os.devnull)
     return environment
 
 
@@ -151,7 +155,7 @@ def verify(manifest, *, export=None):
         stage = 'venv'
         run([sys.executable, '-I', '-m', 'venv', venv], directory=directory, environment=environment)
         python = venv / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
-        pip = [python, '-I', '-m', 'pip', '--isolated']
+        pip = [python, '-I', '-m', 'pip', '--isolated', '--no-input', '--keyring-provider', 'disabled']
         pins = [f"{i['distribution']}=={i['version']}" for i in data['artifacts']]
         report = directory / 'private-pip-report.json'
         stage = 'resolve'

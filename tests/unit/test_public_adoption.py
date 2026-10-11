@@ -1,11 +1,14 @@
 """Ordinary-index commands and sanitized provenance without contacting PyPI."""
 import hashlib
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
 import json
 import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
+import threading
 
 import pytest
 from tests.functional.test_dependency_install import wheel_family
@@ -109,6 +112,10 @@ def test_fresh_adoption_uses_normal_resolver_audits_and_cleans_only_owned_temp(t
     assert json.loads(export.read_text()) == receipt
     assert 'secret' not in export.read_text() and '/sibling' not in export.read_text()
     assert cache.is_dir() and manifest.is_file()
+    for argv in commands:
+        if 'pip' in argv:
+            assert '--no-input' in argv
+            assert argv[argv.index('--keyring-provider') + 1] == 'disabled'
 
 
 def test_failed_installer_exports_no_raw_logs_or_report_and_removes_environment(tmp_path, monkeypatch):
@@ -152,3 +159,74 @@ def test_isolation_disables_global_pip_config_and_removes_inherited_proxies(monk
     environment = implementation().isolated_environment()
     assert environment['PIP_CONFIG_FILE'] == os.devnull
     assert 'HTTPS_PROXY' not in environment
+
+
+def test_isolation_blocks_mixed_case_and_system_proxies_and_ambient_netrc(monkeypatch, tmp_path):
+    fake = tmp_path / 'fake.netrc'
+    fake.write_text('machine fixture.invalid login fixture-user password fixture-only-password\n')
+    for name in ('Https_Proxy', 'HtTp_PrOxY', 'ArBiTrArY_pRoXy'):
+        monkeypatch.setenv(name, 'http://fixture.invalid:9999')
+    monkeypatch.setenv('NETRC', str(fake))
+    before = dict(os.environ)
+    environment = implementation().isolated_environment()
+    proxies = {name: value for name, value in environment.items() if name.lower().endswith('_proxy')}
+    assert proxies == {'no_proxy': '*', 'NO_PROXY': '*'}
+    assert environment['NETRC'] == os.devnull
+    assert environment.get('HOME') == before.get('HOME')
+    assert dict(os.environ) == before
+
+
+@pytest.fixture
+def isolated_http_pair():
+    """Real origin and ambient proxy traps, with synthetic auth only."""
+    origin, proxy = [], []
+    def handler(observed, status):
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                observed.append({'path': self.path, 'authorization': self.headers.get('Authorization')})
+                self.send_response(status)
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+            def log_message(self, *_): pass
+        return Handler
+    servers = [ThreadingHTTPServer(('127.0.0.1', 0), handler(origin, 200)),
+        ThreadingHTTPServer(('127.0.0.1', 0), handler(proxy, 502))]
+    threads = [threading.Thread(target=server.serve_forever, daemon=True) for server in servers]
+    for thread in threads: thread.start()
+    try:
+        yield (f'http://127.0.0.1:{servers[0].server_port}/ordinary-consumer', origin,
+            f'http://127.0.0.1:{servers[1].server_port}', proxy)
+    finally:
+        for server in servers: server.shutdown(); server.server_close()
+        for thread in threads:
+            thread.join(timeout=2)
+            assert not thread.is_alive()
+
+
+@pytest.mark.parametrize('ambient', ['mixed-case-proxy', 'netrc'])
+def test_actual_pip_transport_does_not_use_fake_ambient_proxy_or_netrc(isolated_http_pair,
+        tmp_path, monkeypatch, ambient):
+    url, origin, proxy_url, trapped = isolated_http_pair
+    for name in list(os.environ):
+        if name.lower().endswith('_proxy'): monkeypatch.delenv(name)
+    fake = tmp_path / 'fake.netrc'
+    fake.write_text('machine 127.0.0.1 login fixture-user password fixture-only-password\n')
+    # Explicit fake NETRC prevents even the pre-fix RED from touching user files.
+    monkeypatch.setenv('NETRC', str(fake))
+    if ambient == 'mixed-case-proxy': monkeypatch.setenv('HtTp_PrOxY', proxy_url)
+    environment = implementation().isolated_environment()
+    # Pip is a test oracle here. Production uses CLI flags rather than private
+    # pip/session APIs; no installed SDK is replaced or modified.
+    probe = '''from pip._internal.network.session import PipSession
+from pip._internal.network.auth import MultiDomainBasicAuth
+import sys
+session = PipSession()
+session.auth = MultiDomainBasicAuth(prompting=False, keyring_provider="disabled")
+response = session.get(sys.argv[1], timeout=3)
+raise SystemExit(0 if response.status_code == 200 else 1)
+'''
+    result = subprocess.run([sys.executable, '-I', '-c', probe, url], env=environment,
+        cwd=tmp_path, capture_output=True, text=True, timeout=10)
+    assert trapped == [], 'ordinary consumer reached the fake ambient proxy'
+    assert len(origin) == 1 and origin[0]['authorization'] is None, 'ordinary consumer used fake NETRC auth'
+    assert result.returncode == 0, 'isolated pip transport failed the loopback origin'

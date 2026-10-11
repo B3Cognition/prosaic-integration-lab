@@ -44,7 +44,9 @@ Ordinary public-index adoption is a separate credential-free command:
 ```
 
 It creates a neutral temporary virtual environment, disables inherited installer
-configuration/proxies and runs an isolated cache-free PyPI installation of all
+configuration, removes proxy variables regardless of casing and bypasses system
+proxies. It disables netrc/keyring authentication and interactive prompts, then
+runs an isolated cache-free PyPI installation of all
 five exact pins with dependencies enabled. It checks pip's archive hashes against
 the release manifest, freshly downloads the selected wheel bytes, uses the
 existing installed-payload audit, verifies import ownership, CLI help/version,

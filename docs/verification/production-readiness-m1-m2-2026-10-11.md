@@ -102,6 +102,26 @@ workflow input is now removed; normal required checks and all eight lanes are
 restored for the complete matrix rerun. Direct success alone does not close the
 milestones.
 
+A final installer isolation review found that pip's `--isolated` still honors
+mixed-case proxy variables and netrc authentication. A fake loopback proxy
+received one CONNECT, and a temporary fake netrc supplied Authorization during
+request preparation; no PyPI request or real credentials were used in the proof.
+The fixed-name environment filter therefore did not establish the documented
+ambient-neutral, credential-free boundary, although the five verified SDK wheel
+identities remain valid. The correction must remove proxy variables regardless
+of casing, disable system-proxy fallback, and prevent netrc/keyring lookup or
+authentication prompts. Final full qualification will use that corrected source.
+
+The correction removes every case-insensitive `*_proxy`, forces both bypass
+variables to `*`, selects `NETRC=os.devnull`, and invokes pip with `--no-input`
+and `--keyring-provider disabled`. It preserves `HOME` and the parent process
+environment. Four watched failures reproduced mixed proxy traffic and fake
+netrc Authorization on a direct origin; the corrected 17-case scope passed.
+Only owned loopback services and fake credentials were used. Independent
+re-review passed the same 17 cases and accepted the real pip flags for install,
+download and check. The full source suite passed 744 tests with one existing
+warning; exact-source full qualification remains required.
+
 Logical restoration uses a second database on the same owned primary and a fresh
 replica. It does not certify primary destruction, HA/PITR, long native soak,
 external-effect rollback, deployment identity/TLS or customer invoices.
