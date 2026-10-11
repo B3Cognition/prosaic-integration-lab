@@ -118,3 +118,30 @@ def test_local_preflight_returns_distinct_approved_qwen_tiers(tmp_path):
     assert view['maximum_requests']==12
     encoded=json.dumps(view)
     assert '127.0.0.1' not in encoded and 'omlx_token' not in encoded and str(tmp_path) not in encoded
+
+
+def test_command_without_opt_in_exports_preflight_only(tmp_path):
+    from lab_runner.conversation_conformance import main
+    output=tmp_path/'public.json'
+    assert main(['--config',str(write_profile(tmp_path)),'--max-calls','12',
+                 '--export',str(output)])==0
+    assert json.loads(output.read_text())['live_executed'] is False
+    assert not (tmp_path/'allowance.json').exists()
+
+
+def test_invalid_command_exports_only_closed_failure(tmp_path,capsys):
+    from lab_runner.conversation_conformance import main
+    assert main(['--config',str(tmp_path/'secret-endpoint.json'),'--live-local',
+                 '--max-calls','11'])==1
+    view=json.loads(capsys.readouterr().out)
+    assert view=={'event':'conversation_conformance','passed':False,
+                  'failure':'conformance_failed'}
+    assert str(tmp_path) not in json.dumps(view)
+
+
+def test_unwritable_export_does_not_leak_private_path(tmp_path,capsys):
+    from lab_runner.conversation_conformance import main
+    assert main(['--config',str(write_profile(tmp_path)),'--max-calls','12',
+                 '--export',str(tmp_path/'missing'/'private.json')])==1
+    view=json.loads(capsys.readouterr().out)
+    assert view['failure']=='export_failed' and str(tmp_path) not in json.dumps(view)
