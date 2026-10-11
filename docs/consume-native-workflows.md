@@ -12,8 +12,11 @@ The active [release manifest](../dependencies/releases.json) pins actual public
 download URLs, exact versions, original wheel hashes and qualified source
 commits. It selects Core 0.4.1, Runtime 0.8.1/recorder 0.2.1 and Harness
 0.7.1/store 0.2.1, whose PyPI and GitHub bytes match the qualified originals.
-Use a fresh `.venv-public` environment. Lab 0.3.0 released-package qualification
-is pending; see [current status](current-status.md). The separate
+Use a fresh `.venv-public` environment. [Lab 0.3.0 is published](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+at source `59ea44b97224415e22fec64c2b9bf39bd9503276`, qualified by released-mode
+[run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605).
+This documentation follow-up records that exact release; see
+[current status](current-status.md). The separate
 [candidate profile](../dependencies/sdk-candidates.json), candidate cache and
 earlier receipts remain available for reproducing their original evidence.
 

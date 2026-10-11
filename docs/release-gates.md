@@ -93,9 +93,10 @@ The historical Lab 0.2.0 released-mode evidence is recorded in
 results in the GitHub release notes. The earlier candidate train's successful
 eight-lane matrix is recorded separately in
 [the candidate verification ledger](verification/ecosystem-production-2026-10-10.md);
-Lab 0.3.0 must rerun the matrix against the current verified public pins. See
+Lab 0.3.0 passed its separate released-mode matrix against the verified public
+pins at source `59ea44b` in run `38119573605`. See
 [public adoption](verification/public-release-adoption-2026-10-11.md) for its
-separate final-source preparation and qualification checkpoint.
+exact source, original receipts and verified public release assets.
 Repository rules must still require the
 four matrix checks for future protected merges; publication does not configure
 branch protection.

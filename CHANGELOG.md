@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 — Unreleased
+## 0.3.0 — 2026-10-11
 
 - Native workflow catalogue, proposal admission and execution through public
   Harness APIs, with private host bindings and structured human responses.
@@ -12,8 +12,8 @@
   legacy upgrade and bounded qualification lanes on both Linux architectures.
 - Adopt the published `b3-prosaic` patch family with exact original wheel hashes
   and source commits, fresh-environment installation and public workflow builder
-  examples. Final released-package qualification is required before this Lab
-  version is published.
+  examples. All four released-package native cells passed at source `59ea44b`:
+  864 required cases, zero failures/errors/skips and 32+4 verified cleanups.
 - Correct version reporting for both coherent B3 and legacy SDK installations.
 
 ## 0.2.0 — 2026-10-09

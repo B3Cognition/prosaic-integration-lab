@@ -1,15 +1,23 @@
 # Current delivery status
 
-Checkpoint: 2026-10-11. The released application remains Lab **0.2.0**. The
-`codex/ecosystem-production` branch prepares source version **0.3.0** with the
-verified public SDK patch train. Its active manifest now selects the five
-published B3 wheels. The final released-package native matrix is required before
-Lab 0.3.0 publication; prior candidate receipts retain their original sources.
+Checkpoint: 2026-10-11. [Lab **0.3.0** is published](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+at source `59ea44b97224415e22fec64c2b9bf39bd9503276` with the verified public SDK
+patch train. [Released-package run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605)
+passed all four Linux AMD64/ARM64 × PostgreSQL 16/18 cells: 864 required cases,
+zero failures/errors/skips, all 32 lane cleanups and four demo cleanups verified.
+Each cell also passed 540 source tests with one existing deprecation warning;
+each demo reconciled two complete synthetic calls and remained billing-ineligible.
+Actual downloaded release assets match the original wheel/sdist bytes. See the
+[public adoption ledger](verification/public-release-adoption-2026-10-11.md).
+
+This later documentation-only commit records the qualified `59ea44b` source and
+its original release assets. It is not a newly qualified source or rebuilt
+release. Prior candidate receipts retain their original sources.
 
 The earlier candidate train passed all four required native Linux cells in
 [run 38061354170](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170),
 at Lab source `0feb56b02f4c3dfb21c8fe7487bd1d3216e86dec`. See the
-[current verification ledger](verification/ecosystem-production-2026-10-10.md)
+[earlier candidate ledger](verification/ecosystem-production-2026-10-10.md)
 for exact artifacts, counts, image identities and publication prerequisites.
 
 The native adoption entry point has a pinned candidate setup recipe and
@@ -39,10 +47,12 @@ artifact hashes and consumer verification. Public APIs and formats are unchanged
 
 A later Lab CLI correction lets the default container `--version` command report
 the actual installed B3 SDK family while retaining the legacy-family command.
-Its two isolated CLI regressions and all 539 source tests pass. The native
+Its original checkpoint passed two isolated CLI regressions and all 539 source
+tests. The native
 hardening receipt above still qualifies its original `94f313e` source. The
-corrected Lab source must complete the released-package matrix before Lab 0.3.0
-publication; see the [publication preparation ledger](verification/publication-preparation-2026-10-10.md).
+later `59ea44b` source completed the released-package matrix and publication
+recorded above; the [publication preparation ledger](verification/publication-preparation-2026-10-10.md)
+retains the earlier CLI checkpoint.
 
 Start with the [runnable native consumption guide](consume-native-workflows.md),
 [native workflow usage](native-workflows.md), [persistence and
@@ -167,12 +177,12 @@ publisher conversion preceded adapter registration and guarded completion of
 the original-byte promotion. The package-channel guide details partial-upload
 verification and the complete-pair GitHub release gate.
 
-The patch candidate Lab gate succeeded at its recorded source. Lab 0.3.0 now
-adopts the verified public pins. Its final released-package gate must build a
-fresh consumer and rerun all four cells against these published bytes before
-release. A local source or installed-wheel check cannot replace those native
-receipts. Current adoption evidence belongs in the
-[public adoption ledger](verification/public-release-adoption-2026-10-11.md).
+The patch candidate Lab gate succeeded at its recorded source. Lab 0.3.0 then
+adopted the verified public pins and passed its separate four-cell released-mode
+gate at `59ea44b`. The remote annotated `v0.3.0` tag resolves to that exact
+source. Actual public wheel/sdist, checksum and verification downloads match
+the original release assets. Their identities and native receipts are recorded
+in the [public adoption ledger](verification/public-release-adoption-2026-10-11.md).
 
 Synthetic fixture success does not certify a live provider, customer billing,
 deployment identity/TLS, long soak capacity, HA or PITR. Those qualifications

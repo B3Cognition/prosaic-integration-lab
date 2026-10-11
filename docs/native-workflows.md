@@ -1,7 +1,7 @@
 # Synthetic native workflow HTTP example
 
 For a complete runnable example, follow the
-[candidate installation and native demo](../README.md#try-the-native-workflow).
+[released-package installation and native demo](../README.md#try-the-native-workflow).
 The demo creates its own database, model fixture and replicas, drives the routes
 below, handles generated credentials privately and verifies cleanup. The
 [consumer guide](consume-native-workflows.md) maps these routes to supported
@@ -17,11 +17,13 @@ in both consumer images. These endpoints exercise synthetic find, review, check,
 gate, pause and finish; they access no product data or external business service.
 
 This implementation consumes the new public SDK factory/bundle/interaction APIs.
-The candidate train passed the required native Linux AMD64/ARM64 × PostgreSQL
-16/18 matrix; see the [adoption ledger](verification/native-adoption-2026-10-10.md)
-and [original ecosystem checkpoint](verification/ecosystem-production-2026-10-10.md).
-Public SDK publication and Lab 0.3.0 remain pending. The historical release
-manifest is preserved; use the explicit candidate manifest for this branch.
+The public SDKs and Lab 0.3.0 are published. The released-package native Linux
+AMD64/ARM64 × PostgreSQL 16/18 matrix passed at source `59ea44b` in run
+`38119573605`; see [public adoption](verification/public-release-adoption-2026-10-11.md).
+Use the active release manifest for the released-package recipe. The earlier
+candidate train and its retained profile remain recorded in the historical
+[adoption ledger](verification/native-adoption-2026-10-10.md) and
+[original ecosystem checkpoint](verification/ecosystem-production-2026-10-10.md).
 Synthetic fixture qualification does not certify a live provider or deployment.
 
 ## Host authority and retained bundles

@@ -44,24 +44,27 @@ owned PostgreSQL and measured synthetic inference.
 
 ## Try the native workflow
 
-This branch prepares Lab 0.3.0 and consumes the five published `b3-prosaic`
+The [Lab 0.3.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.3.0)
+consumes the five published `b3-prosaic`
 patch wheels through the exact-version [active manifest](dependencies/releases.json).
 The patch train contains seven upstream reliability fixes. Use a new environment;
 historical manifests, candidate caches and verification receipts are preserved.
-The [hardening checkpoint](docs/verification/hardening-2026-10-10.md#native-hardening-closure)
-records the successful four-cell native run: 864 required cases, zero failures
-or skips, and all lane and demo cleanups verified at the exact qualified source.
-Lab 0.3.0 must pass its final released-package matrix before publication. The
-earlier candidate run above qualifies its original source, while the recipe
-below uses actual verified public SDK downloads. Python imports and CLI names
-remain unchanged.
+The [public adoption ledger](docs/verification/public-release-adoption-2026-10-11.md#released-package-native-qualification)
+records successful [run 38119573605](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38119573605)
+at release source `59ea44b97224415e22fec64c2b9bf39bd9503276`: all four native
+cells, 864 required cases, zero failures/errors/skips and all 32 lane plus four
+demo cleanups verified. The earlier
+[hardening checkpoint](docs/verification/hardening-2026-10-10.md#native-hardening-closure)
+retains its original candidate source and receipts. The recipe below uses the
+stable released tag and actual verified public SDK downloads. Python imports
+and CLI names remain unchanged.
 
 You need Python 3.12 and a running Docker daemon. Use a fresh environment: legacy and `b3-prosaic`
 distributions share import paths and must not be installed together. Podman is
 accepted by the runner but is not a verified path here.
 
 ```sh
-git clone --branch codex/ecosystem-production https://github.com/B3Cognition/prosaic-integration-lab.git
+git clone --branch v0.3.0 https://github.com/B3Cognition/prosaic-integration-lab.git
 cd prosaic-integration-lab
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
@@ -101,7 +104,8 @@ real-model calls are made. Repeat with `--postgres-version 18` if needed.
 
 The normal package-index channel no longer depends on retained Actions artifacts.
 [The publication checkpoint](docs/current-status.md#publication-and-deployment-boundaries)
-records SDK publication and pending Lab 0.3.0 released-package qualification.
+records verified SDK and Lab 0.3.0 publication. This documentation follow-up
+records the qualified `59ea44b` source; it does not rebuild or retag the release.
 
 ### Retained candidate recipe
 
