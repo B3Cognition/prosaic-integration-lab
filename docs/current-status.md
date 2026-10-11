@@ -1,8 +1,10 @@
 # Current delivery status
 
-Checkpoint: 2026-10-10. The released application remains Lab **0.2.0**. The
-`codex/ecosystem-production` branch implements the next ecosystem milestones;
-public SDK publication and Lab 0.3.0 adoption are pending.
+Checkpoint: 2026-10-11. The released application remains Lab **0.2.0**. The
+`codex/ecosystem-production` branch prepares source version **0.3.0** with the
+verified public SDK patch train. Its active manifest now selects the five
+published B3 wheels. The final released-package native matrix is required before
+Lab 0.3.0 publication; prior candidate receipts retain their original sources.
 
 The earlier candidate train passed all four required native Linux cells in
 [run 38061354170](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38061354170),
@@ -49,16 +51,17 @@ migration](persistence.md), [required release gates](release-gates.md) and
 [2026-10-09 release ledger](verification/release-train-2026-10-09.md) records
 the historical published baseline; its versions and measurements are preserved.
 
-## Qualified SDK candidates
+## Published SDK patch train
 
-These runs qualify the original wheel and source bytes. They are candidate
-artifacts, and the public package index is not yet verified available.
+All five distributions are published on PyPI and in their GitHub releases.
+Actual downloads from both channels match the original qualified wheel and
+sdist hashes. Promotion reran the required native gates on those original bytes.
 
-| SDK | Distribution version | Successful native qualification |
-| --- | --- | --- |
-| Core | `b3-prosaic` 0.4.1 | [38077144248](https://github.com/B3Cognition/prosaic/actions/runs/38077144248) |
-| Runtime and recorder | `b3-prosaic-runtime` 0.8.1, `b3-prosaic-runtime-postgres` 0.2.1 | [38079159494](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38079159494) |
-| Harness and store | `b3-prosaic-harness` 0.7.1, `b3-prosaic-harness-postgres` 0.2.1 | [38079961529](https://github.com/B3Cognition/prosaic-harness/actions/runs/38079961529) |
+| SDK | Public release | Original qualification | Successful publication |
+| --- | --- | --- | --- |
+| Core | [`b3-prosaic` 0.4.1](https://github.com/B3Cognition/prosaic/releases/tag/v0.4.1) | [38077144248](https://github.com/B3Cognition/prosaic/actions/runs/38077144248) | [38116854936](https://github.com/B3Cognition/prosaic/actions/runs/38116854936) |
+| Runtime and recorder | [Runtime 0.8.1 / recorder 0.2.1](https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.8.1) | [38079159494](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38079159494) | [38117263240](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38117263240) |
+| Harness and store | [Harness 0.7.1 / store 0.2.1](https://github.com/B3Cognition/prosaic-harness/releases/tag/v0.7.1) | [38079961529](https://github.com/B3Cognition/prosaic-harness/actions/runs/38079961529) | [38118430476](https://github.com/B3Cognition/prosaic-harness/actions/runs/38118430476) |
 
 Core ran Linux AMD64/ARM64 on Python 3.11–3.13 and Windows ownership checks.
 Runtime also ran macOS on all three Python versions. Runtime and Harness ran
@@ -68,47 +71,46 @@ Their exact-source qualification contains 15 Core, 24 Runtime and 18 Harness
 records. The Lab consumer installs the five original patch wheels into a fresh
 Python 3.12 environment with the unchanged hash-locked third-party graph.
 
-Imports and CLI commands retain their existing names. The future normal index
-channel uses the `b3-prosaic` family; migrate with a fresh environment or image.
+Imports and CLI commands retain their existing names. The normal index channel
+uses the `b3-prosaic` family; migrate with a fresh environment or image.
 The old and new distributions share import paths. The active manifest remains
 `dependencies/releases.json`; the immutable 0.2.0 baseline remains
-`dependencies/releases-lab-0.2.0.json`. No predicted release URL or checksum has
-been inserted into either manifest.
+`dependencies/releases-lab-0.2.0.json`. The active manifest contains actual
+verified public URLs and has SHA256
+`37a7b0dcf7bffa1c64481aafc7173e947c1e083616adcf50112e53022d589aca`.
+Historical manifests and receipts are unchanged.
 
-For a checkout of this candidate branch, the supported pre-publication path
-curates those exact successful runs into a separate manifest. Use Python 3.12
-and an environment containing the hash-locked third-party dependencies; the
-`gh` CLI must be authorized to read the public Actions artifacts:
+Use Python 3.12 and the hash-locked third-party dependencies in a fresh
+environment. This public-manifest path does not require Actions artifact access:
 
 ```sh
-python3.12 -m venv .venv-hardening
-.venv-hardening/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
-.venv-hardening/bin/python scripts/prepare_sdk_candidates.py \
-  --profile dependencies/sdk-candidates.json \
-  --manifest .cache/sdk-hardening/manifest.json
-.venv-hardening/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
-.venv-hardening/bin/python scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
-.venv-hardening/bin/python -m pip check
-export PATH="$PWD/.venv-hardening/bin:$PATH"
+python3.12 -m venv .venv-public
+.venv-public/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+.venv-public/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases.json
+.venv-public/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
+.venv-public/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+.venv-public/bin/python -m pip check
+export PATH="$PWD/.venv-public/bin:$PATH"
 ```
 
-With Docker running, build the immutable candidate consumer and run a required
+With Docker running, build the immutable released-SDK consumer and run a required
 owned stack cell:
 
 ```sh
-.venv-hardening/bin/python scripts/build_consumer.py \
-  --manifest .cache/sdk-hardening/manifest.json --dependency-mode candidate \
-  --tag prosaic-integration-lab:candidate
-.venv-hardening/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
-.venv-hardening/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
-.venv-hardening/bin/python scripts/required_acceptance.py \
-  --candidate --candidate-manifest .cache/sdk-hardening/manifest.json \
-  --postgres-version 16 --export reports/candidate-pg16.json
+.venv-public/bin/python scripts/build_consumer.py \
+  --manifest dependencies/releases.json --dependency-mode released \
+  --tag prosaic-integration-lab:dev
+.venv-public/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+.venv-public/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; build_baseline()'
+.venv-public/bin/python scripts/required_acceptance.py \
+  --postgres-version 16 --export reports/required-pg16.json
 ```
 
 Repeat with PostgreSQL 18 on the actual host architecture. The four-cell CI
 matrix separately verifies both Linux architectures. The private owned outputs
 remain under `.lab`; only the sanitized gate summary is suitable for sharing.
+The [retained candidate recipe](../README.md#retained-candidate-recipe) remains
+separate, with its original profile, manifest, cache and receipt lineage.
 
 ## Implemented application behavior
 
@@ -144,35 +146,33 @@ from the hosted CI runners.
 
 ## Publication and deployment boundaries
 
-The GitHub `pypi` environments and tag restrictions are configured. Pending
-publisher registration is not publicly visible. An authorized PyPI owner must
-verify or create all five publishers using owner `B3Cognition`,
-workflow `publish.yml` and environment `pypi`: Core in repository `prosaic`,
-Runtime and its adapter in `prosaic-runtime`, Harness and its adapter in
-`prosaic-harness`. Follow the
-[SDK package-channel guide](https://github.com/B3Cognition/prosaic/blob/codex/ecosystem-production/docs/package-index.md).
-No long-lived token is needed in chat.
+The GitHub `pypi` environments and tag restrictions are configured. The five
+scoped Trusted Publishers are registered with owner `B3Cognition`, workflow
+`publish.yml` and environment `pypi`. Ordered publication completed for Core,
+Runtime/recorder and Harness/store. The
+[SDK package-channel guide](https://github.com/B3Cognition/prosaic/blob/codex/ecosystem-production/docs/package-index.md)
+documents the staged publisher bootstrap and original-byte promotion checks.
 
 The guarded Core promotion
 [38063003741](https://github.com/B3Cognition/prosaic/actions/runs/38063003741)
 passed all 15 qualification records on the original bytes, then PyPI refused
 the token exchange with `invalid-publisher`: no publisher matched the expected
 Core repository/workflow/environment claims. No package files were uploaded;
-GitHub release was skipped. Configure the initial `b3-prosaic` pending publisher
-in the authenticated PyPI owner account before repeating that promotion.
+GitHub release was skipped. This historical failed attempt is preserved; the
+successful publication runs above used the final patch sources and original bytes.
 
-Bootstrap the paired SDKs in stages: PyPI permits only one pending entry per
-repository/workflow/environment tuple. Register the main Runtime/Harness project
-first; after its first exchange converts the pending publisher, register its
-adapter and repeat the same original-byte promotion. The package-channel guide
-details partial-upload verification and the complete-pair GitHub release gate.
+The paired SDKs were bootstrapped in stages because PyPI permits only one pending
+entry per repository/workflow/environment tuple. The main Runtime/Harness
+publisher conversion preceded adapter registration and guarded completion of
+the original-byte promotion. The package-channel guide details partial-upload
+verification and the complete-pair GitHub release gate.
 
-The patch candidate Lab gate has succeeded. After publisher registration,
-promotion publishes
-the original qualified bytes in dependency order: Core, Runtime/recorder,
-Harness/store. Both GitHub and index downloads must match the receipts. Lab
-0.3.0 then adopts verified public pins, builds a fresh consumer and reruns all
-four cells against those published bytes before release.
+The patch candidate Lab gate succeeded at its recorded source. Lab 0.3.0 now
+adopts the verified public pins. Its final released-package gate must build a
+fresh consumer and rerun all four cells against these published bytes before
+release. A local source or installed-wheel check cannot replace those native
+receipts. Current adoption evidence belongs in the
+[public adoption ledger](verification/public-release-adoption-2026-10-11.md).
 
 Synthetic fixture success does not certify a live provider, customer billing,
 deployment identity/TLS, long soak capacity, HA or PITR. Those qualifications

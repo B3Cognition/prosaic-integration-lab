@@ -82,17 +82,20 @@ image/manifest/source digests; the private fixture stays under its owned directo
 An unavailable engine records `not_qualified`; host checks alone prove neither
 PostgreSQL behavior nor either required Linux architecture.
 
-The release manifest now pins Runtime 0.7.0/recorder 0.1.1 and Harness
-0.6.1/store 0.1.1, including schema/grant readiness and atomic lease registration
-fixes. The original 0.6 baseline is preserved in
+The active release manifest now pins published Core 0.4.1, Runtime 0.8.1/recorder
+0.2.1 and Harness 0.7.1/store 0.2.1 under the `b3-prosaic` distribution family.
+Actual PyPI and GitHub downloads match the original qualified bytes, including
+the seven reliability fixes. The original 0.6 baseline is preserved in
 `dependencies/releases-baseline-0.6.json`; previous failing receipts remain
 historical evidence. Local candidate receipts cannot authorize a release.
-Current released-mode evidence is recorded in
-[the release ledger](verification/release-train-2026-10-09.md), with final native
-results in the GitHub release notes. The unpublished SDK train's successful
+The historical Lab 0.2.0 released-mode evidence is recorded in
+[the release ledger](verification/release-train-2026-10-09.md), with its final native
+results in the GitHub release notes. The earlier candidate train's successful
 eight-lane matrix is recorded separately in
 [the candidate verification ledger](verification/ecosystem-production-2026-10-10.md);
-Lab 0.3.0 must rerun the matrix against verified public pins.
+Lab 0.3.0 must rerun the matrix against the current verified public pins. See
+[public adoption](verification/public-release-adoption-2026-10-11.md) for its
+separate final-source preparation and qualification checkpoint.
 Repository rules must still require the
 four matrix checks for future protected merges; publication does not configure
 branch protection.

@@ -1,11 +1,14 @@
 import copy
+import hashlib
+from pathlib import Path
 import pytest
 from lab_runner.gates import validate,export
 
 def receipt(mode='audit'):
+    active = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'
     return {'mode':mode,'passed':True,'cleanup':'verified','dependency_mode':'released',
         'test_returncode':0,'test_count':{'audit':88,'identity':20,'ingress':5}[mode],
-        'payload_audit':'verified','released_manifest_sha256':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
+        'payload_audit':'verified','released_manifest_sha256':hashlib.sha256(active.read_bytes()).hexdigest(),
         'skipped':0,'failed_tests':[],'host_architecture':'arm64',
         'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64}}
 

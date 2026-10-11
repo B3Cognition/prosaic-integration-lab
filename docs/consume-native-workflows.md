@@ -6,14 +6,16 @@ admitted workflow. A prompt or LLM can generate the same proposal envelope.
 The host controls which specialists, schemas, tools and capabilities it offers.
 
 [Run the native demo](../README.md#try-the-native-workflow) first. It installs
-the five original qualified SDK candidate wheels, builds a clean consumer and
+the five verified public SDK wheels, builds a clean consumer and
 exercises the actual HTTP service with synthetic inference and owned PostgreSQL.
-The candidate profile is [dependencies/sdk-candidates.json](../dependencies/sdk-candidates.json).
-It selects successful SDK qualification runs and exact source commits rather
-than mutable SDK branches. The patch recipe uses `.cache/sdk-hardening/manifest.json`
-and a fresh `.venv-hardening` environment; previous candidate evidence stays
-under its original manifest and receipts. Public-index release and Lab 0.3.0 remain pending;
-see [current status](current-status.md). Actions artifacts have 90-day retention.
+The active [release manifest](../dependencies/releases.json) pins actual public
+download URLs, exact versions, original wheel hashes and qualified source
+commits. It selects Core 0.4.1, Runtime 0.8.1/recorder 0.2.1 and Harness
+0.7.1/store 0.2.1, whose PyPI and GitHub bytes match the qualified originals.
+Use a fresh `.venv-public` environment. Lab 0.3.0 released-package qualification
+is pending; see [current status](current-status.md). The separate
+[candidate profile](../dependencies/sdk-candidates.json), candidate cache and
+earlier receipts remain available for reproducing their original evidence.
 
 ## What the client sends
 
@@ -85,6 +87,65 @@ tools. See the qualified
 for usage and invocation scope, and the Lab
 [persistence guide](persistence.md) for explicit schema migration and separate
 database roles.
+
+## Construct a workflow in memory
+
+This runnable admission example uses one registered agent, a closed result
+schema and a human pause. Its illustrative endpoint is host-owned configuration;
+construction never contacts it. Replace it with your authorized model binding
+before execution. The JSON proposal contains only logical references and graph
+data. No `base_dir`, provider credential or executable registration comes from
+the client.
+
+```python
+import json
+from prosaic_harness import (
+    WorkflowBindings, WorkflowCatalog, WorkflowFactory, WorkflowPolicy,
+)
+from prosaic_runtime import EndpointConfig, ProsaicArtifact, RuntimeConfig
+
+finder = ProsaicArtifact.from_inspection({
+    "id": "approved/finder.md", "type": "subagent",
+    "frontmatter": {"name": "finder", "description": "Find an approved entity", "tools": []},
+    "body": "ALWAYS return one JSON object with entity_id. NEVER invent an entity.",
+})
+result_schema = {
+    "type": "object", "properties": {"entity_id": {"type": "string", "maxLength": 64}},
+    "required": ["entity_id"], "additionalProperties": False,
+}
+config = RuntimeConfig({
+    "service": EndpointConfig("https://models.example.invalid/v1", "host-model",
+                              features={"streaming": False}),
+}, {}, "service", allowed_tools=frozenset())
+factory = WorkflowFactory(
+    catalog=WorkflowCatalog(agents={"finder": finder}, schemas={"result": result_schema}),
+    bindings=WorkflowBindings(config=config),
+    policy=WorkflowPolicy(
+        allowed_agents=frozenset({"finder"}), allowed_schemas=frozenset({"result"}),
+        max_calls=1, max_attempts=1, timeout_s=30, max_tokens=256, max_run_s=60,
+        max_provider_requests_per_invocation=1, max_tool_calls_per_invocation=0,
+    ),
+)
+proposal = {"definition": {"version": 1, "start": "find", "steps": {
+    "find": {"kind": "agent", "agent": "finder", "schema": "result", "next": "review"},
+    "review": {"kind": "pause", "question": "Accept the selected entity?",
+               "choices": {"accept": "done", "reject": "rejected"}, "requires": ["find"],
+               "response_schema": "result"},
+    "done": {"kind": "finish", "requires": ["find"]},
+    "rejected": {"kind": "finish", "outcome": "rejected"},
+}}}
+workflow = factory.build_json(json.dumps(proposal))
+inputs = workflow.prepare_inputs({"query": "sample"})
+print(workflow.fingerprint)
+```
+
+Admission validates and seals the workflow; input preparation owns a bounded
+snapshot. Neither operation invokes a model, tool or validator. In a service,
+authenticate the caller and choose its host policy before admission, then
+persist the immutable proposal/reference and use `Harness` with the authorized
+store for execution. The Lab's [native execution binding](../src/prosaic_integration_lab/native_execution.py)
+and [native demo client](../lab_runner/native_demo.py) show that execution and
+revision-checked human-resume path, including measured synthetic calls.
 
 ## Handle retries and recovery deliberately
 
