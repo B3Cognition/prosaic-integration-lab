@@ -16,12 +16,16 @@ def short_profile():
 
 def test_real_fairness_reads_growth_and_usage_are_measured(lab):
     directory=Path(lab['fixture_manifest']).parent
-    result=run(lab,short_profile(),Events(directory))
+    profile=short_profile()
+    # Each fairness window must permit the existing two-second latency SLO
+    # and include several arrivals per identity. Keep two complete windows.
+    profile.update(duration_s=6,window_s=3,maximum_calls=20)
+    result=run(lab,profile,Events(directory))
     assert result['qualification']=='qualified'
     assert result['fixture_passed'] is True and result['fairness_passed'] is True
-    assert result['counts']['offered']==6 and result['counts']['completed']==6
-    assert result['counts']['read_samples']==6 and result['counts']['read_failures']==0
-    assert result['growth']['records_after']-result['growth']['records_before']==6
+    assert result['counts']['offered']==18 and result['counts']['completed']==18
+    assert result['counts']['read_samples']==18 and result['counts']['read_failures']==0
+    assert result['growth']['records_after']-result['growth']['records_before']==18
     assert result['accounting_reconciled'] is True and result['tool_latency_p95_s']>=0
 
 @pytest.mark.parametrize('mode',['legacy','native'])

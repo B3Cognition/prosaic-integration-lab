@@ -5,10 +5,6 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      diagnostic:
-        description: Temporary bounded capacity diagnosis only
-        type: boolean
-        default: false
       candidate:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
@@ -41,7 +37,6 @@ permissions:
   contents: read
 jobs:
   acceptance:
-    if: ${{ !inputs.diagnostic }}
     name: acceptance-${{ matrix.runner }}-pg${{ matrix.postgres }}
     strategy:
       fail-fast: false
@@ -125,95 +120,3 @@ jobs:
             reports/public-adoption-pg${{ matrix.postgres }}.json
           if-no-files-found: error
           retention-days: 14
-  capacity-diagnostic:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnostic }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: '3.12'
-      - name: Install and audit locked released dependencies
-        run: |
-          python -m venv .venv
-          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
-          .venv/bin/python scripts/prepare_dependencies.py
-          .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
-          .venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
-      - name: Build immutable diagnostic consumer once
-        run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
-      - name: Select installed CLI bindings
-        run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
-      - name: Diagnose three independent owned PostgreSQL 18 stacks
-        run: |
-          .venv/bin/python - <<'PY'
-          import json, math, os, subprocess, sys, tempfile
-          from pathlib import Path
-
-          os.umask(0o077)
-          count_keys = ('offered', 'accepted', 'completed', 'errors', 'rejected',
-              'approval_deferred', 'client_shed', 'independent_model_calls', 'ledger_calls',
-              'unknown_usage', 'starved_windows', 'read_failures', 'read_samples',
-              'window_samples', 'tool_samples', 'allowance_rejected')
-          flag_keys = ('correctness_passed', 'fairness_passed', 'accounting_reconciled')
-          def bounded_number(value):
-              return value if type(value) in {int, float} and 0 <= value <= 7200 and math.isfinite(value) else None
-
-          failed = False
-          with tempfile.TemporaryDirectory(prefix='capacity-diagnostic-') as private:
-              for label, duration, window, latency, calls in (
-                  ('original', 2, 1, 0, 10),
-                  ('boundary', 2, 1, 0.34, 10),
-                  ('extended', 6, 3, 0.34, 20)):
-                  result, returncode = {}, None
-                  try:
-                      profile = json.loads(Path('configs/qualification.synthetic.json').read_text())
-                      profile.update(duration_s=duration, window_s=window, provider_latency_s=latency,
-                          maximum_calls=calls, maximum_records=10000, users=3,
-                          arrivals_per_second=3, concurrency=2)
-                      path = Path(private) / (label + '.json')
-                      path.write_text(json.dumps(profile))
-                      with (Path(private) / (label + '.log')).open('w+b') as output:
-                          process = subprocess.run([sys.executable, '-m', 'lab_runner', 'qualify',
-                              '--profile', str(path), '--postgres-version', '18'],
-                              stdout=output, stderr=output)
-                          returncode = process.returncode
-                          output.seek(0, 2)
-                          output.seek(max(0, output.tell() - 524288))
-                          for line in reversed(output.read().decode('utf-8', errors='replace').splitlines()):
-                              if not line.startswith('{') or len(line) > 262144:
-                                  continue
-                              try:
-                                  candidate = json.loads(line)
-                              except ValueError:
-                                  continue
-                              if type(candidate) is dict:
-                                  result = candidate
-                                  break
-                  except Exception:
-                      pass  # Raw exceptions and fixture logs remain private.
-                  counts = result.get('counts', {})
-                  counts = counts if type(counts) is dict else {}
-                  summary = {'case': label, 'status': 'diagnostic_observed',
-                      'returncode': returncode if type(returncode) is int and -128 <= returncode <= 255 else None,
-                      **{key: result.get(key) if type(result.get(key)) is bool else None for key in flag_keys},
-                      'p95_seconds': bounded_number(result.get('p95_seconds')),
-                      'counts': {key: counts.get(key) if type(counts.get(key)) is int and 0 <= counts[key] <= 10000 else None for key in count_keys},
-                      'elapsed_s': bounded_number(result.get('elapsed_s')),
-                      'stop_bound': result.get('stop_bound') if type(result.get('stop_bound')) is str and result['stop_bound'] in {'duration', 'calls', 'records'} else 'unknown',
-                      'cleanup': result.get('cleanup') if type(result.get('cleanup')) is str and result['cleanup'] in {'verified', 'failed', 'pending'} else 'unknown'}
-                  if (summary['returncode'] not in {0, 1} or
-                      any(summary[key] is None for key in flag_keys) or
-                      any(value is None for value in summary['counts'].values()) or
-                      summary['p95_seconds'] is None or summary['elapsed_s'] is None):
-                      summary['status'] = 'diagnostic_incomplete'
-                      failed = True
-                  print(json.dumps(summary, allow_nan=False), flush=True)
-                  if summary['cleanup'] != 'verified':
-                      raise SystemExit(1)
-          raise SystemExit(1 if failed else 0)
-          PY

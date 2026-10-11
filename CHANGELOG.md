@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## 0.4.0 — in preparation
+## 0.4.0 — 2026-10-11
 
 - Native provider transport faults before/after consequential tools and live SQL
   partition recovery with observed lease takeover and late-owner fencing.
@@ -14,6 +14,8 @@
   actual qualification is recorded separately in the milestone ledger.
 - Correct native recovery CLI application imports in SDK-only environments and
   public adoption isolation from mixed-case/system proxies, netrc and keyring.
+- Measure capacity across two three-second fairness windows and 18 workflows,
+  retaining the two-second latency SLO and all correctness/accounting gates.
 - Qualify milestones 1 and 2 at source `8f60c58`: 920 required cases across four
   Linux/database cells, zero failures/test skips, 32+4 verified cleanups; 744
   source tests per cell and actual local Qwen tier routing passed.
