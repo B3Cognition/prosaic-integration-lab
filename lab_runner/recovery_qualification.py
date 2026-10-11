@@ -14,6 +14,11 @@ from .qualification import digest,number,receipt,validate_profile
 from .stack import OwnedStack,command
 from .manifest import validate_resource
 
+NATIVE_CHECKS=('native_verified','proposal_verified','reference_verified','bundle_verified',
+    'reservation_verified','snapshot_verified','receipt_document_verified','interaction_verified',
+    'native_usage_verified','journal_verified','domain_verified','completed_claim_verified',
+    'uncertain_claim_verified')
+
 def refresh_replica_endpoint(stack,name):
     identifier=stack.manifest['replica_ids'][name]
     state=json.loads(command(stack.engine,'inspect',identifier))[0]
@@ -29,11 +34,17 @@ def refresh_replica_endpoint(stack,name):
     stack._save()
     return endpoint
 
-def evaluate(profile,evidence):
+def evaluate(profile,evidence,*,native_mode=False):
     profile=validate_profile(profile)
+    if type(native_mode) is not bool:raise ValueError('trusted restore mode must be boolean')
     if evidence.get('suite')!=profile['suite'] or evidence.get('profile_sha256')!=digest(profile):
         return receipt(profile,qualification='not_qualified',qualified=False,fixture_passed=False,
             reason='evidence_identity_mismatch')
+    native_fields={'native_mode','native_runs','native_proposals','handlers_before','handlers_after',*NATIVE_CHECKS}
+    if (native_mode and evidence.get('native_mode') is not True or
+        not native_mode and any(key in evidence for key in native_fields)):
+        return receipt(profile,qualification='not_qualified',qualified=False,fixture_passed=False,
+            reason='restore_mode_mismatch',logical_restore_only=True)
     markers=evidence.get('acknowledged');restored=evidence.get('restored')
     valid=(type(markers) is list and 0<len(markers)<=10000 and type(restored) is list and
         0<len(restored)<=10000 and all(type(s) is int and 1<=s<=10000 for s in restored))
@@ -56,31 +67,53 @@ def evaluate(profile,evidence):
     fixture=(valid and evidence.get('calls_before')==evidence.get('calls_after') and
         number(evidence.get('calls_before'),0,10000,integer=True) and
         all(evidence.get(key) is True for key in ('owner_verified','revision_verified','receipt_verified','unknown_usage_verified')))
+    native=native_mode
+    native_fields={}
+    if native:
+        handlers=(number(evidence.get('handlers_before'),0,10000,integer=True) and
+            number(evidence.get('handlers_after'),0,10000,integer=True) and
+            evidence.get('handlers_before')==evidence.get('handlers_after'))
+        populated=(type(evidence.get('native_runs')) is int and evidence['native_runs']==4 and
+            type(evidence.get('native_proposals')) is int and evidence['native_proposals']==3)
+        verified=(all(evidence.get(key) is True for key in NATIVE_CHECKS) and handlers and populated and
+            number(evidence.get('calls_before'),0,10000,integer=True) and
+            number(evidence.get('calls_after'),0,10000,integer=True) and
+            evidence.get('calls_before')==evidence.get('calls_after'))
+        fixture=fixture and verified
+        native_fields={key:evidence.get(key) is True for key in NATIVE_CHECKS}
+        native_fields.update(native_verified=verified,native_runs=4 if populated else 0,
+            native_proposals=3 if populated else 0)
     qualified=fixture and rpo<=profile['maximum_rpo_s'] and rto<=profile['maximum_rto_s']
     return receipt(profile,qualified=qualified,qualification='qualified' if qualified else 'not_qualified',
         fixture_passed=fixture,observed_rpo_s=rpo,observed_rto_s=rto,
         acknowledged_markers=len(markers),missing_markers=len(set(sequences)-set(restored)),
-        logical_restore_only=True,redispatch_detected=evidence.get('calls_before')!=evidence.get('calls_after'))
+        logical_restore_only=True,redispatch_detected=(evidence.get('calls_before')!=evidence.get('calls_after') or
+            native and evidence.get('handlers_before')!=evidence.get('handlers_after')),**native_fields)
 
 def run(stack,profile):
     profile=validate_profile(profile)
     if type(stack) is not OwnedStack:raise ValueError('verified OwnedStack required')
     stack.verify_owned()
+    native=getattr(stack,'native_fixture',False)
+    required_calls,required_records=(8,6) if native else (2,2)
+    if native and (profile['maximum_calls']<8 or profile['maximum_records']<6):
+        raise ValueError('native restore fixture requires eight bounded calls/six records')
     if profile['maximum_calls']<2 or profile['maximum_records']<2:raise ValueError('restore fixture requires two bounded calls/records')
     config=json.loads((stack.secrets/'host.json').read_text());config.update(stack.manifest['endpoints'])
     if len(config['principals'])<2:raise ValueError('owner isolation requires two principals')
     with psycopg.connect(config['migration_dsn'],connect_timeout=5,options='-c statement_timeout=5000') as connection:
-        if connection.execute('SELECT count(*) FROM lab_app.runs').fetchone()[0]+2>profile['maximum_records']:
+        if connection.execute('SELECT count(*) FROM lab_app.runs').fetchone()[0]+required_records>profile['maximum_records']:
             raise ValueError('restore record allowance exhausted')
     token=next(iter(config['principals']));headers={'Authorization':'Bearer '+token}
     identifier=stack.manifest['database_id'];engine=stack.engine
     service=stack.secrets/'service.json';original=service.read_text();changed=False
+    b_stopped=False;fresh=None
     archived=stack.secrets/'qualification.dump'
     evidence={'suite':profile['suite'],'profile_sha256':digest(profile)};states=[]
     def count(client):
         response=client.get(config['model']+'/stats');response.raise_for_status();return response.json()['calls']
     with httpx.Client(timeout=15,follow_redirects=False) as client:
-        client.post(config['model']+'/control',json={'maximum_calls':2}).raise_for_status()
+        client.post(config['model']+'/control',json={'maximum_calls':required_calls}).raise_for_status()
         try:
             for scenario,status in (('normal','waiting'),('missing_usage','blocked')):
                 client.post(config['model']+'/control',json={'scenario':scenario,'preserve_allowance':True}).raise_for_status()
@@ -91,6 +124,11 @@ def run(stack,profile):
                     state.get('recovery_status')!='usage_reconciliation_required'):
                     raise ValueError('expected frozen recovery state required')
                 states.append(state)
+            fixture=None
+            if native:
+                from .native_restore import seed
+                fixture=seed(stack,config,client)
+                evidence['native_mode']=True
             evidence['calls_before']=count(client)
             with psycopg.connect(config['migration_dsn'],connect_timeout=5,options='-c statement_timeout=5000') as connection:
                 connection.execute('CREATE SCHEMA lab_qualification')
@@ -111,6 +149,7 @@ def run(stack,profile):
             # Simulated loss: stop only the exact owned replica; the original database remains forensic evidence.
             replica=stack.manifest['replica_ids']['b']
             command(engine,'stop','--time','10',replica)
+            b_stopped=True
             database='qualification_'+stack.owner
             command(engine,'exec',identifier,'createdb','-U','postgres','--owner=lab_migration',database)
             restored=subprocess.run([engine,'exec','-i',identifier,'pg_restore','-U','postgres',
@@ -122,8 +161,12 @@ def run(stack,profile):
                 replacement[key]=make_conninfo(**parameters)
             service.write_text(json.dumps(replacement));changed=True
             command(engine,'start','-a',stack.manifest['runtime_config_job'])
-            command(engine,'start',replica)
-            config['b']=refresh_replica_endpoint(stack,'b')
+            if native:
+                fresh='restored-'+uuid.uuid4().hex
+                config['b']=stack.start_replica(fresh)
+            else:
+                command(engine,'start',replica)
+                config['b']=refresh_replica_endpoint(stack,'b')
             deadline=time.monotonic()+min(60,profile['maximum_rto_s']+1)
             while True:
                 try:
@@ -151,13 +194,28 @@ def run(stack,profile):
             usage=client.get(config['b']+'/runs/'+states[1]['run_id']+'/usage',headers=headers)
             usage.raise_for_status();usage=usage.json()
             evidence['unknown_usage_verified']=usage['unresolved_calls']==1 and usage['fully_costed'] is False
+            if native:
+                from .native_restore import verify
+                restored_config=dict(config)
+                for key in ('migration_dsn','harness_dsn','accounting_dsn','app_dsn'):
+                    parameters=conninfo_to_dict(config[key]);parameters['dbname']=database
+                    restored_config[key]=make_conninfo(**parameters)
+                native_evidence=verify(restored_config,fixture,client)
+                native_evidence['owner_verified'] &= evidence['owner_verified']
+                evidence.update(native_evidence)
             evidence['calls_after']=count(client)
-            return evaluate(profile,evidence)
+            return evaluate(profile,evidence,native_mode=native)
         finally:
-            client.post(config['model']+'/control',json={'preserve_allowance':True}).raise_for_status()
-            if changed:
-                service.write_text(original)
-                command(engine,'start','-a',stack.manifest['runtime_config_job'])
-                command(engine,'stop','--time','10',stack.manifest['replica_ids']['b'])
-                command(engine,'start',stack.manifest['replica_ids']['b'])
-                config['b']=refresh_replica_endpoint(stack,'b')
+            try:
+                client.post(config['model']+'/control',json={'preserve_allowance':True}).raise_for_status()
+            finally:
+                if changed:
+                    service.write_text(original)
+                    command(engine,'start','-a',stack.manifest['runtime_config_job'])
+                    if native and fresh in stack.manifest['replica_ids']:
+                        command(engine,'stop','--time','10',stack.manifest['replica_ids'][fresh])
+                    elif not native:
+                        command(engine,'stop','--time','10',stack.manifest['replica_ids']['b'])
+                if b_stopped:
+                    command(engine,'start',stack.manifest['replica_ids']['b'])
+                    config['b']=refresh_replica_endpoint(stack,'b')

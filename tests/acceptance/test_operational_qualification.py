@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import pytest
 
 from lab_runner.qualification import run
 from lab_runner.workload import Events
@@ -23,11 +24,13 @@ def test_real_fairness_reads_growth_and_usage_are_measured(lab):
     assert result['growth']['records_after']-result['growth']['records_before']==6
     assert result['accounting_reconciled'] is True and result['tool_latency_p95_s']>=0
 
-def test_real_restore_cli_reports_measured_markers_and_verified_cleanup(lab,tmp_path):
+@pytest.mark.parametrize('mode',['legacy','native'])
+def test_real_restore_cli_reports_measured_markers_and_verified_cleanup(lab,tmp_path,mode):
     manifest=json.loads(Path(lab['fixture_manifest']).read_text())
     profile=tmp_path/'restore-profile.json';profile.write_text(json.dumps(short_profile()))
     arguments=[sys.executable,'-m','lab_runner','qualify-recovery','--profile',str(profile),
         '--postgres-version',str(manifest['postgres_major']),'--consumer-image',manifest['images']['consumer']]
+    if mode=='native':arguments+=['--mode','native']
     if lab.get('dependency_mode')=='candidate':arguments+=['--candidate','--candidate-manifest',lab['candidate_manifest']]
     process=subprocess.run(arguments,
         capture_output=True,text=True,timeout=300)
@@ -36,3 +39,9 @@ def test_real_restore_cli_reports_measured_markers_and_verified_cleanup(lab,tmp_
     assert result['acknowledged_markers']==2 and result['observed_rpo_s']==0
     assert result['observed_rto_s']>=0 and result['redispatch_detected'] is False
     assert result['cleanup']=='verified' and result['logical_restore_only'] is True
+    if mode=='native':
+        assert result['native_verified'] is True and result['native_runs']==4 and result['native_proposals']==3
+        for field in ('proposal_verified','reference_verified','bundle_verified','reservation_verified',
+            'snapshot_verified','receipt_document_verified','interaction_verified','native_usage_verified',
+            'journal_verified','domain_verified','completed_claim_verified','uncertain_claim_verified'):
+            assert result[field] is True
