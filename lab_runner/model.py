@@ -3,7 +3,9 @@ import threading
 import json
 import time
 from fastapi import FastAPI
+from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal
 
 app = FastAPI()
 lock = threading.Lock()
@@ -25,6 +27,12 @@ for event in barriers.values():event.set()
 barrier_counts={name:0 for name in barriers}
 provenance_calls=0
 finder_seen={}
+FAULTS = ('reset', 'truncated_json', '429', '503', 'malformed_shape', 'slow')
+fault = None
+fault_phase = 'first'
+fault_delay_s = 35.0
+fault_acceptances = {name: 0 for name in FAULTS}
+accepted_wait_s = 20
 
 class Control(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -37,6 +45,10 @@ class Control(BaseModel):
     preserve_allowance: bool = Field(default=False,strict=True)
     effect_gate: str | None = None
     effect_amount: int = Field(default=1,ge=1,le=2,strict=True)
+    fault: Literal['reset','truncated_json','429','503','malformed_shape','slow'] | None = None
+    fault_phase: Literal['first','post_tool'] = 'first'
+    fault_delay_s: float = Field(default=35.0,ge=0,le=40,strict=True,allow_inf_nan=False)
+    accepted_wait_s: int = Field(default=20,ge=20,le=60,strict=True)
 
 class Operation(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -55,11 +67,13 @@ def stats():
     with lock:
         return {'calls': calls, 'blocked': not gate.is_set(), 'accepted_events': accepted_events,
                 'allowance_rejected':allowance_rejected,'tool_samples':tool_samples,
-                'provenance_calls':provenance_calls,'barriers':dict(barrier_counts)}
+                'provenance_calls':provenance_calls,'barriers':dict(barrier_counts),
+                'fault_acceptances':dict(fault_acceptances)}
 
 @app.post('/control')
 def control(body: Control):
     global scenario,result_text,maximum_calls,allowance_start,allowance_rejected,provider_latency_s,tool_samples
+    global fault,fault_phase,fault_delay_s,accepted_wait_s
     if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
                              'native','native_rejected','native_effect','native_effect_batch','native_revisit'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
@@ -75,6 +89,8 @@ def control(body: Control):
         tool_samples=0
         finder_seen.clear()
         app.state.effect_amount=body.effect_amount
+        fault, fault_phase, fault_delay_s = body.fault, body.fault_phase, body.fault_delay_s
+        accepted_wait_s = body.accepted_wait_s
     gate.clear() if body.blocked else gate.set()
     receipt_gate.clear() if body.accepted_gate else receipt_gate.set()
     for name,event in barriers.items():event.clear() if name==body.effect_gate else event.set()
@@ -85,7 +101,8 @@ def accepted():
     global accepted_events
     with lock:
         accepted_events += 1
-    if not receipt_gate.wait(20):
+        wait_s = accepted_wait_s
+    if not receipt_gate.wait(wait_s):
         from fastapi import HTTPException
         raise HTTPException(504, 'receipt_gate_timeout')
     return {'status': 'observed'}
@@ -111,6 +128,18 @@ def native_arguments(messages):
         if isinstance(value,dict) and 'request' in value:return value
     return {}
 
+
+class LostResponse(Response):
+    """Close an accepted HTTP response before its declared body arrives.
+
+    Uvicorn closes an incomplete ASGI response. Sending no request data back
+    keeps this deliberate transport fault independent of prompts and secrets.
+    """
+    async def __call__(self, scope, receive, send):
+        await send({'type':'http.response.start','status':200,
+                    'headers':[(b'content-type',b'application/json'),(b'content-length',b'128')]})
+        # Deliberately omit the body; the server closes the connection here.
+
 @app.post('/v1/chat/completions')
 def completions(body: dict | None = None):
     global calls,allowance_rejected,provenance_calls
@@ -122,10 +151,20 @@ def completions(body: dict | None = None):
         calls += 1
         call_id, selected, output = calls, scenario, result_text
         delay=provider_latency_s
+        post_tool=any(message.get('role')=='tool' for message in (body or {}).get('messages',[]))
+        selected_fault=fault if (fault_phase=='post_tool')==post_tool else None
+        fault_delay=fault_delay_s
+        if selected_fault is not None:fault_acceptances[selected_fault]+=1
     if not gate.wait(15):
         from fastapi import HTTPException
         raise HTTPException(504, 'fixture_gate_timeout')
     time.sleep(delay)
+    if selected_fault == 'reset':return LostResponse()
+    if selected_fault == 'truncated_json':return Response('{"id":',media_type='application/json')
+    if selected_fault in {'429','503'}:
+        return Response('{"error":"synthetic_provider_fault"}',status_code=int(selected_fault),media_type='application/json')
+    if selected_fault == 'malformed_shape':return {'choices':[]}
+    if selected_fault == 'slow':time.sleep(fault_delay)
     # These two explicit synthetic specialist instructions belong to this fixture.
     # All values are fixture constants; no product lookup or model-selected URL.
     prose = json.dumps((body or {}).get('messages',[]))

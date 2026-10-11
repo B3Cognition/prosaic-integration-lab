@@ -92,7 +92,9 @@ class Execution:
         # operator state, arguments, IDs, prompts or event payloads.
         if event['event'] == 'accepted':
             import httpx
-            response = httpx.post(self.config['fixture_events_url'] + '/accepted', timeout=25)
+            # Owned fault tests may hold a receipt for 60 seconds to observe
+            # real lease expiry and takeover. The callback remains bounded.
+            response = httpx.post(self.config['fixture_events_url'] + '/accepted', timeout=65)
             response.raise_for_status()
 
     def status(self, reservation):
