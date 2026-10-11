@@ -80,6 +80,15 @@ uses distinct `diagnostic-native-restore-*` check names and cannot satisfy the
 normal required acceptance checks. The complete matrix must be rerun after a
 confirmed correction; diagnostic success alone is insufficient.
 
+The [direct diagnostic run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38126506463)
+tested source `a66bf0beccf45c19ee7ccfdb90dfb7b7c798af28`. All four safe receipts
+reported `proposal_admission` / `unexpected_failure` with verified cleanup.
+A fresh SDK-only local interpreter reproduced `ModuleNotFoundError` in the
+approved-proposal helper: pytest supplies the Lab application `src` path, while
+the direct native recovery CLI lacked the native demo's source setup. This is a
+Lab runner defect; the public SDK pins do not need a change. Its correction must
+be verified outside pytest's path setup and through actual restore acceptance.
+
 Logical restoration uses a second database on the same owned primary and a fresh
 replica. It does not certify primary destruction, HA/PITR, long native soak,
 external-effect rollback, deployment identity/TLS or customer invoices.

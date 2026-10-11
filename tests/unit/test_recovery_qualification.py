@@ -269,6 +269,50 @@ def test_native_seed_waiting_check_matches_actual_sdk_filtered_interaction(nativ
         fixture.post('/control',json={}).raise_for_status()
 
 
+def test_native_recovery_cli_loads_current_application_in_sdk_only_subprocess(tmp_path):
+    """Pytest's src path must not hide the real released-SDK CLI import boundary."""
+    import subprocess
+    import sys
+    from pathlib import Path
+    from test_qualification import profile
+    root=Path(__file__).resolve().parents[2]
+    settings=tmp_path/'profile.json';settings.write_text(json.dumps(profile()))
+    script=r'''
+import importlib.util,json,sys
+from pathlib import Path
+from types import SimpleNamespace
+root=Path(sys.argv[1]);profile=sys.argv[2]
+sys.path.insert(0,str(root))
+assert str(root/'src') not in sys.path
+assert importlib.util.find_spec('prosaic_integration_lab') is None
+from lab_runner import __main__ as cli
+def before_engine_allocation(*args,**kwargs):
+    assert kwargs['native'] is True
+    from lab_runner.native_restore import approved_proposal
+    from lab_runner.native_scenarios import native_configuration
+    from prosaic_integration_lab.native_execution import NativeExecution
+    from prosaic_integration_lab.tool_journal import PgToolJournal
+    import prosaic_harness,prosaic_runtime
+    host=SimpleNamespace(config={'assets':str(root/'assets'),'app_dsn':'unused',
+        'fixture_events_url':'http://fixture/events','native':native_configuration('fixture')})
+    execution=NativeExecution(host)
+    bundle,_=execution.factories[('tenant-a','synthetic-v1')]
+    prepared=bundle.prepare_json(json.dumps(approved_proposal()))
+    journal=PgToolJournal('unused',identity='fixture-journal-v1')
+    print(json.dumps({'approval_admitted':prepared.reference.bundle_version=='synthetic-v1',
+        'journal_loaded':journal.contract_version=='tool-journal-v1',
+        'installed_sdks':all(str(root/'src') not in module.__file__ for module in (prosaic_harness,prosaic_runtime))}))
+    raise SystemExit(0)
+cli.OwnedStack=before_engine_allocation
+sys.argv=['lab_runner','qualify-recovery','--mode','native','--profile',profile]
+cli.main()
+'''
+    process=subprocess.run([sys.executable,'-I','-c',script,str(root),str(settings)],cwd=tmp_path,
+        capture_output=True,text=True,timeout=30)
+    assert process.returncode==0,process.stderr
+    assert json.loads(process.stdout)=={'approval_admitted':True,'journal_loaded':True,'installed_sdks':True}
+
+
 def test_native_verifier_uses_public_journal_replay_and_uncertain_claim_without_permission(monkeypatch,prepared_v1):
     import copy
     import httpx

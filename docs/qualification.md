@@ -76,6 +76,9 @@ claims replay; uncertain claims grant no dispatch token. Provider and handler
 counts cannot change during verification. Public output contains fixed
 verification booleans and populated counts; missing evidence cannot qualify.
 Original worker configuration is restored even if backup/restore fails.
+Native fixture failures report a closed `native_restore_diagnostic` phase and
+category. These identify the failed boundary without exporting exception text,
+credentials or captured state. A failed receipt cannot qualify restoration.
 
 After each replica restart, recovery inspects and verifies the same exact owned
 container and its loopback port. The local endpoint and ownership manifest are

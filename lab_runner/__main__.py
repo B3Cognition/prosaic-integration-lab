@@ -120,13 +120,13 @@ def main():
         parser.error('--open-report requires demo')
     if args.open_report and args.mode == 'native':
         parser.error('native demo writes a JSON receipt; --open-report is unsupported')
-    if args.command == 'demo' and args.mode == 'native':
+    if args.command in {'demo','qualify-recovery'} and args.mode == 'native':
         # The runner consumes this checkout's application code; all SDKs stay
         # installed from the manifest. A fresh SDK-only venv has no Lab package.
         source = str(ROOT / 'src')
         if source not in sys.path:
             sys.path.insert(0,source)
-        if args.candidate:
+        if args.command=='demo' and args.candidate:
             from prosaic_integration_lab.dependencies import sdk_manifest
             try:
                 sdk_manifest(args.candidate_manifest)
