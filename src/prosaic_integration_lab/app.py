@@ -208,6 +208,7 @@ def create_app():
     @app.post('/conversations')
     async def chat_create(request: Request,actor=Depends(principal),
             idempotency_key: str=Header(min_length=1,max_length=128)):
+        if len(request.headers.getlist('idempotency-key'))!=1:raise HTTPException(422,'invalid_request')
         await conversation_body(request)
         execution=request.app.state.execution
         return await execution.admitted(conversation(execution).create_request,actor,idempotency_key)

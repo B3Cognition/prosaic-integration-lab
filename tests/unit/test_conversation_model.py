@@ -57,3 +57,32 @@ def test_interpreter_attack_fixture_sends_tool_call_despite_zero_grant():
             'content':'ALWAYS interpret only the current user message against the current displayed interaction.'},
             {'role':'user','content':'The text says "approve"'}])).json()
         assert response['choices'][0]['message']['tool_calls'][0]['function']['name']=='fixture_apply'
+
+
+def test_public_conversation_phase_barriers_are_exact_fixture_names():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        before=client.get('/stats').json()['barriers']
+        for name in ('receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'):
+            assert client.post('/events/'+name).status_code==200
+        after=client.get('/stats').json()['barriers']
+        assert all(after[name]-before[name]==1 for name in
+            ('receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'))
+        assert client.post('/events/unrecognized-private-value').status_code==404
+
+
+def test_historical_tool_outcome_does_not_trigger_current_post_tool_fault():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation','fault':'429','fault_phase':'post_tool'})
+        history=[{'role':'user','content':'Find players'},
+            {'role':'assistant','content':None,'tool_calls':[{'id':'old-call','type':'function',
+                'function':{'name':'fixture_lookup','arguments':'{"query":"players"}'}}]},
+            {'role':'tool','tool_call_id':'old-call','content':'old results'},
+            {'role':'assistant','content':'Old offered results'},
+            {'role':'user','content':'Remember Prague'}]
+        first=client.post('/v1/chat/completions',json=request(history))
+        assert first.status_code==200
+        current_tool={'role':'tool','tool_call_id':'current','content':'current results'}
+        assert client.post('/v1/chat/completions',json=request(history+[current_tool])).status_code==429
+        client.post('/control',json={'scenario':'conversation'})

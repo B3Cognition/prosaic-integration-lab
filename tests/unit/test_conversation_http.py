@@ -43,6 +43,13 @@ def test_closed_creation_and_trusted_identity(client):
     assert len(calls)==1
 
 
+def test_creation_rejects_duplicate_idempotency_headers(client):
+    http,calls=client
+    response=http.post('/conversations',json={},headers=[('Idempotency-Key','first'),('Idempotency-Key','second')])
+    assert response.status_code==422
+    assert calls==[]
+
+
 @pytest.mark.parametrize('field',['actor','tenant','billingAccount','tools','history','config','role'])
 def test_messages_reject_client_authority_before_host(client,field):
     http,calls=client
@@ -86,3 +93,12 @@ def test_unauthenticated_requests_never_reach_host(client):
     http,calls=client
     assert http.post('/conversations',json={},headers={'Authorization':'Bearer invalid','Idempotency-Key':'one'}).status_code==401
     assert calls==[]
+
+
+def test_observability_uses_only_static_conversation_route_labels():
+    from prosaic_integration_lab.observability import route
+    assert route('/conversations')=='conversations_create'
+    assert route('/conversations/'+'a'*32)=='conversation_status'
+    for operation in ('history','usage','messages','recover','retry'):
+        assert route('/conversations/'+'a'*32+'/'+operation)=='conversation_'+operation
+    assert route('/conversations/PRIVATE_SESSION/messages')=='unknown'

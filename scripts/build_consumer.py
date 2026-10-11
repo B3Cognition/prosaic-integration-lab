@@ -17,6 +17,16 @@ from prosaic_integration_lab.dependencies import (cache_directory, manifest_byte
 from audit_install import wheel_payloads
 
 
+def public_file_allowed(filename):
+    if type(filename) is not str or not filename:return False
+    relative=Path(filename)
+    public_directories=('src','scripts','lab_runner','assets','containers')
+    return (not relative.is_absolute() and '..' not in relative.parts and bool(relative.parts) and
+        (relative.parts[0] in public_directories or filename in {
+            'dependencies/requirements.lock','configs/qualification.synthetic.json','configs/native.example.json',
+            'configs/conversation-conformance.example.json'}))
+
+
 def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> str:
     if dependency_mode not in {'released', 'candidate'}:
         raise ValueError('invalid dependency mode')
@@ -31,7 +41,6 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
         context = Path(temporary)
         # Only public runtime inputs enter the context; caches, runs, credentials,
         # research and the Git checkout cannot be uploaded to the engine.
-        public_directories = ('src', 'scripts', 'lab_runner', 'assets', 'containers')
         inventory = ROOT / 'dependencies/public-build-inputs.json'
         if inventory.is_symlink():
             raise ValueError('public build inventory must not be a symlink')
@@ -47,10 +56,7 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
             raise ValueError('invalid public build inventory')
         for filename in sorted(public_files):
             relative = Path(filename)
-            if (relative.is_absolute() or '..' in relative.parts or
-                    (relative.parts[0] not in public_directories and filename not in {
-                            'dependencies/requirements.lock','configs/qualification.synthetic.json',
-                            'configs/native.example.json'})):
+            if not public_file_allowed(filename):
                 raise ValueError('unsafe public build input')
             if '__pycache__' in relative.parts or relative.suffix == '.pyc':
                 continue

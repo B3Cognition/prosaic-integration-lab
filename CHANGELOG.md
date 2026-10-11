@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Conversation candidate host boundaries: authenticated closed HTTP contracts,
+  retained-session creation/quota registry, explicit separate storage readiness,
+  current grant checks and bounded history/usage projections.
+- Deterministic conversation provider fixtures and pure twelve-request live
+  conformance preflight with a shared allowance retaining unknown reservations.
+  Installed SDK, full journey/recovery and platform/database qualification pending.
+
 ## 0.4.0 — 2026-10-11
 
 - Native provider transport faults before/after consequential tools and live SQL

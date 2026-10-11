@@ -39,6 +39,10 @@ def retained_workflows(config):
 class Execution:
     def __init__(self, config, *, metrics=None):
         self.config = config
+        if 'conversation' in config:
+            from .conversation_execution import require_conversation_sdk,validate_settings
+            validate_settings(config['conversation'])
+            require_conversation_sdk()
         self.capacity=policy(config.get('capacity',{}))
         self.fingerprint = assets_hash(config['assets'])
         self.workflows = {name: Workflow.load(Path(config['assets']) / (name + '.yml')) for name in ('approval', 'synthetic')}
@@ -60,7 +64,7 @@ class Execution:
             from .native_execution import NativeExecution
             self.native = NativeExecution(self)
         self.conversation=None
-        if config.get('conversation'):
+        if 'conversation' in config:
             from .conversation_execution import ConversationExecution
             self.conversation=ConversationExecution(self)
 
@@ -73,8 +77,9 @@ class Execution:
     def close(self):
         self.operations.close()
         self.reads.close()
-        self.store.close()
-        if self.conversation is not None:self.conversation.close()
+        try:self.store.close()
+        finally:
+            if self.conversation is not None:self.conversation.close()
 
     def harness(self, reservation):
         if reservation['workflow'] == 'native':

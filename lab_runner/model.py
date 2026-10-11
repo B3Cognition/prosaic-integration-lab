@@ -22,7 +22,8 @@ provider_latency_s = 0
 tool_samples = 0
 receipt_gate = threading.Event()
 receipt_gate.set()
-barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed')}
+barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed',
+    'receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned')}
 for event in barriers.values():event.set()
 barrier_counts={name:0 for name in barriers}
 provenance_calls=0
@@ -198,7 +199,8 @@ def completions(body: dict | None = None):
         calls += 1
         call_id, selected, output = calls, scenario, result_text
         delay=provider_latency_s
-        post_tool=any(message.get('role')=='tool' for message in (body or {}).get('messages',[]))
+        messages=(body or {}).get('messages',[])
+        post_tool=bool(messages) and messages[-1].get('role')=='tool'
         selected_fault=fault if (fault_phase=='post_tool')==post_tool else None
         fault_delay=fault_delay_s
         if selected_fault is not None:fault_acceptances[selected_fault]+=1

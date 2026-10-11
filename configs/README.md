@@ -1,5 +1,12 @@
 # Optional local inference
 
+The new [conversation preview](../docs/conversations.md) includes
+`conversation-conformance.example.json`, a private Runtime YAML/allowance recipe.
+Its pure preflight makes zero provider requests and opens no credential files.
+The planned live schedule requires twelve shared requests, separate fixed
+balanced/strong sessions and explicit local or hosted opt-in. Live dispatch
+qualification remains pending; the existing routing smoke below is independent.
+
 `runtime-local.example.yml` uses the released Runtime configuration contract for
 the host-side endpoint `http://127.0.0.1:8000/v1`. Authenticated discovery
 identified `mlx-community--Qwen2.5-Coder-7B-Instruct-4bit`; this smaller model

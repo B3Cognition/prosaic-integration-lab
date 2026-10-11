@@ -5,6 +5,19 @@ from .conversation_registry import APPLICATION,ConversationRegistry,capacity,ref
 from .views import public_conversation_history,public_usage
 
 
+PHASES=frozenset({'receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'})
+
+
+def phase_observer(config,on_event=None):
+    def observed(event):
+        if config.get('fixture_events_url') and event.get('event') in PHASES:
+            import httpx
+            response=httpx.post(config['fixture_events_url']+'/'+event['event'],timeout=35)
+            response.raise_for_status()
+        if on_event is not None:on_event(event)
+    return observed
+
+
 def require_conversation_sdk():
     import prosaic_harness as harness
     import prosaic_harness_postgres as postgres
@@ -14,6 +27,16 @@ def require_conversation_sdk():
             'ConversationScope','ConversationPolicy','ConversationError')) or
         not hasattr(postgres,'PostgresSessionStore')):
         raise ValueError('conversation capability unavailable')
+
+
+def validate_settings(settings):
+    if (type(settings) is not dict or set(settings)-{'dsn','bundles','tenants','max_sessions','max_owner_sessions'} or
+            not {'dsn','bundles','tenants'}<=set(settings) or type(settings['dsn']) is not str or
+            not settings['dsn'] or type(settings['bundles']) is not list or not settings['bundles'] or
+            type(settings['tenants']) is not dict or not settings['tenants']):
+        raise ValueError('invalid conversation configuration')
+    capacity(settings.get('max_sessions',128),settings.get('max_owner_sessions',16))
+    return settings
 
 
 def current_grant(host,principal,version=None):
@@ -40,10 +63,7 @@ class ConversationExecution:
         from prosaic_harness_postgres import PostgresSessionStore
         from .conversation_workflows import build_bindings
         self.host=host
-        settings=host.config['conversation']
-        if (type(settings) is not dict or set(settings)-{'dsn','bundles','tenants',
-                'max_sessions','max_owner_sessions'} or not {'dsn','bundles','tenants'}<=set(settings)):
-            raise ValueError('invalid conversation configuration')
+        settings=validate_settings(host.config['conversation'])
         self.max_sessions=settings.get('max_sessions',128)
         self.max_owner_sessions=settings.get('max_owner_sessions',16)
         capacity(self.max_sessions,self.max_owner_sessions)
@@ -127,7 +147,8 @@ class ConversationExecution:
             interaction_ref=None,on_event=None):
         row=self._owned(principal,session_id)
         return self._controller(principal,row).send(session_id,message_id=message_id,message=message,
-            expected_revision=expected_revision,interaction_ref=interaction_ref,on_event=on_event).document
+            expected_revision=expected_revision,interaction_ref=interaction_ref,
+            on_event=phase_observer(self.host.config,on_event)).document
 
     def recover_request(self,principal,session_id):
         row=self._owned(principal,session_id)
