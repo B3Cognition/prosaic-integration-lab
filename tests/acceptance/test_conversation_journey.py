@@ -13,8 +13,8 @@ def principal(lab,actor='alice'):
     return next(p for p in lab['principals'].values() if p['actor_id']==actor)
 
 
-def history(lab,p,sid):
-    result=request(lab,p,'GET','/conversations/'+sid+'/history');result.raise_for_status()
+def history(lab,p,sid,*,replica='a'):
+    result=request(lab,p,'GET','/conversations/'+sid+'/history',replica=replica);result.raise_for_status()
     return result.json()['messages']
 
 

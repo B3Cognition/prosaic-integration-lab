@@ -178,6 +178,14 @@ def test_two_workers_admit_one_duplicate_and_one_competing_revision(lab):
 def test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt(lab):
     from test_conversation_journey import history
     p=principal(lab,'user-0010');session=create(lab,p,uuid.uuid4().hex)
+    def durable():
+        with psycopg.connect(lab['conversation']['dsn']) as connection:
+            state=connection.execute('SELECT revision,document FROM prosaic_harness_conversations.sessions '
+                'WHERE namespace=%s AND session_id=%s',(lab['namespace'],session['sessionId'])).fetchall()
+            receipts=connection.execute('SELECT invocation_id,sha256,document FROM prosaic_harness_conversations.receipts '
+                'WHERE namespace=%s AND session_id=%s ORDER BY invocation_id',
+                (lab['namespace'],session['sessionId'])).fetchall()
+        return state,receipts
     with partition_session_worker_a(lab) as proxy:
         before=httpx.get(lab['model']+'/stats',timeout=5).json()['barriers']['receiptSaved']
         control(lab,scenario='conversation',effect_gate='receiptSaved')
@@ -189,14 +197,24 @@ def test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt(l
                 partition=proxy.control(True)
                 assert partition['blocked'] is True and partition['active']==0
                 replace_worker(lab,'b')
+                independent=create(lab,p,uuid.uuid4().hex,replica='b')
+                assert independent['status']=='ready' and calls(lab)==accepted
+                separate=request(lab,p,'GET','/conversations/'+independent['sessionId'],replica='b')
+                assert separate.status_code==200 and separate.json()==independent
+                assert history(lab,p,independent['sessionId'],replica='b')==[]
+                assert calls(lab)==accepted
                 adopted=recover(lab,p,session['sessionId'])
                 assert adopted['status']=='completed' and adopted['answer']=='Your city is Prague.'
                 assert calls(lab)==accepted
+                committed=durable()
+                assert len(committed[0])==1 and len(committed[1])==1
             finally:
                 control(lab,scenario='conversation')
                 proxy.control(False)
             late=future.result(timeout=100)
             assert late.status_code in {409,503}
         assert request(lab,p,'GET','/conversations/'+session['sessionId'],replica='b').json()==adopted
-        assert len(history(lab,p,session['sessionId']))==2 and calls(lab)==accepted
+        assert len(history(lab,p,session['sessionId'],replica='b'))==2 and calls(lab)==accepted
+        assert durable()==committed
         assert recover(lab,p,session['sessionId'])==adopted and calls(lab)==accepted
+        assert durable()==committed

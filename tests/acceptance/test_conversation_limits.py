@@ -72,12 +72,14 @@ def test_messages_envelope_ceiling_rejects_before_sdk_admission(lab):
 def test_session_capacity_rejection_preserves_history_revision_and_exact_replay(lab,policy,limit):
     with bounded_binding(lab,policy) as p:
         key=uuid.uuid4().hex;session=create(lab,p,key,replica='b');initial=session
+        # Only B receives this temporary binding; A retains its original grant.
+        assert request(lab,p,'GET','/conversations/'+session['sessionId']+'/history').status_code==403
         if limit in {'maxTurns','maxAttempts'}:
             session=send(lab,p,session,'admitted','Remember Prague',replica='b')
-        before=calls(lab);saved=history(lab,p,session['sessionId'])
+        before=calls(lab);saved=history(lab,p,session['sessionId'],replica='b')
         rejected=post(lab,p,session)
         assert rejected.status_code==422 and rejected.json()=={'detail':{'code':'sessionLimit','limit':limit}}
-        assert calls(lab)==before and history(lab,p,session['sessionId'])==saved
+        assert calls(lab)==before and history(lab,p,session['sessionId'],replica='b')==saved
         status=request(lab,p,'GET','/conversations/'+session['sessionId'],replica='b').json()
         assert status==session
         assert create(lab,p,key,replica='b')==session
@@ -92,7 +94,7 @@ def test_actual_provider_context_overflow_has_safe_code_and_zero_new_history(lab
         response=post(lab,p,session,message='x'*16384)
         assert response.status_code==422 and response.json()['detail']['code']=='contextLimit'
         assert set(response.json()['detail'])<={'code','limit'}
-        assert calls(lab)==before and history(lab,p,session['sessionId'])==[]
+        assert calls(lab)==before and history(lab,p,session['sessionId'],replica='b')==[]
         assert request(lab,p,'GET','/conversations/'+session['sessionId'],replica='b').json()==session
 
 
@@ -101,7 +103,7 @@ def test_complete_turn_encoding_overflow_rejects_before_provider_call(lab):
         session=create(lab,p,uuid.uuid4().hex,replica='b');before=calls(lab)
         response=post(lab,p,session,message='\\'*500)
         assert response.status_code==422 and response.json()=={'detail':{'code':'contextLimit','limit':'maxTurnBytes'}}
-        assert calls(lab)==before and history(lab,p,session['sessionId'])==[]
+        assert calls(lab)==before and history(lab,p,session['sessionId'],replica='b')==[]
 
 
 def test_json_node_capacity_stops_new_turns_without_evicting_admitted_history(lab):
@@ -115,10 +117,10 @@ def test_json_node_capacity_stops_new_turns_without_evicting_admitted_history(la
             response.raise_for_status();session=response.json();admitted=message_id
             assert session['status']=='completed'
         else:pytest.fail('bounded JSON node allowance admitted every tested turn')
-        before=calls(lab);saved=history(lab,p,session['sessionId'])
+        before=calls(lab);saved=history(lab,p,session['sessionId'],replica='b')
         rejected=post(lab,p,session,message_id='nodes-exhausted')
         assert rejected.status_code==422 and rejected.json()=={'detail':{'code':'sessionLimit','limit':'maxJsonNodes'}}
-        assert calls(lab)==before and history(lab,p,session['sessionId'])==saved
+        assert calls(lab)==before and history(lab,p,session['sessionId'],replica='b')==saved
         if admitted:
             assert send(lab,p,initial,admitted,'hello',replica='b')==session
             assert calls(lab)==before
@@ -131,8 +133,9 @@ def test_json_depth_ceiling_retains_failed_user_without_partial_tool_exchange(la
         reply=response.json()
         assert reply['status']=='failed' and reply['failureCode']=='outputLimit'
         assert calls(lab)==before+1 and 'answer' not in reply
-        saved=history(lab,p,session['sessionId'])
-        assert saved==[{'role':'user','content':'find players now','turnStatus':'failed','failureCode':'outputLimit'}]
+        saved=history(lab,p,session['sessionId'],replica='b')
+        assert saved==[{'role':'user','content':[{'type':'text','text':'find players now'}],
+            'turnStatus':'failed','failureCode':'outputLimit'}]
         assert request(lab,p,'POST','/conversations/'+session['sessionId']+'/recover',replica='b',json={}).json()==reply
         assert calls(lab)==before+1
 
@@ -144,7 +147,7 @@ def test_small_sealed_receipt_ceiling_preserves_output_and_exact_replay(lab):
         response=post(lab,p,session,message=text);response.raise_for_status();completed=response.json()
         assert completed['status']=='completed' and completed['failureCode'] is None
         assert calls(lab)==before+1
-        saved=history(lab,p,session['sessionId'])
+        saved=history(lab,p,session['sessionId'],replica='b')
         assert saved[0]['role']=='user' and saved[0]['content']==[{'type':'text','text':text}]
         with psycopg.connect(lab['conversation']['dsn']) as connection:
             receipts=connection.execute('SELECT octet_length(document) FROM prosaic_harness_conversations.receipts '
@@ -152,7 +155,7 @@ def test_small_sealed_receipt_ceiling_preserves_output_and_exact_replay(lab):
         assert len(receipts)==1 and 0<receipts[0][0]<=policy['max_receipt_bytes']
         assert send(lab,p,session,'overflow',text,replica='b')==completed
         assert request(lab,p,'POST','/conversations/'+session['sessionId']+'/recover',replica='b',json={}).json()==completed
-        assert history(lab,p,session['sessionId'])==saved
+        assert history(lab,p,session['sessionId'],replica='b')==saved
         assert calls(lab)==before+1
 
 
@@ -166,8 +169,9 @@ def test_capacity_after_completed_lookup_retains_tool_usage_and_failed_user(lab,
         response=post(lab,p,session,message='find players now');response.raise_for_status();failed=response.json()
         assert failed['status']=='failed' and failed['failureCode']==code
         assert calls(lab)==before+1 and 'answer' not in failed
-        saved=history(lab,p,session['sessionId'])
-        assert saved==[{'role':'user','content':'find players now','turnStatus':'failed','failureCode':code}]
+        saved=history(lab,p,session['sessionId'],replica='b')
+        assert saved==[{'role':'user','content':[{'type':'text','text':'find players now'}],
+            'turnStatus':'failed','failureCode':code}]
         usage=request(lab,p,'GET','/conversations/'+session['sessionId']+'/usage',replica='b').json()['conversation']
         assert usage['total_calls']==1 and usage['complete_calls']==1
         with psycopg.connect(lab['conversation']['dsn']) as connection:
@@ -180,7 +184,7 @@ def test_capacity_after_completed_lookup_retains_tool_usage_and_failed_user(lab,
         if 'max_receipt_bytes' in policy:assert len(rows[0][0].encode())<=policy['max_receipt_bytes']
         assert send(lab,p,session,'overflow','find players now',replica='b')==failed
         assert request(lab,p,'POST','/conversations/'+session['sessionId']+'/recover',replica='b',json={}).json()==failed
-        assert history(lab,p,session['sessionId'])==saved and calls(lab)==before+1
+        assert history(lab,p,session['sessionId'],replica='b')==saved and calls(lab)==before+1
 
 
 def test_final_assistant_overflow_retains_unsuccessful_user_and_usage_without_partial_exchange(lab):
@@ -190,7 +194,8 @@ def test_final_assistant_overflow_retains_unsuccessful_user_and_usage_without_pa
         response.raise_for_status();failed=response.json()
         assert failed['status']=='failed' and failed['failureCode']=='outputLimit'
         assert 'answer' not in failed and calls(lab)==before+1
-        assert history(lab,p,session['sessionId'])==[{'role':'user','content':'PRIVATE_OUTPUT_BOUNDARY',
+        assert history(lab,p,session['sessionId'],replica='b')==[{'role':'user',
+            'content':[{'type':'text','text':'PRIVATE_OUTPUT_BOUNDARY'}],
             'turnStatus':'failed','failureCode':'outputLimit'}]
         usage=request(lab,p,'GET','/conversations/'+session['sessionId']+'/usage',replica='b').json()['conversation']
         assert usage['total_calls']==1
