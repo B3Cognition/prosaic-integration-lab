@@ -1,4 +1,5 @@
 {
   "runtime_config": "runtime-local.example.yml",
-  "allowance_file": "/replace/with/private/conversation-allowance.json"
+  "allowance_file": "/replace/with/private/conversation-allowance.json",
+  "workflow_tier": "strong"
 }

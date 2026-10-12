@@ -120,6 +120,38 @@ def test_local_preflight_returns_distinct_approved_qwen_tiers(tmp_path):
     assert '127.0.0.1' not in encoded and 'omlx_token' not in encoded and str(tmp_path) not in encoded
 
 
+def test_recipe_defaults_to_balanced_workflow_and_admits_explicit_strong(tmp_path):
+    from lab_runner.conversation_conformance import preflight,public_preflight
+    recipe=write_profile(tmp_path)
+    assert preflight(recipe,max_calls=12)['workflow_tier']=='balanced'
+    document=json.loads(recipe.read_text());document['workflow_tier']='strong'
+    recipe.write_text(json.dumps(document))
+    plan=preflight(recipe,live_local=True,max_calls=12)
+    assert plan['workflow_tier']=='strong'
+    assert public_preflight(plan)['workflow_tier']=='strong'
+    assert not (tmp_path/'allowance.json').exists()
+
+
+@pytest.mark.parametrize('tier',[None,True,1,'','fast','unapproved',[],{}])
+def test_recipe_rejects_unapproved_workflow_tier_before_configuration_or_allowance(tmp_path,tier):
+    from lab_runner.conversation_conformance import preflight
+    recipe=tmp_path/'conversation.json'
+    recipe.write_text(json.dumps({'runtime_config':str(tmp_path/'missing.yml'),
+        'allowance_file':str(tmp_path/'allowance.json'),'workflow_tier':tier}))
+    with pytest.raises(ValueError,match='configuration'):
+        preflight(recipe,live_local=True,max_calls=12)
+    assert not (tmp_path/'allowance.json').exists()
+
+
+def test_recipe_optional_workflow_tier_does_not_admit_other_fields(tmp_path):
+    from lab_runner.conversation_conformance import preflight
+    recipe=write_profile(tmp_path)
+    document=json.loads(recipe.read_text());document.update(workflow_tier='strong',automatic_fallback=True)
+    recipe.write_text(json.dumps(document))
+    with pytest.raises(ValueError,match='configuration'):preflight(recipe,max_calls=12)
+    assert not (tmp_path/'allowance.json').exists()
+
+
 def test_command_without_opt_in_exports_preflight_only(tmp_path):
     from lab_runner.conversation_conformance import main
     output=tmp_path/'public.json'

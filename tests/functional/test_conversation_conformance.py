@@ -27,6 +27,64 @@ def test_bounded_schedule_uses_distinct_tiers_and_authorized_effect(tmp_path,cha
     assert str(tmp_path) not in encoded and chat_provider not in encoded and 'qwen-balanced' not in encoded
 
 
+def test_explicit_strong_workflow_keeps_balanced_interpretation_and_separate_evidence(tmp_path,chat_provider):
+    from prosaic_runtime import EndpointConfig,RuntimeConfig
+    from lab_runner.conversation_conformance import execute_schedule
+    credential=tmp_path/'key';credential.write_text('synthetic');credential.chmod(0o600)
+    config=RuntimeConfig({tier:EndpointConfig(chat_provider+'/v1','qwen-'+tier,
+        api_key_file=str(credential),max_tokens=512,features={'streaming':False})
+        for tier in ('balanced','strong')},{tier:tier for tier in ('balanced','strong')},'balanced')
+    before=httpx.get(chat_provider+'/stats',timeout=5).json()['calls']
+    result=execute_schedule({'mode':'synthetic','runtime_config':config,
+        'allowance_file':tmp_path/'allowance.json','maximum_requests':12,'workflow_tier':'strong'},max_calls=12)
+    assert result['passed'] and result['workflow_tier']=='strong',json.dumps(result)
+    assert result['provider_requests']==8 and result['diagnostic_effects']==1
+    assert result['cases'][-1]['tier']=='balanced' and result['cases'][-1]['workflow_tier']=='strong'
+    assert result['cases'][-1]['provider_requests']==3
+    assert result['routing_verified'] and result['full_history_verified']
+    assert result['allowance']=={'maximum':12,'retained':8,'remaining':4,'unknown':0}
+    assert httpx.get(chat_provider+'/stats',timeout=5).json()['calls']-before==8
+
+
+def test_admitted_strong_workflow_receipt_rejects_wrong_profile_model_or_call_ids(tmp_path,chat_provider):
+    from prosaic_harness import ConversationScope,Harness
+    from prosaic_runtime import EndpointConfig,ExecutionContext,RuntimeConfig
+    from prosaic_runtime.accounting import MemoryRecorder
+    from lab_runner.conversation_conformance import _materials,_matched_calls,_workflow_evidence
+    credential=tmp_path/'key';credential.write_text('synthetic');credential.chmod(0o600)
+    config=RuntimeConfig({tier:EndpointConfig(chat_provider+'/v1','qwen-'+tier,
+        api_key_file=str(credential),max_tokens=512,features={'streaming':False})
+        for tier in ('balanced','strong')},{tier:tier for tier in ('balanced','strong')},'balanced')
+    scope=ConversationScope('evidence-check','diagnostic','conformance','fixture','owner','fixture-payer')
+    recorder=MemoryRecorder(namespace=scope.namespace,environment=scope.environment,provider_id='openai-compatible')
+    effects=[]
+    _,workflow,store=_materials(config,tmp_path,effects,recorder,scope,workflow_tier='strong')
+    assert workflow.artifacts['apply-b'].frontmatter['model_tier']=='strong'
+    sid='a'*32
+    context=ExecutionContext(application_id=scope.application,tenant_id=scope.tenant,actor_id=scope.actor,
+        billing_account_id=scope.billing_account,request_id='workflow-'+sid,run_id=sid)
+    harness=Harness(workflow,store=store,run_id=sid,context=context,accounting=recorder)
+    try:
+        harness.run({})
+        harness.resume(choice='player-b',response={'entityId':'player-b'},
+            expected_revision=harness.status().revision)
+        harness.resume(choice='approve',response={'confirmed':True},
+            expected_revision=harness.status().revision)
+        expected={'application_id':'conformance','tenant_id':'fixture','actor_id':'owner',
+            'billing_account_id':'fixture-payer','request_id':'workflow-'+sid,'run_id':sid}
+        assert _matched_calls(recorder,set(),expected,'strong','qwen-strong')==2
+        assert _matched_calls(recorder,set(),expected,'balanced','qwen-balanced') is None
+        ids=set(recorder.intents)
+        options={'profile':'strong','model':'qwen-strong','context':expected,'scope':scope,'provider_call_ids':ids}
+        assert _workflow_evidence(store,sid,2,**options)
+        assert not _workflow_evidence(store,sid,2,**(options|{'profile':'balanced'}))
+        assert not _workflow_evidence(store,sid,2,**(options|{'model':'qwen-balanced'}))
+        assert not _workflow_evidence(store,sid,2,**(options|{'provider_call_ids':{'foreign-call'}}))
+        assert not _workflow_evidence(store,sid,2,**(options|{'context':expected|{'request_id':'foreign'}}))
+        assert effects==['player-b']
+    finally:store.close()
+
+
 def test_provider_failure_stops_schedule_and_retains_unknown_allowance(tmp_path,chat_provider):
     from prosaic_runtime import EndpointConfig,RuntimeConfig
     from lab_runner.conversation_conformance import execute_schedule

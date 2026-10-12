@@ -56,9 +56,12 @@ def preflight(path,*,live_local=False,live_hosted=False,max_calls=12):
         path=Path(path)
         if path.stat().st_size>65536:raise ValueError('invalid conversation configuration')
         document=json.loads(path.read_text(),object_pairs_hook=_object)
-        if (type(document) is not dict or set(document)!={'runtime_config','allowance_file'} or
+        if (type(document) is not dict or not {'runtime_config','allowance_file'}<=document.keys() or
+                document.keys()-{'runtime_config','allowance_file','workflow_tier'} or
                 any(type(value) is not str or not value for value in document.values())):
             raise ValueError('invalid conversation configuration')
+        workflow_tier=document.get('workflow_tier','balanced')
+        if workflow_tier not in {'balanced','strong'}:raise ValueError('invalid conversation configuration')
         config_path=Path(document['runtime_config']).expanduser()
         if not config_path.is_absolute():config_path=path.resolve().parent/config_path
         config=RuntimeConfig.load(config_path)
@@ -87,13 +90,15 @@ def preflight(path,*,live_local=False,live_hosted=False,max_calls=12):
         if mode=='hosted' and (url.scheme!='https' or loopback or url.hostname in {'localhost','localhost.localdomain'}):
             raise ValueError('hosted conformance requires approved HTTPS profiles')
     return {'mode':mode,'runtime_config':config,'allowance_file':allowance,
-        'maximum_requests':MAXIMUM_REQUESTS,'schedule':SCHEDULE}
+        'maximum_requests':MAXIMUM_REQUESTS,'schedule':SCHEDULE,'workflow_tier':workflow_tier}
 
 
 def public_preflight(plan):
-    return {'event':'conversation_conformance','mode':plan['mode'],'preflight':True,
+    result={'event':'conversation_conformance','mode':plan['mode'],'preflight':True,
         'live_executed':False,'dispatches':0,'maximum_requests':plan['maximum_requests'],
         'tiers':['balanced','strong']}
+    if plan.get('workflow_tier','balanced')!='balanced':result['workflow_tier']=plan['workflow_tier']
+    return result
 
 
 @contextmanager
@@ -117,8 +122,10 @@ def _agent(name,tier,tools,body):
                       'model_tier':tier,'tools':list(tools)},'body':body})
 
 
-def _materials(config,directory,effects,recorder,scope):
+def _materials(config,directory,effects,recorder,scope,*,workflow_tier='balanced'):
     """Admit both sessions and the fixed diagnostic graph before any inference."""
+    if type(workflow_tier) is not str or workflow_tier not in {'balanced','strong'}:
+        raise ValueError('invalid conversation configuration')
     from prosaic_harness import (ConfirmationRule,ConversationBindings,ConversationPolicy,
         FileRunStore,RunAuthorizer,WorkflowBindings,WorkflowCatalog,WorkflowFactory,
         WorkflowPolicy,WorkflowRegistration)
@@ -137,7 +144,7 @@ def _materials(config,directory,effects,recorder,scope):
     agents={}
     for suffix in ('a','b'):
         name='fixture_apply_'+suffix
-        agents['effecter-'+suffix]=_agent('effecter-'+suffix,'balanced',[name],
+        agents['effecter-'+suffix]=_agent('effecter-'+suffix,workflow_tier,[name],
             f'ALWAYS execute {name} once through its provided native callable interface.\n'
             'NEVER describe or simulate a tool call in response text.\n'
             f'ALWAYS wait for the actual tool result before returning only the plain JSON object {{"entity_id":"player-{suffix}"}}.\n'
@@ -152,7 +159,7 @@ def _materials(config,directory,effects,recorder,scope):
     workflow=WorkflowFactory(catalog=WorkflowCatalog(agents=agents,schemas=schemas),
         bindings=WorkflowBindings(config=config,custom_tools=tools),policy=WorkflowPolicy(
             allowed_agents=frozenset(agents),allowed_schemas=frozenset(schemas),
-            allowed_tools=frozenset(tools),allowed_model_tiers=frozenset({'balanced'}),
+            allowed_tools=frozenset(tools),allowed_model_tiers=frozenset({workflow_tier}),
             allow_agent_composition=True,
             max_calls=1,max_attempts=1,max_tokens=4096,max_run_s=90,timeout_s=30,
             max_provider_requests_per_invocation=2,max_tool_calls_per_invocation=1)).build(approved_definition())
@@ -215,16 +222,27 @@ def _ordinary_evidence(store,scope,sid,view,recorder,before,profile,model):
     return count
 
 
-def _workflow_evidence(store,sid,count):
+def _workflow_evidence(store,sid,count,*,profile,model,context,scope,provider_call_ids):
     snapshot=store.load_run(sid)
     invocations=snapshot.state.get('invocations',[])
     if snapshot.state.get('status')!='completed' or len(invocations)!=1:return False
     invocation=invocations[0];receipt=store.load_receipt(sid,invocation['id'])
     if receipt is None:return False
-    result=receipt.get('result',{});budgets=result.get('metadata',{}).get('invocation_budgets_v1',{})
+    result=receipt.get('result',{});metadata=result.get('metadata',{})
+    budgets=metadata.get('invocation_budgets_v1',{})
+    accounting=metadata.get('accounting_v1',{})
+    ids=accounting.get('provider_call_ids',[])
+    receipt_context=accounting.get('context',{})
     return (invocation.get('status')=='complete' and receipt.get('sha256')==invocation.get('receipt_sha256')
         and result.get('exit_code')==0 and result.get('timed_out') is False
-        and type(count) is int and budgets.get('provider_requests')==count and budgets.get('tool_calls')==1)
+        and type(count) is int and budgets.get('provider_requests')==count and budgets.get('tool_calls')==1
+        and metadata.get('profile')==profile and metadata.get('request_model')==model
+        and accounting.get('namespace')==scope.namespace and accounting.get('environment')==scope.environment
+        and type(ids) is list and all(type(value) is str for value in ids)
+        and len(ids)==count and set(ids)==set(provider_call_ids)
+        and all(receipt_context.get(key)==value for key,value in context.items())
+        and receipt_context.get('invocation_id')==invocation['id']
+        and receipt_context.get('step_id')==invocation['step'])
 
 
 @direct_environment()
@@ -237,6 +255,9 @@ def execute_schedule(plan,*,max_calls):
     mode=plan['mode']
     if mode not in {'local','hosted','synthetic'} or max_calls!=MAXIMUM_REQUESTS:
         raise ValueError('explicit bounded conformance mode required')
+    workflow_tier=plan.get('workflow_tier','balanced')
+    if type(workflow_tier) is not str or workflow_tier not in {'balanced','strong'}:
+        raise ValueError('invalid conversation configuration')
     allowance=SharedLiveAllowance(plan['allowance_file'],max_calls=max_calls)
     if allowance.status()['remaining']<MAXIMUM_REQUESTS:
         raise ValueError('complete conversation schedule allowance unavailable')
@@ -244,10 +265,14 @@ def execute_schedule(plan,*,max_calls):
     config=plan['runtime_config'];effects=[];rows=[];history_ok=set()
     recorders={tier:MemoryRecorder(namespace=scope.namespace,environment=scope.environment,
         provider_id=config.profiles[config.routes[tier]].provider) for tier in ('balanced','strong')}
+    workflow_profile=config.routes[workflow_tier];workflow_model=config.profiles[workflow_profile].model
+    workflow_recorder=MemoryRecorder(namespace=scope.namespace,environment=scope.environment,
+        provider_id=config.profiles[workflow_profile].provider)
     contexts={};sessions={};controllers={};stores={}
     with tempfile.TemporaryDirectory(prefix='conversation-conformance-') as temporary:
         directory=Path(temporary).resolve()
-        bindings,workflow,run_store=_materials(config,directory,effects,recorders['balanced'],scope)
+        bindings,workflow,run_store=_materials(config,directory,effects,workflow_recorder,scope,
+            workflow_tier=workflow_tier)
         try:
             for tier in ('balanced','strong'):
                 store=FileSessionStore(directory/tier,namespace=scope.namespace);store.initialize();stores[tier]=store
@@ -264,11 +289,12 @@ def execute_schedule(plan,*,max_calls):
                 if purpose=='selection':
                     # Starting at a deterministic pause has zero model calls.
                     Harness(workflow,store=run_store,run_id=sid,context=replace(contexts[tier],
-                        request_id='workflow-'+sid),accounting=recorder).run({})
+                        request_id='workflow-'+sid),accounting=workflow_recorder).run({})
                     view=controller.attach_workflow(sid,registration='diagnostic',run_id=sid,
                         expected_revision=view['revision']).document
                 token=allowance.reserve(maximum_requests=maximum)
                 before=set(recorder.intents);count=None;passed=False
+                workflow_before=set(workflow_recorder.intents)
                 phase='send';reply=None;failure=None;evidence_ok=True
                 try:
                     message=('Remember Prague' if index in {0,2} else 'Which city did I choose?'
@@ -280,17 +306,17 @@ def execute_schedule(plan,*,max_calls):
                     count=_ordinary_evidence(stores[tier],scope,sid,view,recorder,before,profile,model)
                     if purpose=='confirmation':
                         # Both conversation and workflow contexts are frozen, with distinct request IDs.
-                        ids=set(recorder.intents)-before
-                        chat_ids={key for key in ids if recorder.intents[key]['context'].get('request_id')==sid}
-                        workflow_before=set(recorder.intents)-(ids-chat_ids)
-                        workflow_count=_matched_calls(recorder,workflow_before,{
+                        workflow_context={
                             'request_id':'workflow-'+sid,'run_id':sid,'application_id':scope.application,
-                            'tenant_id':scope.tenant,'actor_id':scope.actor,'billing_account_id':scope.billing_account},profile,model)
+                            'tenant_id':scope.tenant,'actor_id':scope.actor,'billing_account_id':scope.billing_account}
+                        workflow_count=_matched_calls(workflow_recorder,workflow_before,workflow_context,
+                            workflow_profile,workflow_model)
                         # The interpreter receipt is counted independently of the linked follow-up.
-                        chat_before=set(recorder.intents)-chat_ids
-                        chat_count=_ordinary_evidence(stores[tier],scope,sid,view,recorder,chat_before,profile,model)
+                        chat_count=_ordinary_evidence(stores[tier],scope,sid,view,recorder,before,profile,model)
                         count=chat_count+workflow_count if chat_count is not None and workflow_count is not None else None
-                        evidence_ok=_workflow_evidence(run_store,sid,workflow_count)
+                        evidence_ok=_workflow_evidence(run_store,sid,workflow_count,profile=workflow_profile,
+                            model=workflow_model,context=workflow_context,scope=scope,
+                            provider_call_ids=set(workflow_recorder.intents)-workflow_before)
                         passed=(view.get('answer')=='Workflow completed.' and effects==['player-b']
                             and evidence_ok)
                     elif purpose=='selection':
@@ -315,6 +341,7 @@ def execute_schedule(plan,*,max_calls):
                     allowance.finish(token,actual_requests=count if passed else None)
                 row={'tier':tier,'purpose':purpose,'passed':passed,
                      'provider_requests':count if passed else None}
+                if purpose=='confirmation':row['workflow_tier']=workflow_tier
                 if not passed:row['failure']=failure
                 rows.append(row)
                 if not passed:break
@@ -324,6 +351,7 @@ def execute_schedule(plan,*,max_calls):
     passed=len(rows)==len(SCHEDULE) and all(row['passed'] for row in rows) and len(history_ok)==2
     return {'event':'conversation_conformance','mode':'synthetic' if mode=='synthetic' else mode,
         'passed':passed,'live_executed':mode!='synthetic','maximum_requests':MAXIMUM_REQUESTS,
+        'workflow_tier':workflow_tier,
         'provider_requests':sum(row['provider_requests'] for row in rows) if passed else None,
         'routing_verified':passed,'full_history_verified':len(history_ok)==2,'diagnostic_effects':len(effects),
         'accounting_durable':False,'business_effects':False,'allowance':allowance.status(),'cases':rows}
