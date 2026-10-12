@@ -185,3 +185,15 @@ def test_standalone_conformance_preflight_leaves_credentials_and_allowance_unope
     assert json.loads(destination.read_text())==expected
     assert not credential.exists() and not allowance.exists()
     assert not allowance.with_name(allowance.name+'.lock').exists()
+
+
+def test_failed_case_diagnostic_redacts_unknown_codes_and_exception_text():
+    from lab_runner.conversation_conformance import _case_failure
+    class PrivateError(Exception):
+        pass
+    result=_case_failure('send',{'failureCode':'private-token','answer':'private-answer'},
+        PrivateError('private-path'))
+    assert result=={'phase':'send','failureCode':'conformanceFailed','exceptionClass':'OtherError'}
+    assert 'private-' not in json.dumps(result)
+    assert _case_failure('evidence',None,ValueError('secret'))=={
+        'phase':'evidence','failureCode':'conformanceFailed','exceptionClass':'ValueError'}

@@ -80,7 +80,8 @@ def control(body: Control):
     global fault,fault_phase,fault_delay_s,accepted_wait_s
     if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
                              'native','native_rejected','native_effect','native_effect_batch','native_revisit',
-                             'conversation','conversation_interpreter_tool','conversation_ambiguous'} or body.effect_gate not in {None,*barriers}:
+                             'conversation','conversation_interpreter_tool','conversation_ambiguous',
+                             'conversation_fenced_interpretation'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -189,8 +190,10 @@ def conversation_reply(messages,selected):
                 choice='approve';response={'confirmed':True}
             elif 'reject' in text.lower() and 'reject' in choices:
                 choice='reject';response={'confirmed':False}
-        return {'role':'assistant','content':json.dumps({'sourceMessageId':source,
-            'interactionRef':reference,'choice':choice,'response':response,'ambiguous':choice is None})}
+        content=json.dumps({'sourceMessageId':source,'interactionRef':reference,
+            'choice':choice,'response':response,'ambiguous':choice is None})
+        if selected=='conversation_fenced_interpretation':content='```json\n'+content+'\n```'
+        return {'role':'assistant','content':content}
     if messages and messages[-1].get('role')=='tool':
         return {'role':'assistant','content':'1. player-a\n2. player-b'}
     if 'find' in text.lower():return tool('fixture_lookup',{'query':'players'})
