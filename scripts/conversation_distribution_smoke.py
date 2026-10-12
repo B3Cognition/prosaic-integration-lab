@@ -26,13 +26,37 @@ def _helper(name):
     return module
 
 
+class DistributionCommandError(ValueError):
+    def __init__(self,output):
+        super().__init__('isolated distribution command failed')
+        self.output=output
+
+
 def run(argv,*,directory,environment,timeout=300):
     with tempfile.TemporaryFile(dir=directory) as out,tempfile.TemporaryFile(dir=directory) as err:
         result=subprocess.run([str(arg) for arg in argv],cwd=directory,env=environment,
             stdout=out,stderr=err,timeout=timeout,check=False)
-        if result.returncode:raise ValueError('isolated distribution command failed')
         out.seek(0,os.SEEK_END);size=out.tell()
-        out.seek(max(0,size-65536));return out.read(65536)
+        out.seek(max(0,size-65536));output=out.read(65536)
+        if result.returncode:raise DistributionCommandError(output)
+        return output
+
+
+def safe_stack_failure(raw):
+    """Preserve only the existing sanitized owned receipt on command failure."""
+    try:
+        records=[json.loads(line) for line in raw.decode().splitlines() if line.startswith('{')]
+    except (UnicodeError,ValueError):return {}
+    matches=[row for row in records if type(row) is dict and type(row.get('mode')) is str
+        and row['mode'] in {'demo','conversation'}
+        and type(row.get('owner')) is str and re.fullmatch('[0-9a-f]{32}',row['owner'])]
+    if len(matches)!=1:return {}
+    from lab_runner.gates import export
+    result={'stack_receipt':export(matches[0])}
+    error=matches[0].get('error')
+    if type(error) is str and error in {'EngineError','RuntimeError','ValueError','KeyError','AssertionError','TimeoutExpired'}:
+        result['stack_error']=error
+    return result
 
 
 def validate_mode(data,*,candidate):
@@ -172,7 +196,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
 def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False,postgres_version=16):
     result={'event':'conversation_distribution','passed':False,'candidate':candidate,
         'public_index_verified':False,'owned_temporary_cleanup':True,'stack_executed':False}
-    stage='inputs';temporary=None
+    stage='inputs';temporary=None;raw=None
     try:
         wheel=Path(wheel).resolve();sdist=Path(sdist).resolve();manifest=Path(manifest).resolve()
         data=sdk_manifest(manifest);validate_mode(data,candidate=candidate)
@@ -217,6 +241,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             flags=['--candidate','--candidate-manifest',snapshot] if candidate else []
             for command in ('demo','test'):
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
+                raw=None
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
                     '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
                 receipt=execution_receipt(raw,command=command)
@@ -237,8 +262,11 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             sdist_sha256=hashlib.sha256(original_sdist.read_bytes()).hexdigest(),
             installed_payloads_verified=True,isolated_imports_verified=True,pip_check_passed=True,
             public_construction_verified=True,sdist_assets_verified=True)
-    except Exception:
+    except Exception as error:
         result.update(failure='distribution_failed',failure_stage=stage)
+        if stage in {'sdist_demo','sdist_acceptance'}:
+            output=error.output if isinstance(error,DistributionCommandError) else raw
+            if output is not None:result.update(safe_stack_failure(output))
     finally:
         if temporary is not None:
             try:temporary.cleanup()

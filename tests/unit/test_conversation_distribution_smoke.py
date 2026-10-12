@@ -54,6 +54,26 @@ def test_process_failure_exports_no_private_logs(tmp_path,monkeypatch):
         module.run(['python','-I','private-path'],directory=tmp_path,environment={})
 
 
+def test_failed_stack_diagnostic_exports_only_owned_whitelisted_fields():
+    import json
+    raw=json.dumps({'owner':'a'*32,'mode':'demo','passed':False,'cleanup':'verified',
+        'error':'EngineError','dsn':'private-secret','report_json':'private-path',
+        'engine_diagnostic':{'operation':'start','return_code':1,
+            'category':'engine_failed','outcome':'unknown'}}).encode()
+    result=implementation().safe_stack_failure(raw)
+    assert result['stack_error']=='EngineError'
+    assert result['stack_receipt']['cleanup']=='verified'
+    assert result['stack_receipt']['engine_diagnostic']['operation']=='start'
+    encoded=json.dumps(result)
+    assert 'private-secret' not in encoded and 'private-path' not in encoded
+
+
+def test_unowned_or_malformed_command_output_supplies_no_stack_diagnostic():
+    module=implementation()
+    for raw in (b'private-secret',b'{broken',b'{"mode":"demo","error":"private-secret"}'):
+        assert module.safe_stack_failure(raw)=={}
+
+
 def test_lab_version_command_preserves_existing_five_sdk_json_contract():
     module=implementation()
     data={'artifacts':[{'distribution':'b3-prosaic','version':'0.4.1'}]}
