@@ -33,6 +33,16 @@ publication, Lab release, ordinary public-index adoption and hosted qualificatio
 remain pending. Published and
 historical manifests below are unchanged.
 
+The subsequent main-branch merge also includes the previously verified prepared-
+context handoff, described in the [context ledger](verification/context-handoff-2026-10-12.md#integration-with-the-conversation-candidate).
+The combined source passed 948 candidate and 926 applicable published-baseline
+tests. Its required contract has 54 native plus 95 conversation cases: 326 per
+candidate cell. This newer source needs its own platform receipts; the exact
+`34f291e` results above retain their original identity. Harness ordinary CI now
+curates the original qualified Core/Runtime artifacts while Runtime 0.9.0 is
+unpublished, preserving sandbox and database requirements. Version bumps already
+select Runtime 0.9.0/recorder 0.3.0, Harness 0.8.0/store 0.3.0 and Lab 0.5.0.
+
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
 ## Release checkpoint

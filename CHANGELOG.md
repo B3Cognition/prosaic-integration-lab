@@ -12,9 +12,16 @@
   interpretation with a meaningfully registered consequential handler.
 - Required conversation lane for PostgreSQL permissions, sealed capacities,
   retained quotas and exact-owned worker recovery. Lab target is 0.5.0;
-  final candidate/platform/public-index qualification remains pending.
+  exact platform and local-model evidence is recorded in the verification ledger;
+  publication and ordinary public-index adoption remain pending.
 - Runnable optional local/hosted conformance command with nondurable diagnostic
   accounting, persistent bounded allowance and no external business effect.
+- Explicit host-selected workflow tier and independent profile/model, call-ID,
+  frozen-context and immutable-receipt checks in conversation conformance.
+- Balanced preparation of accepted JSON context followed by strong-tier
+  consumption on a fresh replica, with exact immutable artifact bindings and no
+  shared workspace. Native acceptance now requires 54 cases; the combined
+  conversation candidate requires 326 cases per platform/database cell.
 
 ## 0.4.0 — 2026-10-11
 

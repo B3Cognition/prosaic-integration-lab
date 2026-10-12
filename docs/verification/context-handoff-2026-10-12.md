@@ -86,6 +86,29 @@ Independent read-only code review found no important issues. No AMD64 lane,
 paid provider call, real-model quality trial, push or release was performed.
 Historical release receipts and counts remain unchanged.
 
+## Integration with the conversation candidate
+
+The subsequent main-branch merge retains both this context handoff and all 95
+conversation acceptance cases. The combined required contract is 326 cases per
+Linux/database cell; unchanged published SDKs run the eight applicable lanes
+with 231 cases. The earlier 54-case native receipts and 1,395-execution
+conversation qualification retain their original source identities.
+
+The merged local source suite passed 948 tests against the original qualified
+conversation SDK wheels and 926 against the published SDKs, with zero failures
+or skips and the existing Starlette warning. Only the three functional modules
+requiring the unpublished Conversation API are excluded from the published
+baseline. The merge exposed a direct fixture-module import incompatible with
+pytest's importlib mode; this test now uses the existing shared loopback provider
+fixture. Its real provider requests and artifact checks remain unchanged.
+
+Platform qualification of the combined source is separate from these local
+results. Main's ordinary CI verifies the published baseline; an explicit candidate
+dispatch verifies all nine lanes and the extracted-sdist conversation stack.
+The combined candidate contract requires 1,304 matrix executions plus 95 extra
+sdist checks, or 1,399 total. Public pins remain unchanged until actual publication
+and verified public downloads.
+
 Executed commands:
 
 ```sh
