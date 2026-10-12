@@ -74,6 +74,24 @@ def test_unowned_or_malformed_command_output_supplies_no_stack_diagnostic():
         assert module.safe_stack_failure(raw)=={}
 
 
+def test_stack_diagnostic_bootstraps_lab_runner_outside_pytest(tmp_path):
+    import subprocess
+    import sys
+    script=Path(__file__).resolve().parents[2]/'scripts/conversation_distribution_smoke.py'
+    source="""
+import importlib.util,json,sys
+spec=importlib.util.spec_from_file_location('distribution_probe',sys.argv[1])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+row={'owner':'a'*32,'mode':'demo','passed':False,'cleanup':'verified','error':'EngineError'}
+result=module.safe_stack_failure(json.dumps(row).encode())
+assert result['stack_error']=='EngineError'
+from lab_runner.gates import validate
+"""
+    result=subprocess.run([sys.executable,'-I','-B','-c',source,str(script)],
+        cwd=tmp_path,capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,result.stderr
+
+
 def test_lab_version_command_preserves_existing_five_sdk_json_contract():
     module=implementation()
     data={'artifacts':[{'distribution':'b3-prosaic','version':'0.4.1'}]}

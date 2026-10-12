@@ -15,7 +15,7 @@ import tempfile
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'src'))
+sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
 from prosaic_integration_lab.dependencies import (cache_directory,manifest_bytes,
     manifest_digest,sdk_manifest,verified_wheel_paths)
 
