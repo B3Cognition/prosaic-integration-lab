@@ -9,7 +9,7 @@ from test_release_gates import receipt
 from test_native_execution import native
 
 
-@pytest.mark.parametrize('mode,count',[('native-persistence',26),('native',53),('legacy-upgrade',10),('qualification',3)])
+@pytest.mark.parametrize('mode,count',[('native-persistence',26),('native',54),('legacy-upgrade',10),('qualification',3)])
 def test_new_required_lanes_reject_partial_collection(mode,count):
     item=receipt(); item.update(mode=mode,test_count=count)
     if mode=='legacy-upgrade':
@@ -66,6 +66,46 @@ def test_native_fixture_entitlements_remain_independent():
     assert config['tenants']['tenant-b']['composition'] is False
     assert config['tenants']['tenant-b']['tools']==[]
     assert config['tenants']['tenant-a']['tools']==['fixture_apply']
+
+
+def test_fixture_tiers_route_to_distinct_models_only_with_explicit_host_opt_in(native):
+    from prosaic_integration_lab.native_execution import NativeExecution
+    execution,a,_=native
+    execution.host.config['fixture_events_url']='http://127.0.0.1:9/events'
+    definition=execution.host.config['native']['bundles'][0]
+    definition.update(fixture_effects=True,fixture_tiers=True,journal_identity='fixture-journal')
+    definition['policies']['a']['model_tiers']=['balanced','strong']
+    execution.host.config['native']['tenants']['a']['model_tiers']=['balanced','strong']
+    current=NativeExecution(execution.host)
+    assert current.catalogue(a)['manifest']['modelTiers']==['balanced','strong']
+    definition['fixture_effects']=False
+    with pytest.raises(ValueError):NativeExecution(execution.host)
+
+
+@pytest.mark.parametrize('damage',['missing','changed','binding'])
+def test_context_consumer_rejects_missing_changed_or_unbound_preparation(damage):
+    import json
+    import hashlib
+    from lab_runner import model
+    with TestClient(model.app) as client:
+        try:
+            client.post('/control',json={'scenario':'context_handoff'}).raise_for_status()
+            def invoke(model_name,arguments):
+                return client.post('/v1/chat/completions',json={'model':model_name,'messages':[
+                    {'role':'user','content':'## Arguments\n'+json.dumps(arguments)}]})
+            prepared=invoke('fixture-balanced',{'request':{'entity_id':'case-1'}})
+            prepared.raise_for_status()
+            pack=json.loads(prepared.json()['choices'][0]['message']['content'])
+            assert pack['entity_id']!='case-1'
+            binding={'id':'receipt-1','sha256':hashlib.sha256(json.dumps(pack,sort_keys=True).encode()).hexdigest(),
+                     'dependencies':{}}
+            arguments={'request':{'entity_id':'case-1'},'artifacts':{'prepare':pack},
+                       'artifact_bindings':{'prepare':binding}}
+            if damage=='missing':arguments['artifacts']={}
+            elif damage=='changed':arguments['artifacts']['prepare']={'entity_id':'fabricated'}
+            else:arguments['artifact_bindings']={}
+            assert invoke('fixture-strong',arguments).status_code==422
+        finally:client.post('/control',json={}).raise_for_status()
 
 
 def test_host_registered_effect_tool_needs_independent_grant(native):

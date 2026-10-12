@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3}
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
@@ -30,6 +30,7 @@ FAILURE_CASES={
         'test_real_restore_cli_reports_measured_markers_and_verified_cleanup[legacy]':'restore',
         'test_real_restore_cli_reports_measured_markers_and_verified_cleanup[native]':'native_restore'},
     'native':{
+        'test_prepared_context_cross_tier_database_handoff_on_fresh_replica':'context_handoff',
         'test_native_adoption_demo_runs_public_protocol_and_filtered_receipt':'native_demo',
         'test_native_graph_cross_worker_fresh_process_pause_approval_and_provenance':'native_graph',
         'test_invalid_structured_response_preserves_committed_revision[response0]':'invalid_response',

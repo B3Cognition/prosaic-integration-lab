@@ -66,6 +66,46 @@ def test_native_graph_cross_worker_fresh_process_pause_approval_and_provenance(l
     assert usage['total_calls']==2 and usage['complete_calls']==2
 
 
+def test_prepared_context_cross_tier_database_handoff_on_fresh_replica(lab):
+    from prosaic_harness_postgres import PostgresRunStore
+    from lab_runner.native_scenarios import context_handoff_proposal,owned
+    from lab_runner.stack import command
+    control(lab,scenario='context_handoff',maximum_calls=2)
+    before=calls(lab)
+    entity=uuid.uuid4().hex
+    run=start(lab,propose(lab,context_handoff_proposal()),entity=entity)
+    assert run['status']=='waiting' and run['current_step']=='handoff'
+    assert calls(lab)==before+1
+    with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
+        prepared=store.load_run(run['run_id']).state
+        pack=prepared['outputs']['prepare']
+        assert pack['entity_id'].startswith('context-') and pack['entity_id']!=entity
+        binding=prepared['bindings']['prepare']
+        preparation_receipt=store.load_receipt(run['run_id'],binding['id'])
+        assert preparation_receipt['result']['metadata']['request_model']=='fixture-balanced'
+        # The producer cannot provide memory or scratch files after it is stopped.
+        manifest=owned(lab)
+        command(manifest['engine'],'stop','--time','10',manifest['replica_ids']['a'])
+        try:
+            replace_worker(lab)
+            consumed=resume(lab,run)
+            assert consumed['status']=='waiting' and consumed['current_step']=='confirm'
+            state=store.load_run(run['run_id']).state
+            assert state['outputs']['review']=={'entity_id':pack['entity_id'],'approved':True}
+            assert state['bindings']['prepare']==binding and state['outputs']['prepare']==pack
+            consumer_receipt=store.load_receipt(run['run_id'],state['bindings']['review']['id'])
+            assert consumer_receipt['arguments']['artifacts']=={'prepare':pack}
+            assert consumer_receipt['arguments']['artifact_bindings']=={'prepare':binding}
+            assert consumer_receipt['result']['metadata']['request_model']=='fixture-strong'
+            assert len(state['invocations'])==2
+            assert resume(lab,consumed)['status']=='completed'
+            usage=http(lab,'GET','/runs/'+run['run_id']+'/usage',worker='b')
+            assert usage['total_calls']==2 and usage['complete_calls']==2
+            assert calls(lab)==before+2
+            assert store.load_receipt(run['run_id'],binding['id'])==preparation_receipt
+        finally:replace_worker(lab,name='a')
+
+
 def test_native_adoption_demo_runs_public_protocol_and_filtered_receipt(lab):
     from lab_runner.native_demo import capture_native
     before=calls(lab)

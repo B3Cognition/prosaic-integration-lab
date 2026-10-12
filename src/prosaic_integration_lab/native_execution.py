@@ -61,8 +61,11 @@ class NativeExecution:
         if type(native) is not dict or set(native) != {'bundles','tenants'} or not native['bundles']:
             raise ValueError('invalid native configuration')
         for definition in native['bundles']:
-            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version','fixture_provider_request_limit'}:
+            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version','fixture_provider_request_limit','fixture_tiers'}:
                 raise ValueError('invalid native configuration')
+            if (type(definition.get('fixture_tiers',False)) is not bool or
+                definition.get('fixture_tiers') and not definition.get('fixture_effects')):
+                raise ValueError('fixture tiers require explicit fixture bindings')
             if type(definition.get('fixture_effects',False)) is not bool:
                 raise ValueError('invalid native configuration')
             if definition.get('fixture_effect_version','v1') not in {'v1','v2'}:
@@ -112,8 +115,14 @@ class NativeExecution:
             'agents':{name:{'description':f'Synthetic {name} fixture'} for name in agents},
             'schemas':{name:{'description':f'Closed synthetic {name} value'} for name in schemas},
             'validators':{'approved':{'description':'Synthetic approved flag check'}}})
-        config = RuntimeConfig({'fixture':EndpointConfig(definition['model_url'],'test-model',
-            features={'streaming':False})},definition.get('routes',{}),'fixture',
+        profiles={'fixture':EndpointConfig(definition['model_url'],'test-model',features={'streaming':False})}
+        routes=dict(definition.get('routes',{}))
+        if definition.get('fixture_tiers',False):
+            for tier in ('balanced','strong'):
+                profiles['fixture-'+tier]=EndpointConfig(definition['model_url'],'fixture-'+tier,
+                    features={'streaming':False})
+                routes[tier]='fixture-'+tier
+        config = RuntimeConfig(profiles,routes,'fixture',
             allowed_tools=frozenset(tools))
         journal = None
         if 'journal_identity' in definition:

@@ -16,14 +16,14 @@ def approved_proposal():
 
 def native_configuration(namespace):
     """Fixture authority is registered by the runner, never by HTTP clients."""
-    policies={'tenant-a':{'composition':True,'inline':False,'tools':['fixture_apply'],'agents':['finder','reviewer','effecter'],
+    policies={'tenant-a':{'composition':True,'inline':True,'model_tiers':['balanced','strong'],'tools':['fixture_apply'],'agents':['finder','reviewer','effecter'],
                    'review_outputs':True,'response_schema':True},
               'tenant-b':{'composition':False,'inline':True,'tools':[],'agents':['finder','reviewer','effecter']}}
     bundles=[]
     for tenant,policy in policies.items():
         bundles.append({'version':'synthetic-v1','model_url':'http://model:8000/v1',
             'operation_namespace':namespace+'-'+tenant,'journal_identity':'fixture-journal-v1',
-            'fixture_effects':True,'policies':{tenant:policy}})
+            'fixture_effects':True,'fixture_tiers':tenant=='tenant-a','policies':{tenant:policy}})
     return {'bundles':bundles,'tenants':{tenant:{'bundle_version':'synthetic-v1',**policy}
                                        for tenant,policy in policies.items()}}
 
@@ -35,6 +35,23 @@ def effect_proposal():
         'apply':{'kind':'agent','agent':'effecter','schema':'found',
                  'tools':['fixture_apply'],'require_tools':['fixture_apply'],'next':'done'},
         'done':{'kind':'finish','requires':['apply']}}}}
+
+
+def context_handoff_proposal():
+    """Context bytes are accepted JSON, never a path or shared scratch file."""
+    return {'definition':{'version':1,'start':'prepare','steps':{
+        'prepare':{'kind':'agent','agent':'preparer','schema':'found','next':'handoff'},
+        'handoff':{'kind':'pause','question':'Transfer prepared context to the fresh worker?',
+            'choices':{'accept':'review'},'requires':['prepare'],'response_schema':'decision'},
+        'review':{'kind':'agent','agent':'consumer','schema':'reviewed','inputs':['prepare'],'next':'confirm'},
+        'confirm':{'kind':'pause','question':'Accept the context-derived answer?',
+            'choices':{'accept':'done'},'requires':['prepare','review'],'response_schema':'decision'},
+        'done':{'kind':'finish','requires':['prepare','review']}}},
+        'inline_agents':{
+            'preparer':{'type':'subagent','frontmatter':{'name':'preparer','description':'Prepare context',
+                'tools':[],'model_tier':'balanced'},'body':'Prepare a new synthetic fact as entity_id JSON.'},
+            'consumer':{'type':'subagent','frontmatter':{'name':'consumer','description':'Consume prepared context',
+                'tools':[],'model_tier':'strong'},'body':'Use artifacts.prepare.entity_id as the answer entity_id; return approved true. Never substitute request.entity_id.'}}}
 
 
 def control(lab,**settings):
