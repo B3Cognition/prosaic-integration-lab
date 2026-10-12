@@ -145,3 +145,43 @@ def test_unwritable_export_does_not_leak_private_path(tmp_path,capsys):
                  '--export',str(tmp_path/'missing'/'private.json')])==1
     view=json.loads(capsys.readouterr().out)
     assert view['failure']=='export_failed' and str(tmp_path) not in json.dumps(view)
+
+
+def test_standalone_conformance_help_bootstraps_outside_checkout(tmp_path):
+    from pathlib import Path
+    import subprocess
+    import sys
+    script=Path(__file__).resolve().parents[2]/'scripts/conversation_conformance.py'
+    result=subprocess.run([sys.executable,'-I','-B',str(script),'--help'],
+        cwd=tmp_path,capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,result.stderr
+    assert '--live-local' in result.stdout and '--live-hosted' in result.stdout
+    assert '--max-calls' in result.stdout
+
+
+def test_standalone_conformance_preflight_leaves_credentials_and_allowance_unopened(tmp_path):
+    from pathlib import Path
+    import subprocess
+    import sys
+    script=Path(__file__).resolve().parents[2]/'scripts/conversation_conformance.py'
+    credential=tmp_path/'unavailable-credential'
+    runtime=tmp_path/'runtime.yml'
+    runtime.write_text(json.dumps({'default_profile':'balanced','allowed_tools':[],
+        'routes':{'balanced':'balanced','strong':'strong'},
+        'profiles':{tier:{'base_url':'http://127.0.0.1:9/v1','model':'qwen-'+tier,
+            'api_key_file':str(credential),'max_tokens':128,'features':{'streaming':False}}
+            for tier in ('balanced','strong')}}))
+    allowance=tmp_path/'allowance.json'
+    recipe=tmp_path/'conversation.json'
+    recipe.write_text(json.dumps({'runtime_config':str(runtime),'allowance_file':str(allowance)}))
+    destination=tmp_path/'preflight.json'
+    result=subprocess.run([sys.executable,'-I','-B',str(script),'--config',str(recipe),
+        '--max-calls','12','--export',str(destination)],
+        cwd=tmp_path,capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,result.stderr
+    expected={'event':'conversation_conformance','mode':'preflight','preflight':True,
+        'live_executed':False,'dispatches':0,'maximum_requests':12,'tiers':['balanced','strong']}
+    assert json.loads(result.stdout)==expected
+    assert json.loads(destination.read_text())==expected
+    assert not credential.exists() and not allowance.exists()
+    assert not allowance.with_name(allowance.name+'.lock').exists()
