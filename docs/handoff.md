@@ -5,19 +5,24 @@
 Lab target 0.5.0 implements authenticated bounded conversations, a fixed host-only
 selection/review workflow, actual diagnostic conformance, and a ninth required
 acceptance lane. Read [the conversation guide](conversations.md) and
-[its development evidence](verification/conversation-adoption-2026-10-11.md).
-All source units and installed synthetic functional tests passed (866/0 skips)
-before the final PostgreSQL readiness fix. The native owned PostgreSQL16 journey
-passed with one actual journalled player-b effect and separate seven/two usage
-counts. These are development results; final post-fix SDK lineage, four required
-Linux cells, ordinary public-index and distribution gates remain pending.
-Published and historical manifests below remain unchanged.
+[its qualification evidence](verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12).
+Exact source `018425b810c6583bd3c1e20fc8cc8088ee4cda7c` passed
+[run 38195151714](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38195151714):
+325 required cases per Linux AMD64/ARM64 × PostgreSQL 16/18 cell, plus 95
+extracted-sdist conversation checks on ARM64/16. All 1,395 acceptance executions
+passed with zero skips and verified cleanup, including 475 conversation checks
+and both documented candidate demos per cell. Closed capacity diagnostics
+reconcile 18 requests/ledger calls with p95 0.2124–0.2630 seconds.
 
-After the accepted whole-branch review fix pass and corrected genuine SDK train,
-the full source suite passed 893 tests with zero skips, and the current public
-baseline passed 876 with zero skips (only three unavailable conversation
-functional files explicitly excluded). The exact new required lane collects 95
-cases. Actual four-cell acceptance and extracted-sdist stack proof remain gates.
+The final local suite passed 925 candidate tests and 908 applicable published
+baseline tests with zero skips; only three functional files requiring the absent
+conversation API are excluded from the old baseline. The earlier failed
+`0f7791c` capacity qualification and its unidentified cause remain recorded;
+the final commit improves diagnostic reporting without claiming a capacity bug
+fix. This later documentation-only checkpoint refers to tested source `018425b`.
+Runtime/Harness publication, Lab release/tagging, ordinary public-index adoption
+and explicit live Qwen/hosted validation remain pending. Published and historical
+manifests below are unchanged.
 
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 

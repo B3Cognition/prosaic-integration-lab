@@ -1,11 +1,15 @@
-# Conversation adoption preview
+# Conversation adoption
 
-This branch targets Runtime 0.9.0/recorder 0.3.0 and Harness 0.8.0/store 0.3.0,
-with unchanged Core 0.4.1. The existing released manifest stays unchanged and its
-SDKs do not provide this API. Exact-source candidate CI and installed synthetic/
-native PostgreSQL journeys have been exercised during development. The corrected
-Harness candidate passed upstream qualification; the required four Linux/database
-cells and public-index adoption remain release gates.
+Lab 0.5.0's conversation candidate uses Runtime 0.9.0/recorder 0.3.0 and
+Harness 0.8.0/store 0.3.0, with Core 0.4.1. Exact source
+`018425b810c6583bd3c1e20fc8cc8088ee4cda7c` passed all four Linux
+AMD64/ARM64 × PostgreSQL 16/18 cells in
+[run 38195151714](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38195151714):
+1,395 acceptance executions, including 475 conversation checks, zero failures
+or skips and verified cleanup. Read the
+[original qualification evidence](verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12).
+The released manifest is unchanged; its SDKs do not provide this API. Publication,
+ordinary public-index adoption and actual live-provider conformance remain pending.
 
 The application owns authentication, current authorization, HTTP idempotency and
 retained-session quotas. Harness owns conversation advancement; Runtime owns
@@ -228,6 +232,9 @@ tool's semantic version and admitted identity; it is absent from HTTP inputs and
 defaults to zero. This exercises actual receipt/context bounds without changing
 the SDK engine or normal journey output.
 
-Required installed SDK, workflow-handoff, worker-loss, PostgreSQL 16/18 and Linux
-AMD64/ARM64 lanes remain release gates. Unit checks are development evidence;
-missing infrastructure is a failure, never a successful skip.
+The exact candidate passed installed SDK, workflow-handoff, worker-loss,
+PostgreSQL 16/18 and Linux AMD64/ARM64 gates, including an actual extracted-sdist
+stack on ARM64/16. This guide's later documentation-only commit records the
+tested source above. Public-index adoption must separately audit actual published
+bytes and rerun released-mode gates. No live Qwen or hosted call was made.
+Missing infrastructure is a failure, never a successful skip.

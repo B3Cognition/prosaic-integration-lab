@@ -2,9 +2,16 @@
 
 Conversation adoption is tracked separately in
 [conversation-adoption-2026-10-11.md](conversation-adoption-2026-10-11.md).
-Lab target 0.5.0 has actual installed SDK journey/HTTP and owned native PostgreSQL
-development evidence. Required Linux/database cells and final post-readiness-fix
-SDK/public release qualification remain pending; the historical ledger follows.
+Lab 0.5.0 candidate source `018425b810c6583bd3c1e20fc8cc8088ee4cda7c`
+passed all four Linux AMD64/ARM64 × PostgreSQL 16/18 cells in
+[run 38195151714](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38195151714),
+including the extracted-sdist stack: 1,395 acceptance executions, 475 conversation
+checks, zero failures/skips and verified cleanup. The full local candidate/public
+baseline suites passed 925/908 tests. This later docs-only entry records that
+exact tested source. The earlier failed capacity result retains an unknown cause;
+closed diagnostics repair reporting without claiming a capacity defect was fixed.
+Release, ordinary public-index adoption and live-provider qualification remain
+pending, and the current released manifest is unchanged. The historical ledger follows.
 
 Plan and native execution authorized by maintainer's “proceed” after local
 endpoint credentials were identified. Branch: `codex/integration-lab`.

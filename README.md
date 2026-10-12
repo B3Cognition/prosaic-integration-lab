@@ -12,9 +12,11 @@ records the exact qualified SDKs and release evidence.
 
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
-replies and bounded full history. Lab 0.5.0 is under qualification: existing
-published pins below do not supply the conversation API. See the separate
-[development evidence](docs/verification/conversation-adoption-2026-10-11.md)
+replies and bounded full history. Lab 0.5.0's candidate passed installed Linux
+AMD64/ARM64 × PostgreSQL 16/18 qualification. Its new SDK train remains
+unpublished; current published pins below do not supply the conversation API.
+See the separate
+[verification evidence](docs/verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12)
 before selecting a candidate.
 
 ## Install packages for an embedding service
