@@ -55,7 +55,7 @@ def main():
     parser.add_argument('--directory', help='exact evidence directory for watch')
     parser.add_argument('--stream', choices=['requests', 'accounting'], default='accounting')
     parser.add_argument('--open-report', action='store_true', help='open the generated demo report after cleanup')
-    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity','native','legacy-upgrade','qualification'], default='deterministic')
+    parser.add_argument('--mode', choices=['provisioning', 'deterministic', 'load', 'recovery', 'audit','identity','persistence','native-persistence','operations','budget','lago','ingress','observability','capacity','native','legacy-upgrade','qualification','conversation'], default='deterministic')
     parser.add_argument('--engine', choices=['docker', 'podman'], default='docker')
     parser.add_argument('--postgres-version', type=int, choices=[16, 18], default=16)
     parser.add_argument('--candidate', action='store_true', help='explicitly use checksummed unpublished SDK candidates')
@@ -68,8 +68,15 @@ def main():
     if args.baseline_image is not None and (args.mode!='legacy-upgrade' or
             not __import__('re').fullmatch('sha256:[0-9a-f]{64}',args.baseline_image)):
         parser.error('baseline image requires legacy-upgrade and an immutable image ID')
-    if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and args.candidate_manifest is None:
+    if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
+    if args.mode=='conversation':
+        if args.command not in {'test','demo'}:parser.error('conversation mode requires test or demo')
+        source=str(ROOT/'src')
+        if source not in sys.path:sys.path.insert(0,source)
+        from prosaic_integration_lab.conversation_execution import require_conversation_sdk
+        try:require_conversation_sdk()
+        except (ImportError,ValueError):parser.error('installed conversation capability unavailable')
     profile=None
     operational=args.command in {'qualify','qualify-recovery'}
     if operational:
@@ -118,8 +125,8 @@ def main():
         parser.error(str(error))
     if args.open_report and args.command != 'demo':
         parser.error('--open-report requires demo')
-    if args.open_report and args.mode == 'native':
-        parser.error('native demo writes a JSON receipt; --open-report is unsupported')
+    if args.open_report and args.mode in {'native','conversation'}:
+        parser.error(args.mode+' demo writes a JSON receipt; --open-report is unsupported')
     if args.command in {'demo','qualify-recovery'} and args.mode == 'native':
         # The runner consumes this checkout's application code; all SDKs stay
         # installed from the manifest. A fresh SDK-only venv has no Lab package.
@@ -145,10 +152,10 @@ def main():
         parser.error('lago mode requires test')
     if args.mode == 'native-persistence' and args.command != 'test':
         parser.error('native-persistence mode requires test')
-    stack = OwnedStack(args.engine, args.postgres_version, users=args.users if args.command in {'run','stress'} or operational else 3,
+    stack = OwnedStack(args.engine, args.postgres_version, users=16 if args.mode=='conversation' else args.users if args.command in {'run','stress'} or operational else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
         observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None,
-        candidate_manifest=args.candidate_manifest,native=args.mode=='native',baseline_image=args.baseline_image)
+        candidate_manifest=args.candidate_manifest,native=args.mode=='native',conversation=args.mode=='conversation',baseline_image=args.baseline_image)
     events = workload.Events(stack.directory) if args.command in {'run','stress','qualify'} else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
@@ -156,10 +163,11 @@ def main():
     result = {'owner': stack.owner, 'mode': args.command if args.command in {'demo', 'run','stress'} or operational else args.mode, 'host_architecture': platform.machine(),
               'python': platform.python_version(), 'passed': False, 'cleanup': 'pending',
               'dependency_mode': 'candidate' if args.candidate else 'released'}
-    if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification'}:
+    if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation'}:
         result['qualification'] = 'not_qualified'
     if args.command == 'demo' and args.mode == 'native':
         result['fixture'] = 'native-workflow-demonstration'
+    if args.command=='demo' and args.mode=='conversation':result['fixture']='conversation-demonstration'
     if operational:
         from .qualification import receipt
         result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
@@ -227,6 +235,11 @@ def main():
                    'tests/acceptance/test_native_faults.py']
         if args.mode=='legacy-upgrade':files=['tests/acceptance/test_legacy_release_upgrade.py']
         if args.mode=='qualification':files=['tests/acceptance/test_operational_qualification.py']
+        if args.mode=='conversation':
+            # Retained quota exhaustion runs last; it must not mask earlier cases.
+            files=['tests/acceptance/test_conversation_journey.py','tests/acceptance/test_conversation_persistence.py',
+                'tests/acceptance/test_conversation_security.py','tests/acceptance/test_conversation_recovery.py',
+                'tests/acceptance/test_conversation_limits.py']
         if args.command=='qualify':
             from .qualification import run
             result.update(run(config,profile,events))
@@ -242,7 +255,14 @@ def main():
         elif args.command == 'run':
             result.update(workload.run(config, args.users, args.runs_per_user, args.concurrency, events, args.allow_overload))
         elif args.command == 'demo':
-            if args.mode == 'native':
+            if args.mode=='conversation':
+                from .conversation_demo import capture_conversation
+                report=capture_conversation(config)
+                report_path=stack.directory/'report/conversation.json'
+                report_path.parent.mkdir(parents=True,exist_ok=True)
+                report_path.write_text(json.dumps(report,indent=2)+'\n')
+                result.update(passed=True,report_json=str(report_path),independent_model_calls=report['independent_model_calls'])
+            elif args.mode == 'native':
                 from .native_demo import capture_native
                 report = capture_native(config)
                 report_path = stack.directory / 'report' / 'native-workflow.json'
@@ -260,7 +280,7 @@ def main():
             test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
                 f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
                 env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True,
-                timeout=600 if args.mode in {'lago','native','legacy-upgrade','qualification'} else 180)
+                timeout=600 if args.mode in {'lago','native','legacy-upgrade','qualification','conversation'} else 180)
             result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__
@@ -269,6 +289,9 @@ def main():
         if isinstance(error,EngineError) and error.diagnostic is not None:
             result['engine_diagnostic']=error.diagnostic
     finally:
+        if args.command=='test' and args.mode=='qualification':
+            from .capacity_diagnostics import read
+            result['capacity_diagnostic']=read(stack.directory)
         junit = stack.directory / 'junit.xml'
         if junit.exists():
             try:
@@ -290,7 +313,7 @@ def main():
         result['seconds'] = round(time.monotonic() - started, 2)
         from .gates import COUNTS
         if args.command == 'test' and args.mode in COUNTS and result.get('test_count')!=COUNTS[args.mode]:result['passed']=False
-        if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and result['passed']:
+        if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation'} and result['passed']:
             result['qualification'] = 'qualified'
         if args.mode=='legacy-upgrade' and 'historical' in locals():
             from .legacy_upgrade import public_summary
@@ -301,7 +324,7 @@ def main():
         if args.candidate:
             result['candidate_manifest_sha256'] = stack.manifest.get('candidate_manifest_sha256')
             result['candidate_lineage_sha256']=stack.manifest.get('candidate_lineage_sha256')
-            if args.mode in {'native-persistence','native','legacy-upgrade','qualification'} and not result['candidate_lineage_sha256']:
+            if args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation'} and not result['candidate_lineage_sha256']:
                 result['passed']=False
                 if args.command == 'test':result['qualification']='not_qualified'
         if operational and len(json.dumps(result).encode())>profile['maximum_report_bytes']:
@@ -314,7 +337,11 @@ def main():
         print(json.dumps(result))
         print(f'Evidence: {stack.directory}')
         if args.command == 'demo' and result['passed']:
-            if args.mode == 'native':
+            if args.mode=='conversation':
+                print('Conversation: preference -> correction -> lookup -> selection -> confirmation -> completed')
+                print(json.dumps(report))
+                print(f"Report: {result['report_json']}")
+            elif args.mode == 'native':
                 print('Native workflow: discover -> admit -> start -> review -> resume -> completed')
                 print(json.dumps(report))
                 print(f"Report: {result['report_json']}")

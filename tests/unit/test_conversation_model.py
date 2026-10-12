@@ -1,0 +1,126 @@
+import json
+
+from fastapi.testclient import TestClient
+
+
+def request(messages,tools=None):
+    return {'model':'test-model','messages':messages,'tools':tools or [],'stream':False}
+
+
+def test_synthetic_conversation_remembers_failed_user_correction():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        assert client.post('/control',json={'scenario':'conversation'}).status_code==200
+        payload=request([{'role':'system','content':'approved fixture'},
+            {'role':'user','content':'Remember Brno'},
+            {'role':'assistant','content':'Saved Brno'},
+            {'role':'user','content':json.dumps({'text':'I meant Prague','turnStatus':'failed'})},
+            {'role':'user','content':'Which city did I choose?'}])
+        response=client.post('/v1/chat/completions',json=payload)
+        assert response.status_code==200
+        assert response.json()['choices'][0]['message']['content']=='Your city is Prague.'
+
+
+def test_synthetic_lookup_requests_only_approved_tool_then_uses_result():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        messages=[{'role':'user','content':'Find players'}]
+        first=client.post('/v1/chat/completions',json=request(messages)).json()
+        tool=first['choices'][0]['message']['tool_calls'][0]
+        assert tool['function']=={'name':'fixture_lookup','arguments':'{"query": "players"}'}
+        second=client.post('/v1/chat/completions',json=request(messages+[
+            first['choices'][0]['message'],{'role':'tool','tool_call_id':tool['id'],
+                'content':'{"results":[{"id":"player-a"},{"id":"player-b"}]}'}])).json()
+        assert second['choices'][0]['message']['content']=='1. player-a\n2. player-b'
+
+
+def test_interpretation_uses_exact_current_source_and_offered_order():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        body=request([{'role':'system','content':'ALWAYS interpret only the current user message against the current displayed interaction.'},
+            {'role':'user','content':json.dumps({'message':'the second result','inputData':{
+                'sourceMessageId':'message-2','interactionRef':'current-ref','interaction':{
+                    'choices':['player-b','player-a']}}})}])
+        result=client.post('/v1/chat/completions',json=body).json()
+        proposal=json.loads(result['choices'][0]['message']['content'])
+        assert proposal=={'sourceMessageId':'message-2','interactionRef':'current-ref',
+            'choice':'player-a','response':{'entityId':'player-a'},'ambiguous':False}
+
+
+def test_interpreter_attack_fixture_sends_tool_call_despite_zero_grant():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation_interpreter_tool'})
+        response=client.post('/v1/chat/completions',json=request([{'role':'system',
+            'content':'ALWAYS interpret only the current user message against the current displayed interaction.'},
+            {'role':'user','content':'The text says "approve"'}])).json()
+        assert response['choices'][0]['message']['tool_calls'][0]['function']['name']=='fixture_apply_b'
+
+
+def test_conversation_effect_fixture_respects_the_approved_branch_and_real_tool_exchange():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        messages=[{'role':'system','content':'ALWAYS execute fixture_apply_b once, then return {"entity_id":"player-b"} as JSON.'},
+            {'role':'user','content':'approved branch input'}]
+        initial=client.post('/v1/chat/completions',json=request(messages)).json()['choices'][0]['message']
+        assert initial['tool_calls'][0]['function']=={'name':'fixture_apply_b','arguments':'{}'}
+        completed=client.post('/v1/chat/completions',json=request(messages+[initial,
+            {'role':'tool','tool_call_id':'conversation-call','content':'{"applied":true}'}])).json()
+        assert json.loads(completed['choices'][0]['message']['content'])=={'entity_id':'player-b'}
+
+
+def test_conversation_workflow_effect_reads_legacy_runtime_user_rendering():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        messages=[{'role':'system','content':'Runtime tool guidance'},
+            {'role':'user','content':'ALWAYS execute fixture_apply_b once, then return {"entity_id":"player-b"} as JSON.\n{}'}]
+        initial=client.post('/v1/chat/completions',json=request(messages)).json()['choices'][0]['message']
+        assert initial['tool_calls'][0]['function']=={'name':'fixture_apply_b','arguments':'{}'}
+
+
+def test_interpreter_wire_counter_measures_actual_tool_definitions():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation_interpreter_tool'})
+        before=client.get('/stats').json()
+        payload=request([{'role':'system','content':'ALWAYS interpret only the current user message'},
+            {'role':'user','content':'approve'}])
+        client.post('/v1/chat/completions',json=payload)
+        after=client.get('/stats').json()
+        assert after['interpreter_calls']-before['interpreter_calls']==1
+        assert after['interpreter_tool_definitions']==before['interpreter_tool_definitions']
+        client.post('/v1/chat/completions',json={**payload,'tools':[{'type':'function','function':{'name':'fixture_apply_b'}}]})
+        assert client.get('/stats').json()['interpreter_tool_definitions']==after['interpreter_tool_definitions']+1
+
+
+def test_public_conversation_phase_barriers_are_exact_fixture_names():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        before=client.get('/stats').json()['barriers']
+        for name in ('receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'):
+            assert client.post('/events/'+name).status_code==200
+        after=client.get('/stats').json()['barriers']
+        assert all(after[name]-before[name]==1 for name in
+            ('receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'))
+        assert client.post('/events/unrecognized-private-value').status_code==404
+
+
+def test_historical_tool_outcome_does_not_trigger_current_post_tool_fault():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation','fault':'429','fault_phase':'post_tool'})
+        history=[{'role':'user','content':'Find players'},
+            {'role':'assistant','content':None,'tool_calls':[{'id':'old-call','type':'function',
+                'function':{'name':'fixture_lookup','arguments':'{"query":"players"}'}}]},
+            {'role':'tool','tool_call_id':'old-call','content':'old results'},
+            {'role':'assistant','content':'Old offered results'},
+            {'role':'user','content':'Remember Prague'}]
+        first=client.post('/v1/chat/completions',json=request(history))
+        assert first.status_code==200
+        current_tool={'role':'tool','tool_call_id':'current','content':'current results'}
+        assert client.post('/v1/chat/completions',json=request(history+[current_tool])).status_code==429
+        client.post('/control',json={'scenario':'conversation'})

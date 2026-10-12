@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Conversation candidate host boundaries: authenticated closed HTTP contracts,
+  retained-session creation/quota registry, explicit separate storage readiness,
+  current grant checks and bounded history/usage projections.
+- Deterministic conversation provider fixtures and pure twelve-request live
+  conformance preflight with a shared allowance retaining unknown reservations.
+- Actual installed SDK conversation journey, failed user correction retention,
+  host-only workflow attachment, phase-aware selection/approval and zero-tool
+  interpretation with a meaningfully registered consequential handler.
+- Required conversation lane for PostgreSQL permissions, sealed capacities,
+  retained quotas and exact-owned worker recovery. Lab target is 0.5.0;
+  final candidate/platform/public-index qualification remains pending.
+- Runnable optional local/hosted conformance command with nondurable diagnostic
+  accounting, persistent bounded allowance and no external business effect.
+
 ## 0.4.0 — 2026-10-11
 
 - Native provider transport faults before/after consequential tools and live SQL

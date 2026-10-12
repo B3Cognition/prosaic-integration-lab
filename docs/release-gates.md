@@ -1,7 +1,7 @@
 # Required release gates
 
 CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
-`native-persistence`, `native`, `legacy-upgrade` and `qualification` lanes
+`native-persistence`, `native`, `legacy-upgrade`, `qualification` and `conversation` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload
@@ -35,6 +35,32 @@ cross-repository Actions access fails the candidate job. It uses a separate
 digest cache, manifest and clean image; active and historical release manifests
 remain unchanged. It never substitutes a branch checkout or published URL.
 Updating the acceptance suite also requires reviewing its count contract.
+
+Conversation qualification requires the full installed SDK API and complete
+exact-source candidate lineage. It runs ordinary history/corrections, ordered
+selection, quoted/fabricated approval denial, separate workflow usage, strict
+authentication/body admission, restricted PostgreSQL roles, sealed capacity and
+retained quotas, plus exact-owned worker loss at receipt and workflow barriers.
+The HTTP surface uses saved JSON views; transient SDK streaming deltas are not a
+Lab client protocol in this MVP. Every new case joins the exact count contract;
+the historical eight-lane receipts remain unchanged.
+
+Staged activation is explicit. The exact currently published SDK train has no
+Conversation capability and retains the original eight released gates. Its
+source job excludes only the three new installed conversation functional files;
+all older functional tests and new pure host units still run. Explicit candidate
+dispatch requires the coherent new five-package train, public capability, all
+nine lanes, full source tests and distribution/demo checks. Once active released
+pins point at that exact new train, released CI automatically requires the same
+nine lanes and full conversation checks. Unknown/mixed versions fail admission;
+the old train never emits a passing conversation receipt.
+
+The separate distribution smoke installs both the Lab wheel and a wheel rebuilt
+from its exact sdist in neutral environments, audits all five SDK payloads and
+checks public capabilities/import ownership/CLI startup. Its optional required
+stack execution uses the extracted sdist's owned assets and configuration. A
+candidate distribution smoke is not ordinary public-index evidence, and missing
+Docker/PostgreSQL cannot turn it into a successful skip.
 
 Released CI also installs the exact supported five-package train in a separate
 fresh environment through the ordinary PyPI resolver with dependencies enabled

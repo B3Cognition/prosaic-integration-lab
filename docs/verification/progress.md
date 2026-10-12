@@ -1,5 +1,24 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+Conversation adoption is tracked separately in
+[conversation-adoption-2026-10-11.md](conversation-adoption-2026-10-11.md).
+Lab 0.5.0 candidate source `34f291e8c7f7dd3809767c2fbf518b55e50204d6`
+passed all four Linux AMD64/ARM64 × PostgreSQL 16/18 cells in
+[run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309),
+including the extracted-sdist stack: 1,395 acceptance executions, 475 conversation
+checks, zero failures/skips and verified cleanup. The full local candidate/public
+baseline suites passed 943/921 tests. This later docs-only entry records that
+exact tested source. The earlier failed capacity result retains an unknown cause;
+closed diagnostics repair reporting without claiming a capacity defect was fixed.
+Release and ordinary public-index adoption remain pending, and the current
+released manifest is unchanged. [Actual local conversation checks](local-conversation-2026-10-12.md)
+passed the complete journey at `34f291e` with explicit strong workflow binding,
+quoted-approval denial and zero-call duplicate replay. The earlier 7B/server
+native failure remains documented. Original final-source platform receipts,
+both demos and owned cleanup were independently verified; publication and hosted
+qualification remain open.
+The historical ledger follows.
+
 Plan and native execution authorized by maintainer's “proceed” after local
 endpoint credentials were identified. Branch: `codex/integration-lab`.
 

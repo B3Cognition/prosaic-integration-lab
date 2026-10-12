@@ -1,6 +1,7 @@
 """Authenticate before receiving bodies; bound application HTTP work per replica."""
 import asyncio
 import math
+import re
 import time
 from starlette.responses import JSONResponse
 from .identity import FixtureAuthenticator
@@ -63,6 +64,7 @@ class HttpGuard:
             if scope['method'] == 'POST':
                 content = bytearray()
                 maximum = 65536 if scope['path'] == '/workflow-proposals' else 8192
+                if re.fullmatch(r'/conversations/[0-9a-f]{32}/messages',scope['path']):maximum=102400
                 async def collect():
                     while True:
                         message = await receive()

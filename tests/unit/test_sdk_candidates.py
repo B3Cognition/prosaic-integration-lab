@@ -11,11 +11,11 @@ def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan
 
 @pytest.fixture
 def candidate_set(tmp_path):
-    # This fixture describes the independently selected hardening artifacts.
+    # Structural fixture for the planned conversation train; these are never qualification receipts.
     expected_versions={
         'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
-        'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1'},
-        'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}}
+        'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0'},
+        'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}}
     candidates=[]
     for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
@@ -50,6 +50,23 @@ def test_candidates_curate_only_exact_five_verified_wheels(candidate_set,tmp_pat
     from prosaic_integration_lab.dependencies import cache_directory,verified_wheel_paths
     assert len(verified_wheel_paths(manifest,cache_directory(manifest,cache)))==5
     assert all(item['distribution'].startswith('b3-') for item in data['artifacts'])
+    assert {item['distribution']:item['version'] for item in data['artifacts']}=={
+        'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
+        'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+
+
+@pytest.mark.parametrize('version',['0.8.1','0.10.0'])
+def test_old_or_unapproved_runtime_train_rejected(candidate_set,tmp_path,version):
+    from scripts.prepare_sdk_candidates import curate
+    directories,candidates=candidate_set
+    receipt_path=directories[1]/'release-receipt.json'
+    receipt=json.loads(receipt_path.read_text())
+    receipt['distributions'][0]['version']=version
+    receipt_path.write_bytes(serialized(receipt))
+    with pytest.raises(ValueError,match='distribution'):
+        curate([(candidate['repository'],candidate['run_id'],candidate['source_commit'],directory)
+            for candidate,directory in zip(candidates,directories)],tmp_path/'manifest.json',tmp_path/'cache')
+    assert not (tmp_path/'manifest.json').exists()
 
 
 def test_candidate_wrong_source_or_wheel_hash_never_creates_selected_manifest(candidate_set,tmp_path):

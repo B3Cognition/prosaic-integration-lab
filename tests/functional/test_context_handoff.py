@@ -9,10 +9,10 @@ from prosaic_harness import FileRunStore,Harness
 from lab_runner.native_scenarios import context_handoff_proposal,native_configuration
 from prosaic_integration_lab.capacity import policy
 from prosaic_integration_lab.native_execution import NativeExecution
-from test_native_fault_transport import provider
 
 
-def test_context_fact_is_consumed_through_distinct_tiers_and_exact_binding(provider,tmp_path):
+def test_context_fact_is_consumed_through_distinct_tiers_and_exact_binding(chat_provider,tmp_path):
+    provider=chat_provider
     configuration=native_configuration('context-loopback')
     for bundle in configuration['bundles']:bundle['model_url']=provider+'/v1'
     host=SimpleNamespace(config={'native':configuration,'app_dsn':'unused',

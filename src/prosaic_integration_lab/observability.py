@@ -26,6 +26,9 @@ def route(path):
     if path == '/workflow-catalogue': return 'workflow_catalogue'
     if path == '/workflow-proposals': return 'workflow_proposals'
     if path == '/native-runs': return 'native_runs_start'
+    if path == '/conversations':return 'conversations_create'
+    conversation=re.fullmatch('/conversations/[0-9a-f]{32}(?:/(history|usage|messages|recover|retry))?',path)
+    if conversation:return 'conversation_'+(conversation.group(1) or 'status')
     match = re.fullmatch('/runs/[0-9a-f]{32}(?:/(resume|usage))?',path)
     return ('run_'+(match.group(1) or 'status')) if match else 'unknown'
 

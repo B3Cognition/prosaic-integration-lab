@@ -22,10 +22,13 @@ provider_latency_s = 0
 tool_samples = 0
 receipt_gate = threading.Event()
 receipt_gate.set()
-barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed')}
+barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed',
+    'tool-authorizer','tool-resolver','receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned')}
 for event in barriers.values():event.set()
 barrier_counts={name:0 for name in barriers}
 provenance_calls=0
+interpreter_calls=0
+interpreter_tool_definitions=0
 finder_seen={}
 context_packs={}
 FAULTS = ('reset', 'truncated_json', '429', '503', 'malformed_shape', 'slow')
@@ -69,6 +72,7 @@ def stats():
         return {'calls': calls, 'blocked': not gate.is_set(), 'accepted_events': accepted_events,
                 'allowance_rejected':allowance_rejected,'tool_samples':tool_samples,
                 'provenance_calls':provenance_calls,'barriers':dict(barrier_counts),
+                'interpreter_calls':interpreter_calls,'interpreter_tool_definitions':interpreter_tool_definitions,
                 'fault_acceptances':dict(fault_acceptances)}
 
 @app.post('/control')
@@ -76,7 +80,9 @@ def control(body: Control):
     global scenario,result_text,maximum_calls,allowance_start,allowance_rejected,provider_latency_s,tool_samples
     global fault,fault_phase,fault_delay_s,accepted_wait_s
     if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
-                             'native','native_rejected','native_effect','native_effect_batch','native_revisit','context_handoff'} or body.effect_gate not in {None,*barriers}:
+                             'native','native_rejected','native_effect','native_effect_batch','native_revisit','context_handoff',
+                             'conversation','conversation_interpreter_tool','conversation_ambiguous',
+                             'conversation_fenced_interpretation','conversation_simulated_tool'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -142,9 +148,69 @@ class LostResponse(Response):
                     'headers':[(b'content-type',b'application/json'),(b'content-length',b'128')]})
         # Deliberately omit the body; the server closes the connection here.
 
+
+def conversation_reply(messages,selected):
+    """Only fixture constants/current public provider data drive these replies."""
+    prose='\n'.join(message.get('content','') for message in messages
+        if message.get('role')=='system' and type(message.get('content')) is str)
+    current=next((message.get('content','') for message in reversed(messages)
+        if message.get('role')=='user'),'')
+    text=current
+    data={}
+    try:
+        envelope=json.loads(current)
+        if type(envelope) is dict and type(envelope.get('message')) is str:
+            text=envelope['message'];data=envelope.get('inputData',{})
+    except (ValueError,TypeError):pass
+    def tool(name,arguments):
+        return {'role':'assistant','content':None,'tool_calls':[{'id':'conversation-call',
+            'type':'function','function':{'name':name,'arguments':json.dumps(arguments)}}]}
+    for suffix in ('a','b'):
+        if f'ALWAYS execute fixture_apply_{suffix} once' in prose+'\n'+current:
+            if selected=='conversation_simulated_tool':
+                return {'role':'assistant','content':'```json\n'+json.dumps({
+                    'name':'fixture_apply_'+suffix,'arguments':{}})+'\n'+json.dumps({
+                    'entity_id':'player-'+suffix})+'\n```'}
+            if messages and messages[-1].get('role')=='tool':
+                return {'role':'assistant','content':json.dumps({'entity_id':'player-'+suffix})}
+            return tool('fixture_apply_'+suffix,{})
+    if 'ALWAYS interpret only the current user message' in prose:
+        if selected=='conversation_interpreter_tool':return tool('fixture_apply_b',{})
+        def find(name,value):
+            if type(value) is dict:
+                if name in value:return value[name]
+                for child in value.values():
+                    result=find(name,child)
+                    if result is not None:return result
+            return None
+        choices=find('choices',data) or []
+        reference=find('interactionRef',data) or find('reference',data)
+        source=find('sourceMessageId',data)
+        choice=None;response=None
+        if selected!='conversation_ambiguous':
+            if 'second' in text.lower() and len(choices)>1:
+                choice=choices[1];response={'entityId':choice}
+            elif 'first' in text.lower() and choices:
+                choice=choices[0];response={'entityId':choice}
+            elif 'approve' in text.lower() and 'approve' in choices:
+                choice='approve';response={'confirmed':True}
+            elif 'reject' in text.lower() and 'reject' in choices:
+                choice='reject';response={'confirmed':False}
+        content=json.dumps({'sourceMessageId':source,'interactionRef':reference,
+            'choice':choice,'response':response,'ambiguous':choice is None})
+        if selected=='conversation_fenced_interpretation':content='```json\n'+content+'\n```'
+        return {'role':'assistant','content':content}
+    if messages and messages[-1].get('role')=='tool':
+        return {'role':'assistant','content':'1. player-a\n2. player-b'}
+    if 'find' in text.lower():return tool('fixture_lookup',{'query':'players'})
+    history='\n'.join(message.get('content','') for message in messages
+        if message.get('role')=='user' and type(message.get('content')) is str)
+    answer='Your city is Prague.' if 'Prague' in history else 'Preference recorded.'
+    return {'role':'assistant','content':answer}
+
 @app.post('/v1/chat/completions')
 def completions(body: dict | None = None):
-    global calls,allowance_rejected,provenance_calls
+    global calls,allowance_rejected,provenance_calls,interpreter_calls,interpreter_tool_definitions
     with lock:
         if maximum_calls is not None and calls-allowance_start>=maximum_calls:
             allowance_rejected+=1
@@ -153,7 +219,14 @@ def completions(body: dict | None = None):
         calls += 1
         call_id, selected, output = calls, scenario, result_text
         delay=provider_latency_s
-        post_tool=any(message.get('role')=='tool' for message in (body or {}).get('messages',[]))
+        messages=(body or {}).get('messages',[])
+        if selected.startswith('conversation') and any(message.get('role')=='system' and
+                type(message.get('content')) is str and 'ALWAYS interpret only the current user message' in message['content']
+                for message in messages):
+            interpreter_calls+=1
+            definitions=(body or {}).get('tools',[])
+            interpreter_tool_definitions+=len(definitions) if type(definitions) is list else 0
+        post_tool=bool(messages) and messages[-1].get('role')=='tool'
         selected_fault=fault if (fault_phase=='post_tool')==post_tool else None
         fault_delay=fault_delay_s
         if selected_fault is not None:fault_acceptances[selected_fault]+=1
@@ -167,6 +240,12 @@ def completions(body: dict | None = None):
         return Response('{"error":"synthetic_provider_fault"}',status_code=int(selected_fault),media_type='application/json')
     if selected_fault == 'malformed_shape':return {'choices':[]}
     if selected_fault == 'slow':time.sleep(fault_delay)
+    if selected.startswith('conversation'):
+        message=conversation_reply((body or {}).get('messages',[]),selected)
+        return {'id':f'fixture-{call_id}','object':'chat.completion','created':1,
+            'model':(body or {}).get('model','test-model'),'choices':[{'index':0,
+                'finish_reason':'tool_calls' if message.get('tool_calls') else 'stop','message':message}],
+            'usage':{'prompt_tokens':100,'completion_tokens':25,'total_tokens':125}}
     # These two explicit synthetic specialist instructions belong to this fixture.
     # All values are fixture constants; no product lookup or model-selected URL.
     prose = json.dumps((body or {}).get('messages',[]))

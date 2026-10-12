@@ -1,10 +1,11 @@
 import asyncio
+import json
 from contextlib import asynccontextmanager
 from typing import Literal
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, JsonValue
+from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError
 from prosaic_harness import StoreError
 from .config import load_config
 from .execution import Execution
@@ -33,6 +34,39 @@ class NativeStartRequest(BaseModel):
     model_config = ConfigDict(extra='forbid',strict=True)
     proposal_id: str = Field(min_length=1,max_length=128)
     inputs: JsonValue
+
+
+class ConversationMessageRequest(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    messageId: str=Field(min_length=1,max_length=128,pattern=r'^[A-Za-z0-9][A-Za-z0-9._:-]*$')
+    message: str=Field(min_length=1,max_length=16384)
+    expectedRevision: str=Field(min_length=1,max_length=512)
+    interactionRef: str | None=Field(default=None,min_length=1,max_length=512)
+
+
+class ConversationRetryRequest(BaseModel):
+    model_config=ConfigDict(extra='forbid',strict=True)
+    expectedRevision: str=Field(min_length=1,max_length=512)
+    acknowledgeEffectRisk: bool
+
+
+async def conversation_body(request,model=None):
+    def pairs(items):
+        result={}
+        for key,value in items:
+            if key in result:raise ValueError('duplicate JSON field')
+            result[key]=value
+        return result
+    try:
+        value=json.loads(await request.body(),object_pairs_hook=pairs,
+            parse_constant=lambda value: (_ for _ in ()).throw(ValueError('nonfinite JSON')))
+        if type(value) is not dict:raise ValueError('invalid conversation body')
+        if model is None:
+            if value:raise ValueError('invalid conversation body')
+            return None
+        return model.model_validate(value)
+    except (ValueError,ValidationError,UnicodeError,RecursionError):
+        raise HTTPException(422,'invalid_request') from None
 
 
 def create_app():
@@ -74,7 +108,7 @@ def create_app():
 
     @app.exception_handler(StoreError)
     async def store_error(request, error):
-        status = 409 if error.code in {'run_busy', 'revision_conflict', 'run_already_exists', 'receipt_conflict'} else 503
+        status = 404 if error.code=='session_not_found' else 409 if error.code in {'run_busy', 'revision_conflict', 'run_already_exists', 'receipt_conflict','session_busy','session_already_exists'} else 503
         return JSONResponse({'detail': error.code}, status_code=status)
 
     @app.exception_handler(RequestConflict)
@@ -83,6 +117,13 @@ def create_app():
 
     @app.exception_handler(ValueError)
     async def value_error(request, error):
+        if config.get('conversation'):
+            from prosaic_harness import ConversationError
+            if isinstance(error,ConversationError):
+                detail={'code':error.code}
+                if error.limit is not None:detail['limit']=error.limit
+                status=409 if error.code in {'bindingMismatch','identityMismatch','messageConflict','interactionStale'} else 422
+                return JSONResponse({'detail':detail},status_code=status)
         # New native diagnostics are already closed and redacted by the SDK.
         # Import lazily so the legacy application still starts on historical pins.
         if config.get('native'):
@@ -159,5 +200,56 @@ def create_app():
     def usage(run_id: str, request: Request, actor=Depends(principal)):
         execution = request.app.state.execution
         return execution.read(lambda: execution.usage(owned(execution,actor,run_id)))
+
+    def conversation(execution):
+        if getattr(execution,'conversation',None) is None:raise HTTPException(404,'not_found')
+        return execution.conversation
+
+    @app.post('/conversations')
+    async def chat_create(request: Request,actor=Depends(principal),
+            idempotency_key: str=Header(min_length=1,max_length=128)):
+        if len(request.headers.getlist('idempotency-key'))!=1:raise HTTPException(422,'invalid_request')
+        await conversation_body(request)
+        execution=request.app.state.execution
+        return await execution.admitted(conversation(execution).create_request,actor,idempotency_key)
+
+    @app.get('/conversations/{session_id}')
+    def chat_status(session_id: str,request: Request,actor=Depends(principal)):
+        execution=request.app.state.execution
+        return execution.read(conversation(execution).status_request,actor,session_id)
+
+    @app.get('/conversations/{session_id}/history')
+    def chat_history(session_id: str,request: Request,actor=Depends(principal)):
+        execution=request.app.state.execution
+        return execution.read(conversation(execution).history_request,actor,session_id)
+
+    @app.get('/conversations/{session_id}/usage')
+    def chat_usage(session_id: str,request: Request,actor=Depends(principal)):
+        execution=request.app.state.execution
+        return execution.read(conversation(execution).usage_request,actor,session_id)
+
+    @app.post('/conversations/{session_id}/messages')
+    async def chat_message(session_id: str,request: Request,actor=Depends(principal)):
+        body=await conversation_body(request,ConversationMessageRequest)
+        execution=request.app.state.execution
+        chat=conversation(execution)
+        return await execution.admitted(lambda owner:chat.send_request(owner,session_id,
+            message_id=body.messageId,message=body.message,expected_revision=body.expectedRevision,
+            interaction_ref=body.interactionRef),actor)
+
+    @app.post('/conversations/{session_id}/recover')
+    async def chat_recover(session_id: str,request: Request,actor=Depends(principal)):
+        await conversation_body(request)
+        execution=request.app.state.execution
+        return await execution.admitted(conversation(execution).recover_request,actor,session_id)
+
+    @app.post('/conversations/{session_id}/retry')
+    async def chat_retry(session_id: str,request: Request,actor=Depends(principal)):
+        body=await conversation_body(request,ConversationRetryRequest)
+        if body.acknowledgeEffectRisk is not True:raise HTTPException(422,'invalid_request')
+        execution=request.app.state.execution
+        chat=conversation(execution)
+        return await execution.admitted(lambda owner:chat.retry_request(owner,session_id,
+            expected_revision=body.expectedRevision,acknowledge_effect_risk=True),actor)
 
     return app

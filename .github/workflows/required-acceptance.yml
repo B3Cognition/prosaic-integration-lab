@@ -83,11 +83,45 @@ jobs:
           .venv/bin/python -m pip check
       - name: Select installed CLI bindings
         run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Select exact conversation SDK capability
+        id: conversation-sdk
+        env:
+          USE_CANDIDATE: ${{ inputs.candidate }}
+        run: |
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
       - name: Unit and functional regressions
+        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' }}
         run: .venv/bin/python -m pytest -q
+      - name: Current released baseline units and functional regressions
+        if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py
+      - name: Qualify released Lab wheel and exact source distribution consumers
+        if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
+        env:
+          RUNNER_CELL: ${{ matrix.runner }}
+          POSTGRES_CELL: ${{ matrix.postgres }}
+        run: |
+          .venv/bin/python -m build
+          flags=(--manifest dependencies/releases.json)
+          if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
+            flags+=(--run-stack)
+          fi
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
+      - name: Qualify exact candidate Lab wheel and source distribution consumers
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        env:
+          RUNNER_CELL: ${{ matrix.runner }}
+          POSTGRES_CELL: ${{ matrix.postgres }}
+        run: |
+          .venv/bin/python -m build
+          flags=(--manifest .cache/sdk-hardening/manifest.json --candidate)
+          if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
+            flags+=(--run-stack)
+          fi
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Build immutable consumer
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
@@ -110,6 +144,12 @@ jobs:
       - name: Run documented native adoption demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode native --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Run documented conversation demo with released SDKs
+        if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --postgres-version ${{ matrix.postgres }}
+      - name: Run documented conversation demo with exact candidate SDKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -118,5 +158,6 @@ jobs:
           path: |
             reports/required-pg${{ matrix.postgres }}.json
             reports/public-adoption-pg${{ matrix.postgres }}.json
+            reports/conversation-distribution-pg${{ matrix.postgres }}.json
           if-no-files-found: error
           retention-days: 14
