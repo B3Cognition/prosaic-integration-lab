@@ -196,6 +196,9 @@ def export(item):
         cases=FAILURE_CASES[item['mode']]
         result['failed_cases']=sorted({cases.get(name,'unknown') if type(name) is str else 'unknown'
             for name in item['failed_tests']})
+    if item.get('mode')=='qualification' and 'capacity_diagnostic' in item:
+        from .capacity_diagnostics import sanitize
+        result['capacity_diagnostic']=sanitize(item['capacity_diagnostic'])
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner

@@ -29,6 +29,7 @@
     "lab_runner/__main__.py",
     "lab_runner/accounting_demo.py",
     "lab_runner/accounting_report.py",
+    "lab_runner/capacity_diagnostics.py",
     "lab_runner/conversation_conformance.py",
     "lab_runner/conversation_demo.py",
     "lab_runner/conversation_faults.py",

@@ -289,6 +289,9 @@ def main():
         if isinstance(error,EngineError) and error.diagnostic is not None:
             result['engine_diagnostic']=error.diagnostic
     finally:
+        if args.command=='test' and args.mode=='qualification':
+            from .capacity_diagnostics import read
+            result['capacity_diagnostic']=read(stack.directory)
         junit = stack.directory / 'junit.xml'
         if junit.exists():
             try:

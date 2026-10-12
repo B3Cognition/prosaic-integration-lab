@@ -21,6 +21,8 @@ def test_real_fairness_reads_growth_and_usage_are_measured(lab):
     # and include several arrivals per identity. Keep two complete windows.
     profile.update(duration_s=6,window_s=3,maximum_calls=20)
     result=run(lab,profile,Events(directory))
+    from lab_runner.capacity_diagnostics import write
+    write(directory,result)
     assert result['qualification']=='qualified'
     assert result['fixture_passed'] is True and result['fairness_passed'] is True
     assert result['counts']['offered']==18 and result['counts']['completed']==18
