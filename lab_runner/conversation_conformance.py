@@ -138,7 +138,10 @@ def _materials(config,directory,effects,recorder,scope):
     for suffix in ('a','b'):
         name='fixture_apply_'+suffix
         agents['effecter-'+suffix]=_agent('effecter-'+suffix,'balanced',[name],
-            f'ALWAYS execute {name} once, then return {{"entity_id":"player-{suffix}"}} as JSON.\n'
+            f'ALWAYS execute {name} once through its provided native callable interface.\n'
+            'NEVER describe or simulate a tool call in response text.\n'
+            f'ALWAYS wait for the actual tool result before returning only the plain JSON object {{"entity_id":"player-{suffix}"}}.\n'
+            'NEVER wrap the final JSON in Markdown or code fences, or add other text.\n'
             'NEVER execute any other tool. /no_think')
     schemas={'selection':{'type':'object','properties':{'entityId':{'enum':['player-a','player-b']}},
         'required':['entityId'],'additionalProperties':False},

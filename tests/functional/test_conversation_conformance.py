@@ -84,3 +84,29 @@ def test_ambiguous_selection_reports_semantic_failure_without_exporting_reply(tm
     encoded=json.dumps(result)
     assert 'Please clarify' not in encoded and str(tmp_path) not in encoded
     assert chat_provider not in encoded and 'qwen-balanced' not in encoded
+
+
+def test_simulated_tool_text_blocks_confirmation_without_effect_or_retry(tmp_path,chat_provider):
+    from prosaic_runtime import EndpointConfig,RuntimeConfig
+    from lab_runner.conversation_conformance import execute_schedule
+    response=httpx.post(chat_provider+'/control',json={'scenario':'conversation_simulated_tool'},timeout=5)
+    assert response.status_code==200
+    credential=tmp_path/'key';credential.write_text('synthetic');credential.chmod(0o600)
+    config=RuntimeConfig({tier:EndpointConfig(chat_provider+'/v1','qwen-'+tier,
+        api_key_file=str(credential),max_tokens=512,features={'streaming':False})
+        for tier in ('balanced','strong')},{tier:tier for tier in ('balanced','strong')},'balanced')
+    before=httpx.get(chat_provider+'/stats',timeout=5).json()['calls']
+    result=execute_schedule({'mode':'synthetic','runtime_config':config,
+        'allowance_file':tmp_path/'allowance.json','maximum_requests':12},max_calls=12)
+    assert not result['passed'] and len(result['cases'])==6
+    assert all(row['passed'] for row in result['cases'][:-1])
+    assert result['cases'][-1]['purpose']=='confirmation'
+    assert result['cases'][-1]['failure']=={'phase':'evidence','failureCode':'conformanceFailed',
+        'exceptionClass':None}
+    assert result['cases'][-1]['provider_requests'] is None
+    assert result['diagnostic_effects']==0
+    assert result['allowance']=={'maximum':12,'retained':8,'remaining':4,'unknown':1}
+    assert httpx.get(chat_provider+'/stats',timeout=5).json()['calls']-before==7
+    encoded=json.dumps(result)
+    assert 'fixture_apply_b' not in encoded and 'entity_id' not in encoded
+    assert str(tmp_path) not in encoded and chat_provider not in encoded

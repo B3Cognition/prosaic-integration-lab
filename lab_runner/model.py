@@ -81,7 +81,7 @@ def control(body: Control):
     if body.scenario not in {'normal', 'missing_usage', 'invalid_output','large_usage',
                              'native','native_rejected','native_effect','native_effect_batch','native_revisit',
                              'conversation','conversation_interpreter_tool','conversation_ambiguous',
-                             'conversation_fenced_interpretation'} or body.effect_gate not in {None,*barriers}:
+                             'conversation_fenced_interpretation','conversation_simulated_tool'} or body.effect_gate not in {None,*barriers}:
         from fastapi import HTTPException
         raise HTTPException(422, 'invalid_scenario')
     with lock:
@@ -165,6 +165,10 @@ def conversation_reply(messages,selected):
             'type':'function','function':{'name':name,'arguments':json.dumps(arguments)}}]}
     for suffix in ('a','b'):
         if f'ALWAYS execute fixture_apply_{suffix} once' in prose+'\n'+current:
+            if selected=='conversation_simulated_tool':
+                return {'role':'assistant','content':'```json\n'+json.dumps({
+                    'name':'fixture_apply_'+suffix,'arguments':{}})+'\n'+json.dumps({
+                    'entity_id':'player-'+suffix})+'\n```'}
             if messages and messages[-1].get('role')=='tool':
                 return {'role':'assistant','content':json.dumps({'entity_id':'player-'+suffix})}
             return tool('fixture_apply_'+suffix,{})
