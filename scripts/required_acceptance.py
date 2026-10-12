@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from lab_runner.gates import COUNTS,export,validate
+from lab_runner.gates import COUNTS,export,validate,required_modes
 from lab_runner.stack import EngineError
 
 def resolve_image(candidate):
@@ -41,7 +41,8 @@ def main():
     lineage=json.loads(args.candidate_manifest.read_text()).get('candidate_lineage') if args.candidate else None
     lineage_sha=hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest() if lineage is not None else None
     summary = {'passed':True,'postgres_major':args.postgres_version,'lanes':[]}
-    for mode in COUNTS:
+    released=json.loads((ROOT/'dependencies/releases.json').read_text())
+    for mode in required_modes(candidate=args.candidate,manifest=released):
         command = [sys.executable,'-m','lab_runner','test','--mode',mode,'--postgres-version',str(args.postgres_version),
             '--consumer-image',image_id]
         if args.candidate: command+=['--candidate','--candidate-manifest',str(args.candidate_manifest.resolve())]
@@ -49,7 +50,7 @@ def main():
         item = {}
         try:
             process = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,
-                timeout=1200 if mode=='legacy-upgrade' else 900 if mode in {'lago','native','qualification'} else 300)
+                timeout=1200 if mode=='legacy-upgrade' else 900 if mode in {'lago','native','qualification','conversation'} else 300)
             for line in process.stdout.splitlines():
                 if line.startswith('{'): item = json.loads(line)
             validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha,lineage_sha=lineage_sha)

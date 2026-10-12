@@ -62,7 +62,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,baseline_image=None):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,conversation=False,baseline_image=None):
         from .workload import identities
         self.identities = identities(users)
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
@@ -79,6 +79,7 @@ class OwnedStack:
             if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
         self.consumer_image = consumer_image
         self.native_fixture=native
+        self.conversation_fixture=conversation
         self.baseline_image=baseline_image
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
@@ -261,6 +262,7 @@ class OwnedStack:
         self.manifest['database_port'] = int(port)
         credentials = {name: secrets.token_hex(24) for name in
             ('lab_migration', 'harness_runtime', 'accounting_runtime', 'app_runtime')}
+        if self.conversation_fixture:credentials['conversation_runtime']=secrets.token_hex(24)
         if self.billing:
             credentials['billing_exporter'] = secrets.token_hex(24)
         self._secret('provision.json', json.dumps({'admin_password': admin, 'roles': credentials}))
@@ -269,7 +271,13 @@ class OwnedStack:
         if self.native_fixture:
             from .native_scenarios import native_configuration
             container_config['native']=native_configuration('effects-'+self.owner)
-        host_config = dict(container_config)
+        if self.conversation_fixture:
+            from .conversation_scenarios import conversation_configuration
+            container_config['conversation']=conversation_configuration('chat-'+self.owner)
+            container_config['conversation']['dsn']=f'host=database port=5432 dbname=lab user=conversation_runtime password={credentials["conversation_runtime"]}'
+        host_config = json.loads(json.dumps(container_config))
+        if self.conversation_fixture:
+            host_config['conversation']['dsn']=f'host=127.0.0.1 port={port} dbname=lab user=conversation_runtime password={credentials["conversation_runtime"]}'
         host_config['dependency_mode']='candidate' if self.candidate else 'released'
         if self.candidate:host_config['candidate_manifest']=str(self.candidate_manifest.resolve())
         if self.capacity_policy is not None:
@@ -300,7 +308,7 @@ class OwnedStack:
             f'{self.secrets / "provision.json"}:/run/secrets/provision.json:ro',
             self.baseline_image or self.manifest['images']['consumer'], 'python', 'scripts/provision.py')
         command(self.engine, 'start', '-a', provision)
-        if self.native_fixture:
+        if self.native_fixture or self.conversation_fixture:
             from .native_scenarios import provision_effects
             provision_effects(host_config['migration_dsn'])
         runtime_name = name+'-runtime-config'

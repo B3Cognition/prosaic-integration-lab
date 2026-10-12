@@ -1,11 +1,16 @@
 # Optional local inference
 
-The new [conversation preview](../docs/conversations.md) includes
+The new [conversation guide](../docs/conversations.md) includes
 `conversation-conformance.example.json`, a private Runtime YAML/allowance recipe.
 Its pure preflight makes zero provider requests and opens no credential files.
-The planned live schedule requires twelve shared requests, separate fixed
-balanced/strong sessions and explicit local or hosted opt-in. Live dispatch
-qualification remains pending; the existing routing smoke below is independent.
+The live command reserves twelve shared requests, uses separate fixed balanced/
+strong sessions and requires explicit `--live-local` or `--live-hosted` opt-in.
+Run `python scripts/conversation_conformance.py --config PRIVATE.json --max-calls
+12 --export SAFE.json` for pure preflight; add the live flag to contact the
+approved endpoint. No actual live calls have qualified this branch. The command
+uses nondurable diagnostic accounting and private temporary session/run files;
+the shared allowance persists uncertain consumption across crashes. The existing
+routing smoke below is independent.
 
 `runtime-local.example.yml` uses the released Runtime configuration contract for
 the host-side endpoint `http://127.0.0.1:8000/v1`. Authenticated discovery

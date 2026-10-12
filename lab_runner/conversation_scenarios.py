@@ -1,5 +1,6 @@
 """Trusted owned-stack conversation configuration and public HTTP helpers."""
 import re
+import hashlib
 
 import httpx
 
@@ -8,7 +9,9 @@ def conversation_configuration(namespace):
     if type(namespace) is not str or not re.fullmatch('[A-Za-z0-9._-]{1,128}',namespace):
         raise ValueError('invalid owned conversation namespace')
     return {'bundles':[{'version':tier+'-v1','model_url':'http://model:8000/v1',
-        'model':'test-model-'+tier,'model_tier':tier} for tier in ('balanced','strong')],
+        'model':'test-model-'+tier,'model_tier':tier,'fixture_effects':True,
+        'operation_namespace':'conversation-'+hashlib.sha256(namespace.encode()).hexdigest()[:32]+'-'+tier,
+        'journal_identity':'conversation-journal-v1'} for tier in ('balanced','strong')],
         'tenants':{'tenant-a':{'enabled':True,'binding_version':'balanced-v1'},
                    'tenant-b':{'enabled':True,'binding_version':'strong-v1'}},
         'max_sessions':128,'max_owner_sessions':16}

@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 from types import SimpleNamespace
-from lab_runner.gates import COUNTS
+from lab_runner.gates import COUNTS,required_modes
 
 
 def test_native_persistence_candidate_requires_manifest_before_stack_allocation(monkeypatch):
@@ -39,7 +39,8 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     target=tmp_path/'safe.json'
     monkeypatch.setattr(sys,'argv',['required_acceptance','--postgres-version','16','--export',str(target)])
     assert runner.main() == 1
-    assert seen == list(COUNTS)
+    released=json.loads((source.parents[1]/'dependencies/releases.json').read_text())
+    assert seen == list(required_modes(candidate=False,manifest=released))
     assert 'PRIVATE' not in target.read_text()
     assert json.loads(target.read_text())['passed'] is False
 

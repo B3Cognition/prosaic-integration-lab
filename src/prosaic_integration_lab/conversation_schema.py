@@ -7,13 +7,19 @@ from psycopg.rows import tuple_row
 TEXT_LIMITS={'session_id':32,'tenant_id':128,'actor_id':128,'billing_account_id':128,
     'idempotency_key':128,'binding_identity':64,'binding_version':128,'namespace':128,
     'environment':32,'application':128,'phase':16}
+LINK_LIMITS={'session_id':32,'registration':128,'source_message_id':128,'source_revision':64,'phase':16}
 COLUMNS={'schema_version':{'version':('integer',True)},
-    'sessions':{name:('text',True) for name in TEXT_LIMITS}}
+    'sessions':{name:('text',True) for name in TEXT_LIMITS},
+    'workflow_links':{name:('text',True) for name in LINK_LIMITS}}
 CONSTRAINTS={'schema_version':{'PRIMARY KEY (version)'},'sessions':{
     'PRIMARY KEY (session_id)',
     'UNIQUE (namespace, environment, tenant_id, actor_id, idempotency_key)',
     "CHECK ((phase = ANY (ARRAY['reserved'::text, 'created'::text])))",
-    *{f'CHECK ((octet_length({name}) <= {limit}))' for name,limit in TEXT_LIMITS.items()}}}
+    *{f'CHECK ((octet_length({name}) <= {limit}))' for name,limit in TEXT_LIMITS.items()}},
+    'workflow_links':{'PRIMARY KEY (session_id)',
+    'FOREIGN KEY (session_id) REFERENCES lab_chat.sessions(session_id)',
+    "CHECK ((phase = ANY (ARRAY['reserved'::text, 'starting'::text, 'started'::text, 'attached'::text])))",
+    *{f'CHECK ((octet_length({name}) <= {limit}))' for name,limit in LINK_LIMITS.items()}}}
 
 
 def validate_catalog(tables,columns,constraints):
@@ -59,14 +65,15 @@ def check_ready(connection):
             if cursor.fetchone()!=(expected,):raise ValueError('conversation registry grants unavailable')
         required("SELECT has_schema_privilege(current_user,'lab_chat','USAGE')",(),True)
         required("SELECT has_schema_privilege(current_user,'lab_chat','CREATE')",(),False)
-        for table,privileges in (('schema_version',('SELECT',)),('sessions',('SELECT','INSERT'))):
+        for table,privileges in (('schema_version',('SELECT',)),('sessions',('SELECT','INSERT')),
+                                ('workflow_links',('SELECT','INSERT'))):
             for privilege in privileges:
                 required('SELECT has_table_privilege(current_user,%s,%s)',('lab_chat.'+table,privilege),True)
             for privilege in ('DELETE','TRUNCATE','TRIGGER'):
                 required('SELECT has_table_privilege(current_user,%s,%s)',('lab_chat.'+table,privilege),False)
             for column in COLUMNS[table]:
                 required('SELECT has_column_privilege(current_user,%s,%s,\'UPDATE\')',
-                    ('lab_chat.'+table,column),table=='sessions' and column=='phase')
+                    ('lab_chat.'+table,column),table in {'sessions','workflow_links'} and column=='phase')
         required("SELECT has_table_privilege(current_user,'lab_chat.schema_version','INSERT')",(),False)
 
 
@@ -83,9 +90,17 @@ def initialize(dsn,*,runtime_role='app_runtime'):
                 cursor.execute(sql.SQL('''CREATE TABLE lab_chat.sessions({},PRIMARY KEY(session_id),
                     UNIQUE(namespace,environment,tenant_id,actor_id,idempotency_key),
                     CHECK(phase IN ('reserved','created')))''').format(fields))
+                fields=sql.SQL(',').join(sql.SQL('{} text NOT NULL CHECK(octet_length({}) <= {})').format(
+                    sql.Identifier(name),sql.Identifier(name),sql.Literal(limit)) for name,limit in LINK_LIMITS.items())
+                cursor.execute(sql.SQL('''CREATE TABLE lab_chat.workflow_links({},PRIMARY KEY(session_id),
+                    FOREIGN KEY(session_id) REFERENCES lab_chat.sessions(session_id),
+                    CHECK(phase IN ('reserved','starting','started','attached')))''').format(fields))
                 cursor.execute('INSERT INTO lab_chat.schema_version VALUES(1)')
             _contract(cursor)
             cursor.execute(sql.SQL('GRANT USAGE ON SCHEMA lab_chat TO {}').format(sql.Identifier(runtime_role)))
             cursor.execute(sql.SQL('GRANT SELECT ON lab_chat.schema_version TO {}').format(sql.Identifier(runtime_role)))
-            cursor.execute(sql.SQL('GRANT SELECT,INSERT ON lab_chat.sessions TO {}').format(sql.Identifier(runtime_role)))
-            cursor.execute(sql.SQL('GRANT UPDATE(phase) ON lab_chat.sessions TO {}').format(sql.Identifier(runtime_role)))
+            for table in ('sessions','workflow_links'):
+                cursor.execute(sql.SQL('GRANT SELECT,INSERT ON lab_chat.{} TO {}').format(
+                    sql.Identifier(table),sql.Identifier(runtime_role)))
+                cursor.execute(sql.SQL('GRANT UPDATE(phase) ON lab_chat.{} TO {}').format(
+                    sql.Identifier(table),sql.Identifier(runtime_role)))

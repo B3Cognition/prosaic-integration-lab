@@ -1,5 +1,18 @@
 # Codex handoff
 
+## Conversation adoption checkpoint — 2026-10-12
+
+Lab target 0.5.0 implements authenticated bounded conversations, a fixed host-only
+selection/review workflow, actual diagnostic conformance, and a ninth required
+acceptance lane. Read [the conversation guide](conversations.md) and
+[its development evidence](verification/conversation-adoption-2026-10-11.md).
+All source units and installed synthetic functional tests passed (866/0 skips)
+before the final PostgreSQL readiness fix. The native owned PostgreSQL16 journey
+passed with one actual journalled player-b effect and separate seven/two usage
+counts. These are development results; final post-fix SDK lineage, four required
+Linux cells, ordinary public-index and distribution gates remain pending.
+Published and historical manifests below remain unchanged.
+
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
 ## Release checkpoint

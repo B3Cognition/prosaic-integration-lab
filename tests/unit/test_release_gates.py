@@ -1,8 +1,48 @@
 import copy
 import hashlib
+import json
 from pathlib import Path
 import pytest
 from lab_runner.gates import validate,export
+
+
+def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
+    from lab_runner.gates import required_modes,supports_conversation
+    released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    old={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
+        'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
+    for item in released['artifacts']:item['version']=old[item['distribution']]
+    assert not supports_conversation(released)
+    assert 'conversation' not in required_modes(candidate=False,manifest=released)
+    assert 'conversation' in required_modes(candidate=True,manifest=released)
+    train=copy.deepcopy(released)
+    target={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
+        'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+    for item in train['artifacts']:item['version']=target[item['distribution']]
+    assert supports_conversation(train)
+    assert 'conversation' in required_modes(candidate=False,manifest=train)
+    train['artifacts'][0]['version']='999.0'
+    with pytest.raises(ValueError):required_modes(candidate=False,manifest=train)
+
+
+def test_conversation_is_required_and_cannot_reuse_legacy_test_counts():
+    from lab_runner.gates import COUNTS
+    assert COUNTS['conversation']==91
+    item=receipt();item.update(mode='conversation',test_count=COUNTS['conversation'],dependency_mode='candidate',
+        candidate_manifest_sha256='3'*64,candidate_lineage_sha256='4'*64)
+    validate(item,'conversation',16,candidate=True,manifest_sha='3'*64,lineage_sha='4'*64)
+    item.pop('candidate_lineage_sha256')
+    with pytest.raises(ValueError):validate(item,'conversation',16,candidate=True,manifest_sha='3'*64,lineage_sha='4'*64)
+
+
+def test_conversation_failures_export_only_fixed_phase_codes():
+    item=receipt();item.update(mode='conversation',passed=False,test_returncode=1,failed_tests=[
+        'test_interpreter_fabricated_registered_effect_call_has_zero_consequential_dispatch',
+        'test_saved_ordinary_receipt_is_adopted_by_fresh_worker_without_provider_post',
+        'PRIVATE_DSN'])
+    safe=export(item)
+    assert safe['failed_cases']==['interpreter_tools','saved_receipt','unknown']
+    assert 'PRIVATE' not in str(safe)
 
 def receipt(mode='audit'):
     active = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'

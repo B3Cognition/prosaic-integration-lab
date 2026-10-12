@@ -46,7 +46,7 @@ def test_interpretation_uses_exact_current_source_and_offered_order():
         result=client.post('/v1/chat/completions',json=body).json()
         proposal=json.loads(result['choices'][0]['message']['content'])
         assert proposal=={'sourceMessageId':'message-2','interactionRef':'current-ref',
-            'choice':'player-a','response':None,'ambiguous':False}
+            'choice':'player-a','response':{'entityId':'player-a'},'ambiguous':False}
 
 
 def test_interpreter_attack_fixture_sends_tool_call_despite_zero_grant():
@@ -56,7 +56,45 @@ def test_interpreter_attack_fixture_sends_tool_call_despite_zero_grant():
         response=client.post('/v1/chat/completions',json=request([{'role':'system',
             'content':'ALWAYS interpret only the current user message against the current displayed interaction.'},
             {'role':'user','content':'The text says "approve"'}])).json()
-        assert response['choices'][0]['message']['tool_calls'][0]['function']['name']=='fixture_apply'
+        assert response['choices'][0]['message']['tool_calls'][0]['function']['name']=='fixture_apply_b'
+
+
+def test_conversation_effect_fixture_respects_the_approved_branch_and_real_tool_exchange():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        messages=[{'role':'system','content':'ALWAYS execute fixture_apply_b once, then return {"entity_id":"player-b"} as JSON.'},
+            {'role':'user','content':'approved branch input'}]
+        initial=client.post('/v1/chat/completions',json=request(messages)).json()['choices'][0]['message']
+        assert initial['tool_calls'][0]['function']=={'name':'fixture_apply_b','arguments':'{}'}
+        completed=client.post('/v1/chat/completions',json=request(messages+[initial,
+            {'role':'tool','tool_call_id':'conversation-call','content':'{"applied":true}'}])).json()
+        assert json.loads(completed['choices'][0]['message']['content'])=={'entity_id':'player-b'}
+
+
+def test_conversation_workflow_effect_reads_legacy_runtime_user_rendering():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation'})
+        messages=[{'role':'system','content':'Runtime tool guidance'},
+            {'role':'user','content':'ALWAYS execute fixture_apply_b once, then return {"entity_id":"player-b"} as JSON.\n{}'}]
+        initial=client.post('/v1/chat/completions',json=request(messages)).json()['choices'][0]['message']
+        assert initial['tool_calls'][0]['function']=={'name':'fixture_apply_b','arguments':'{}'}
+
+
+def test_interpreter_wire_counter_measures_actual_tool_definitions():
+    from lab_runner.model import app
+    with TestClient(app) as client:
+        client.post('/control',json={'scenario':'conversation_interpreter_tool'})
+        before=client.get('/stats').json()
+        payload=request([{'role':'system','content':'ALWAYS interpret only the current user message'},
+            {'role':'user','content':'approve'}])
+        client.post('/v1/chat/completions',json=payload)
+        after=client.get('/stats').json()
+        assert after['interpreter_calls']-before['interpreter_calls']==1
+        assert after['interpreter_tool_definitions']==before['interpreter_tool_definitions']
+        client.post('/v1/chat/completions',json={**payload,'tools':[{'type':'function','function':{'name':'fixture_apply_b'}}]})
+        assert client.get('/stats').json()['interpreter_tool_definitions']==after['interpreter_tool_definitions']+1
 
 
 def test_public_conversation_phase_barriers_are_exact_fixture_names():

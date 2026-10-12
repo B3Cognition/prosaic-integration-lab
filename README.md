@@ -10,10 +10,12 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
-The [conversation adoption preview](docs/conversations.md) documents the new
-authenticated host boundary and bounded full-history patterns. Its candidate
-SDK, workflow recovery and platform/database gates remain pending; existing
-published pins do not supply that API.
+The [conversation adoption guide](docs/conversations.md) documents the new
+authenticated host boundary, public SDK memory/durable examples, exact workflow
+replies and bounded full history. Lab 0.5.0 is under qualification: existing
+published pins below do not supply the conversation API. See the separate
+[development evidence](docs/verification/conversation-adoption-2026-10-11.md)
+before selecting a candidate.
 
 ## Install packages for an embedding service
 

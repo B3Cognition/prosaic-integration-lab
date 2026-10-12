@@ -1,5 +1,11 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+Conversation adoption is tracked separately in
+[conversation-adoption-2026-10-11.md](conversation-adoption-2026-10-11.md).
+Lab target 0.5.0 has actual installed SDK journey/HTTP and owned native PostgreSQL
+development evidence. Required Linux/database cells and final post-readiness-fix
+SDK/public release qualification remain pending; the historical ledger follows.
+
 Plan and native execution authorized by maintainer's “proceed” after local
 endpoint credentials were identified. Branch: `codex/integration-lab`.
 

@@ -58,7 +58,7 @@ def current_grant(host,principal,version=None):
 
 
 class ConversationExecution:
-    def __init__(self,host):
+    def __init__(self,host,*,session_store=None):
         require_conversation_sdk()
         from prosaic_harness_postgres import PostgresSessionStore
         from .conversation_workflows import build_bindings
@@ -70,8 +70,9 @@ class ConversationExecution:
         self.registry=ConversationRegistry(host.config['app_dsn'],namespace=host.config['namespace'],
             environment=host.config['environment'])
         self.bindings={}
+        self.workflow_materials={}
         for definition in settings['bundles']:
-            binding=build_bindings(host,definition)
+            binding=build_bindings(host,definition,registry=self.registry,workflow_materials=self.workflow_materials)
             if binding.version in self.bindings:raise ValueError('duplicate conversation binding version')
             self.bindings[binding.version]=binding
         if not self.bindings or type(settings['tenants']) is not dict:
@@ -81,7 +82,7 @@ class ConversationExecution:
                 raise ValueError('missing retained conversation binding')
             if any(version not in self.bindings for version in grant.get('retained_versions',[])):
                 raise ValueError('missing retained conversation binding')
-        self.store=PostgresSessionStore(settings['dsn'],namespace=host.config['namespace'],
+        self.store=session_store if session_store is not None else PostgresSessionStore(settings['dsn'],namespace=host.config['namespace'],
             max_active_leases=2,lease_s=15,renew_s=3,operation_timeout_s=5,pool_timeout_s=2,
             connect_timeout_s=3,lock_timeout_s=1,statement_timeout_s=3)
 
@@ -141,14 +142,68 @@ class ConversationExecution:
         report=self.host.recorder.report(application_id=APPLICATION,tenant_id=row['tenant_id'],
             actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
             request_id=session_id,run_id=session_id)
-        return {'conversation':public_usage(report)}
+        result={'conversation':public_usage(report)}
+        if self.registry.workflow(row) is not None:
+            workflow=self.host.recorder.report(application_id=APPLICATION,tenant_id=row['tenant_id'],
+                actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
+                request_id='workflow-'+session_id,run_id=session_id)
+            result['workflow']=public_usage(workflow)
+        return result
 
     def send_request(self,principal,session_id,*,message_id,message,expected_revision,
             interaction_ref=None,on_event=None):
         row=self._owned(principal,session_id)
-        return self._controller(principal,row).send(session_id,message_id=message_id,message=message,
+        controller=self._controller(principal,row)
+        reply=controller.send(session_id,message_id=message_id,message=message,
             expected_revision=expected_revision,interaction_ref=interaction_ref,
             on_event=phase_observer(self.host.config,on_event)).document
+        if message=='Find players' and reply.get('status')=='completed' and row['binding_version'] in self.workflow_materials:
+            return self.attach_owned_workflow(principal,row,controller,reply)
+        return reply
+
+    def attach_owned_workflow(self,principal,row,controller,reply):
+        """A host-approved intent; unknown starts never grant a second run call."""
+        from prosaic_harness import Harness,RunNotFound
+        from prosaic_runtime import ExecutionContext
+        workflow,registration=self.workflow_materials[row['binding_version']]
+        current=controller.status(row['session_id']).document
+        link=self.registry.workflow(row)
+        if link is None:
+            if (current.get('messageId')!=reply.get('messageId') or current['revision']!=reply['revision'] or
+                    current.get('pendingInteraction') is not None):
+                return reply
+            link=self.registry.reserve_workflow(row,registration,reply['messageId'],reply['revision'])
+        if link['source_message_id']!=reply['messageId'] or link['registration']!=registration:
+            return reply
+        context=ExecutionContext(application_id=APPLICATION,tenant_id=row['tenant_id'],
+            actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
+            request_id='workflow-'+row['session_id'],run_id=row['session_id'])
+        harness=Harness(workflow,store=self.host.store,run_id=row['session_id'],context=context,
+            accounting=self.host.recorder,observer=self.host.observer)
+        if link['phase']=='attached':
+            return current if current.get('messageId')==reply.get('messageId') else reply
+        claimed=self.registry.claim_workflow_start(row)
+        try:saved=harness.status()
+        except RunNotFound:
+            if not claimed:raise HTTPException(409,{'code':'needsResolution'}) from None
+            # The one durable claim was committed before this only dispatch.
+            harness.run(inputs={})
+            saved=harness.status()
+        interaction=harness.interaction(include_response_schema=True)
+        if interaction is None or interaction.to_dict().get('stepId')!='select':
+            raise HTTPException(409,{'code':'needsResolution'})
+        self.registry.workflow_started(row)
+        current=controller.status(row['session_id']).document
+        displayed=current.get('pendingInteraction')
+        if displayed is not None and displayed.get('runId')==row['session_id']:
+            self.registry.workflow_attached(row)
+            return current
+        if (current.get('messageId')!=link['source_message_id'] or current['revision']!=link['source_revision']):
+            raise HTTPException(409,{'code':'interactionStale'})
+        result=controller.attach_workflow(row['session_id'],registration=registration,
+            run_id=row['session_id'],expected_revision=current['revision']).document
+        self.registry.workflow_attached(row)
+        return result
 
     def recover_request(self,principal,session_id):
         row=self._owned(principal,session_id)

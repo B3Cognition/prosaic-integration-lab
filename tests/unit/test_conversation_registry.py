@@ -17,6 +17,8 @@ def registry(tmp_path):
             actor_id TEXT,billing_account_id TEXT,idempotency_key TEXT,binding_identity TEXT,
             binding_version TEXT,namespace TEXT,environment TEXT,application TEXT,phase TEXT,
             UNIQUE(namespace,environment,tenant_id,actor_id,idempotency_key))''')
+        db.execute('''CREATE TABLE workflow_links(session_id TEXT PRIMARY KEY,
+            registration TEXT,source_message_id TEXT,source_revision TEXT,phase TEXT)''')
     class Connection:
         def __init__(self, db): self.db = db
         def execute(self, statement, params=()):
@@ -100,3 +102,34 @@ def test_keys_are_bounded_before_storage(registry,key):
 @pytest.mark.parametrize('maximum',[True,0,129])
 def test_quota_bounds_are_finite(registry,maximum):
     with pytest.raises(ValueError):reserve(registry,max_sessions=maximum)
+
+
+def test_workflow_intent_is_exact_immutable_replay_and_retained(registry):
+    row=reserve(registry)
+    first=registry.reserve_workflow(row,'selection-v1','find','b'*64)
+    assert first['phase']=='reserved'
+    assert registry.reserve_workflow(row,'selection-v1','find','b'*64)==first
+    for registration,message,revision in (('other','find','b'*64),('selection-v1','later','b'*64),
+                                         ('selection-v1','find','c'*64)):
+        with pytest.raises(HTTPException):registry.reserve_workflow(row,registration,message,revision)
+    assert registry.workflow(row)==first
+
+
+def test_workflow_start_has_one_claim_and_never_reclaims_unknown_dispatch(registry):
+    row=reserve(registry)
+    registry.reserve_workflow(row,'selection-v1','find','b'*64)
+    assert registry.claim_workflow_start(row) is True
+    assert registry.claim_workflow_start(row) is False
+    assert registry.workflow(row)['phase']=='starting'
+    registry.workflow_started(row)
+    registry.workflow_started(row)
+    registry.workflow_attached(row)
+    assert registry.workflow(row)['phase']=='attached'
+    assert registry.claim_workflow_start(row) is False
+
+
+def test_workflow_intent_cannot_attach_an_unreserved_or_foreign_session(registry):
+    row=reserve(registry)
+    with pytest.raises(HTTPException):registry.reserve_workflow({**row,'actor_id':'bob'},'selection-v1','find','b'*64)
+    with pytest.raises(HTTPException):registry.workflow_started(row)
+    with pytest.raises(HTTPException):registry.workflow_attached(row)

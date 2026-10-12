@@ -113,3 +113,57 @@ class ConversationRegistry:
             row=dict(row)
             self._matches(row,self._scope(principal),row['binding_identity'],row['binding_version'])
             return row
+
+    @staticmethod
+    def _reserved(connection,reservation):
+        row=connection.execute('SELECT * FROM lab_chat.sessions WHERE session_id=%s',
+            (reservation['session_id'],)).fetchone()
+        if row is None or any(row[name]!=reservation[name] for name in
+                ('namespace','environment','application','tenant_id','actor_id','billing_account_id',
+                 'binding_identity','binding_version','idempotency_key')):
+            raise HTTPException(409,{'code':'bindingConflict'})
+
+    def reserve_workflow(self,reservation,registration,source_message_id,source_revision):
+        reference(registration);reference(source_message_id)
+        if type(source_revision) is not str or not re.fullmatch('[0-9a-f]{64}',source_revision):
+            raise ValueError('invalid conversation revision')
+        with self.connection() as connection:
+            self._reserved(connection,reservation)
+            connection.execute('''INSERT INTO lab_chat.workflow_links
+                (session_id,registration,source_message_id,source_revision,phase)
+                VALUES (%s,%s,%s,%s,'reserved') ON CONFLICT DO NOTHING''',
+                (reservation['session_id'],registration,source_message_id,source_revision))
+            row=connection.execute('SELECT * FROM lab_chat.workflow_links WHERE session_id=%s',
+                (reservation['session_id'],)).fetchone()
+            if row is None or (row['registration'],row['source_message_id'],row['source_revision'])!=\
+                    (registration,source_message_id,source_revision):
+                raise HTTPException(409,{'code':'messageConflict'})
+            return dict(row)
+
+    def workflow(self,reservation):
+        with self.connection() as connection:
+            self._reserved(connection,reservation)
+            row=connection.execute('SELECT * FROM lab_chat.workflow_links WHERE session_id=%s',
+                (reservation['session_id'],)).fetchone()
+            return dict(row) if row is not None else None
+
+    def claim_workflow_start(self,reservation):
+        with self.connection() as connection:
+            self._reserved(connection,reservation)
+            result=connection.execute("""UPDATE lab_chat.workflow_links SET phase='starting'
+                WHERE session_id=%s AND phase='reserved'""",(reservation['session_id'],))
+            return result.rowcount==1
+
+    def _workflow_phase(self,reservation,phase,previous):
+        with self.connection() as connection:
+            self._reserved(connection,reservation)
+            row=connection.execute('SELECT phase FROM lab_chat.workflow_links WHERE session_id=%s',
+                (reservation['session_id'],)).fetchone()
+            if row is None or row['phase'] not in {*previous,phase,'attached'}:
+                raise HTTPException(409,{'code':'needsResolution'})
+            if row['phase'] in previous:
+                connection.execute('UPDATE lab_chat.workflow_links SET phase=%s WHERE session_id=%s AND phase=%s',
+                    (phase,reservation['session_id'],row['phase']))
+
+    def workflow_started(self,reservation):self._workflow_phase(reservation,'started',{'starting'})
+    def workflow_attached(self,reservation):self._workflow_phase(reservation,'attached',{'started'})

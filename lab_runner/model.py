@@ -23,10 +23,12 @@ tool_samples = 0
 receipt_gate = threading.Event()
 receipt_gate.set()
 barriers={name:threading.Event() for name in ('tool-claimed','tool-handler','tool-effect','tool-committed',
-    'receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned')}
+    'tool-authorizer','tool-resolver','receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned')}
 for event in barriers.values():event.set()
 barrier_counts={name:0 for name in barriers}
 provenance_calls=0
+interpreter_calls=0
+interpreter_tool_definitions=0
 finder_seen={}
 FAULTS = ('reset', 'truncated_json', '429', '503', 'malformed_shape', 'slow')
 fault = None
@@ -69,6 +71,7 @@ def stats():
         return {'calls': calls, 'blocked': not gate.is_set(), 'accepted_events': accepted_events,
                 'allowance_rejected':allowance_rejected,'tool_samples':tool_samples,
                 'provenance_calls':provenance_calls,'barriers':dict(barrier_counts),
+                'interpreter_calls':interpreter_calls,'interpreter_tool_definitions':interpreter_tool_definitions,
                 'fault_acceptances':dict(fault_acceptances)}
 
 @app.post('/control')
@@ -159,8 +162,13 @@ def conversation_reply(messages,selected):
     def tool(name,arguments):
         return {'role':'assistant','content':None,'tool_calls':[{'id':'conversation-call',
             'type':'function','function':{'name':name,'arguments':json.dumps(arguments)}}]}
+    for suffix in ('a','b'):
+        if f'ALWAYS execute fixture_apply_{suffix} once' in prose+'\n'+current:
+            if messages and messages[-1].get('role')=='tool':
+                return {'role':'assistant','content':json.dumps({'entity_id':'player-'+suffix})}
+            return tool('fixture_apply_'+suffix,{})
     if 'ALWAYS interpret only the current user message' in prose:
-        if selected=='conversation_interpreter_tool':return tool('fixture_apply',{'amount':1})
+        if selected=='conversation_interpreter_tool':return tool('fixture_apply_b',{})
         def find(name,value):
             if type(value) is dict:
                 if name in value:return value[name]
@@ -173,11 +181,14 @@ def conversation_reply(messages,selected):
         source=find('sourceMessageId',data)
         choice=None;response=None
         if selected!='conversation_ambiguous':
-            if 'second' in text.lower() and len(choices)>1:choice=choices[1]
-            elif 'first' in text.lower() and choices:choice=choices[0]
+            if 'second' in text.lower() and len(choices)>1:
+                choice=choices[1];response={'entityId':choice}
+            elif 'first' in text.lower() and choices:
+                choice=choices[0];response={'entityId':choice}
             elif 'approve' in text.lower() and 'approve' in choices:
                 choice='approve';response={'confirmed':True}
-            elif 'reject' in text.lower() and 'reject' in choices:choice='reject'
+            elif 'reject' in text.lower() and 'reject' in choices:
+                choice='reject';response={'confirmed':False}
         return {'role':'assistant','content':json.dumps({'sourceMessageId':source,
             'interactionRef':reference,'choice':choice,'response':response,'ambiguous':choice is None})}
     if messages and messages[-1].get('role')=='tool':
@@ -190,7 +201,7 @@ def conversation_reply(messages,selected):
 
 @app.post('/v1/chat/completions')
 def completions(body: dict | None = None):
-    global calls,allowance_rejected,provenance_calls
+    global calls,allowance_rejected,provenance_calls,interpreter_calls,interpreter_tool_definitions
     with lock:
         if maximum_calls is not None and calls-allowance_start>=maximum_calls:
             allowance_rejected+=1
@@ -200,6 +211,12 @@ def completions(body: dict | None = None):
         call_id, selected, output = calls, scenario, result_text
         delay=provider_latency_s
         messages=(body or {}).get('messages',[])
+        if selected.startswith('conversation') and any(message.get('role')=='system' and
+                type(message.get('content')) is str and 'ALWAYS interpret only the current user message' in message['content']
+                for message in messages):
+            interpreter_calls+=1
+            definitions=(body or {}).get('tools',[])
+            interpreter_tool_definitions+=len(definitions) if type(definitions) is list else 0
         post_tool=bool(messages) and messages[-1].get('role')=='tool'
         selected_fault=fault if (fault_phase=='post_tool')==post_tool else None
         fault_delay=fault_delay_s

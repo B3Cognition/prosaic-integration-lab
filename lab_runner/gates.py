@@ -4,11 +4,55 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3,'conversation':91}
+
+
+def supports_conversation(manifest):
+    """Staged activation; old released SDKs cannot certify this new capability."""
+    expected={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
+        'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+    if not (type(manifest) is dict and type(manifest.get('artifacts')) is list and
+        len(manifest['artifacts'])==len(expected) and all(type(item) is dict for item in manifest['artifacts']) and
+        all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
+        raise ValueError('invalid SDK train')
+    actual={item['distribution']:item['version'] for item in manifest['artifacts']}
+    if actual==expected:return True
+    legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
+        'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
+    if actual==legacy:return False
+    raise ValueError('unsupported or incoherent SDK train')
+
+
+def required_modes(*,candidate,manifest):
+    # Every explicit candidate must qualify the new lane. An unchanged released
+    # baseline retains its original gates and makes no conversation claim.
+    return tuple(mode for mode in COUNTS if mode!='conversation' or candidate or supports_conversation(manifest))
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
+    'conversation':{
+        'test_owned_conversation_demo_uses_separate_frozen_usage':'conversation_demo',
+        'test_offered_selection_survives_fresh_worker_and_quoted_approval_dispatches_no_effect':'interaction',
+        'test_failed_user_correction_survives_without_partial_assistant_history':'failed_correction',
+        'test_message_replay_and_creation_replay_do_not_repeat_provider_work':'idempotency',
+        'test_ambiguous_selection_changes_no_workflow_or_domain_effect':'interaction',
+        'test_saved_ordinary_receipt_is_adopted_by_fresh_worker_without_provider_post':'saved_receipt',
+        'test_saved_interpretation_is_adopted_without_another_model_call':'saved_interpretation',
+        'test_uncertain_workflow_handoff_requires_resolution_without_second_resume[workflowCommandPrepared-select]':'handoff_uncertain',
+        'test_uncertain_workflow_handoff_requires_resolution_without_second_resume[workflowCommandReturned-confirm-b]':'handoff_uncertain',
+        'test_repeated_interrupted_attempts_require_consent_and_stop_at_per_turn_cap':'retry_bound',
+        'test_interpreter_fabricated_registered_effect_call_has_zero_consequential_dispatch':'interpreter_tools',
+        'test_foreign_and_replaced_interaction_references_fail_before_interpretation':'interaction_reference',
+        'test_current_grant_revocation_precedes_duplicate_create_message_and_reads':'authorization',
+        'test_utf8_user_boundary_accepts_exact_16kib_and_rejects_one_extra_byte':'user_bound',
+        'test_json_escaping_fits_envelope_without_changing_raw_utf8_admission':'user_bound',
+        'test_messages_envelope_ceiling_rejects_before_sdk_admission':'http_bound',
+        'test_actual_provider_context_overflow_has_safe_code_and_zero_new_history':'request_bound',
+        'test_complete_turn_encoding_overflow_rejects_before_provider_call':'turn_bound',
+        'test_final_assistant_overflow_retains_unsuccessful_user_and_usage_without_partial_exchange':'assistant_bound',
+        'test_retained_owner_quota_counts_terminal_sessions_and_preserves_creation_replay':'owner_quota',
+        'test_atomic_retained_deployment_quota_blocks_only_new_keys_at_128':'deployment_quota'},
     'native-persistence':{
         'test_proposal_replay_after_bundle_upgrade_keeps_original_reference':'proposal_replay',
         'test_concurrent_bundle_admission_returns_only_original_winning_reference':'proposal_race',

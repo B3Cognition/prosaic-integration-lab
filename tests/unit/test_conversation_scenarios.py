@@ -10,6 +10,9 @@ def test_runner_configuration_separates_tiers_and_host_authority():
     assert settings['tenants']['tenant-b']['enabled'] is True
     assert {bundle['model_tier'] for bundle in settings['bundles']}=={'balanced','strong'}
     assert len({bundle['model'] for bundle in settings['bundles']})==2
+    assert all(bundle['fixture_effects'] is True for bundle in settings['bundles'])
+    assert len({bundle['operation_namespace'] for bundle in settings['bundles']})==2
+    assert all(len(bundle['operation_namespace'].encode())<=128 for bundle in settings['bundles'])
 
 
 def test_runner_lists_explicit_conversation_mode():
