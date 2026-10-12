@@ -130,7 +130,29 @@ class ConversationExecution:
 
     def status_request(self,principal,session_id):
         row=self._owned(principal,session_id)
-        return self._controller(principal,row).status(session_id).document
+        return self._attachment_status(row,self._controller(principal,row).status(session_id).document)
+
+    def _workflow_harness(self,row):
+        from prosaic_harness import Harness
+        from prosaic_runtime import ExecutionContext
+        workflow,registration=self.workflow_materials[row['binding_version']]
+        context=ExecutionContext(application_id=APPLICATION,tenant_id=row['tenant_id'],
+            actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
+            request_id='workflow-'+row['session_id'],run_id=row['session_id'])
+        return registration,Harness(workflow,store=self.host.store,run_id=row['session_id'],context=context,
+            accounting=self.host.recorder,observer=self.host.observer)
+
+    def _attachment_status(self,row,reply):
+        """Project uncertain host intent; neither read nor recovery grants a start."""
+        from prosaic_harness import RunNotFound
+        link=self.registry.workflow(row)
+        if link is None or link['phase']=='attached':return reply
+        registration,harness=self._workflow_harness(row)
+        if link['registration']!=registration:raise HTTPException(409,{'code':'bindingConflict'})
+        try:harness.status()
+        except RunNotFound:
+            return {**reply,'status':'needsResolution','recoveryStatus':'needsResolution'}
+        return reply
 
     def history_request(self,principal,session_id):
         row=self._owned(principal,session_id)
@@ -163,9 +185,8 @@ class ConversationExecution:
 
     def attach_owned_workflow(self,principal,row,controller,reply):
         """A host-approved intent; unknown starts never grant a second run call."""
-        from prosaic_harness import Harness,RunNotFound
-        from prosaic_runtime import ExecutionContext
-        workflow,registration=self.workflow_materials[row['binding_version']]
+        from prosaic_harness import RunNotFound
+        registration,harness=self._workflow_harness(row)
         current=controller.status(row['session_id']).document
         link=self.registry.workflow(row)
         if link is None:
@@ -175,11 +196,6 @@ class ConversationExecution:
             link=self.registry.reserve_workflow(row,registration,reply['messageId'],reply['revision'])
         if link['source_message_id']!=reply['messageId'] or link['registration']!=registration:
             return reply
-        context=ExecutionContext(application_id=APPLICATION,tenant_id=row['tenant_id'],
-            actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
-            request_id='workflow-'+row['session_id'],run_id=row['session_id'])
-        harness=Harness(workflow,store=self.host.store,run_id=row['session_id'],context=context,
-            accounting=self.host.recorder,observer=self.host.observer)
         if link['phase']=='attached':
             return current if current.get('messageId')==reply.get('messageId') else reply
         claimed=self.registry.claim_workflow_start(row)
@@ -189,6 +205,20 @@ class ConversationExecution:
             # The one durable claim was committed before this only dispatch.
             harness.run(inputs={})
             saved=harness.status()
+        displayed=current.get('pendingInteraction')
+        if displayed is not None and displayed.get('runId')==row['session_id']:
+            self.registry.workflow_started(row)
+            self.registry.workflow_attached(row)
+            return current if current.get('messageId')==reply.get('messageId') else reply
+        if saved.state['status']=='completed':
+            # Public attach is idempotent for an already linked registration/run.
+            # This repairs only the immutable existing intent; no run is started
+            # or resumed, and the SDK retains its authoritative session state.
+            result=controller.attach_workflow(row['session_id'],registration=registration,
+                run_id=row['session_id'],expected_revision=current['revision']).document
+            self.registry.workflow_started(row)
+            self.registry.workflow_attached(row)
+            return result if current.get('messageId')==reply.get('messageId') else reply
         interaction=harness.interaction(include_response_schema=True)
         if interaction is None or interaction.to_dict().get('stepId')!='select':
             raise HTTPException(409,{'code':'needsResolution'})
@@ -207,7 +237,11 @@ class ConversationExecution:
 
     def recover_request(self,principal,session_id):
         row=self._owned(principal,session_id)
-        return self._controller(principal,row).recover(session_id).document
+        controller=self._controller(principal,row)
+        current=controller.status(session_id).document
+        projected=self._attachment_status(row,current)
+        if projected!=current:return projected
+        return self._attachment_status(row,controller.recover(session_id).document)
 
     def retry_request(self,principal,session_id,*,expected_revision,acknowledge_effect_risk):
         row=self._owned(principal,session_id)

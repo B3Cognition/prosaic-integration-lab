@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3,'conversation':91}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':53,'legacy-upgrade':10,'qualification':3,'conversation':95}
 
 
 def supports_conversation(manifest):
@@ -42,6 +42,10 @@ FAILURE_CASES={
         'test_uncertain_workflow_handoff_requires_resolution_without_second_resume[workflowCommandPrepared-select]':'handoff_uncertain',
         'test_uncertain_workflow_handoff_requires_resolution_without_second_resume[workflowCommandReturned-confirm-b]':'handoff_uncertain',
         'test_repeated_interrupted_attempts_require_consent_and_stop_at_per_turn_cap':'retry_bound',
+        'test_approval_handoff_loss_preserves_effect_journal_without_resume[before-approved-effect]':'approval_effect_recovery',
+        'test_approval_handoff_loss_preserves_effect_journal_without_resume[after-committed-effect]':'approval_effect_recovery',
+        'test_two_workers_admit_one_duplicate_and_one_competing_revision':'session_race',
+        'test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt':'session_fence',
         'test_interpreter_fabricated_registered_effect_call_has_zero_consequential_dispatch':'interpreter_tools',
         'test_foreign_and_replaced_interaction_references_fail_before_interpretation':'interaction_reference',
         'test_current_grant_revocation_precedes_duplicate_create_message_and_reads':'authorization',

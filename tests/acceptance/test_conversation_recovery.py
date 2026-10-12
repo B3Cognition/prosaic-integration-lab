@@ -7,7 +7,7 @@ import httpx
 import psycopg
 import pytest
 
-from lab_runner.conversation_faults import kill_worker,restore_workers_after_loss
+from lab_runner.conversation_faults import kill_worker,restore_workers_after_loss,partition_session_worker_a
 from lab_runner.conversation_scenarios import create,request,send
 from lab_runner.native_scenarios import calls,control,replace_worker
 from test_conversation_journey import principal,conversation_model
@@ -119,3 +119,84 @@ def test_repeated_interrupted_attempts_require_consent_and_stop_at_per_turn_cap(
     assert blocked.status_code==422
     assert blocked.json()=={'detail':{'code':'sessionLimit','limit':'maxAttemptsPerTurn'}}
     assert calls(lab)==before
+
+
+def effect_evidence(lab,sid):
+    key=sid+':player-b'
+    with psycopg.connect(lab['app_dsn']) as connection:
+        domain=connection.execute('SELECT namespace,business_key,amount FROM lab_fixture.effects '
+            'WHERE business_key=%s ORDER BY namespace',(key,)).fetchall()
+        journal=connection.execute('SELECT operation_namespace,operation_key,signature,claim_token,state,outcome '
+            'FROM lab_app.tool_operations WHERE operation_key=%s ORDER BY operation_namespace',(key,)).fetchall()
+    return domain,journal
+
+
+@pytest.mark.parametrize('phase,effects',[
+    ('workflowCommandPrepared',0),('workflowCommandReturned',1)],ids=['before-approved-effect','after-committed-effect'])
+def test_approval_handoff_loss_preserves_effect_journal_without_resume(lab,phase,effects):
+    from prosaic_harness_postgres import PostgresRunStore
+    p=principal(lab,'user-0008')
+    session=send(lab,p,create(lab,p,uuid.uuid4().hex),'find','Find players')
+    session=send(lab,p,session,'second','the second result',interaction_ref=session['pendingInteraction']['reference'])
+    accepted=loss(lab,p,session,phase,'approve',ref=session['pendingInteraction']['reference'])
+    original=effect_evidence(lab,session['sessionId'])
+    assert len(original[0])==effects and len(original[1])==effects
+    if effects:assert original[1][0][4]=='completed'
+    with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
+        run=store.load_run(session['sessionId'])
+        assert run.state['status']==('completed' if effects else 'waiting')
+    for _ in range(2):
+        result=recover(lab,p,session['sessionId'])
+        assert result['recoveryStatus']=='needsResolution' and calls(lab)==accepted
+        assert effect_evidence(lab,session['sessionId'])==original
+        with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
+            assert store.load_run(session['sessionId']).revision==run.revision
+
+
+def test_two_workers_admit_one_duplicate_and_one_competing_revision(lab):
+    p=principal(lab,'user-0009');session=create(lab,p,uuid.uuid4().hex)
+    for names in (('duplicate','duplicate'),('left','right')):
+        before=calls(lab)
+        def submit(worker,message_id):
+            return request(lab,p,'POST','/conversations/'+session['sessionId']+'/messages',replica=worker,
+                json={'messageId':message_id,'message':'Remember Prague','expectedRevision':session['revision']})
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures=[executor.submit(submit,worker,message_id) for worker,message_id in zip(('a','b'),names)]
+            replies=[future.result(timeout=100) for future in futures]
+        assert any(reply.status_code==200 for reply in replies)
+        assert all(reply.status_code in {200,409} for reply in replies)
+        assert calls(lab)==before+1
+        current=request(lab,p,'GET','/conversations/'+session['sessionId'],replica='b').json()
+        assert current['turnSequence']==(1 if names[0]=='duplicate' else 2)
+        if names[0]==names[1]:
+            assert send(lab,p,session,names[0],'Remember Prague',replica='b')==current
+            assert calls(lab)==before+1
+        else:assert sum(reply.status_code==200 for reply in replies)==1
+        session=current
+
+
+def test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt(lab):
+    from test_conversation_journey import history
+    p=principal(lab,'user-0010');session=create(lab,p,uuid.uuid4().hex)
+    with partition_session_worker_a(lab) as proxy:
+        before=httpx.get(lab['model']+'/stats',timeout=5).json()['barriers']['receiptSaved']
+        control(lab,scenario='conversation',effect_gate='receiptSaved')
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future=executor.submit(request,lab,p,'POST','/conversations/'+session['sessionId']+'/messages',
+                json={'messageId':'partitioned','message':'Remember Prague','expectedRevision':session['revision']})
+            try:
+                observed(lab,'receiptSaved',before);accepted=calls(lab)
+                partition=proxy.control(True)
+                assert partition['blocked'] is True and partition['active']==0
+                replace_worker(lab,'b')
+                adopted=recover(lab,p,session['sessionId'])
+                assert adopted['status']=='completed' and adopted['answer']=='Your city is Prague.'
+                assert calls(lab)==accepted
+            finally:
+                control(lab,scenario='conversation')
+                proxy.control(False)
+            late=future.result(timeout=100)
+            assert late.status_code in {409,503}
+        assert request(lab,p,'GET','/conversations/'+session['sessionId'],replica='b').json()==adopted
+        assert len(history(lab,p,session['sessionId']))==2 and calls(lab)==accepted
+        assert recover(lab,p,session['sessionId'])==adopted and calls(lab)==accepted

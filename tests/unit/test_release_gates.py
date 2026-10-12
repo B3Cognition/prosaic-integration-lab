@@ -27,7 +27,7 @@ def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
 
 def test_conversation_is_required_and_cannot_reuse_legacy_test_counts():
     from lab_runner.gates import COUNTS
-    assert COUNTS['conversation']==91
+    assert COUNTS['conversation']==95
     item=receipt();item.update(mode='conversation',test_count=COUNTS['conversation'],dependency_mode='candidate',
         candidate_manifest_sha256='3'*64,candidate_lineage_sha256='4'*64)
     validate(item,'conversation',16,candidate=True,manifest_sha='3'*64,lineage_sha='4'*64)
@@ -43,6 +43,14 @@ def test_conversation_failures_export_only_fixed_phase_codes():
     safe=export(item)
     assert safe['failed_cases']==['interpreter_tools','saved_receipt','unknown']
     assert 'PRIVATE' not in str(safe)
+
+
+def test_conversation_effect_and_lease_failures_have_fixed_public_codes():
+    item=receipt();item.update(mode='conversation',passed=False,test_returncode=1,failed_tests=[
+        'test_approval_handoff_loss_preserves_effect_journal_without_resume[after-committed-effect]',
+        'test_two_workers_admit_one_duplicate_and_one_competing_revision',
+        'test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt'])
+    assert export(item)['failed_cases']==['approval_effect_recovery','session_fence','session_race']
 
 def receipt(mode='audit'):
     active = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'

@@ -77,6 +77,7 @@ source archives, release receipts, wheel/sdist payloads and linked upstream byte
 | Core 0.4.1 | `6ac6cfdfd47dc70ecf68e441aa004f07c3be3822` | [38077144248](https://github.com/B3Cognition/prosaic/actions/runs/38077144248) |
 | Runtime 0.9.0 / recorder 0.3.0 | `a59621c5f30d766d1217b37df777d3876075dc34` | [38181785317](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38181785317) |
 | Harness 0.8.0 / store 0.3.0, pre-fix | `a638694096c660b5656659a81bf2c22f67b1b3fb` | [38185470516](https://github.com/B3Cognition/prosaic-harness/actions/runs/38185470516) |
+| Harness 0.8.0 / store 0.3.0, corrected | `f913fa18820554ffc5eb30a7bc4a8a6e302ed0ce` | [38186769826](https://github.com/B3Cognition/prosaic-harness/actions/runs/38186769826) |
 
 The pre-fix Harness run had 24 required records, nine source lanes with 756
 tests each and four PostgreSQL lanes with 160 tests each, zero failures/errors/
@@ -84,7 +85,14 @@ skips. Lab then reproduced a substantive gap: restricted runtime readiness
 accepted an accidental `UPDATE(document)` grant on receipts. The owned native
 regression failed, restored its exact grant and verified exact-PID cleanup.
 The original successful CI evidence is preserved; that candidate cannot be
-promoted. A new Harness source/run/five-wheel manifest is required.
+promoted. The corrected genuine run has 24 passing records, nine source lanes
+with 756 tests each and four PostgreSQL lanes with 179 tests each, zero failures/
+errors/skips. It retains the exact original Core/Runtime upstream lineage.
+The separate corrected five-wheel manifest SHA256 is
+`d5b4678788239ebf090979fcea65ee1c9774376f48b3994a4ad9cd3876b6314b`;
+its original lineage digest is
+`dc5ed7a9ee13f8868c7cf31daf889ec0f5058c5e0c595ab717ff1b6dac3c24c8`.
+All installed SDK payloads in the fresh consumer environment match those wheels.
 
 Readiness remains available to the trusted schema owner/operator, including
 effective inherited ownership. Nonowner runtime roles must reject excess
@@ -105,3 +113,45 @@ the three newly added installed conversation functional files. Candidate CI
 requires full collection plus all nine lanes and an actual extracted-sdist stack
 on at least one cell. New exact public pins activate the same released checks;
 unknown or incoherent trains fail instead of falling back to baseline.
+
+## Independent review and explicit boundaries
+
+One whole-branch review found zero Critical, five Important and zero Minor issues.
+All five were accepted for a single fix pass: source bootstrap in CI, selection of
+the execution receipt in distribution smoke, visible uncertain host start intent,
+reconciliation after a lost attachment acknowledgement, and actual consequential
+handoff/concurrent-session/SQL-partition recovery coverage. No second review is
+used as evidence. Host status and advanced/completed replay failures were observed
+before their fixes. The corrected installed SDK functional tests now prove both
+approval phase failures retain zero/one actual effect and immutable journal
+evidence without resuming. The required real-stack collection is now 95 cases;
+its four added approval/race/partition cases still require actual Linux execution.
+
+Final corrected-SDK full source verification passed 893 tests with zero skips
+(55.17 seconds), and the unchanged released baseline passed 876 with zero skips
+(33.48 seconds); both retain the one existing Starlette warning. The CI bootstrap
+regression executes the real workflow command without a Lab installation. The
+host regressions use real installed controllers and wire requests; no SDK engine
+is patched. The required new recovery cases fail missing infrastructure and are
+not counted as qualified until real platform receipts pass.
+
+The review explicitly retained these boundaries:
+
+- Platform/database success and container cleanup require exact-source real CI
+  receipts. Read-only review and local native results cannot establish them.
+- SQLite host SQL doubles prove protocol behavior; only real PostgreSQL qualifies
+  locking and permissions. Treating them otherwise would overstate readiness.
+- SDK reducers, providers, storage and Core remain owned by their separately
+  reviewed upstream plans. Consumer review cannot replace upstream qualification.
+- Qwen/hosted quality, prices and customer billing require separate explicit live
+  or business evidence. Diagnostic memory accounting supplies no financial claim.
+- Production identity-provider operation remains the deploying host's work;
+  fixture bearer/JWT authentication does not establish that deployment.
+- Trusted host Python, arbitrary callbacks, administrator credentials and
+  same-user filesystem mutation remain outside the sandbox boundary. Malicious
+  trusted code or host credential mistakes can defeat application boundaries.
+- Uncertain workflow resolution requires an operator; HTTP uses saved JSON views.
+  Automatic effect resolution and durable SSE replay require a separate design.
+- Deletion/retention automation, summaries, vector/multimodal memory, multiple
+  actors, changing profiles and scheduling remain deferred features. This
+  qualification makes no new feature or compliance claim about them.

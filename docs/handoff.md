@@ -13,6 +13,12 @@ counts. These are development results; final post-fix SDK lineage, four required
 Linux cells, ordinary public-index and distribution gates remain pending.
 Published and historical manifests below remain unchanged.
 
+After the accepted whole-branch review fix pass and corrected genuine SDK train,
+the full source suite passed 893 tests with zero skips, and the current public
+baseline passed 876 with zero skips (only three unavailable conversation
+functional files explicitly excluded). The exact new required lane collects 95
+cases. Actual four-cell acceptance and extracted-sdist stack proof remain gates.
+
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 
 ## Release checkpoint

@@ -59,6 +59,23 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary():
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
 
+def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_path):
+    import os,shlex,yaml
+    root=Path(__file__).resolve().parents[2]
+    workflow=yaml.safe_load((root/'.github/workflows/required-acceptance.yml').read_text())
+    selected=next(step for step in workflow['jobs']['acceptance']['steps'] if step.get('id')=='conversation-sdk')
+    environment={key:value for key,value in os.environ.items() if not key.startswith(('PYTHON','PIP_'))}
+    output=tmp_path/'capability-output'
+    environment.update(USE_CANDIDATE='false',SDK_MANIFEST='dependencies/releases.json',GITHUB_OUTPUT=str(output))
+    subprocess.run([sys.executable,'-I','-c',
+        "from importlib.util import find_spec; assert find_spec('prosaic_integration_lab') is None"],
+        cwd=tmp_path,env=environment,check=True,capture_output=True,timeout=15)
+    command=selected['run'].replace('.venv/bin/python',shlex.quote(sys.executable))
+    result=subprocess.run(['/bin/bash','-e','-c',command],cwd=root,env=environment,capture_output=True,timeout=15)
+    assert result.returncode==0,result.stderr.decode()
+    assert output.read_text()=='enabled=false\n'
+
+
 def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):
     import os
     import yaml

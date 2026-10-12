@@ -88,7 +88,7 @@ jobs:
         env:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
-          .venv/bin/python -c "import json,os; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json

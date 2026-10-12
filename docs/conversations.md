@@ -3,9 +3,9 @@
 This branch targets Runtime 0.9.0/recorder 0.3.0 and Harness 0.8.0/store 0.3.0,
 with unchanged Core 0.4.1. The existing released manifest stays unchanged and its
 SDKs do not provide this API. Exact-source candidate CI and installed synthetic/
-native PostgreSQL journeys have been exercised during development. A readiness
-permissions regression requires a new Harness candidate; the required four Linux/
-database cells and public-index adoption remain release gates.
+native PostgreSQL journeys have been exercised during development. The corrected
+Harness candidate passed upstream qualification; the required four Linux/database
+cells and public-index adoption remain release gates.
 
 The application owns authentication, current authorization, HTTP idempotency and
 retained-session quotas. Harness owns conversation advancement; Runtime owns
@@ -135,6 +135,13 @@ A changed body conflicts. Refreshing status never infers approval. If a worker
 stops after a workflow command may have run, `/recover` returns
 `needsResolution`; an operator must reconcile the actual workflow/effect ledger.
 Recovery does not resume that command automatically.
+
+If the host committed a workflow-start claim but lost acknowledgement before an
+authoritative run appeared, status and recovery explicitly show `needsResolution`.
+They never start the workflow. A lost attachment acknowledgement can be reconciled
+against the existing owned run after selection or completion, through public
+idempotent attachment; replay preserves the original message and adds no inference,
+resume or effect.
 
 Full history is the only MVP mode. Capacity or context overflow fails explicitly;
 there is no automatic summarization, compaction, truncation or eviction.
