@@ -208,7 +208,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
         stage='sdist_consumer';second=directory/'sdist-consumer';second.mkdir()
         source_python=consume(choices[0],directory=second,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
         if run_stack:
-            stage='sdist_stack'
+            stage='sdist_image_build'
             image=run([source_python,source/'scripts/build_consumer.py','--manifest',snapshot,
                 '--wheel-dir',wheels,'--dependency-mode','candidate' if candidate else 'released',
                 '--tag','prosaic-integration-lab:conversation-sdist'],directory=source,environment=environment,timeout=900)
@@ -216,6 +216,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             if image_id is None:raise ValueError('source consumer did not return immutable image')
             flags=['--candidate','--candidate-manifest',snapshot] if candidate else []
             for command in ('demo','test'):
+                stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
                     '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
                 receipt=execution_receipt(raw,command=command)
@@ -255,7 +256,9 @@ def main(argv=None):
                   run_stack=args.run_stack,postgres_version=args.postgres_version)
     encoded=json.dumps(result,sort_keys=True)
     if args.export:
-        try:args.export.write_text(encoded+'\n')
+        try:
+            args.export.parent.mkdir(parents=True,exist_ok=True)
+            args.export.write_text(encoded+'\n')
         except OSError:result.update(passed=False,failure='export_failed');encoded=json.dumps(result,sort_keys=True)
     print(encoded);return 0 if result['passed'] else 1
 

@@ -62,6 +62,19 @@ def test_lab_version_command_preserves_existing_five_sdk_json_contract():
     with pytest.raises(ValueError):module.verify_cli_versions(b'{"b3-prosaic":"9.0"}',data)
 
 
+def test_cli_creates_missing_report_parent_after_success(tmp_path,monkeypatch,capsys):
+    import json
+    module=implementation()
+    receipt={'event':'conversation_distribution','passed':True,'candidate':True}
+    monkeypatch.setattr(module,'verify',lambda *args,**kwargs:receipt.copy())
+    destination=tmp_path/'reports'/'conversation-distribution-pg16.json'
+    code=module.main(['--wheel','wheel.whl','--sdist','source.tar.gz',
+        '--manifest','manifest.json','--candidate','--export',str(destination)])
+    assert code==0
+    assert json.loads(destination.read_text())==receipt
+    assert json.loads(capsys.readouterr().out)==receipt
+
+
 def test_bounded_process_output_keeps_final_immutable_image_id(tmp_path,monkeypatch):
     import subprocess
     module=implementation();identifier=b'sha256:'+b'a'*64+b'\n'
