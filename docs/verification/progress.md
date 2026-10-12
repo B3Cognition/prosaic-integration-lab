@@ -10,8 +10,11 @@ checks, zero failures/skips and verified cleanup. The full local candidate/publi
 baseline suites passed 925/908 tests. This later docs-only entry records that
 exact tested source. The earlier failed capacity result retains an unknown cause;
 closed diagnostics repair reporting without claiming a capacity defect was fixed.
-Release, ordinary public-index adoption and live-provider qualification remain
-pending, and the current released manifest is unchanged. The historical ledger follows.
+Release and ordinary public-index adoption remain pending, and the current
+released manifest is unchanged. [Actual local conversation checks](local-conversation-2026-10-12.md)
+passed Qwen memory/routing and corrected selection, while the native tool step
+blocked with zero effects. The live workflow qualification remains open.
+The historical ledger follows.
 
 Plan and native execution authorized by maintainer's “proceed” after local
 endpoint credentials were identified. Branch: `codex/integration-lab`.

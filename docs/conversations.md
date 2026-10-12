@@ -8,8 +8,11 @@ AMD64/ARM64 × PostgreSQL 16/18 cells in
 1,395 acceptance executions, including 475 conversation checks, zero failures
 or skips and verified cleanup. Read the
 [original qualification evidence](verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12).
-The released manifest is unchanged; its SDKs do not provide this API. Publication,
-ordinary public-index adoption and actual live-provider conformance remain pending.
+The released manifest is unchanged; its SDKs do not provide this API. Publication
+and ordinary public-index adoption remain pending. Actual local Qwen checks
+verified memory and tier routing, then exposed interpretation-format and native
+tool-use failures; read the [live evidence](verification/local-conversation-2026-10-12.md)
+for the fixes and the remaining workflow check.
 
 The application owns authentication, current authorization, HTTP idempotency and
 retained-session quotas. Harness owns conversation advancement; Runtime owns
@@ -199,8 +202,17 @@ The command uses temporary private file stores and `MemoryRecorder` for bounded
 diagnostics, with no external business operation. Its exported accounting is
 explicitly nondurable and cannot certify billing. The private shared allowance
 file survives command crashes and retains uncertain consumption. Proxy isolation
-applies to this standalone command. No actual live conformance call has been run
-as part of this change.
+applies to this standalone command. Failed cases report only a closed phase,
+failure code and exception class. Raw model responses and exception text stay
+private. Unknown consumption retains its maximum and stops the schedule.
+
+Interpreter prose should explicitly request one plain JSON object without
+Markdown fences or explanatory text. Effecter prose should request the native
+callable interface and emit final JSON only after the actual tool result.
+These instructions help model compatibility; validation and permission checks
+still decide admission, and text describing a tool call never dispatches it.
+The [local verification ledger](verification/local-conversation-2026-10-12.md)
+records actual Qwen results separately from the synthetic platform qualification.
 
 ## Run the installed Lab fixture
 
@@ -234,7 +246,8 @@ the SDK engine or normal journey output.
 
 The exact candidate passed installed SDK, workflow-handoff, worker-loss,
 PostgreSQL 16/18 and Linux AMD64/ARM64 gates, including an actual extracted-sdist
-stack on ARM64/16. This guide's later documentation-only commit records the
-tested source above. Public-index adoption must separately audit actual published
-bytes and rerun released-mode gates. No live Qwen or hosted call was made.
+stack on ARM64/16. That platform receipt qualifies the exact source above;
+subsequent CLI and prompt fixes have separate local evidence. Public-index
+adoption must audit actual published bytes and rerun released-mode gates.
+Actual local Qwen evidence is linked above; hosted qualification remains pending.
 Missing infrastructure is a failure, never a successful skip.

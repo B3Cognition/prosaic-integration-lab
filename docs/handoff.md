@@ -19,10 +19,17 @@ baseline tests with zero skips; only three functional files requiring the absent
 conversation API are excluded from the old baseline. The earlier failed
 `0f7791c` capacity qualification and its unidentified cause remain recorded;
 the final commit improves diagnostic reporting without claiming a capacity bug
-fix. This later documentation-only checkpoint refers to tested source `018425b`.
-Runtime/Harness publication, Lab release/tagging, ordinary public-index adoption
-and explicit live Qwen/hosted validation remain pending. Published and historical
-manifests below are unchanged.
+fix. That platform checkpoint refers to tested source `018425b`.
+Later CLI and interpreter-format fixes have a separate 930-test local result at
+`b8781d1`; the prepared native-call clarification at `425093c` passed 931
+candidate and 911 applicable published-baseline tests.
+[Actual local Qwen evidence](verification/local-conversation-2026-10-12.md)
+verifies both tiers' memory/routing and the corrected selection/current approval,
+but the 7B profile simulated its tool call in text and the workflow safely blocked.
+The original 12-request allowance is exhausted; the next native-dispatch check
+requires additional authorization. Runtime/Harness publication, Lab release,
+ordinary public-index adoption and full live workflow/hosted qualification remain
+pending. Published and historical manifests below are unchanged.
 
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 

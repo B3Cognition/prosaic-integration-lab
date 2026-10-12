@@ -248,6 +248,9 @@ PostgreSQL 16/18 at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; the
 ledger retains that source's pinned checkout instructions. Lab 0.4.0 passed its
 own exact-source matrix at `f47328d` as recorded above. Actual local routing passed
 default/balanced Qwen 7B and strong Qwen 27B. SDK release pins remain unchanged.
+The newer conversation candidate has [separate actual local Qwen evidence](docs/verification/local-conversation-2026-10-12.md):
+memory/routing and corrected selection passed; simulated tool text was safely
+blocked with zero effects, so the full live workflow remains unqualified.
 
 The eight lanes cover adversarial service inputs, identity, TLS ingress, Lago,
 native SQL persistence, native execution/effect recovery, original-release

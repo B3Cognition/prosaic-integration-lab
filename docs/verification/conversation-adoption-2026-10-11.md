@@ -1,11 +1,13 @@
 # Conversation adoption evidence
 
 Lab target: 0.5.0. Status: exact-source candidate platform qualification passed;
-publication and public-index/live-provider qualification remain pending.
+publication and public-index/full live-provider qualification remain pending.
 See the [final platform result](#candidate-platform-qualification--2026-10-12).
 The active `dependencies/releases.json` and historic receipts retain the
-published 0.4.1/0.8.1/0.2.1/0.7.1/0.2.1 SDK train. No conversation release,
-public-index adoption or actual live provider result is claimed here.
+published 0.4.1/0.8.1/0.2.1/0.7.1/0.2.1 SDK train. No conversation release or
+public-index adoption is claimed here. Subsequent actual local Qwen memory,
+routing, selection and blocked native-tool results are recorded separately in
+[the live verification ledger](local-conversation-2026-10-12.md).
 
 ## Installed development tests
 
