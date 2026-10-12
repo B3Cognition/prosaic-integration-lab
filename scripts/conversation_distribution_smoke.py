@@ -6,6 +6,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path,PurePosixPath
+import re
 import shutil
 import subprocess
 import sys
@@ -42,6 +43,20 @@ def validate_mode(data,*,candidate):
 def verify_cli_versions(raw,data):
     expected={item['distribution']:item['version'] for item in data['artifacts']}
     if json.loads(raw)!=expected:raise ValueError('installed SDK CLI versions mismatch')
+
+
+def execution_receipt(raw,*,command):
+    """Select the owned execution result; the demo also prints a separate report."""
+    expected='demo' if command=='demo' else 'conversation'
+    records=[json.loads(line) for line in raw.decode().splitlines() if line.startswith('{')]
+    matches=[row for row in records if type(row) is dict and row.get('mode')==expected]
+    if len(matches)!=1:raise ValueError('missing or ambiguous stack execution receipt')
+    result=matches[0]
+    if (type(result.get('owner')) is not str or not re.fullmatch('[0-9a-f]{32}',result['owner'])
+        or result.get('passed') is not True or result.get('cleanup')!='verified'
+        or command=='demo' and result.get('fixture')!='conversation-demonstration'):
+        raise ValueError('source stack qualification or cleanup failed')
+    return result
 
 
 def extract_sdist(archive,destination):
@@ -203,9 +218,16 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             for command in ('demo','test'):
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
                     '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
-                summaries=[json.loads(line) for line in raw.decode().splitlines() if line.startswith('{')]
-                if not summaries or summaries[-1].get('passed') is not True or summaries[-1].get('cleanup')!='verified':
-                    raise ValueError('source stack qualification or cleanup failed')
+                receipt=execution_receipt(raw,command=command)
+                if receipt.get('images',{}).get('consumer')!=image_id:
+                    raise ValueError('source consumer image changed between build and qualification')
+                if command=='test':
+                    from lab_runner.gates import validate
+                    lineage=data.get('candidate_lineage')
+                    lineage_sha=(hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest()
+                                 if lineage is not None else None)
+                    validate(receipt,'conversation',postgres_version,candidate=candidate,
+                             manifest_sha=before if candidate else None,lineage_sha=lineage_sha)
             result['stack_executed']=True
         stage='final_inputs'
         if manifest_digest(manifest)!=before or manifest_digest(snapshot)!=before:raise ValueError('manifest changed')

@@ -71,3 +71,24 @@ def test_bounded_process_output_keeps_final_immutable_image_id(tmp_path,monkeypa
     monkeypatch.setattr(module.subprocess,'run',successful)
     output=module.run(['python','-I','build-consumer'],directory=tmp_path,environment={})
     assert len(output)<=65536 and output.endswith(identifier)
+
+
+def test_actual_demo_stdout_selects_execution_receipt_before_separate_report(tmp_path,monkeypatch,capsys):
+    import json
+    from tests.unit.test_conversation_runner import test_conversation_demo_selects_owned_chat_stack_and_its_own_capture
+    test_conversation_demo_selects_owned_chat_stack_and_its_own_capture(tmp_path,monkeypatch)
+    output=capsys.readouterr().out.encode()
+    records=[json.loads(line) for line in output.decode().splitlines() if line.startswith('{')]
+    assert len(records)==2 and records[-1]['fixture']=='conversation' and 'passed' not in records[-1]
+    result=implementation().execution_receipt(output,command='demo')
+    assert result['passed'] is True and result['cleanup']=='verified'
+
+
+@pytest.mark.parametrize('rows',[[],[{'mode':'conversation','passed':True,'cleanup':'pending'}],
+    [{'mode':'conversation','passed':False,'cleanup':'verified'}],
+    [{'mode':'conversation','passed':True,'cleanup':'verified'}]*2,
+    [{'fixture':'conversation','status':'completed'}]])
+def test_diagnostic_or_ambiguous_stack_output_cannot_qualify(rows):
+    import json
+    with pytest.raises(ValueError):
+        implementation().execution_receipt(('\n'.join(json.dumps({'owner':'a'*32,**row}) for row in rows)).encode(),command='test')
