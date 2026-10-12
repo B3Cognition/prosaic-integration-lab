@@ -2,17 +2,18 @@
 
 Lab 0.5.0's conversation candidate uses Runtime 0.9.0/recorder 0.3.0 and
 Harness 0.8.0/store 0.3.0, with Core 0.4.1. Exact source
-`018425b810c6583bd3c1e20fc8cc8088ee4cda7c` passed all four Linux
+`34f291e8c7f7dd3809767c2fbf518b55e50204d6` passed all four Linux
 AMD64/ARM64 × PostgreSQL 16/18 cells in
-[run 38195151714](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38195151714):
+[run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309):
 1,395 acceptance executions, including 475 conversation checks, zero failures
 or skips and verified cleanup. Read the
-[original qualification evidence](verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12).
+[original qualification evidence](verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12).
 The released manifest is unchanged; its SDKs do not provide this API. Publication
 and ordinary public-index adoption remain pending. Actual local Qwen checks
-verified memory and tier routing, then exposed interpretation-format and native
-tool-use failures; read the [live evidence](verification/local-conversation-2026-10-12.md)
-for the fixes and the remaining workflow check.
+passed the complete journey with balanced chat/interpretation and an explicitly
+approved strong workflow tier, plus quoted-approval denial and duplicate replay.
+Read the [live evidence](verification/local-conversation-2026-10-12.md) for the
+tested binding, observed 7B/server limitation and preserved failed runs.
 
 The application owns authentication, current authorization, HTTP idempotency and
 retained-session quotas. Harness owns conversation advancement; Runtime owns
@@ -180,6 +181,15 @@ provider requests: eight for four ordinary turns, one for selection and three
 for confirmation plus the linked effect agent. Balanced and strong bind distinct
 sessions/profiles; local mode requires approved Qwen models on literal loopback.
 Hosted, local and synthetic evidence stay separately labelled.
+
+The optional private recipe field `workflow_tier` chooses `balanced` or `strong`
+for the fixed effecter agents. Omission preserves `balanced`; the example selects
+`strong`, matching the locally verified native-tool binding. Ordinary sessions
+and the selection/confirmation interpreter keep their own tiers. Workflow
+profile/model and accounting are independently checked against the actual
+immutable receipt. Invalid tiers fail preflight; no automatic fallback occurs.
+For the HTTP fixture, use the existing trusted bundle `model_tier` setting when
+constructing its registered workflow. Neither setting is client authority.
 
 `SharedLiveAllowance` reserves the entire operation atomically under a shared
 lock. Trustworthy exact completion counts release unused capacity. Unknown

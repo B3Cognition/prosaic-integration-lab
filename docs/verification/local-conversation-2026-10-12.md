@@ -1,9 +1,11 @@
 # Local conversation verification — 2026-10-12
 
-The maintainer explicitly authorized local model inference for the conversation
-candidate. The first bounded run verified memory and routing on both local tiers,
-but the complete workflow journey has not yet passed. This is a live diagnostic
-result, not a synthetic-provider or production billing qualification.
+The maintainer explicitly authorized local model inference and subsequent bounded
+testing/fixes for the conversation candidate. The corrected host binding at
+`34f291e8c7f7dd3809767c2fbf518b55e50204d6` passed the complete local journey,
+two further independent workflow sessions, quoted-approval denial and duplicate
+approval replay. The first failing runs remain recorded below. This is live
+diagnostic evidence, not production billing qualification.
 
 ## Installed inputs and boundaries
 
@@ -110,11 +112,98 @@ the corrected command below supplies the compatibility result.
   --ignore tests/functional/test_conversation_http.py
 ```
 
-The rebuilt local wheel SHA256 is
+The prepared local wheel SHA256 was
 `f8ba2b0cec0a0aa5e0e07397f4813bc60ef1022acab2e68890d2b768f4ec3051`;
-all 64 Lab module payloads match the exact source. This is preparation, not proof
-that Qwen follows the improved instructions. The next bounded live check must
-verify native dispatch independently of model text, final schema admission and
-exactly one approved diagnostic effect. Additional requests require a separately
-authorized allowance. Public Runtime/Harness publication, Lab release, ordinary
-public-index adoption and hosted-provider qualification remain separate pending work.
+all 64 Lab module payloads matched the exact source. This preparation alone did
+not establish that Qwen followed the improved instructions. The maintainer then
+authorized further bounded local batches, without resetting earlier allowances.
+
+## Native transport diagnosis and supported local binding
+
+Retesting the clarified native-call instructions still blocked the 7B workflow
+with zero effects. A separate public Runtime probe requested an explicit initial
+native function, with two provider requests and one tool call allowed. Balanced
+returned no native call and failed `tool_choice_not_honored`; strong completed
+two requests, one real handler invocation and the exact final entity JSON. The
+corrected public full-history `Runtime.turn()` probe likewise did not produce a
+native call on the tested balanced profile. This is a result for this model/server
+pair, not a claim that all Qwen Coder deployments lack tools.
+
+A read-only audit identified oMLX 0.7.0, app build 2987, with bundled
+`mlx-lm 0.31.4.dev132+g94cdcae13`. The approved 7B conversion's cached template
+advertises tools and `<tool_call>` envelopes; the installed inferred `json_tools`
+parser matches those delimiters. No default template/parser mismatch was found.
+The installed non-streaming Chat Completions route accepts named `tool_choice`
+but neither forwards nor enforces it; only `none` disables tools. The strong
+probe's success therefore demonstrates actual model/native transport behavior,
+not server enforcement of that requested choice. No model template, server
+settings, process, credentials or SDK was changed.
+
+The supported tested binding uses balanced for ordinary chat and tool-free
+selection/confirmation interpretation, with the approved strong tier for the
+effecter agent. The private diagnostic recipe explicitly sets
+`"workflow_tier": "strong"`. Omission retains the previous balanced default;
+there is no automatic fallback. Invalid tiers and extra configuration fields
+fail before credential reads or allowance creation. The selected effecter tier
+is admitted against its corresponding named `WorkflowPolicy` grant.
+
+Conversation and workflow recorders are separate. Success requires the actual
+selected profile/model, frozen attribution, complete observations, exact call IDs,
+immutable workflow receipt SHA and matching provider/tool budgets. Routing to
+another model or substituting another receipt's call IDs cannot qualify the test.
+The host consumer's existing trusted bundle `model_tier` provides the same explicit
+selection through public SDK construction; client messages cannot change it.
+The installed final-wheel command also passed its documented default preflight,
+reporting the explicit strong workflow tier and zero dispatches without a live flag.
+
+## Actual successful closure at `34f291e`
+
+The local wheel SHA256 was
+`edf771f8c0f52977654388839c6f9725c064629c1adff9b76dc48f7861e0725b`.
+All 64 Lab module payloads matched immutable source and installed bytes. All five
+SDK wheels and import origins passed the unchanged original manifest audit.
+
+| Actual live check | Provider requests | Result |
+| --- | --- | --- |
+| Complete six-case conformance schedule | 8 | Both tiers remembered Prague; balanced selection/current approval; strong native tool and final schema; one effect |
+| Fresh independently recorded workflow | 4 | Selection and current approval completed; one strong native tool effect |
+| Fresh quoted-approval/current-approval journey | 5 | Valid model approval proposal from quoted text denied with `confirmationRequired`; subsequent literal approval completed; one effect |
+| Exact duplicate of the completed approval | 0 | Cached reply; unchanged session/workflow snapshots and receipt; no extra effect |
+
+These successful checks contain 17 verified live requests, including three
+independent workflow sessions, each with exactly one local diagnostic effect.
+The complete schedule's actual case counts were `1, 1, 1, 1, 1, 3`; confirmation
+reconciled one balanced interpreter request with two strong workflow requests.
+The quoted case had a valid plain JSON proposal with current copied IDs, choice
+`approve`, `confirmed: true` and `ambiguous: false`. The independent whole-current-
+message confirmation rule denied that proposal before workflow dispatch. This
+demonstrates that valid model output is not human authorization.
+
+The independently recorded successful/guard sessions retained their private
+operator snapshots and receipts. Public file-store rereads verified snapshot
+integrity, exact workflow receipt equality/SHA, selected strong profile/model,
+provider/tool counts and unchanged state after replay, with zero audit dispatches.
+The complete standalone schedule used its documented temporary stores and closed
+summary; no replacement raw evidence is invented for that removed directory.
+
+The later batches remain distinct: the first retry batch retained its full 12
+requests including failed probes; the successful full/repeat batch settled all
+12 requests as known with zero unknown reservations; the guard batch retained
+seven (five successful requests plus a two-request failed balanced probe), with
+five remaining. Earlier failed allowances remain unchanged. Diagnostic-harness
+errors (a missing import before dispatch, an unsupported legacy `cwd=None`, and
+an incorrect turn-result attribute after dispatch) were corrected and retained
+conservatively; they are not SDK or model regressions and supply no passing claim.
+
+Exact-source verification passed 943 candidate tests and 921 applicable published-
+baseline tests, zero failures/skips, with the existing Starlette warning. The
+final source was pushed and dispatched to
+[four-cell candidate run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309).
+The original receipts and cleanup passed independent verification: all four cells,
+943 source tests per cell, 1,395 acceptance executions including 475 conversation
+checks, both documented demos per cell and verified cleanup. Read the
+[final platform evidence](conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12).
+The earlier `018425b` platform qualification stays historical. CI uses synthetic
+providers; the actual local Qwen evidence above is separate.
+Public Runtime/Harness publication, Lab release, ordinary public-index adoption
+and hosted-provider qualification remain separate pending work.

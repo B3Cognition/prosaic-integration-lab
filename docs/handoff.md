@@ -5,31 +5,33 @@
 Lab target 0.5.0 implements authenticated bounded conversations, a fixed host-only
 selection/review workflow, actual diagnostic conformance, and a ninth required
 acceptance lane. Read [the conversation guide](conversations.md) and
-[its qualification evidence](verification/conversation-adoption-2026-10-11.md#candidate-platform-qualification--2026-10-12).
-Exact source `018425b810c6583bd3c1e20fc8cc8088ee4cda7c` passed
-[run 38195151714](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38195151714):
+[its qualification evidence](verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12).
+Exact source `34f291e8c7f7dd3809767c2fbf518b55e50204d6` passed
+[run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309):
 325 required cases per Linux AMD64/ARM64 × PostgreSQL 16/18 cell, plus 95
 extracted-sdist conversation checks on ARM64/16. All 1,395 acceptance executions
 passed with zero skips and verified cleanup, including 475 conversation checks
 and both documented candidate demos per cell. Closed capacity diagnostics
-reconcile 18 requests/ledger calls with p95 0.2124–0.2630 seconds.
+reconcile 18 requests/ledger calls with p95 0.2085–0.2469 seconds.
 
-The final local suite passed 925 candidate tests and 908 applicable published
+The final local suite passed 943 candidate tests and 921 applicable published
 baseline tests with zero skips; only three functional files requiring the absent
 conversation API are excluded from the old baseline. The earlier failed
 `0f7791c` capacity qualification and its unidentified cause remain recorded;
-the final commit improves diagnostic reporting without claiming a capacity bug
-fix. That platform checkpoint refers to tested source `018425b`.
-Later CLI and interpreter-format fixes have a separate 930-test local result at
-`b8781d1`; the prepared native-call clarification at `425093c` passed 931
-candidate and 911 applicable published-baseline tests.
+the earlier `018425b` commit improved diagnostic reporting without claiming a
+capacity bug fix. Subsequent CLI, interpreter-format and native-call clarifications
+retain their separate historical results in the live ledger.
 [Actual local Qwen evidence](verification/local-conversation-2026-10-12.md)
-verifies both tiers' memory/routing and the corrected selection/current approval,
-but the 7B profile simulated its tool call in text and the workflow safely blocked.
-The original 12-request allowance is exhausted; the next native-dispatch check
-requires additional authorization. Runtime/Harness publication, Lab release,
-ordinary public-index adoption and full live workflow/hosted qualification remain
-pending. Published and historical manifests below are unchanged.
+records the original blocked 7B native-tool run and subsequent successful closure
+at `34f291e`: explicit strong effecter binding, 943 candidate/921 applicable
+published-baseline tests, a complete live journey plus two independent workflow
+sessions, quoted approval denied, and duplicate approval replay with zero calls.
+All earlier failed allowances are preserved; the maintainer authorized further
+bounded testing and fixes. The final four-cell run qualifies that exact executable
+source; this later documentation commit records its result. Runtime/Harness
+publication, Lab release, ordinary public-index adoption and hosted qualification
+remain pending. Published and
+historical manifests below are unchanged.
 
 Checkpoint: 2026-10-09, first working synthetic consumer on a local feature branch.
 

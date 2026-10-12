@@ -1,12 +1,14 @@
 # Conversation adoption evidence
 
-Lab target: 0.5.0. Status: exact-source candidate platform qualification passed;
-publication and public-index/full live-provider qualification remain pending.
-See the [final platform result](#candidate-platform-qualification--2026-10-12).
+Lab target: 0.5.0. Status: final exact-source candidate platform qualification and
+actual local Qwen journey passed. Publication and public-index/hosted-provider
+qualification remain pending. See the
+[final platform result](#final-source-platform-qualification--2026-10-12).
 The active `dependencies/releases.json` and historic receipts retain the
 published 0.4.1/0.8.1/0.2.1/0.7.1/0.2.1 SDK train. No conversation release or
 public-index adoption is claimed here. Subsequent actual local Qwen memory,
-routing, selection and blocked native-tool results are recorded separately in
+routing, full workflow, quoted-approval denial and duplicate replay results,
+including preserved native-tool failures, are recorded separately in
 [the live verification ledger](local-conversation-2026-10-12.md).
 
 ## Installed development tests
@@ -226,6 +228,71 @@ qualification failure. Its detailed assertion was discarded, so the cause is
 unidentified. Commit `018425b` repairs that diagnostic reporting gap; it does
 not claim to have fixed an identified capacity defect or change any threshold.
 
-Runtime/Harness publication, Lab release/tagging, ordinary public-index adoption
-and explicit live Qwen/hosted conformance remain pending. Current published pins
-and historic evidence are unchanged; all review boundaries above remain in force.
+At this historical platform checkpoint, Runtime/Harness publication, Lab
+release/tagging, ordinary public-index adoption and explicit live Qwen/hosted
+conformance remained pending. The subsequent local-model closure is recorded in
+the separate live ledger. Current published pins and historic evidence are
+unchanged; all review boundaries above remain in force.
+
+## Final-source platform qualification — 2026-10-12
+
+Executable source `34f291e8c7f7dd3809767c2fbf518b55e50204d6` passed
+[run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309).
+This subsequent documentation commit records the tested executable source.
+Current GitHub metadata, all four original required/distribution receipts and
+original private job logs were independently verified. The unchanged original
+SDK manifest and lineage above still apply; no SDK or public pin was replaced.
+
+Every cell passed 943 source tests, all nine required lanes, both documented
+native/conversation demonstrations, isolated wheel/sdist consumers, payload and
+import audits, `pip check`, pinned database images and owned cleanup. Required
+cases total 1,300; ARM64/16 additionally passed the extracted-sdist public demo
+and all 95 conversation cases: 1,395 acceptance executions, including 475
+conversation checks, zero failures or test skips. Each distribution receipt
+retains `public_index_verified=false`. These CI provider requests are synthetic;
+actual local Qwen verification remains in the separate live ledger.
+
+| Linux architecture | PostgreSQL | Required cases | Conversation cases | Capacity p95 |
+| --- | --- | --- | --- | --- |
+| AMD64 | 16 | 325 passed | 95 passed | 0.2469 s |
+| AMD64 | 18 | 325 passed | 95 passed | 0.2239 s |
+| ARM64 | 16 | 325 passed | 95 passed | 0.2271 s |
+| ARM64 | 18 | 325 passed | 95 passed | 0.2085 s |
+
+All five closed capacity flags pass in every cell. Offered, accepted, completed,
+read samples, tool samples, independent model calls and ledger calls reconcile
+at 18. Two fairness windows have zero starvation; adverse counts are zero and
+record growth is 18. The unchanged p95 bound is two seconds. Earlier failed
+capacity evidence remains preserved; this passing run establishes the final
+source's result without assigning an unsupported cause to that failure.
+
+Original final-run receipt SHA256 values:
+
+| Cell | Required receipt | Distribution receipt |
+| --- | --- | --- |
+| AMD64/16 | `5285d1ef47dee9a5f6f37456bac1c0b62010ff740cb7c37a20bc22044e80aad7` | `1b02170b176bda7cae5caf010a9172b2c4cf58afb245c55ae6eeab1e27eef132` |
+| AMD64/18 | `0e02969d3446760e7f0cfa4fe584a4b715ab8735e5aaaefa2a016305f2719736` | `a332e8a03fbac1e5b684ae3bd410ff5811becd7b69f2f16c1ab6ed3368b49704` |
+| ARM64/16 | `d65e40a585e124c816338cd9444f8cdf52194846dd064363d502433d65425096` | `55bcb26266f5fb57660b9d19e862b34e5bea826c21f0062d5af3f3ade3b5168c` |
+| ARM64/18 | `cf886ca605418de04bff49e4c2e7dad1fbf5b59dfa7af965058f3f44ed2e9455` | `229aafaf47897b54f0446755df1c3cb9893d8b5b5c7d74d8eaafd9d4c321f9e0` |
+
+Original final-run Lab artifact SHA256 values; local live-test rebuilds remain
+separate evidence:
+
+| Cell | Lab wheel | Lab source distribution |
+| --- | --- | --- |
+| AMD64/16 | `956ce5522098f2729945e9a9f01671137f39882ef74ade0410ea6c9c14a808d8` | `2eb65daa92485a0246c829647de80ac29ad8fc3c8b681bc669107272de13f89d` |
+| AMD64/18 | `1183c2b52bfc94a655ba33a9e51bbc45195b0a7927bff4025acf2952a7d84396` | `4c19a88d724bf1244df8f3e0f2420cea5c3e6d6d660b0cc028ff4d6e6401807d` |
+| ARM64/16 | `d4a9803f27a1b5ea28856a75644d74599d34b0a989cc8fcdf7e85a649192614c` | `47a76e743579dff1b23619d6f8e4194511aec3ad60e57f9dc1c4a33124dc7af5` |
+| ARM64/18 | `d4a9803f27a1b5ea28856a75644d74599d34b0a989cc8fcdf7e85a649192614c` | `09b2cf9e897ec237fa53c1f9ed530a12e4f0e8844426496740eaf708723b0d8e` |
+
+Local macOS ARM64 verification passed 943 candidate tests and 921 applicable
+published-baseline tests. The only baseline exclusions remain the three files
+requiring the unavailable Conversation API. The default installed conformance
+preflight dispatched zero requests. Actual local tests passed both memory tiers,
+explicit strong native workflow execution, quoted-approval denial and duplicate
+replay with zero further dispatch/effect. The tested 7B/server native-tool
+limitation remains recorded; no automatic fallback or validation bypass exists.
+
+Runtime/Harness publication, Lab release, ordinary public-index adoption and
+hosted-provider qualification remain pending. Published pins, failed runs and
+all review boundaries remain unchanged.
