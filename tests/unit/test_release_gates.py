@@ -6,13 +6,14 @@ import pytest
 from lab_runner.gates import validate,export
 
 
-def test_context_train_requires_context_cases_without_changing_public_baseline():
+def test_context_train_requires_context_cases_and_preserves_archived_baseline():
     from lab_runner.gates import supports_context_assembly, supports_conversation
-    released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    root=Path(__file__).resolve().parents[2]
+    baseline=root/'dependencies/releases-pre-context-2026-10-14.json'
+    assert hashlib.sha256(baseline.read_bytes()).hexdigest() == '87862e1d37fd2f2cc1b8c6cd9965289887b0c056b26e81781dad4929a70a36c6'
+    released=json.loads(baseline.read_text())
     assert not supports_context_assembly(released)
-    train=copy.deepcopy(released)
-    versions={'b3-prosaic-runtime':'0.9.4','b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
-    for item in train['artifacts']:item['version']=versions.get(item['distribution'],item['version'])
+    train=json.loads((root/'dependencies/releases.json').read_text())
     assert supports_conversation(train) and supports_context_assembly(train)
     item=receipt();item.update(mode='conversation',test_count=97)
     with pytest.raises(ValueError):validate(item,'conversation',16,context_assembly=True)
