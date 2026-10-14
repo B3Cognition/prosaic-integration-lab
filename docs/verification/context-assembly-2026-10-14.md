@@ -9,8 +9,8 @@ tokenizer or live provider is qualified by these results.
 Host: macOS arm64, Python 3.12.14. Final Runtime source suite: 1159 passed, two
 explicit live gates skipped (359.80s). Harness: 831 passed, two explicit live
 gates skipped, one existing fork warning (130.80s). Lab against the final audited
-installed wheels: 975 passed, one existing Starlette deprecation warning
-(78.46s). Independent review found retry allowance, native construction timing
+installed wheels: 977 passed, one existing Starlette deprecation warning
+(75.89s). Independent review found retry allowance, native construction timing
 and endpoint-control admission gaps. All were fixed with regressions; a further
 asymmetric-policy retry regression was fixed and re-reviewed. Final reviewer
 found no material residual findings.
@@ -45,9 +45,22 @@ same-version Runtime adapter bytes never replace the original Lab release wheel.
 Draft PRs: Runtime[#6](https://github.com/B3Cognition/prosaic-runtime/pull/6),
 Harness[#7](https://github.com/B3Cognition/prosaic-harness/pull/7),
 Lab[#16](https://github.com/B3Cognition/prosaic-integration-lab/pull/16).
-Runtime exact-source qualification run
+Runtime first exact-source qualification run
 [38542535522](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38542535522)
-is in progress. User approved pushes, draft PRs and CI; merge/publication remain
+passed its four PostgreSQL cells but failed stale 0.9.3 expectations in installed
+wheel gates. Those expectations and ordinary CI wheel paths were repaired;
+production wheel smoke and mandatory installed metadata acceptance passed
+locally. Replacement exact-source qualification
+[38544660074](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38544660074)
+at `5f0a02b923173286debd8c2c01951aba35d84377` is in progress.
+The extracted-source distribution gate now also requires the context demo flag
+and 103 acceptance cases; its process-double rejection/success regressions and
+related gates passed68 tests. The staged capability-output expectation was
+updated and passed7 functional tests, then the full977-test suite.
+Final PostgreSQL16/18 demo owners `ef8b4e6f97984a4ca8fa0d5b18cd23ce` and
+`ed04d3316a3f4cab8626b2b2373c2c2d` captured the comparison with nine independent
+fixture calls each, and verified cleanup (38.61s / 38.49s).
+User approved pushes, draft PRs and CI; merge/publication remain
 pending. Local results do not replace successful required CI receipts.
 
 Development consumer image:
