@@ -95,16 +95,19 @@ jobs:
         env:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
-          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
       - name: Unit and functional regressions
-        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' }}
+        if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q
+      - name: Current conversation train without context capability
+        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' && steps.conversation-sdk.outputs.context != 'true' }}
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
-        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Qualify released Lab wheel and exact source distribution consumers
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:

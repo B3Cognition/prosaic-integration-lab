@@ -6,11 +6,49 @@ tokenizer or live provider is qualified by these results.
 
 ## Local evidence
 
-Host: macOS arm64, Python 3.12.14. Runtime source suite: 1153 passed, two explicit
-live gates skipped. Harness: 823 passed, two explicit live gates skipped. Lab:
-972 passed, one existing Starlette deprecation warning. Independent review found
-retry allowance, native construction timing and endpoint-control admission gaps;
-regressions and fixes are being requalified in the final candidate train.
+Host: macOS arm64, Python 3.12.14. Final Runtime source suite: 1159 passed, two
+explicit live gates skipped (359.80s). Harness: 831 passed, two explicit live
+gates skipped, one existing fork warning (130.80s). Lab against the final audited
+installed wheels: 975 passed, one existing Starlette deprecation warning
+(78.46s). Independent review found retry allowance, native construction timing
+and endpoint-control admission gaps. All were fixed with regressions; a further
+asymmetric-policy retry regression was fixed and re-reviewed. Final reviewer
+found no material residual findings.
+
+Final local development image:
+`sha256:d261e95268043e5736dcc26b348804f68f9da75e98f4bfe7c80096a8884bd3b7`.
+Final development manifest SHA256:
+`ed9dd2554b64654da9423b4efb2427283965e73b10c1daf83ffc3186b33f0c5a`.
+Final image PostgreSQL16 acceptance owner `0b7798cd048040d79b205fd3d80b4ee8`
+and PostgreSQL18 owner `4a5666cd35094cc9b68f3f6e17feab4f` each passed103
+tests with zero skips and verified cleanup (465.81s / 467.49s).
+
+Full Harness PostgreSQL16/18 adapter and lifecycle lanes each passed186 tests
+with no skips (128.38s / 123.86s), including schema1 migration, old-worker
+refusal, owner/runtime role checks, recovery and fencing. Both exact standalone
+fixture ownership manifests were cleaned with the ownership-validating helper.
+Python3.11.15 macOS arm64 clean wheel dependency-floor smoke passed for both
+SDKs and memory/file context storage; `pip check` passed. This is not Linux or
+multi-platform CI evidence.
+
+| Local wheel | Source | SHA256 |
+|---|---|---|
+| Runtime0.9.4 | 20489c1e891ced4512619dcef5e5eaf68eca2ec4 | d19fd15e1209a876b79cddd19bf5e5b813e746c22b48c73a9434dea00ca1d67d |
+| Harness0.9.0 | cac445727b7258dea7334ae75f75b6bd8752ac74 | 0fc3396568299f2a714e6f10f58e65c1a17b5355a2f811c6ae6e44da1088eba8 |
+| Harness PostgreSQL0.4.0 | cac445727b7258dea7334ae75f75b6bd8752ac74 | aa3bfd37f6d2bfd4e6cbb4adc506c0e75796b82b9a359604ccfeec1488e3677b |
+
+Candidate curation preserves the original Core0.4.1 and Runtime PostgreSQL0.3.0
+public payloads. It verifies exact-source successful Actions run metadata and
+receipt/upstream lineage for the new SDK candidates before selection. Rebuilt
+same-version Runtime adapter bytes never replace the original Lab release wheel.
+
+Draft PRs: Runtime[#6](https://github.com/B3Cognition/prosaic-runtime/pull/6),
+Harness[#7](https://github.com/B3Cognition/prosaic-harness/pull/7),
+Lab[#16](https://github.com/B3Cognition/prosaic-integration-lab/pull/16).
+Runtime exact-source qualification run
+[38542535522](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38542535522)
+is in progress. User approved pushes, draft PRs and CI; merge/publication remain
+pending. Local results do not replace successful required CI receipts.
 
 Development consumer image:
 `sha256:00eb9c706df54def11a195cc60694c1f61ec17fc6d186567134dd733d503564b`.
