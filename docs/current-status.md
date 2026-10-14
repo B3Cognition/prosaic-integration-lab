@@ -1,8 +1,26 @@
 # Current delivery status
 
+## Published optional context assembly adoption — 2026-10-14
+
+The active manifest selects Core0.4.1, Runtime0.9.4/recorder0.3.0 and
+Harness0.9.0/store0.4.0. The three new distributions were published from exact
+qualified artifacts; actual public wheel and source downloads match their
+hashes. Fresh ordinary PyPI consumer adoption and the978-test Lab suite passed.
+The previous manifest remains in
+[`releases-pre-context-2026-10-14.json`](../dependencies/releases-pre-context-2026-10-14.json).
+See the [context assembly ledger](verification/context-assembly-2026-10-14.md#published-sdks-and-public-consumer-adoption)
+and [Lab PR16](https://github.com/B3Cognition/prosaic-integration-lab/pull/16)
+for released-package acceptance and merge evidence.
+
+Context policies are optional and host controlled. The demonstration uses
+synthetic byte counts; no production tokenizer is certified. Drain old writers
+and explicitly migrate existing storage before enabling context policies.
+The context-capable conversation lane requires103 cases. Lab0.5.0 publication
+is separate from this SDK adoption.
+
 ## Published timeout patch adoption — 2026-10-14
 
-The current manifest selects Core 0.4.1, Runtime 0.9.3/recorder 0.3.0 and Harness
+The timeout-patch manifest selected Core 0.4.1, Runtime 0.9.3/recorder 0.3.0 and Harness
 0.8.2/store 0.3.0. The Runtime patch fixes the negative provider timeout status
 that caused `store_corrupt` during conversation receipt persistence. All five
 public wheels were downloaded, verified by hash and audited in `.venv-latest`.
@@ -10,7 +28,7 @@ The lab suite passes 955 tests with no skips. See the
 [patch verification ledger](verification/conversation-timeout-patch-2026-10-14.md)
 for exact release provenance and stack acceptance results.
 
-The current conversation gate contains 97 cases, including real ordinary and
+That conversation gate contained 97 cases, including real ordinary and
 interpretation timeouts followed by replica replay/recovery without redispatch.
 Historical evidence below retains the versions and counts actually verified.
 

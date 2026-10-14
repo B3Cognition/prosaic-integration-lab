@@ -13,7 +13,7 @@ records the exact qualified SDKs and release evidence.
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.3/recorder 0.3.0 and Harness 0.8.2/store 0.3.0 with Core 0.4.1.
+0.9.4/recorder 0.3.0 and Harness 0.9.0/store 0.4.0 with Core 0.4.1.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -33,8 +33,8 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.3' 'b3-prosaic-runtime-postgres==0.3.0' \
-  'b3-prosaic-harness==0.8.2' 'b3-prosaic-harness-postgres==0.3.0'
+  'b3-prosaic-runtime==0.9.4' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.9.0' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -108,10 +108,10 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.3 |
+| `b3-prosaic-runtime` | 0.9.4 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
-| `b3-prosaic-harness` | 0.8.2 |
-| `b3-prosaic-harness-postgres` | 0.3.0 |
+| `b3-prosaic-harness` | 0.9.0 |
+| `b3-prosaic-harness-postgres` | 0.4.0 |
 
 Preparation downloads the actual pinned public URLs and verifies the original
 wheel hashes. Installation uses only those five wheels after the locked
@@ -334,12 +334,11 @@ HA/PITR or customer invoices.
 ## Historical release and operations
 
 The optional context assembly demonstration uses local synthetic byte units,
-not a production tokenizer. With the complete context-capable SDK candidate
+not a production tokenizer. With the complete context-capable published SDK
 train installed and audited, run:
 
 ```sh
-python -m lab_runner demo --mode conversation --context-assembly --candidate \
-  --candidate-manifest .cache/context-assembly/manifest.json --postgres-version 16
+python -m lab_runner demo --mode conversation --context-assembly --postgres-version 16
 ```
 
 The comparison includes recent and older preferences, current interaction

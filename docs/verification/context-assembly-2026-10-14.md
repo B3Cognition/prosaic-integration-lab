@@ -163,15 +163,39 @@ counter/endpoint declarations without untracked counter callbacks. Source-only
 Lab CLI qualification uses SDK wheels with no installed consumer. These rulings
 retain their consequences and historic evidence in the execution ledger.
 
-### Promotion remains pending
+### Published SDKs and public consumer adoption
 
-Qualification is complete for synthetic context assembly. User authorization so
-far covers branch pushes, draft PRs and CI; merging and package publication
-remain pending. The active public release manifest still selects Runtime0.9.3,
-Harness0.8.2 and Harness PostgreSQL0.3.0. A production tokenizer is not qualified.
+The user approved merging, publication and Lab adoption. Runtime PR6 and
+Harness PR7 merged with trees identical to the qualified source commits. Tags
+v0.9.4 and v0.9.0 identify those original qualified commits. Publication runs
+[38554227602](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38554227602)
+and [38554238773](https://github.com/B3Cognition/prosaic-harness/actions/runs/38554238773)
+passed the complete platform matrices, promoted the exact candidate bytes,
+verified actual PyPI wheel/sdist downloads and created GitHub releases.
+Their first attempts uploaded successfully but immediate index checks observed
+missing versions during propagation. Failed-job retries passed after independent
+public hash verification; no artifacts were rebuilt or replaced.
 
-Promote only authorized qualified artifacts, verify the actual public hashes,
-archive the previous Lab manifest and rerun public consumer adoption. Retain
-original Core and Runtime PostgreSQL wheel bytes. The development receipts above
-remain historical evidence; the final exact-source receipts qualify synthetic
-context assembly and its SDK/storage implementation, not a production tokenizer.
+The active public manifest selects Core0.4.1, Runtime0.9.4, Runtime
+PostgreSQL0.3.0, Harness0.9.0 and Harness PostgreSQL0.4.0. Its SHA256 is
+`21bef77267379a1613d3bad567f432eda28c6182b5a280478e921d9c5cef9f03`.
+The previous manifest is preserved unchanged in
+[`releases-pre-context-2026-10-14.json`](../../dependencies/releases-pre-context-2026-10-14.json).
+Original Core and Runtime PostgreSQL bytes are retained. All wheel hashes match
+the qualified table above; the public manifest contains no candidate lineage.
+
+Fresh macOS arm64 Python3.12.14 public-index adoption passed ordinary dependency
+resolution, cache-free downloads, installed payload audits, import ownership,
+all three CLIs, dependency consistency and public factory construction. The
+owned temporary environment was removed. An initial clean resolver saw only
+the old Harness PostgreSQL versions during index propagation; the unchanged
+check passed once the new version became visible.
+The fresh Lab source suite passed978 tests with one existing warning (75.64s).
+Released consumer image:
+`sha256:1717e6cc482d088b172c2e6bfce38fb580ca7fb1b7ef494a2caa2a8fdf09ace6`.
+Lab PR16 records the subsequent released-package acceptance and merge evidence.
+
+Earlier development receipts remain historical evidence. This release
+qualifies synthetic context assembly and its SDK/storage implementation.
+No production tokenizer is certified. Existing writer migrations remain
+explicit; no existing live demo or session store was upgraded in place.
