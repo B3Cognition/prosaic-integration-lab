@@ -200,6 +200,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
     try:
         wheel=Path(wheel).resolve();sdist=Path(sdist).resolve();manifest=Path(manifest).resolve()
         data=sdk_manifest(manifest);validate_mode(data,candidate=candidate)
+        from lab_runner.gates import supports_context_assembly
+        context_enabled=supports_context_assembly(data)
         before=manifest_digest(manifest);identity=wheel_identity(wheel)
         wheel_dir=Path(wheel_dir) if wheel_dir else cache_directory(manifest,ROOT/'.cache/wheels')
         selected=verified_wheel_paths(manifest,wheel_dir)
@@ -239,6 +241,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             lines=image.decode().splitlines();image_id=next((line for line in reversed(lines) if line.startswith('sha256:')),None)
             if image_id is None:raise ValueError('source consumer did not return immutable image')
             flags=['--candidate','--candidate-manifest',snapshot] if candidate else []
+            if context_enabled:flags+=['--context-assembly']
             for command in ('demo','test'):
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=None
@@ -253,7 +256,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                     lineage_sha=(hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest()
                                  if lineage is not None else None)
                     validate(receipt,'conversation',postgres_version,candidate=candidate,
-                             manifest_sha=before if candidate else None,lineage_sha=lineage_sha)
+                             manifest_sha=before if candidate else None,lineage_sha=lineage_sha,
+                             context_assembly=context_enabled)
             result['stack_executed']=True
         stage='final_inputs'
         if manifest_digest(manifest)!=before or manifest_digest(snapshot)!=before:raise ValueError('manifest changed')
