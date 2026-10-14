@@ -100,11 +100,78 @@ readable; context-enabled new sessions use version 2. Preserve full source
 history and frozen selections across recovery. Explicit retries require the
 existing effect-risk acknowledgment.
 
-## Remaining release qualification
+## Release qualification and promotion
 
-Review fixes must pass fresh source and installed-wheel checks. Complete the
-existing Python/platform and PostgreSQL 16/18 release lanes using successful
-exact-source artifact receipts; retain original Core and Runtime PostgreSQL
-wheel bytes. Promote only authorized qualified artifacts, verify public hashes,
-archive the previous Lab manifest and rerun public consumer adoption. Until
-then, this evidence supports synthetic development validation only.
+### Qualified exact-source candidates
+
+Runtime qualification
+[38544660074](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38544660074)
+at `5f0a02b923173286debd8c2c01951aba35d84377` passed all nine native platform
+cells, four PostgreSQL cells, dependency floors and the artifact gate. Harness
+qualification
+[38546680530](https://github.com/B3Cognition/prosaic-harness/actions/runs/38546680530)
+at `1db61abf1b648affe1d67a5069f15ce9c9b4c9d3` passed the equivalent full matrix.
+Both explicitly skipped package publication and GitHub release jobs.
+
+Exact-source Lab candidate qualification
+[38548867472](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38548867472)
+at `32665dbb9d966efb257509ccd5fcca0fd61dc5ec` passed all four Linux AMD64/ARM64
+and PostgreSQL16/18 cells. Each cell passed all nine required acceptance modes,
+including 103 conversation/context cases. The ARM PostgreSQL16 cell also
+qualified the extracted source distribution with the context demo and103 cases.
+Baseline compatibility
+[38545575978](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38545575978)
+passed all four cells against the currently published train.
+
+Real curation initially exposed a source-bootstrap import failure that pytest
+had masked. An isolated subprocess regression reproduced it; `32665db` includes
+the source-root bootstrap repair. Related curation/bootstrap/functional tests
+passed26 cases and actual three-run curation then succeeded. No release lineage
+was invented or substituted.
+
+Qualified candidate manifest SHA256:
+`0315cf67102b505d4a6593e76da7fe91e1b39896ea07b5dd306a22dc80c77782`.
+Lineage SHA256:
+`c29db44b88418e053e378018c98b85e74babb99c362c0f7d6e4d855e88755be9`.
+Local consumer image built from those exact qualified wheels:
+`sha256:8d44b544415853614c61b09498f4a8bec8e1079dd49f96a9e76a3695f2257fbb`.
+All five installed payloads were audited; dependency consistency passed.
+
+| Qualified wheel | SHA256 |
+|---|---|
+| Core0.4.1, original bytes | 07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51 |
+| Runtime0.9.4 | f2f88630933217cda791792d3a3341a36485690bbb39b81890a8f22ef2c4bde3 |
+| Runtime PostgreSQL0.3.0, original bytes | 5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca |
+| Harness0.9.0 | 6c9d2c2bcfcb6ac5720547db492d64526074431fa639ec2e030f88b2a633309c |
+| Harness PostgreSQL0.4.0 | 35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a |
+
+Qualified local PostgreSQL16 owner `b5fcc8e476cd4d6f9d187ee873af9730` and
+PostgreSQL18 owner `2fc454ce651c4a04be8ed169c5589924` each passed103 cases,
+zero skips, and verified cleanup (455.21s / 456.20s). Qualified demos owners
+`d54ca0d095f947988ab08a4d30c1254d` and `0156ddaad3454c9587170639f71e7ab4`
+passed with verified cleanup (37.69s / 37.06s). Each captured nine independent
+main-demo calls plus the34-request four-case comparison. Both reports explicitly
+set `productionCounterQualified` to false. Exact qualified clean-wheel native
+execution passed28 tests on both providers; v2 memory/file lifecycle smoke and
+dependency checks passed.
+
+All material independent-review findings are closed. Runtime0.9.4 stays in the
+0.9 series so the original Runtime PostgreSQL0.3.0 dependency bound remains
+valid. File migration is explicit, like PostgreSQL migration, to prevent old
+writers from silently accepting the new contract. Binding admission validates
+counter/endpoint declarations without untracked counter callbacks. Source-only
+Lab CLI qualification uses SDK wheels with no installed consumer. These rulings
+retain their consequences and historic evidence in the execution ledger.
+
+### Promotion remains pending
+
+Qualification is complete for synthetic context assembly. User authorization so
+far covers branch pushes, draft PRs and CI; merging and package publication
+remain pending. The active public release manifest still selects Runtime0.9.3,
+Harness0.8.2 and Harness PostgreSQL0.3.0. A production tokenizer is not qualified.
+
+Promote only authorized qualified artifacts, verify the actual public hashes,
+archive the previous Lab manifest and rerun public consumer adoption. Retain
+original Core and Runtime PostgreSQL wheel bytes. The development receipts above
+remain historical evidence; the final exact-source receipts qualify synthetic
+context assembly and its SDK/storage implementation, not a production tokenizer.
