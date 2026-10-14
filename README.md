@@ -333,6 +333,22 @@ HA/PITR or customer invoices.
 
 ## Historical release and operations
 
+The optional context assembly demonstration uses local synthetic byte units,
+not a production tokenizer. With the complete context-capable SDK candidate
+train installed and audited, run:
+
+```sh
+python -m lab_runner demo --mode conversation --context-assembly --candidate \
+  --candidate-manifest .cache/context-assembly/manifest.json --postgres-version 16
+```
+
+The comparison includes recent and older preferences, current interaction
+authority and historical injection. It reports `lostContext` where removing
+older turns loses useful information. Stored history remains complete; the chat
+UI exposes only counts and omitted ranges. See the
+[context qualification ledger](docs/verification/context-assembly-2026-10-14.md)
+for exact evidence and release limitations.
+
 Lab **0.2.0** and its original SDK family are recorded in the
 [2026-10-09 release ledger](docs/verification/release-train-2026-10-09.md).
 To reproduce that release, use a separate checkout of tag `v0.2.0` and its own

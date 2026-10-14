@@ -6,6 +6,20 @@ import pytest
 from lab_runner.gates import validate,export
 
 
+def test_context_train_requires_context_cases_without_changing_public_baseline():
+    from lab_runner.gates import supports_context_assembly, supports_conversation
+    released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    assert not supports_context_assembly(released)
+    train=copy.deepcopy(released)
+    versions={'b3-prosaic-runtime':'0.9.4','b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
+    for item in train['artifacts']:item['version']=versions.get(item['distribution'],item['version'])
+    assert supports_conversation(train) and supports_context_assembly(train)
+    item=receipt();item.update(mode='conversation',test_count=97)
+    with pytest.raises(ValueError):validate(item,'conversation',16,context_assembly=True)
+    item.update(context_assembly=True,test_count=103)
+    validate(item,'conversation',16,context_assembly=True)
+
+
 def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
     from lab_runner.gates import required_modes,supports_conversation
     released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())

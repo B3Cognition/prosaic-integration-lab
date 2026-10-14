@@ -62,9 +62,13 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,conversation=False,baseline_image=None):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,conversation=False,baseline_image=None,context_assembly=False):
         from .workload import identities
         self.identities = identities(users)
+        self.context_assembly=context_assembly
+        if context_assembly:
+            self.identities.extend({'tenant_id':tenant,'actor_id':tenant+'-actor','billing_account_id':tenant+'-payer'}
+                for tenant in ('context-full','context-omit'))
         if engine not in {'docker', 'podman'} or postgres_major not in {16, 18}:
             raise ValueError('unsupported engine/PostgreSQL major')
         self.engine, self.major = engine, postgres_major
@@ -273,9 +277,10 @@ class OwnedStack:
             container_config['native']=native_configuration('effects-'+self.owner)
         if self.conversation_fixture:
             from .conversation_scenarios import conversation_configuration
-            container_config['conversation']=conversation_configuration('chat-'+self.owner)
+            container_config['conversation']=conversation_configuration('chat-'+self.owner,context_assembly=self.context_assembly)
             container_config['conversation']['dsn']=f'host=database port=5432 dbname=lab user=conversation_runtime password={credentials["conversation_runtime"]}'
         host_config = json.loads(json.dumps(container_config))
+        if self.context_assembly:host_config['context_assembly']=True
         if self.conversation_fixture:
             host_config['conversation']['dsn']=f'host=127.0.0.1 port={port} dbname=lab user=conversation_runtime password={credentials["conversation_runtime"]}'
         host_config['dependency_mode']='candidate' if self.candidate else 'released'

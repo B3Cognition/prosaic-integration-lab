@@ -51,12 +51,19 @@ function renderInteraction(){
   $('choices').append(button);
  }
 }
+function renderContext(){
+ const report=session?.contextAssembly;
+ $('context').classList.toggle('hidden',!report);
+ if(!report){$('context').textContent='';return;}
+ $('context').textContent='Synthetic context: '+report.inputTokens+'/'+report.inputCapacityTokens+
+  ' input units · '+report.omittedTurnCount+' earlier turns omitted';
+}
 async function refresh(){
  if(!session)return;
  const id=session.sessionId;
  const current=await api('/conversations/'+id);
  const history=await api('/conversations/'+id+'/history');
- session=current;renderHistory(history.messages||[]);renderInteraction();
+ session=current;renderHistory(history.messages||[]);renderInteraction();renderContext();
  $('session').textContent='Session '+id+' · '+(session.status||'ready');
  try{const usage=await api('/conversations/'+id+'/usage');$('usage').textContent='Conversation: '+(usage.conversation?.total_calls||0)+' calls · Workflow: '+(usage.workflow?.total_calls||0)+' calls';}catch(error){$('usage').textContent='Usage temporarily unavailable';}
  updateControls();
@@ -108,6 +115,7 @@ def response():
 <form id="connect"><input id="token" type="password" autocomplete="off" placeholder="Lab API access token" aria-label="Lab API access token" required><button class="primary">Connect</button></form>
 <div id="messages" role="log" aria-label="Conversation history"><div class="empty"><h2>A conversation, with context.</h2><p>Connect to start chatting. Your token stays in browser memory.</p></div></div>
 <section id="interaction" class="hidden" aria-label="Workflow interaction"><strong id="question"></strong><div id="choices"></div></section>
+<div id="context" class="subtle hidden" role="status" aria-label="Synthetic context assembly"></div>
 <div id="notice" role="status" aria-live="polite"></div>
 <form id="composer"><textarea id="message" placeholder="Message the assistant…" aria-label="Message" maxlength="16384" rows="2"></textarea><button id="send" class="primary" disabled>Send</button></form>
 <footer><div><div id="usage" class="subtle"></div><div id="session" class="subtle"></div></div><div class="actions"><button id="retry-request" class="hidden">Retry same request</button><button id="refresh" disabled>Refresh</button><button id="recover" disabled>Inspect recovery</button></div></footer>

@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from lab_runner.gates import COUNTS,export,validate,required_modes
+from lab_runner.gates import COUNTS,export,validate,required_modes,supports_context_assembly
 from lab_runner.stack import EngineError
 
 def resolve_image(candidate):
@@ -42,10 +42,13 @@ def main():
     lineage_sha=hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest() if lineage is not None else None
     summary = {'passed':True,'postgres_major':args.postgres_version,'lanes':[]}
     released=json.loads((ROOT/'dependencies/releases.json').read_text())
+    selected=json.loads(args.candidate_manifest.read_text()) if args.candidate else released
+    context_enabled=supports_context_assembly(selected)
     for mode in required_modes(candidate=args.candidate,manifest=released):
         command = [sys.executable,'-m','lab_runner','test','--mode',mode,'--postgres-version',str(args.postgres_version),
             '--consumer-image',image_id]
         if args.candidate: command+=['--candidate','--candidate-manifest',str(args.candidate_manifest.resolve())]
+        if mode=='conversation' and context_enabled:command+=['--context-assembly']
         if mode=='legacy-upgrade' and args.baseline_image:command+=['--baseline-image',args.baseline_image]
         item = {}
         try:
@@ -53,7 +56,8 @@ def main():
                 timeout=1200 if mode=='legacy-upgrade' else 900 if mode in {'lago','native','qualification','conversation'} else 300)
             for line in process.stdout.splitlines():
                 if line.startswith('{'): item = json.loads(line)
-            validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha,lineage_sha=lineage_sha)
+            validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha,lineage_sha=lineage_sha,
+                context_assembly=context_enabled)
             if item['images']['consumer'] != image_id: raise ValueError('image changed between gates')
             if process.returncode != 0: raise ValueError('lane process failed')
             passed = True

@@ -2,7 +2,7 @@
 from fastapi import HTTPException
 
 from .conversation_registry import APPLICATION,ConversationRegistry,capacity,reference
-from .views import public_conversation_history,public_usage
+from .views import public_conversation_history,public_usage,public_context_report
 
 
 PHASES=frozenset({'receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'})
@@ -58,6 +58,10 @@ def current_grant(host,principal,version=None):
 
 
 class ConversationExecution:
+    @staticmethod
+    def _public_reply(reply):
+        if 'contextAssembly' not in reply:return reply
+        return {**reply,'contextAssembly':public_context_report(reply['contextAssembly'])}
     def __init__(self,host,*,session_store=None):
         require_conversation_sdk()
         from prosaic_harness_postgres import PostgresSessionStore
@@ -126,11 +130,11 @@ class ConversationExecution:
         # No application transaction/connection remains open across this call.
         snapshot=controller.create(session_id=reservation['session_id'])
         self.registry.adopt_creation(reservation,snapshot.session_id)
-        return controller.status(snapshot.session_id).document
+        return self._public_reply(controller.status(snapshot.session_id).document)
 
     def status_request(self,principal,session_id):
         row=self._owned(principal,session_id)
-        return self._attachment_status(row,self._controller(principal,row).status(session_id).document)
+        return self._public_reply(self._attachment_status(row,self._controller(principal,row).status(session_id).document))
 
     def _workflow_harness(self,row):
         from prosaic_harness import Harness
@@ -180,8 +184,8 @@ class ConversationExecution:
             expected_revision=expected_revision,interaction_ref=interaction_ref,
             on_event=phase_observer(self.host.config,on_event)).document
         if message=='Find players' and reply.get('status')=='completed' and row['binding_version'] in self.workflow_materials:
-            return self.attach_owned_workflow(principal,row,controller,reply)
-        return reply
+            return self._public_reply(self.attach_owned_workflow(principal,row,controller,reply))
+        return self._public_reply(reply)
 
     def attach_owned_workflow(self,principal,row,controller,reply):
         """A host-approved intent; unknown starts never grant a second run call."""
@@ -240,10 +244,10 @@ class ConversationExecution:
         controller=self._controller(principal,row)
         current=controller.status(session_id).document
         projected=self._attachment_status(row,current)
-        if projected!=current:return projected
-        return self._attachment_status(row,controller.recover(session_id).document)
+        if projected!=current:return self._public_reply(projected)
+        return self._public_reply(self._attachment_status(row,controller.recover(session_id).document))
 
     def retry_request(self,principal,session_id,*,expected_revision,acknowledge_effect_risk):
         row=self._owned(principal,session_id)
-        return self._controller(principal,row).retry_interrupted(session_id,
-            expected_revision=expected_revision,acknowledge_effect_risk=acknowledge_effect_risk).document
+        return self._public_reply(self._controller(principal,row).retry_interrupted(session_id,
+            expected_revision=expected_revision,acknowledge_effect_risk=acknowledge_effect_risk).document)
