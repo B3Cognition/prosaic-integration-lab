@@ -73,7 +73,10 @@ def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_
     command=selected['run'].replace('.venv/bin/python',shlex.quote(sys.executable))
     result=subprocess.run(['/bin/bash','-e','-c',command],cwd=root,env=environment,capture_output=True,timeout=15)
     assert result.returncode==0,result.stderr.decode()
-    assert output.read_text()=='enabled=true\n'
+    from lab_runner.gates import supports_context_assembly
+    import json
+    manifest=json.loads((root/'dependencies/releases.json').read_text())
+    assert output.read_text()=='enabled=true\ncontext='+str(supports_context_assembly(manifest)).lower()+'\n'
 
 
 def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):
