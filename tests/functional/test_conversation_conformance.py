@@ -159,7 +159,9 @@ def test_simulated_tool_text_blocks_confirmation_without_effect_or_retry(tmp_pat
     assert not result['passed'] and len(result['cases'])==6
     assert all(row['passed'] for row in result['cases'][:-1])
     assert result['cases'][-1]['purpose']=='confirmation'
-    assert result['cases'][-1]['failure']=={'phase':'evidence','failureCode':'conformanceFailed',
+    # Harness 0.8.2 stops at the unresolved workflow reply before the host's
+    # conformance evidence check when the provider simulates a tool result.
+    assert result['cases'][-1]['failure']=={'phase':'reply','failureCode':'interrupted',
         'exceptionClass':None}
     assert result['cases'][-1]['provider_requests'] is None
     assert result['diagnostic_effects']==0

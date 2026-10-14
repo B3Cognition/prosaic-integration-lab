@@ -12,16 +12,19 @@ records the exact qualified SDKs and release evidence.
 
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
-replies and bounded full history. Lab 0.5.0's candidate passed installed Linux
-AMD64/ARM64 × PostgreSQL 16/18 qualification. Its new SDK train remains
-unpublished; current published pins below do not supply the conversation API.
-See the separate
+replies and bounded full history. The active manifest now uses published Runtime
+0.9.3/recorder 0.3.0 and Harness 0.8.2/store 0.3.0 with Core 0.4.1.
+Lab 0.5.0's earlier candidate passed installed Linux
+AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
-before selecting a candidate.
+for that exact candidate's results; fresh public adoption is recorded in the
+[published SDK adoption ledger](docs/verification/published-conversation-adoption-2026-10-13.md).
+The [timeout patch ledger](docs/verification/conversation-timeout-patch-2026-10-14.md)
+records the latest package update and its additional no-redispatch regressions.
 
 ## Install packages for an embedding service
 
-All five patch packages are published on PyPI. Their actual public downloads
+All five packages are published on PyPI. Their actual public downloads
 match the original qualified wheels and GitHub release assets. Create a fresh
 Python environment or container image and install the coherent five-package
 family:
@@ -30,8 +33,8 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.8.1' 'b3-prosaic-runtime-postgres==0.2.1' \
-  'b3-prosaic-harness==0.7.1' 'b3-prosaic-harness-postgres==0.2.1'
+  'b3-prosaic-runtime==0.9.3' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.8.2' 'b3-prosaic-harness-postgres==0.3.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -54,8 +57,8 @@ owned PostgreSQL and measured synthetic inference.
 ## Try the native workflow
 
 The [Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
-consumes the five published `b3-prosaic`
-patch wheels through the exact-version [active manifest](dependencies/releases.json).
+consumed the five published `b3-prosaic`
+patch wheels preserved in the [Lab 0.4.0 manifest](dependencies/releases-lab-0.4.0.json).
 The patch train contains seven upstream reliability fixes. Use a new environment;
 historical manifests, candidate caches and verification receipts are preserved.
 The [release closure](docs/verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure)
@@ -76,7 +79,8 @@ cells, 864 required cases, zero failures/errors/skips and all 32 lane plus four
 demo cleanups verified. The earlier
 [hardening checkpoint](docs/verification/hardening-2026-10-10.md#native-hardening-closure)
 retains its original candidate source and receipts. The recipe below uses the
-stable released tag and actual verified public SDK downloads. Python imports
+current `main` checkout and actual verified public SDK downloads. Lab 0.5.0
+publication is separate from this SDK adoption. Python imports
 and CLI names remain unchanged.
 
 You need Python 3.12 and a running Docker daemon. Use a fresh environment: legacy and `b3-prosaic`
@@ -84,7 +88,7 @@ distributions share import paths and must not be installed together. Podman is
 accepted by the runner but is not a verified path here.
 
 ```sh
-git clone --branch v0.4.0 https://github.com/B3Cognition/prosaic-integration-lab.git
+git clone --branch main https://github.com/B3Cognition/prosaic-integration-lab.git
 cd prosaic-integration-lab
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
@@ -104,10 +108,10 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.8.1 |
-| `b3-prosaic-runtime-postgres` | 0.2.1 |
-| `b3-prosaic-harness` | 0.7.1 |
-| `b3-prosaic-harness-postgres` | 0.2.1 |
+| `b3-prosaic-runtime` | 0.9.3 |
+| `b3-prosaic-runtime-postgres` | 0.3.0 |
+| `b3-prosaic-harness` | 0.8.2 |
+| `b3-prosaic-harness-postgres` | 0.3.0 |
 
 Preparation downloads the actual pinned public URLs and verifies the original
 wheel hashes. Installation uses only those five wheels after the locked
@@ -128,6 +132,72 @@ records the SDK and Lab release evidence. The earlier documentation-only
 checkpoint `e283752` records the qualified Lab 0.3.0 source `59ea44b`; its tag
 and original assets remain unchanged. The current documentation records the
 separate Lab 0.4.0 source and original builds.
+
+## Try a conversation and an approved workflow
+
+### Converse in the browser
+
+After the fresh installation and released consumer build above, keep an owned
+local chat service running with:
+
+```sh
+.venv-public/bin/python -m lab_runner.chat --live-local --max-calls 32
+```
+
+The launcher opens a simple browser chat backed by the approved local Qwen
+profile in `configs/runtime-local.example.yml` (`local-strong` by default).
+It reads the provider key from that profile's private secret file, uses an owned
+PostgreSQL database and binds service ports to loopback. You can type messages,
+read retained history, start a new conversation and select or approve the
+displayed workflow interaction. The shared provider allowance covers all sessions
+in that launch; exhaustion stops dispatch rather than silently extending it.
+Workflow tools still operate on synthetic Lab players, even with a real model.
+
+Use `--runtime-config /absolute/private/runtime.yml --profile approved-profile`
+to select another approved local Qwen profile. Omit `--live-local` for scripted,
+credential-free fixture responses. The model mode is labeled in the page.
+Press Ctrl+C in the launcher terminal to stop and verify owned-stack cleanup.
+The browser launch code is single-use and expires after ten minutes. API tokens
+stay in browser memory; reloading requires a fresh launch or manual token
+connection. No token is embedded in the page or saved in browser storage.
+The ordinary service also serves the chat shell at `/chat`; its API calls still
+require authentication. **Refresh** only reads current state. **Retry same
+request** replays an uncertain HTTP request with the original message ID/body;
+**Inspect recovery** does not authorize repeating an uncertain effect.
+
+After the installation and released consumer build above, run:
+
+```sh
+.venv-public/bin/python -m lab_runner demo --mode conversation --postgres-version 16
+.venv-public/bin/python -m lab_runner test --mode conversation --postgres-version 18
+```
+
+The demo uses the published packages, two HTTP replicas, durable PostgreSQL
+sessions and synthetic inference. It creates an authenticated conversation,
+remembers a user correction, starts the host-approved player lookup workflow,
+selects the displayed second result and approves its exact current interaction.
+The fixture performs one effect; duplicate approval replays add no model call or
+effect. Conversation and workflow usage are reported separately. The test lane
+also exercises authorization, worker loss, recovery and capacity limits.
+
+Choose the API that matches your application:
+
+- **A small assistant:** use `Conversation` with `MemorySessionStore` for a
+  prototype, `FileSessionStore` for a private single-host service, or
+  `PostgresSessionStore` for replicas. Follow the
+  [public SDK example](docs/conversations.md#build-a-small-assistant).
+- **A generated workflow:** admit a proposal with `WorkflowFactory` and trusted
+  `WorkflowCatalog`/`WorkflowBindings`; then execute the admitted graph. Follow
+  the [construction example](docs/consume-native-workflows.md#construct-a-workflow-in-memory)
+  and the native HTTP demo above.
+- **A conversation that needs approval:** let trusted host code attach an
+  approved workflow and require the displayed `interactionRef` and current
+  revision. Follow the [HTTP contract](docs/conversations.md#authenticated-http-contract).
+
+The host owns identity, grants, endpoints, tools and billing attribution. Clients
+send messages or graph proposals, and receive filtered public replies. Recovery
+does not authorize repeating an uncertain effect. These demos need Docker but no
+real-model credentials; live conformance is a separate opt-in operation.
 
 ### Retained candidate recipe
 
@@ -240,14 +310,15 @@ and runs CLI, `pip check` and public workflow construction checks. Released CI
 requires it. Native transport/SQL fault tests and populated native logical restore
 are described in [release gates](docs/release-gates.md) and
 [qualification](docs/qualification.md). Their new collection contract is 230
-cases per platform/database cell; the Lab 0.3.0 release retains its original
+historical cases per platform/database cell; the Lab 0.3.0 release retains its original
 864-case evidence. Current milestone evidence and remaining limits are in the
 [production readiness ledger](docs/verification/production-readiness-m1-m2-2026-10-11.md).
 The original milestone checks passed all 920 cases on Linux AMD64/ARM64 ×
 PostgreSQL 16/18 at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; the
 ledger retains that source's pinned checkout instructions. Lab 0.4.0 passed its
 own exact-source matrix at `f47328d` as recorded above. Actual local routing passed
-default/balanced Qwen 7B and strong Qwen 27B. SDK release pins remain unchanged.
+default/balanced Qwen 7B and strong Qwen 27B. That milestone retained its SDK pins;
+the active manifest now adopts the published conversation family above.
 The newer conversation candidate has [separate actual local Qwen evidence](docs/verification/local-conversation-2026-10-12.md):
 the complete journey passed with balanced chat/interpretation and explicit strong
 workflow execution. Quoted approval was denied and duplicate approval caused no

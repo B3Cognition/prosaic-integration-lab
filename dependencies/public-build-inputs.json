@@ -81,6 +81,7 @@
     "src/prosaic_integration_lab/bundles.py",
     "src/prosaic_integration_lab/capacity.py",
     "src/prosaic_integration_lab/config.py",
+    "src/prosaic_integration_lab/chat_ui.py",
     "src/prosaic_integration_lab/conversation_execution.py",
     "src/prosaic_integration_lab/conversation_registry.py",
     "src/prosaic_integration_lab/conversation_schema.py",
