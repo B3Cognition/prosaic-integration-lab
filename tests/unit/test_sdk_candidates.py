@@ -9,6 +9,21 @@ import pytest
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
 
 
+def test_retained_dependency_helper_bootstraps_from_source_outside_pytest(tmp_path):
+    import subprocess,sys
+    script=Path(__file__).resolve().parents[2]/'scripts/prepare_sdk_candidates.py'
+    source="""
+import importlib.util,sys
+spec=importlib.util.spec_from_file_location('candidate_probe',sys.argv[1])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+from scripts.prepare_dependencies import prepare
+assert callable(prepare)
+"""
+    result=subprocess.run([sys.executable,'-I','-B','-c',source,str(script)],cwd=tmp_path,
+        capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,result.stderr
+
+
 @pytest.fixture
 def candidate_set(tmp_path,request):
     # Structural fixture for the planned conversation train; these are never qualification receipts.

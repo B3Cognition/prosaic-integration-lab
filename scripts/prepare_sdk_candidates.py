@@ -14,7 +14,7 @@ import sys
 import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'src'))
+sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
 from prosaic_integration_lab.dependencies import cache_directory,file_digest,sdk_manifest,verified_wheel_paths
 
 EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
