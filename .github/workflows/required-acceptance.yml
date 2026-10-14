@@ -9,6 +9,10 @@ on:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
         default: false
+      context_assembly:
+        description: Qualify context SDK candidates and retain the original Runtime PostgreSQL wheel
+        type: boolean
+        default: false
       core_run_id:
         description: Successful exact-source Core Publish SDK run
         type: string
@@ -76,8 +80,11 @@ jobs:
           RUNTIME_SOURCE: ${{ inputs.runtime_source }}
           HARNESS_RUN: ${{ inputs.harness_run_id }}
           HARNESS_SOURCE: ${{ inputs.harness_source }}
+          CONTEXT_ASSEMBLY: ${{ inputs.context_assembly }}
         run: |
-          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json
+          flags=()
+          if [ "$CONTEXT_ASSEMBLY" = "true" ]; then flags+=(--context-assembly); fi
+          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json "${flags[@]}"
           .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python -m pip check
@@ -150,6 +157,9 @@ jobs:
       - name: Run documented conversation demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Run optional context comparison with exact candidate SDKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.context_assembly }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --context-assembly --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
