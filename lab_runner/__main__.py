@@ -61,8 +61,13 @@ def main():
     parser.add_argument('--candidate', action='store_true', help='explicitly use checksummed unpublished SDK candidates')
     parser.add_argument('--consumer-image',help='immutable consumer sha256 image ID; manifest and installed payload still verified')
     parser.add_argument('--candidate-manifest',type=__import__('pathlib').Path,help='explicit complete candidate SDK manifest')
+    parser.add_argument('--context-assembly',action='store_true',help='include required synthetic context assembly evidence')
     parser.add_argument('--baseline-image',help='immutable historical Lab0.2.0 image; otherwise build exact committed baseline')
     args = parser.parse_args()
+    if args.context_assembly and args.mode!='conversation':parser.error('context assembly requires conversation mode')
+    if args.context_assembly:
+        from prosaic_runtime import ProsaicRuntime
+        if 'context_assembly_v1' not in ProsaicRuntime.capabilities:parser.error('installed context assembly capability unavailable')
     if args.candidate_manifest is not None and not args.candidate:
         parser.error('candidate manifest requires --candidate')
     if args.baseline_image is not None and (args.mode!='legacy-upgrade' or
@@ -155,7 +160,8 @@ def main():
     stack = OwnedStack(args.engine, args.postgres_version, users=16 if args.mode=='conversation' else args.users if args.command in {'run','stress'} or operational else 3,
         candidate=args.candidate,identity=args.mode in {'identity','ingress'},billing=args.mode == 'lago',consumer_image=args.consumer_image,
         observability=args.mode in {'audit','observability'},capacity_policy=capacity_policy or None,
-        candidate_manifest=args.candidate_manifest,native=args.mode=='native',conversation=args.mode=='conversation',baseline_image=args.baseline_image)
+        candidate_manifest=args.candidate_manifest,native=args.mode=='native',conversation=args.mode=='conversation',baseline_image=args.baseline_image,
+        **({'context_assembly':True} if args.context_assembly else {}))
     events = workload.Events(stack.directory) if args.command in {'run','stress','qualify'} else None
     if events:
         print(f'Accounting in another terminal: {sys.executable} -m lab_runner watch --directory {stack.directory}', flush=True)
@@ -168,6 +174,7 @@ def main():
     if args.command == 'demo' and args.mode == 'native':
         result['fixture'] = 'native-workflow-demonstration'
     if args.command=='demo' and args.mode=='conversation':result['fixture']='conversation-demonstration'
+    if args.context_assembly:result['context_assembly']=True
     if operational:
         from .qualification import receipt
         result.update(receipt(profile,qualified=False,qualification='not_qualified',fixture_passed=False))
@@ -240,6 +247,7 @@ def main():
             files=['tests/acceptance/test_conversation_journey.py','tests/acceptance/test_conversation_persistence.py',
                 'tests/acceptance/test_conversation_security.py','tests/acceptance/test_conversation_recovery.py',
                 'tests/acceptance/test_conversation_limits.py']
+            if args.context_assembly:files.insert(-1,'tests/acceptance/test_context_assembly.py')
         if args.command=='qualify':
             from .qualification import run
             result.update(run(config,profile,events))
@@ -258,6 +266,9 @@ def main():
             if args.mode=='conversation':
                 from .conversation_demo import capture_conversation
                 report=capture_conversation(config)
+                if args.context_assembly:
+                    from .context_scenarios import capture_context_quality
+                    report['contextQuality']=capture_context_quality(config)
                 report_path=stack.directory/'report/conversation.json'
                 report_path.parent.mkdir(parents=True,exist_ok=True)
                 report_path.write_text(json.dumps(report,indent=2)+'\n')
@@ -312,7 +323,8 @@ def main():
             if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
         from .gates import COUNTS
-        if args.command == 'test' and args.mode in COUNTS and result.get('test_count')!=COUNTS[args.mode]:result['passed']=False
+        from .gates import expected_test_count
+        if args.command == 'test' and args.mode in COUNTS and result.get('test_count')!=expected_test_count(args.mode,args.context_assembly):result['passed']=False
         if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation'} and result['passed']:
             result['qualification'] = 'qualified'
         if args.mode=='legacy-upgrade' and 'historical' in locals():

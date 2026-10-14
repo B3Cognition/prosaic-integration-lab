@@ -3,6 +3,9 @@ import importlib.util
 import io
 from pathlib import Path
 import tarfile
+import json
+import hashlib
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,6 +16,51 @@ def implementation():
     spec=importlib.util.spec_from_file_location('conversation_distribution_smoke',path)
     module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
     return module
+
+
+@pytest.mark.parametrize('complete_context_evidence',[False,True])
+def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monkeypatch,complete_context_evidence):
+    from lab_runner.gates import CONTEXT_TRAIN
+    module=implementation()
+    lineage={'version':1,'candidates':[]}  # structural process-double evidence only
+    data={'artifacts':[{'distribution':name,'version':version} for name,version in CONTEXT_TRAIN.items()],
+        'candidate_lineage':lineage}
+    manifest=tmp_path/'manifest.json';manifest.write_text(json.dumps(data))
+    wheel=tmp_path/'lab.whl';wheel.write_bytes(b'wheel')
+    sdist=tmp_path/'lab.tar.gz';sdist.write_bytes(b'sdist')
+    monkeypatch.setattr(module,'sdk_manifest',lambda path:data)
+    monkeypatch.setattr(module,'verified_wheel_paths',lambda *args:[])
+    monkeypatch.setattr(module,'wheel_identity',lambda path:{'version':'0.5.0'})
+    monkeypatch.setattr(module,'_helper',lambda name:SimpleNamespace(isolated_environment=lambda:{}))
+    monkeypatch.setattr(module,'consume',lambda *args,**kwargs:Path('/fixture/python'))
+    def extract(archive,destination):
+        destination.mkdir()
+        for name in ('configs/conversation-conformance.example.json','docs/conversations.md',
+                     'assets/conversation/agents/assistant.md','scripts/conversation_conformance.py',
+                     'tests/acceptance/test_conversation_journey.py','dependencies/public-build-inputs.json'):
+            path=destination/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_bytes(b'fixture')
+        return destination
+    monkeypatch.setattr(module,'extract_sdist',extract)
+    identifier='sha256:'+'a'*64
+    def process(argv,**kwargs):
+        if 'build' in argv:
+            out=Path(argv[argv.index('--outdir')+1]);(out/'rebuilt.whl').write_bytes(b'rebuilt');return b''
+        if any(str(arg).endswith('build_consumer.py') for arg in argv):return (identifier+'\n').encode()
+        assert '--context-assembly' in argv
+        kind='demo' if 'demo' in argv else 'conversation'
+        receipt={'owner':'a'*32,'mode':kind,'passed':True,'cleanup':'verified','test_returncode':0,
+            'test_count':103 if complete_context_evidence else 97,'skipped':0,'failed_tests':[],
+            'context_assembly':complete_context_evidence,'host_architecture':'arm64','dependency_mode':'candidate',
+            'payload_audit':'verified','candidate_manifest_sha256':hashlib.sha256(manifest.read_bytes()).hexdigest(),
+            'released_manifest_sha256':hashlib.sha256((module.ROOT/'dependencies/releases.json').read_bytes()).hexdigest(),
+            'candidate_lineage_sha256':hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2)+'\n').encode()).hexdigest(),
+            'images':{'consumer':identifier,'postgres':'postgres:16@sha256:'+'b'*64}}
+        if kind=='demo':receipt['fixture']='conversation-demonstration'
+        return json.dumps(receipt).encode()
+    monkeypatch.setattr(module,'run',process)
+    result=module.verify(wheel,sdist,manifest,candidate=True,run_stack=True)
+    assert result['passed'] is complete_context_evidence, json.dumps(result)
+    if not complete_context_evidence:assert result['failure_stage']=='sdist_acceptance', result
 
 
 @pytest.mark.parametrize('name,kind',[('../outside','file'),('project/../outside','file'),

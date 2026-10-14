@@ -56,3 +56,28 @@ def public_conversation_history(session_id,messages,*,max_bytes=4194304+512):
     if len(json.dumps(result,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode('utf-8'))>max_bytes:
         raise ValueError('conversation history limit')
     return result
+
+
+def public_context_report(source):
+    """Allowlisted host fixture metrics, excluding SDK identities and content."""
+    if type(source) is not dict or source.get('mode') not in {'fullHistory','omitOldestTurns'}:
+        raise ValueError('invalid context report')
+    result={'mode':source['mode'],'evidenceKind':'synthetic'}
+    for name in ('inputTokens','inputCapacityTokens','retainedTurnCount','omittedTurnCount'):
+        value=source.get(name)
+        maximum=1_048_576 if name in {'inputTokens','inputCapacityTokens'} else 65536
+        if type(value) is not int or not 0<=value<=maximum:
+            raise ValueError('invalid context report')
+        result[name]=value
+    if result['inputCapacityTokens']==0 or result['inputTokens']>result['inputCapacityTokens']:
+        raise ValueError('invalid context capacity')
+    omitted=source.get('omittedRange')
+    if omitted is None:
+        if result['omittedTurnCount']!=0:raise ValueError('invalid omitted range')
+    elif (type(omitted) is not dict or omitted.keys()!={'startTurn','endTurnExclusive'} or
+            type(omitted['startTurn']) is not int or omitted['startTurn']!=1 or
+            type(omitted['endTurnExclusive']) is not int or
+            omitted['endTurnExclusive']!=result['omittedTurnCount']+1 or result['omittedTurnCount']==0):
+        raise ValueError('invalid omitted range')
+    result['omittedRange']=dict(omitted) if omitted is not None else None
+    return result

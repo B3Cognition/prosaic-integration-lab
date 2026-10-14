@@ -4,19 +4,31 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':95}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
+CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
+    'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
+
+
+def supports_context_assembly(manifest):
+    supports_conversation(manifest)  # validate a complete coherent SDK train
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} == CONTEXT_TRAIN
+
+
+def expected_test_count(mode,context_assembly=False):
+    return COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
 
 
 def supports_conversation(manifest):
     """Staged activation; old released SDKs cannot certify this new capability."""
-    expected={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
-        'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+    expected={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.3','b3-prosaic-runtime-postgres':'0.3.0',
+        'b3-prosaic-harness':'0.8.2','b3-prosaic-harness-postgres':'0.3.0'}
     if not (type(manifest) is dict and type(manifest.get('artifacts')) is list and
         len(manifest['artifacts'])==len(expected) and all(type(item) is dict for item in manifest['artifacts']) and
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
-    if actual==expected:return True
+    previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
+    if actual in (expected,previous,CONTEXT_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -32,6 +44,14 @@ def required_modes(*,candidate,manifest):
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
     'conversation':{
+        'test_context_quality_exposes_lost_history_and_preserves_current_authority':'context_quality',
+        'test_context_report_replays_on_other_replica_without_provider_dispatch[context-full]':'context_replay',
+        'test_context_report_replays_on_other_replica_without_provider_dispatch[context-omit]':'context_replay',
+        'test_full_history_overflow_allocates_no_call_or_accounting_intent':'context_rejection',
+        'test_context_report_and_full_history_remain_owner_scoped':'context_owner',
+        'test_posteffect_context_failure_keeps_sql_journal_and_known_usage':'context_effect',
+        'test_real_provider_timeout_is_durable_across_replica_replay_and_recovery[False]':'provider_timeout',
+        'test_real_provider_timeout_is_durable_across_replica_replay_and_recovery[True]':'provider_timeout',
         'test_owned_conversation_demo_uses_separate_frozen_usage':'conversation_demo',
         'test_offered_selection_survives_fresh_worker_and_quoted_approval_dispatches_no_effect':'interaction',
         'test_failed_user_correction_survives_without_partial_assistant_history':'failed_correction',
@@ -138,12 +158,14 @@ for name,parameters,code in (
      ('oversize','nonfinite','unserializable'),'invalid_effect_result')):
     FAILURE_CASES['native-persistence'].update({name+'['+parameter+']':code for parameter in parameters})
 
-def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None):
+def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None,context_assembly=False):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
+    if context_assembly and mode=='conversation' and item.get('context_assembly') is not True:
+        raise ValueError('required context assembly evidence missing')
     if (mode not in COUNTS or item.get('mode') != mode or
         item.get('passed') is not True or item.get('cleanup') != 'verified' or
         type(item.get('test_returncode')) is not int or item['test_returncode'] != 0 or type(item.get('test_count')) is not int or
-        item['test_count'] != COUNTS[mode] or type(item.get('skipped')) is not int or item['skipped'] != 0 or
+        item['test_count'] != expected_test_count(mode,item.get('context_assembly')) or type(item.get('skipped')) is not int or item['skipped'] != 0 or
         item.get('failed_tests') != [] or 'error' in item or
         item.get('host_architecture') not in {'arm64','aarch64','x86_64','AMD64'}):
         raise ValueError('required acceptance receipt did not pass')
@@ -181,8 +203,9 @@ def export(item):
     if not isinstance(item,dict): item = {}
     result = {'passed':item.get('passed') is True and 'error' not in item and
         item.get('cleanup') == 'verified' and item.get('failed_tests') == [] and item.get('skipped') == 0 and
-        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == COUNTS[item['mode']] and
+        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
+    if item.get('context_assembly') is True:result['context_assembly']=True
     for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
         value = item.get(key)

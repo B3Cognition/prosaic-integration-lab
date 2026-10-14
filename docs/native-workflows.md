@@ -17,8 +17,12 @@ in both consumer images. These endpoints exercise synthetic find, review, check,
 gate, pause and finish; they access no product data or external business service.
 
 This implementation consumes the new public SDK factory/bundle/interaction APIs.
-The public SDKs and current [Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
-use the same verified SDK pins. The released-package Linux AMD64/ARM64 ×
+The active manifest uses Core 0.4.1, Runtime 0.9.3/recorder 0.3.0 and Harness
+0.8.2/store 0.3.0. The [timeout patch ledger](verification/conversation-timeout-patch-2026-10-14.md)
+records the latest adoption. Earlier released-mode use is recorded in the
+[adoption ledger](verification/published-conversation-adoption-2026-10-13.md).
+The historical [Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
+retains its patch pins in `dependencies/releases-lab-0.4.0.json`. Its released-package Linux AMD64/ARM64 ×
 PostgreSQL 16/18 matrix passed at source `f47328d` in
 [run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985),
 with 920 required cases, zero failures/errors/test skips and all 32 lane plus

@@ -5,7 +5,7 @@ from pathlib import Path
 import hashlib
 
 
-def test_active_manifest_selects_only_the_verified_patch_sdk_family():
+def test_active_manifest_selects_only_the_verified_conversation_sdk_family():
     from prosaic_integration_lab.dependencies import sdk_manifest
     manifest = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'
     data = sdk_manifest(manifest)
@@ -13,14 +13,14 @@ def test_active_manifest_selects_only_the_verified_patch_sdk_family():
             for item in data['artifacts']} == {
         ('b3-prosaic', '0.4.1', '6ac6cfdfd47dc70ecf68e441aa004f07c3be3822',
          '07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51'),
-        ('b3-prosaic-runtime', '0.8.1', '3566731c39a3fff2837acd93a96baa2187764206',
-         '3f74da0c7598c9e13f05de6b9080d6f1058bed3e1ca7ba0f960201bd34d3a1ae'),
-        ('b3-prosaic-runtime-postgres', '0.2.1', '3566731c39a3fff2837acd93a96baa2187764206',
-         'f06e6e3d95ad5c182b9b3d5329b6cff0b3e7be997168d2bed59fa37741f32a30'),
-        ('b3-prosaic-harness', '0.7.1', 'cba77d09d1844ff624911295aecd58021b457c08',
-         '7cb170ad52f9170221360f2d0eac868c667d9e531dd39236db0bf46987c18db2'),
-        ('b3-prosaic-harness-postgres', '0.2.1', 'cba77d09d1844ff624911295aecd58021b457c08',
-         'e7dfcdd04ab1105be99ed8cc26e569d3b39d962046c6dbd3d885e641f75f1008'),
+        ('b3-prosaic-runtime', '0.9.4', '5f0a02b923173286debd8c2c01951aba35d84377',
+         'f2f88630933217cda791792d3a3341a36485690bbb39b81890a8f22ef2c4bde3'),
+        ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
+         '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
+        ('b3-prosaic-harness', '0.9.0', '1db61abf1b648affe1d67a5069f15ce9c9b4c9d3',
+         '6c9d2c2bcfcb6ac5720547db492d64526074431fa639ec2e030f88b2a633309c'),
+        ('b3-prosaic-harness-postgres', '0.4.0', '1db61abf1b648affe1d67a5069f15ce9c9b4c9d3',
+         '35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a'),
     }
 
 

@@ -124,8 +124,11 @@ image/manifest/source digests; the private fixture stays under its owned directo
 An unavailable engine records `not_qualified`; host checks alone prove neither
 PostgreSQL behavior nor either required Linux architecture.
 
-The active release manifest now pins published Core 0.4.1, Runtime 0.8.1/recorder
-0.2.1 and Harness 0.7.1/store 0.2.1 under the `b3-prosaic` distribution family.
+The active release manifest now pins published Core 0.4.1, Runtime 0.9.0/recorder
+0.3.0 and Harness 0.8.0/store 0.3.0 under the `b3-prosaic` distribution family.
+The former patch family is preserved in `dependencies/releases-lab-0.4.0.json`.
+The conversation lane is now required in released mode; fresh adoption results
+are recorded in the [2026-10-13 ledger](verification/published-conversation-adoption-2026-10-13.md).
 Actual PyPI and GitHub downloads match the original qualified bytes, including
 the seven reliability fixes. The original 0.6 baseline is preserved in
 `dependencies/releases-baseline-0.6.json`; previous failing receipts remain

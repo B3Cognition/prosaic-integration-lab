@@ -6,6 +6,21 @@ import pytest
 from lab_runner.gates import validate,export
 
 
+def test_context_train_requires_context_cases_and_preserves_archived_baseline():
+    from lab_runner.gates import supports_context_assembly, supports_conversation
+    root=Path(__file__).resolve().parents[2]
+    baseline=root/'dependencies/releases-pre-context-2026-10-14.json'
+    assert hashlib.sha256(baseline.read_bytes()).hexdigest() == '87862e1d37fd2f2cc1b8c6cd9965289887b0c056b26e81781dad4929a70a36c6'
+    released=json.loads(baseline.read_text())
+    assert not supports_context_assembly(released)
+    train=json.loads((root/'dependencies/releases.json').read_text())
+    assert supports_conversation(train) and supports_context_assembly(train)
+    item=receipt();item.update(mode='conversation',test_count=97)
+    with pytest.raises(ValueError):validate(item,'conversation',16,context_assembly=True)
+    item.update(context_assembly=True,test_count=103)
+    validate(item,'conversation',16,context_assembly=True)
+
+
 def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
     from lab_runner.gates import required_modes,supports_conversation
     released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
@@ -27,7 +42,7 @@ def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
 
 def test_conversation_is_required_and_cannot_reuse_legacy_test_counts():
     from lab_runner.gates import COUNTS
-    assert COUNTS['conversation']==95
+    assert COUNTS['conversation']==97
     item=receipt();item.update(mode='conversation',test_count=COUNTS['conversation'],dependency_mode='candidate',
         candidate_manifest_sha256='3'*64,candidate_lineage_sha256='4'*64)
     validate(item,'conversation',16,candidate=True,manifest_sha='3'*64,lineage_sha='4'*64)

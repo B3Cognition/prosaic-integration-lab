@@ -99,6 +99,11 @@ def create_app():
     app.add_middleware(HttpGuard,authenticator=authenticator,**config.get('http_bounds',{}))
     app.add_middleware(Observability,metrics=metrics,operator_token=config.get('metrics_token'))
 
+    @app.get('/chat')
+    def chat_page():
+        from .chat_ui import response
+        return response()
+
     def principal(request: Request):
         return request.state.principal
 

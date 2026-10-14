@@ -117,7 +117,12 @@ def test_public_approval_phase_failure_retains_real_journal_and_never_resumes(ch
     assert run.state['status']==('completed' if effects else 'waiting')
     for _ in range(2):
         result=chat.client.post('/conversations/'+session['sessionId']+'/recover',json={},headers=HEADERS)
-        assert result.status_code==200 and result.json()['recoveryStatus']=='needsResolution'
+        assert result.status_code==200
+        recovered = result.json()
+        # A saved matching decision can now be reconciled after return without
+        # resuming the workflow; a merely prepared command remains uncertain.
+        assert recovered['status'] == ('completed' if effects else 'needsResolution')
+        assert recovered['recoveryStatus'] == (None if effects else 'needsResolution')
         assert stats(chat)==before and chat.host.store.load_run(session['sessionId']).revision==run.revision
         with sqlite3.connect(chat.effects_path) as connection:assert connection.execute('SELECT * FROM effects').fetchall()==domain
         with sqlite3.connect(chat.journal_path) as connection:assert connection.execute('SELECT * FROM tool_operations').fetchall()==journal

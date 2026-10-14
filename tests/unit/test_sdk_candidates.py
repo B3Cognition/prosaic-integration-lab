@@ -9,13 +9,31 @@ import pytest
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
 
 
+def test_retained_dependency_helper_bootstraps_from_source_outside_pytest(tmp_path):
+    import subprocess,sys
+    script=Path(__file__).resolve().parents[2]/'scripts/prepare_sdk_candidates.py'
+    source="""
+import importlib.util,sys
+spec=importlib.util.spec_from_file_location('candidate_probe',sys.argv[1])
+module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+from scripts.prepare_dependencies import prepare
+assert callable(prepare)
+"""
+    result=subprocess.run([sys.executable,'-I','-B','-c',source,str(script)],cwd=tmp_path,
+        capture_output=True,text=True,timeout=15)
+    assert result.returncode==0,result.stderr
+
+
 @pytest.fixture
-def candidate_set(tmp_path):
+def candidate_set(tmp_path,request):
     # Structural fixture for the planned conversation train; these are never qualification receipts.
     expected_versions={
         'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
         'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0'},
         'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}}
+    if getattr(request,'param',None)=='context':
+        expected_versions['B3Cognition/prosaic-runtime']['b3-prosaic-runtime']='0.9.4'
+        expected_versions['B3Cognition/prosaic-harness']={'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
     candidates=[]
     for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
@@ -38,6 +56,30 @@ def candidate_set(tmp_path):
             candidate.update(upstream_receipt=upstream,upstream_sha256=hashlib.sha256(serialized(upstream)).hexdigest())
         candidates.append(candidate)
     return [tmp_path/str(index) for index in range(3)],candidates
+
+
+@pytest.mark.parametrize('candidate_set',['context'],indirect=True)
+@pytest.mark.parametrize('corrupt',[False,True])
+def test_context_train_keeps_original_adapter_bytes(candidate_set,tmp_path,monkeypatch,corrupt):
+    import scripts.prepare_sdk_candidates as cli
+    directories,candidates=candidate_set
+    original=tmp_path/'original.whl';original.write_bytes(b'original published adapter')
+    retained={'distribution':'b3-prosaic-runtime-postgres','version':'0.3.0',
+        'filename':'b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl',
+        'sha256':hashlib.sha256(original.read_bytes()).hexdigest(),'source_commit':'a'*40}
+    monkeypatch.setattr(cli,'retained_runtime_postgres',lambda cache:(retained,original))
+    if corrupt:original.write_bytes(b'changed original')
+    arguments=[(c['repository'],c['run_id'],c['source_commit'],d) for c,d in zip(candidates,directories)]
+    manifest=tmp_path/'context.json'
+    if corrupt:
+        with pytest.raises(ValueError,match='bytes differ'):cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        assert not manifest.exists()
+    else:
+        data=cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        assert next(a for a in data['artifacts'] if a['distribution']==retained['distribution'])==retained
+        assert data['candidate_lineage']['retained_artifacts']==[retained]
+        from prosaic_integration_lab.dependencies import cache_directory
+        assert (cache_directory(manifest,tmp_path/'cache')/retained['filename']).read_bytes()==original.read_bytes()
 
 
 def test_candidates_curate_only_exact_five_verified_wheels(candidate_set,tmp_path):

@@ -9,6 +9,10 @@ on:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
         default: false
+      context_assembly:
+        description: Qualify context SDK candidates and retain the original Runtime PostgreSQL wheel
+        type: boolean
+        default: false
       core_run_id:
         description: Successful exact-source Core Publish SDK run
         type: string
@@ -76,8 +80,11 @@ jobs:
           RUNTIME_SOURCE: ${{ inputs.runtime_source }}
           HARNESS_RUN: ${{ inputs.harness_run_id }}
           HARNESS_SOURCE: ${{ inputs.harness_source }}
+          CONTEXT_ASSEMBLY: ${{ inputs.context_assembly }}
         run: |
-          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json
+          flags=()
+          if [ "$CONTEXT_ASSEMBLY" = "true" ]; then flags+=(--context-assembly); fi
+          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json "${flags[@]}"
           .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python -m pip check
@@ -88,16 +95,19 @@ jobs:
         env:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
-          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
       - name: Unit and functional regressions
-        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' }}
+        if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q
+      - name: Current conversation train without context capability
+        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' && steps.conversation-sdk.outputs.context != 'true' }}
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
-        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Qualify released Lab wheel and exact source distribution consumers
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:
@@ -150,6 +160,9 @@ jobs:
       - name: Run documented conversation demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Run optional context comparison with exact candidate SDKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.context_assembly }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --context-assembly --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
