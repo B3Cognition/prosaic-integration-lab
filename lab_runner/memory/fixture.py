@@ -9,7 +9,7 @@ import threading
 @contextmanager
 def fixture_provider(cases,scenario='correct'):
     from prosaic_runtime import EndpointConfig,RuntimeConfig
-    if scenario not in {'correct','wrong','missing_usage','invalid_json','repair_fact_ids','repair_source','repair_absence','public_summary'}:raise ValueError('invalid memory fixture')
+    if scenario not in {'correct','wrong','missing_usage','invalid_json','repair_fact_ids','repair_source','repair_absence','public_summary','repair_arguments'}:raise ValueError('invalid memory fixture')
     by_id={c['caseId']:c for c in cases}
     class Provider:
         requests=0
@@ -40,6 +40,7 @@ def fixture_provider(cases,scenario='correct'):
                             latest[row['factId']]=row
                     ids=[r['recordId'] for r in latest.values()][:4]
                 else:ids=case['requiredRecords']
+                if scenario=='repair_arguments' and not retry:ids=['unlisted-record']
                 if scenario=='repair_source' and not retry:
                     ids=[k for k,v in case['records'].items() if v['authority']=='observer'][:4]
                 message=dict(role='assistant',content=None,tool_calls=[dict(id='memory-lookup',type='function',

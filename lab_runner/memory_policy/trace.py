@@ -33,7 +33,14 @@ class TraceRecorder(MemoryRecorder):
         with self._lock:self._proposals=decode(encode(rows));self._save()
 
     def event(self,event):
-        with self._lock:self._events.append(decode(encode(event)));self._save()
+        event=decode(encode(event))
+        if 'tool_outcome' in event:
+            from prosaic_runtime import ToolOutcome
+            raw=event.pop('tool_outcome')
+            try:outcome=ToolOutcome.from_dict(raw).to_dict()
+            except (ValueError,TypeError):outcome=None
+            if outcome is not None:event['tool_outcome']=outcome
+        with self._lock:self._events.append(event);self._save()
 
     def finish(self,receipts):
         with self._lock:
@@ -45,6 +52,10 @@ class TraceRecorder(MemoryRecorder):
                         reason=result.get('metadata',{}).get('failure_reason') or 'unclassified'))
                 for event in receipt['events']:
                     if event.get('event')=='tool_completed' and event.get('status')!='ok':
-                        self._failures.append(dict(invocationId=receipt['id'],kind='tool',reason='unclassified',
-                            callId=event.get('call_id')))
+                        from prosaic_runtime import ToolOutcome
+                        try:outcome=ToolOutcome.from_dict(event.get('tool_outcome')).to_dict()
+                        except (ValueError,TypeError):outcome=None
+                        self._failures.append(dict(invocationId=receipt['id'],kind='tool',
+                            reason=outcome['code'] if outcome is not None else 'unclassified',
+                            callId=event.get('call_id'),**({'toolOutcome':outcome} if outcome is not None else {})))
             self._save()
