@@ -1,18 +1,20 @@
 {
   "version": 1,
   "implementation": {
-    "fixture.py": "d01f804c8aa1ce496aec648ab7c9358e3710744c4e25243dc472a612a40bf114",
-    "runner.py": "bcaa1b660903d36b53544c6de9c5dac6703568b0d92cc9ae35fd9d82d3d79209",
-    "execution.py": "a0ed81c16c9bcc98b653da28b879ccf336a7206f5a82945c1044592375ad34ec",
+    "fixture.py": "91a03b3af4f231ce954a5ec9d9d7e9186ee54619c76530577437c1a1194ab8c5",
+    "runner.py": "5d42b10b2f55d5e44ec65217f763b0fa9bd9dbadcea10994f2f987cfb06b7de3",
+    "execution.py": "87408ebf26c89672c53ee527bada982156cbae20a03ffaf1d19eef51ae17c733",
     "suite.py": "610c9a5db9855945b23419ac401c1442b75907172fba752acd86137f4bc642cf",
-    "scoring.py": "e48235d7f5b50f7a24887b77776996f8a00ba97e32766c95ae61399be11ca6e9",
+    "scoring.py": "7d74ddb64527414e8f0283941792b0ea785f8c85cf46805d1c106dc8361d098d",
     "__init__.py": "794f5b685779a01185502a545e3a8e951e5784c1185a05f1d26d66e0fde8cbcf",
     "context.py": "d3cd06ab7962c39cb586e9a50400e9ac2d17fb47d4ddba4648dc5f8d5db09c62",
     "contracts.py": "6f358d87edcbadf80d9f9157887851c20cb5d27962881e73dab64ef02e00279e",
-    "freeze.py": "638ab23fccb3248d6ab0fb57f5bf92130ff21f49d96818d6c784a0480a98ca12",
+    "freeze.py": "029c6c39410eabca333a7549c9527df73de3cb375bdd3278366b4e012d47dbcd",
+    "evidence.py": "bb012c4ab8f476cf10b92f055d01ac62283e30c3d3ec8408e9f3cf3800643d60",
     "corpus.py": "828d8ee53f1b2765032663a80162777c5d42a8f87641b4eddb67038f4edce26a",
     "reporting.py": "76c2d1dab66aa590bc9293c297f51d45f38407d3a799bdf60456a66750aafe05",
-    "../retrieval_memory.py": "ebb0e7aa9aac3f6ff55e79dbb8b198889bae09c00ecb8e6a1c006c3d7458e79c"
+    "data/evidence-summary.schema.json": "16d74f90c7628f2365a63b3357a40d26c500cded12e09e385adc80449ec7adb3",
+    "../retrieval_memory.py": "415a01380cea29854063fc744222a266b8de7b1bf2c3f506b9bcbbcfa55080ab"
   },
   "qualityDependencies": {
     "contracts.py": "8016c4967039cc15e59bbeed4085a4e741f1c836208459b79bb32073be22d94b",
@@ -25,6 +27,6 @@
     "data/answer.schema.json": "ac845f7fdc6dc3821afade1f8abb48dea6d6fab388a153f0ded1c4c09c5e0ad7"
   },
   "proseDigest": "d91a90088f5de2b56e5d4cb8e4c19872dd61580cb767ab76c75745294b5cbf16",
-  "corpusDigest": "b1a3bf4eccbb7b7eca5db6d6d17f2bf32291fccd3853d94dab335c84d0f83332",
-  "historicalSourcesDigest": "16de632148c47f08a90184c4904978d2f68336d969d12db046a811f51596c1ff"
+  "corpusDigest": "6e3d85412619290f80e56a728123a50f9f3d26c8886973ed43edcb953919b9a2",
+  "historicalSourcesDigest": "ce778ba8c71090815b92d20f21d1c9f322a3e52902355b5d342db0ed2727a778"
 }

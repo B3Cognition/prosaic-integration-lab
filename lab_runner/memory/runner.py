@@ -13,6 +13,7 @@ from .execution import execute_case,recover_case,freeze,LIMITS,PROSE
 from .suite import load_suite,validate_bundle
 from .reporting import public_result,unknown_result,summarize
 from .contracts import answer_schema
+from .evidence import validate_format,TYPED_GUIDANCE
 
 
 def schedule(bundle,profiles):
@@ -28,25 +29,28 @@ def schedule(bundle,profiles):
     return rows
 
 
-def identity(bundle):
+def identity(bundle,*,evidence_format='raw'):
+    validate_format(evidence_format)
     corpus=Corpus(bundle['corpus'],bundle['historicalSources'])
     sdk=decode(resource('sdk-provenance.json'));installed=provenance()
     qualified={a['distribution']:a['version'] for a in sdk['artifacts']}
     if any(qualified.get(k)!=v for k,v in installed.items()):raise ValueError('unqualified memory SDK')
     source={p.name:p.read_text(encoding='utf-8') for p in files(__package__).iterdir() if p.name.endswith('.py')}
+    source['data/evidence-summary.schema.json']=files(__package__).joinpath('data/evidence-summary.schema.json').read_text(encoding='utf-8')
     quality={n:files('lab_runner.quality').joinpath(n).read_text(encoding='utf-8') for n in
              ('checks.py','execution.py','scoring.py','contracts.py','allowance.py','runner.py','suite.py')}
     return dict(suiteId=bundle['suiteId'],suiteDigest=digest(bundle['cases']),
         corpusDigest=digest({c['caseId']:corpus.tenant_digest(c['tenantId']) for c in bundle['cases']}),
-        implementationDigest=digest(dict(memory=source,quality=quality)),proseDigest=digest(PROSE),
+        implementationDigest=digest(dict(memory=source,quality=quality)),evidenceFormat=evidence_format,
+        proseDigest=digest(PROSE+(TYPED_GUIDANCE if evidence_format=='typed' else '')),
         schemaDigest=digest({c['caseId']:answer_schema(c) for c in bundle['cases']}),policyDigest=digest(LIMITS),
         sdkManifestDigest=sdk['manifestDigest'],sdkVersions=installed)
 
 
-def preflight(bundle=None):
+def preflight(bundle=None,*,evidence_format='raw'):
     bundle=validate_bundle(load_suite() if bundle is None else bundle)
     return summarize(schedule(bundle,[digest('unexecuted-a'),digest('unexecuted-b')]),[],
-                     identity=identity(bundle),origin='unexecuted')
+                     identity=identity(bundle,evidence_format=evidence_format),origin='unexecuted')
 
 
 def live_settings(path):
@@ -71,11 +75,11 @@ def live_settings(path):
     return data,config,allowance
 
 
-def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario='correct',recover_only=False):
+def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario='correct',recover_only=False,evidence_format='raw'):
     if fixture==(live_config is not None):raise ValueError('select explicit memory execution mode')
     if not fixture and fixture_scenario!='correct':raise ValueError('fixture scenario in live mode')
     bundle=validate_bundle(load_suite() if bundle is None else bundle);out=private_directory(output)
-    corpus=Corpus(bundle['corpus'],bundle['historicalSources']);ident=identity(bundle)
+    corpus=Corpus(bundle['corpus'],bundle['historicalSources']);ident=identity(bundle,evidence_format=evidence_format)
     aliases=['fixture-a','fixture-b'];config=None
     if fixture:
         profiles=[digest('memory-'+name) for name in aliases]
@@ -106,7 +110,7 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                     config=RuntimeConfig.load(out/'fixture-runtime.yml')
                 if config is None:return None
                 recovered=recover_case(case,corpus=corpus,arm=row['arm'],config=config,profile=profile,
-                    output=out,sample_id=sample,limits=LIMITS)
+                    output=out,sample_id=sample,limits=LIMITS,evidence_format=evidence_format)
                 if recovered is None:return None
                 if fixture:
                     if not observation_path.exists():return None
@@ -128,7 +132,7 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                     for key in observed:
                         integer(independent[key],0,LIMITS[key]);observed[key]+=independent[key]
                 if preparation_path.exists():
-                    freeze(case,corpus,row['arm'],preparation_path)
+                    freeze(case,corpus,row['arm'],preparation_path,evidence_format=evidence_format)
                     preparation=decode(preparation_path.read_bytes())
                 return unknown_result(row,case,preparation,available)
             if path.exists():
@@ -167,7 +171,7 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                     before=provider.requests if provider is not None else None
                     try:
                         e=execute_case(case,corpus=corpus,arm=row['arm'],config=config,profile=profile,
-                                       output=out,sample_id=sample,limits=LIMITS)
+                                       output=out,sample_id=sample,limits=LIMITS,evidence_format=evidence_format)
                     finally:
                         if fixture:
                             journal_path=out/(sample+'-journal.json')

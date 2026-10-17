@@ -7,6 +7,7 @@ from .execution import PROSE
 
 def development_manifest(corpus,historical_sources):
     source={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in files(__package__).iterdir() if p.name.endswith('.py')}
+    source['data/evidence-summary.schema.json']=hashlib.sha256(files(__package__).joinpath('data/evidence-summary.schema.json').read_bytes()).hexdigest()
     source['../retrieval_memory.py']=hashlib.sha256(files('lab_runner').joinpath('retrieval_memory.py').read_bytes()).hexdigest()
     common={name:hashlib.sha256(files('lab_runner.quality').joinpath(name).read_bytes()).hexdigest()
         for name in ('contracts.py','checks.py','execution.py','scoring.py','allowance.py','runner.py','suite.py','data/answer.schema.json')}

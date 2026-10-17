@@ -10,6 +10,7 @@ from lab_runner.quality.execution import extract
 from lab_runner.quality.suite import resource
 from .context import prepare,current_index,current_sources
 from .contracts import answer_schema,SOURCE_RULE,ABSENCE_RULE,feedback
+from .evidence import summarize_lookup,validate_format,admit_complete_index,TYPED_GUIDANCE
 
 LIMITS=dict(providerRequests=4,toolCalls=2,reportedTokens=8192,timeoutSeconds=600)
 PROSE='''Review the current public task using current authoritative source records.
@@ -35,35 +36,42 @@ fact rule regardless of the available values; report only available verified fac
 
 
 def code_digest():
-    names=('corpus.py','context.py','contracts.py','execution.py')
+    names=('corpus.py','context.py','contracts.py','execution.py','evidence.py','data/evidence-summary.schema.json')
     return digest(dict(memory={n:files(__package__).joinpath(n).read_text(encoding='utf-8') for n in names},
         checks=files('lab_runner.quality').joinpath('checks.py').read_text(encoding='utf-8')))
 
 
-def freeze(case,corpus,arm,path):
+def freeze(case,corpus,arm,path,*,evidence_format='raw'):
+    validate_format(evidence_format)
     if arm not in {'enabled','disabled'}:raise ValueError('invalid memory arm')
     scope=digest(dict(tenantId=case['tenantId'],arm=arm,asOf=case['asOf'],entity=case['entity'],
         topics=case['topics'],caseId=case['caseId'],task=case['task'],recordIndex=case['recordIndex'],
-        currentSources=case['records'],corpus=corpus.tenant_digest(case['tenantId']),code=code_digest()))
+        currentSources=case['records'],corpus=corpus.tenant_digest(case['tenantId']),code=code_digest(),evidenceFormat=evidence_format))
     if path.exists():
         frozen=decode(path.read_bytes())
         if frozen['scopeDigest']!=scope or frozen['preparedDigest']!=digest(frozen['prepared']):
             raise ValueError('memory context drift')
         return frozen['prepared']
     began=time.monotonic();prepared=prepare(case,corpus,arm)
+    if evidence_format=='typed':
+        prepared['evidenceFormat']='typed'
+        prepared['binding']=digest(dict(tenantId=case['tenantId'],arm=arm,request=prepared['request'],
+            retrieval=prepared['retrieval'],evidenceFormat='typed'))
     private_write(path,dict(scopeDigest=scope,prepared=prepared,preparedDigest=digest(prepared),
         retrievalSeconds=time.monotonic()-began,hostQueries=int(arm=='enabled')))
     return prepared
 
 
-def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_only=False):
+def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_only=False,evidence_format='raw'):
     from prosaic_harness import WorkflowFactory,WorkflowCatalog,WorkflowBindings,WorkflowPolicy,Validator
     from prosaic_runtime import CustomTool,ProsaicArtifact,ProsaicRuntime,RuntimeAdapter,Result
     identifier(sample_id);output=private_directory(output)
     if profile not in config.profiles or limits!=LIMITS:raise ValueError('invalid memory execution policy')
     parse_task(case['task'])
     current_index(case['recordIndex']);snapshot=current_sources(case['records'])
-    prepared=freeze(case,corpus,arm,output/(sample_id+'-prepared.json'))
+    validate_format(evidence_format)
+    if evidence_format=='typed':admit_complete_index(case['recordIndex'],snapshot)
+    prepared=freeze(case,corpus,arm,output/(sample_id+'-prepared.json'),evidence_format=evidence_format)
     request=prepared['request']
     config=replace(config,default_profile=profile,routes={'memory':profile},
                    allowed_tools=frozenset({'lookup_records'}),tool_directories=())
@@ -76,17 +84,20 @@ def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_
         if event.get('event')=='completed' and attempt in began:events.timings[attempt]=time.monotonic()-began[attempt]
         if event.get('event')=='tool_started':active[attempt]=event['call_id']
     events.timings={}
+    tool_version='lookup-summary-v1' if evidence_format=='typed' else 'lookup-v1'
     def lookup(arguments,context):
         rows=[deepcopy(snapshot[key]) for key in arguments['recordIds']]
+        response=summarize_lookup(request,rows) if evidence_format=='typed' else rows
         journal.append(dict(sampleId=sample_id,invocationId=context.scope.invocation_id,
             callIndex=context.call_index,callId=active.get(context.scope.invocation_id),
-            signature=digest(dict(tool_name='lookup_records',tool_version='lookup-v1',arguments=arguments)),
-            toolVersion='lookup-v1',recordIds=arguments['recordIds'],recordsSha256=digest(rows),status='ok'))
+            signature=digest(dict(tool_name='lookup_records',tool_version=tool_version,arguments=arguments)),
+            toolVersion=tool_version,recordIds=arguments['recordIds'],recordsSha256=digest(rows),status='ok',
+            **(dict(resultSha256=digest(response),resultBytes=len(encode(response))) if evidence_format=='typed' else {})))
         private_write(journal_path,journal)
-        return rows
+        return response
     schema=dict(type='object',properties={'recordIds':dict(type='array',minItems=1,maxItems=4,
         uniqueItems=True,items={'enum':sorted(snapshot)})},required=['recordIds'],additionalProperties=False)
-    tool=CustomTool('lookup_records','Read current sources by recordId. '+SOURCE_RULE,schema,lookup,'lookup-v1',
+    tool=CustomTool('lookup_records','Read current sources by recordId. '+SOURCE_RULE,schema,lookup,tool_version,
                     with_context=True,max_argument_bytes=1024,max_result_bytes=8192)
     def validate(answer,context):
         invocation=current.get('id',journal[-1]['invocationId'] if journal else None)
@@ -106,7 +117,7 @@ def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_
     schema_answer=answer_schema(case)
     artifact=ProsaicArtifact('memory-reviewer','subagent',dict(name='memory-reviewer',
         description='Review current evidence with untrusted recalled hints',model_tier='memory',tools=['lookup_records']),
-        PROSE+'\nOutput JSON schema:\n'+encode(schema_answer).decode('utf-8'))
+        PROSE+(TYPED_GUIDANCE if evidence_format=='typed' else '')+'\nOutput JSON schema:\n'+encode(schema_answer).decode('utf-8'))
     definition=dict(version=1,start='answer',limits=dict(max_calls=2,max_visits=2,timeout_s=600,
         max_tokens=8192,max_run_s=600),steps=dict(answer=dict(kind='agent',agent='reviewer',schema='answer',
         tools=['lookup_records'],require_tools=['lookup_records'],validators=['current'],max_attempts=2,next='done'),done=dict(kind='finish')))
@@ -143,10 +154,10 @@ def _evidence(case,sample_id,h,journal,events,prepared,output,elapsed,recovered=
     return e
 
 
-def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS):
+def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw'):
     from prosaic_harness import Harness,FileRunStore
     workflow,journal,events,prepared=materials(case,corpus=corpus,arm=arm,config=config,profile=profile,
-        output=output,sample_id=sample_id,limits=limits)
+        output=output,sample_id=sample_id,limits=limits,evidence_format=evidence_format)
     store=FileRunStore(output/'store',namespace='retrieval-memory');store.initialize()
     h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events)
     began=time.monotonic()
@@ -156,12 +167,12 @@ def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS
     finally:store.close()
 
 
-def recover_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS):
+def recover_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw'):
     """Adopt receipts through Harness; any new Runtime invocation is denied."""
     from prosaic_harness import Harness,FileRunStore,RunNotFound
     if not (output/(sample_id+'-prepared.json')).exists():return None
     workflow,journal,events,prepared=materials(case,corpus=corpus,arm=arm,config=config,profile=profile,
-        output=output,sample_id=sample_id,limits=limits,recovery_only=True)
+        output=output,sample_id=sample_id,limits=limits,recovery_only=True,evidence_format=evidence_format)
     store=FileRunStore(output/'store',namespace='retrieval-memory');store.initialize()
     try:
         h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events)

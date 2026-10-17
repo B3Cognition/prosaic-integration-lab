@@ -22,6 +22,28 @@ def test_preflight_never_opens_network_or_constructs_runtime(monkeypatch):
     assert report['scheduledSamples']==8 and report['baselineComplete'] is False
 
 
+def test_format_changes_only_declared_format_and_prose_identity():
+    from lab_runner.memory.runner import identity
+    raw=identity(bundle());typed=identity(bundle(),evidence_format='typed')
+    assert raw['evidenceFormat']=='raw' and typed['evidenceFormat']=='typed'
+    assert raw['proseDigest']!=typed['proseDigest']
+    assert {k:v for k,v in raw.items() if k not in {'evidenceFormat','proseDigest'}}=={
+        k:v for k,v in typed.items() if k not in {'evidenceFormat','proseDigest'}}
+
+
+def test_typed_fixture_consumes_public_summary_and_replays_without_network(tmp_path,monkeypatch):
+    import lab_runner.memory.runner as runner
+    data=bundle()
+    report=runner.execute(output=tmp_path,bundle=data,fixture=True,evidence_format='typed',fixture_scenario='public_summary')
+    assert report['baselineComplete'] and report['taskSuccess']['passed']==8
+    before={p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    def forbidden(*a,**kw):raise AssertionError('network during replay')
+    monkeypatch.setattr(socket,'socket',forbidden)
+    assert runner.execute(output=tmp_path,bundle=data,fixture=True,evidence_format='typed',recover_only=True)==report
+    assert before=={p:p.read_bytes() for p in tmp_path.rglob('*') if p.is_file()}
+    with pytest.raises(ValueError):runner.execute(output=tmp_path,bundle=data,fixture=True,evidence_format='raw')
+
+
 def test_paired_schedule_alternates_order_per_case_without_changing_profiles():
     from lab_runner.memory.runner import schedule
     rows=schedule(bundle(),[digest('a'),digest('b')])

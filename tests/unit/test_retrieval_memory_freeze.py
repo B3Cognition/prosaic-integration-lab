@@ -28,3 +28,14 @@ def test_packaged_historical_corpus_is_admitted_before_evaluation_freeze():
     ids=[e['episodeId'] for e in r['episodes']]
     assert 'orchid-prior' in ids and 'orchid-future' not in ids
     assert not any('FOREIGN-TENANT-SECRET' in e['note'] for e in r['episodes'])
+
+
+def test_new_history_preserves_released_evidence_byte_values():
+    from importlib.resources import files
+    from lab_runner.quality.contracts import decode
+    root=files('lab_runner.memory').joinpath('data')
+    episodes=decode(root.joinpath('corpus.json').read_bytes())['episodes']
+    sources=decode(root.joinpath('historical-sources.json').read_bytes())['sources']
+    assert digest(episodes[:26])=='4f7a2b0b9d0431bc3a0a07536226e8699c7e6f1656138a6bb34d2651f22cfcc6'
+    assert digest(sources[:48])=='51c3eb27fb69ee393b16b08137b136d4fcdd5c666a9185dd348ec68c639ca24d'
+    assert len(episodes)==38 and len(sources)==72

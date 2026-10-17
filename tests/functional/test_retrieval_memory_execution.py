@@ -132,3 +132,44 @@ def test_direct_native_boundary_rejects_private_annotations_before_any_request(t
         with pytest.raises(ValueError):execute_case(case,corpus=corpus,arm='enabled',config=p.config,profile='fixture',
             output=tmp_path,sample_id='canary',limits=LIMITS)
         assert p.requests==0
+
+
+def test_typed_lookup_receipts_bind_actual_summary_and_recover_without_dispatch(tmp_path):
+    from lab_runner.memory.execution import execute_case,recover_case
+    from lab_runner.memory.scoring import score_case
+    from lab_runner.memory.evidence import summarize_lookup
+    from lab_runner.quality.contracts import digest,encode
+    from lab_runner.quality.fixture import fixture_provider
+    case,corpus,_,_=development()
+    with fixture_provider() as p:
+        kw=dict(corpus=corpus,arm='enabled',config=p.config,profile='fixture',
+                output=tmp_path,sample_id='typed',evidence_format='typed')
+        evidence=execute_case(case,**kw)
+        assert evidence['completed'] and score_case(case,evidence)['state']=='passed'
+        row=evidence['journal'][0]
+        response=summarize_lookup(evidence['prepared']['request'],[case['records'][key] for key in row['recordIds']])
+        assert row['toolVersion']=='lookup-summary-v1'
+        assert row['resultSha256']==digest(response) and row['resultBytes']==len(encode(response))
+        delivered=json.loads(next(m['content'] for m in p.payloads[1]['messages'] if m['role']=='tool'))
+        assert delivered==dict(status='ok',result=response)
+        before=p.requests
+        assert recover_case(case,**kw)['prepared']==evidence['prepared']
+        assert p.requests==before
+        with pytest.raises(ValueError):execute_case(case,**(kw|dict(evidence_format='raw')))
+        assert p.requests==before
+    for target in ('resultSha256','resultBytes','toolVersion'):
+        forged=deepcopy(evidence);forged['journal'][0][target]='forged'
+        assert 'invalidEvidence' in score_case(case,forged)['reasons']
+
+
+@pytest.mark.parametrize('change',['omitted','metadata'])
+def test_typed_mode_rejects_incomplete_or_mismatched_source_index_before_dispatch(tmp_path,change):
+    from lab_runner.memory.execution import execute_case
+    from lab_runner.quality.fixture import fixture_provider
+    case,corpus,_,_=development()
+    if change=='omitted':case['recordIndex'].pop()
+    else:case['recordIndex'][0]['revision']+=1
+    with fixture_provider() as p:
+        with pytest.raises(ValueError):execute_case(case,corpus=corpus,arm='enabled',config=p.config,
+            profile='fixture',output=tmp_path,sample_id='incomplete',evidence_format='typed')
+        assert p.requests==0

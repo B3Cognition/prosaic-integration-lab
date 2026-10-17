@@ -33,9 +33,9 @@
 
 **Interfaces:** `build_summary(*, authority, required_facts, record_index, records, index_complete)` returns bounded JSON; `summarize_lookup(request, records)` is the rollout public-grammar adapter.
 
-- [ ] Write tests for absent/unread/verified, authority-before-revision, stale/observer retention, arbitrary renamed labels/three required facts, empty complete index, deterministic order, duplicate/tie/mismatch/nonfinite/partial-index rejection, no decisions/private data, schema validation.
-- [ ] Run focused tests and observe missing-module RED; implement the pure contract and schema; run GREEN.
-- [ ] Record checks and commit only Task1 files.
+- [x] Write tests for absent/unread/verified, authority-before-revision, stale/observer retention, arbitrary renamed labels/three required facts, empty complete index, deterministic order, duplicate/tie/mismatch/nonfinite/partial-index rejection, no decisions/private data, schema validation.
+- [x] Run focused tests and observe missing-module RED; implement the pure contract and schema; run GREEN.
+- [x] Record checks and commit only Task1 files.
 
 ### Task 2: Native integration, provenance and recovery
 
@@ -43,10 +43,10 @@
 
 **Interfaces:** `evidence_format='raw'|'typed'` flows through preflight/execute/freeze/materials/execute_case/recover_case and identity. `--typed-evidence` opts in. Typed journal/result hashes and tool version are independently reconstructed by scoring.
 
-- [ ] Add failing tests for typed native wire/schema, mode-bound identity, raw compatibility, summary tamper rejection, cross-format recovery blocked before dispatch, receipt-only replay and wrong-decision rejection.
-- [ ] Implement minimal plumbing with unchanged raw default and limits; retain current public decision validation.
-- [ ] Add a scripted provider scenario that consumes/validates the actual public summary, rather than using private expected answers for its reply.
-- [ ] Run focused memory/CLI/recovery suites, then full suite; commit the independently tested change.
+- [x] Add failing tests for typed native wire/schema, mode-bound identity, raw compatibility, summary tamper rejection, cross-format recovery blocked before dispatch, receipt-only replay and wrong-decision rejection.
+- [x] Implement minimal plumbing with unchanged raw default and limits; retain current public decision validation.
+- [x] Add a scripted provider scenario that consumes/validates the actual public summary, rather than using private expected answers for its reply.
+- [x] Run focused memory/CLI/recovery suites, then full suite; commit the independently tested change.
 
 ### Task 3: Freeze and qualify fresh factorial study
 
