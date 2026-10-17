@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "runtimeConfig": "runtime-local.yml",
+  "profiles": ["local", "local-strong"],
+  "allowanceFile": "/absolute/private/quality/allowance.json",
+  "limits": {"providerRequests": 480, "toolCalls": 240, "reportedTokens": 983040, "maxSamples": 60, "timeoutSeconds": 1800},
+  "caseLimits": {"providerRequests": 8, "toolCalls": 4, "reportedTokens": 16384, "timeoutSeconds": 30}
+}

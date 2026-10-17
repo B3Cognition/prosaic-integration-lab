@@ -167,3 +167,12 @@ def test_workflow_failure_codes_only_match_fixed_owned_cases(mode,names,codes):
     safe=export(item)
     assert safe['failed_cases']==codes and safe['passed'] is False
     assert 'PRIVATE' not in json.dumps(safe)
+
+
+def test_native_tool_release_preserves_required_context_acceptance():
+    from lab_runner.gates import CONTEXT_TRAIN, supports_conversation, supports_context_assembly
+    versions = {**CONTEXT_TRAIN, 'b3-prosaic-runtime': '0.9.6'}
+    manifest = {'artifacts': [{'distribution': name, 'version': value}
+                              for name, value in versions.items()]}
+    assert supports_conversation(manifest)
+    assert supports_context_assembly(manifest)

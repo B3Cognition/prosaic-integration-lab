@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "implementation": {
+    "fixture.py": "d01f804c8aa1ce496aec648ab7c9358e3710744c4e25243dc472a612a40bf114",
+    "runner.py": "bcaa1b660903d36b53544c6de9c5dac6703568b0d92cc9ae35fd9d82d3d79209",
+    "execution.py": "a0ed81c16c9bcc98b653da28b879ccf336a7206f5a82945c1044592375ad34ec",
+    "suite.py": "610c9a5db9855945b23419ac401c1442b75907172fba752acd86137f4bc642cf",
+    "scoring.py": "e48235d7f5b50f7a24887b77776996f8a00ba97e32766c95ae61399be11ca6e9",
+    "__init__.py": "794f5b685779a01185502a545e3a8e951e5784c1185a05f1d26d66e0fde8cbcf",
+    "context.py": "d3cd06ab7962c39cb586e9a50400e9ac2d17fb47d4ddba4648dc5f8d5db09c62",
+    "contracts.py": "6f358d87edcbadf80d9f9157887851c20cb5d27962881e73dab64ef02e00279e",
+    "freeze.py": "638ab23fccb3248d6ab0fb57f5bf92130ff21f49d96818d6c784a0480a98ca12",
+    "corpus.py": "828d8ee53f1b2765032663a80162777c5d42a8f87641b4eddb67038f4edce26a",
+    "reporting.py": "76c2d1dab66aa590bc9293c297f51d45f38407d3a799bdf60456a66750aafe05",
+    "../retrieval_memory.py": "ebb0e7aa9aac3f6ff55e79dbb8b198889bae09c00ecb8e6a1c006c3d7458e79c"
+  },
+  "qualityDependencies": {
+    "contracts.py": "8016c4967039cc15e59bbeed4085a4e741f1c836208459b79bb32073be22d94b",
+    "checks.py": "d2b07910d0bc92ff3d79f526251851faff89c662c0638e7b08282884a9535c84",
+    "execution.py": "f6af0dbd9b99adf7aed469d3e2ff2d02a607afaf6a3e29c7c0e19c879f8e55cd",
+    "scoring.py": "08df607887f18c16866ededc7d4cd89db762174a0089ff760c7ef2d8faaee45d",
+    "allowance.py": "1540a513b88c10ac119fb74cd81a1ae4afca19665b3d8c89af5ce68028960706",
+    "runner.py": "2190c11191cdf4f4709471b478e0e7d59530583094cbd13ac6eb88cf3275bc33",
+    "suite.py": "31695d93e0c1dc9a1d605c3d99749d5bf87bbce2dae2cd6a5e5555163c1a1ccd",
+    "data/answer.schema.json": "ac845f7fdc6dc3821afade1f8abb48dea6d6fab388a153f0ded1c4c09c5e0ad7"
+  },
+  "proseDigest": "d91a90088f5de2b56e5d4cb8e4c19872dd61580cb767ab76c75745294b5cbf16",
+  "corpusDigest": "b1a3bf4eccbb7b7eca5db6d6d17f2bf32291fccd3853d94dab335c84d0f83332",
+  "historicalSourcesDigest": "16de632148c47f08a90184c4904978d2f68336d969d12db046a811f51596c1ff"
+}

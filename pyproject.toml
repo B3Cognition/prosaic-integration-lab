@@ -16,6 +16,10 @@ test = ["pytest", "build"]
 where = ["src", "."]
 include = ["prosaic_integration_lab*", "lab_runner*"]
 
+[tool.setuptools.package-data]
+"lab_runner.quality" = ["data/*.json", "data/*.md"]
+"lab_runner.memory" = ["data/*.json"]
+
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
 pythonpath = ["src", ".", "tests/unit", "tests/acceptance"]

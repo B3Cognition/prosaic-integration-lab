@@ -5,6 +5,7 @@ include configs/README.md
 include configs/qualification.synthetic.json
 include configs/native.example.json
 include configs/conversation-conformance.example.json
+include configs/agent-quality.example.json configs/runtime-local-native-candidate.example.yml
 include configs/alerts.example.yml configs/auth0.example.json configs/oidc.example.json configs/runtime-local.example.yml
 include containers/Dockerfile containers/Candidate.Dockerfile
 recursive-include dependencies *.json *.lock

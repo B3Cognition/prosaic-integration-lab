@@ -10,10 +10,16 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
+For Lab 0.5.0 packages and final verification, use the
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0).
+The experimental [agent-quality](docs/agent-quality.md) and
+[retrieval-memory](docs/retrieval-memory.md) examples have separate capability
+claims and retained model-study evidence.
+
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.4/recorder 0.3.0 and Harness 0.9.0/store 0.4.0 with Core 0.4.1.
+0.9.6/recorder 0.3.0 and Harness 0.9.0/store 0.4.0 with Core 0.4.1.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -33,7 +39,7 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.4' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-runtime==0.9.6' 'b3-prosaic-runtime-postgres==0.3.0' \
   'b3-prosaic-harness==0.9.0' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
@@ -108,7 +114,7 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.4 |
+| `b3-prosaic-runtime` | 0.9.6 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
 | `b3-prosaic-harness` | 0.9.0 |
 | `b3-prosaic-harness-postgres` | 0.4.0 |
@@ -371,3 +377,9 @@ Implementation context lives in [AGENTS.md](AGENTS.md), the
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Experimental agent quality and retrieval memory
+
+See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval-memory.md) for opt-in local evaluation commands. These consumer examples use public SDK APIs and retain bounded live allowances, immutable evidence and offline replay.
+
+The [fresh memory comparison](docs/verification/memory-grounding-live-2026-10-17.md) found a one-case smaller-model gain, no larger-model gain, increased token costs and unresolved smaller-model missing-evidence failures. Memory remains experimental and disabled unless explicitly selected.

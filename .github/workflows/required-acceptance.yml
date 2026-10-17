@@ -163,6 +163,16 @@ jobs:
       - name: Run optional context comparison with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.context_assembly }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --context-assembly --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Retain qualified Lab release bytes
+        if: ${{ success() && !inputs.candidate && matrix.runner == 'ubuntu-24.04-arm' && matrix.postgres == 16 }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lab-release-bytes
+          path: |
+            dist/prosaic_integration_lab-0.5.0-py3-none-any.whl
+            dist/prosaic_integration_lab-0.5.0.tar.gz
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

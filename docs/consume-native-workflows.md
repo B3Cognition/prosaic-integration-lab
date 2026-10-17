@@ -10,11 +10,11 @@ the five verified public SDK wheels, builds a clean consumer and
 exercises the actual HTTP service with synthetic inference and owned PostgreSQL.
 The active [release manifest](../dependencies/releases.json) pins actual public
 download URLs, exact versions, original wheel hashes and qualified source
-commits. It selects Core 0.4.1, Runtime 0.9.3/recorder 0.3.0 and Harness
-0.8.2/store 0.3.0, whose PyPI bytes match the qualified originals. The same
+commits. The 0.5.0 release train selects Core 0.4.1, Runtime 0.9.6/recorder 0.3.0 and Harness
+0.9.0/store 0.4.0. The same
 family also supplies the [conversation API](conversations.md).
-Use a fresh `.venv-public` environment. The current
-[Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
+Use a fresh `.venv-public` environment. The historical
+[earlier Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
 is at source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`, qualified by
 [run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985):
 920 required cases across four Linux/database cells, zero failures/errors/test
