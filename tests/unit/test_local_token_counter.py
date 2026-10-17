@@ -94,6 +94,12 @@ def test_unqualified_schema_vocabulary_is_closed():
     with pytest.raises(ValueError):counter().count_tokens(native)
 
 
+def test_structured_enum_data_is_outside_schema_normalization_domain():
+    native=request();native['tools']=[dict(type='function',function=dict(name='echo',description='Echo',
+        parameters=dict(type='object',properties={'x':dict(enum=[{'properties':{'x':{'type':'string'}}}])})))]
+    with pytest.raises(ValueError):counter().count_tokens(native)
+
+
 def test_registration_binds_source_libraries_assets_and_framing(monkeypatch,tmp_path):
     import lab_runner.quality.local_token_counter as module
     monkeypatch.setattr(module,'load_local_counter',lambda *a,**kw:counter())
@@ -108,3 +114,40 @@ def test_registration_binds_source_libraries_assets_and_framing(monkeypatch,tmp_
     assert a.descriptor.identity!=b.descriptor.identity
     assert a.descriptor.implementation_version.startswith('local-hf-v1-')
     assert 'qualification' in a.descriptor.guarantee
+
+
+def test_qualified_native_constraints_and_conditional_suffix_are_bound():
+    from lab_runner.quality.local_token_counter import LocalChatCounter
+    tokenizer=Tokenizer();variants=[dict(templateKwargs={},schemaDescriptions=False),
+        dict(templateKwargs={},schemaDescriptions=False,whenExtension='response_format',systemSuffix='Only valid JSON.')]
+    c=LocalChatCounter(tokenizer,model='synthetic',variants=variants,
+        extensions={'response_format':{'type':'json_object'},'structured_outputs':{'regex':'literal'}})
+    native=request();c.count_tokens(native)
+    assert len(tokenizer.seen)==1
+    tokenizer.seen.clear();native['response_format']={'type':'json_object'};before=deepcopy(native)
+    c.count_tokens(native)
+    assert len(tokenizer.seen)==2 and native==before
+    assert tokenizer.seen[1][0][0]==dict(role='system',content='Only valid JSON.')
+    native['response_format']={'type':'json_schema'}
+    with pytest.raises(ValueError):c.count_tokens(native)
+
+
+def test_extension_declarations_cannot_admit_media_or_unconditional_hidden_input():
+    from lab_runner.quality.local_token_counter import LocalChatCounter
+    with pytest.raises(ValueError):LocalChatCounter(Tokenizer(),model='synthetic',
+        variants=[dict(templateKwargs={},schemaDescriptions=False)],extensions={'images':[]})
+    with pytest.raises(ValueError):LocalChatCounter(Tokenizer(),model='synthetic',
+        variants=[dict(templateKwargs={},schemaDescriptions=False,systemSuffix='unbound')])
+
+
+def test_trailing_tool_finalization_system_requires_explicit_system_framing():
+    from lab_runner.quality.local_token_counter import LocalChatCounter
+    tokenizer=Tokenizer();native=request()
+    native['messages'] += [dict(role='assistant',content='lookup'),dict(role='tool',content='data',tool_call_id='c'),
+                           dict(role='system',content='Now finalize.')]
+    with pytest.raises(ValueError):counter().count_tokens(native)
+    variants=[dict(templateKwargs={},schemaDescriptions=False,systemHandling=mode) for mode in ('verbatim','consolidate')]
+    LocalChatCounter(tokenizer,model='synthetic',variants=variants).count_tokens(native)
+    assert tokenizer.seen[0][0][-1]['role']=='system'
+    assert tokenizer.seen[1][0][0]==dict(role='system',content='Now finalize.')
+    assert [m['role'] for m in tokenizer.seen[1][0]]==['system','user','assistant','tool']

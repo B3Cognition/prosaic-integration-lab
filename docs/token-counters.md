@@ -22,7 +22,7 @@ from lab_runner.quality.local_token_counter import register_local_counter
 registration = register_local_counter(
     frozen_assets_directory, assets=filename_to_sha256,
     model=approved_profile.model, variants=qualified_framing_variants,
-    capacity=approved_context_capacity,
+    capacity=approved_context_capacity, extensions=qualified_native_constraints,
 )
 ```
 
@@ -30,6 +30,18 @@ Explicit framing variants select template keywords and canonical schema
 descriptions. Their maximum is counted; numerical padding is never learned from
 model results. Public descriptors bind source, library versions, asset hashes
 and variants. Hosts freeze serving settings separately and invalidate on drift.
+
+Native JSON/grammar constraints are rejected by default. A host may freeze exact
+`response_format` / `structured_outputs` values as extensions and include a
+conditional `systemSuffix` framing variant for a known instruction fallback.
+These fields alter counting only: no constraint, suffix or setting is sent or
+changed by the counter. Changed constraint values fail admission.
+
+Runtime's trailing system note after a tool needs explicit `systemHandling`:
+`verbatim` preserves placement; `consolidate` joins system text at the beginning.
+Take the maximum of qualified modes that the frozen template supports. Other
+nonleading-system placements remain outside this counter's domain. No input
+message is changed on the wire by these counting variants.
 
 Qualification compares development requests against independent serving-library
 framing, then compares a bounded live sample with per-request provider usage.

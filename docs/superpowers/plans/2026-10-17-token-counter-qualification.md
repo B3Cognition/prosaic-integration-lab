@@ -68,3 +68,17 @@ one real reasoning reconstruction undercount; regression reproduced it before
 rejecting that unsupported field. Both real tokenizer assets reject it. The 102
 independent development framing checks matched exactly (zero underestimates).
 No inference requests have been made yet. Runtime/Core/Harness remain unchanged.
+
+Ruling: the first installed live-qualification admission rejected the original
+smaller profile's JSON constraint before any HTTP request (known actual 0/0/0,
+ledger preserved). Extend generic declarative framing with exact hash-bound
+response/grammar constraints and conditional system-suffix variants. Preserve
+all original profile settings. Candidate v2 is requalified offline with the
+actual approved native features before a new live qualification ledger is used.
+
+Final framing review verified the reasoning fix and explicit constraint/system
+variants, with no remaining blocking findings. 24 focused tests pass. The expanded
+independent witness covers 102 approved-feature requests and 129 base/JSON-fallback
+counts, with zero underestimates and margins0..20 tokens. Both local loads and
+counts pass with socket creation denied. Strict templates use a declared system
+consolidation variant; other templates count the maximum of supported modes.

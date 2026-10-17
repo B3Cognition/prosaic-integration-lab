@@ -22,7 +22,10 @@ def _admit_schema(value):
     if type(value) is bool:return
     if type(value) is not dict or set(value)-SCHEMA_KEYS:raise ValueError('unqualified schema vocabulary')
     for key,child in value.items():
-        if key=='properties':
+        if key=='enum':
+            if type(child) is not list or any(type(v) not in (str,int,float,bool,type(None)) for v in child):
+                raise ValueError('only scalar enum values are qualified')
+        elif key=='properties':
             if type(child) is not dict:raise ValueError('invalid schema properties')
             for schema in child.values():_admit_schema(schema)
         elif key in {'items','additionalProperties'}:_admit_schema(child)
@@ -64,27 +67,39 @@ def _schema(value):
 
 
 class LocalChatCounter:
-    def __init__(self,tokenizer,*,model,variants,asset_check=None):
+    def __init__(self,tokenizer,*,model,variants,asset_check=None,extensions=None):
         variants=decode(encode(variants,65536),65536)
-        if type(model) is not str or not model or type(variants) is not list or not 1<=len(variants)<=8:
+        extensions=decode(encode({} if extensions is None else extensions,16384),16384)
+        if type(extensions) is not dict or set(extensions)-{'response_format','structured_outputs'}:
+            raise ValueError('unqualified native constraints')
+        if type(model) is not str or not model or type(variants) is not list or not 1<=len(variants)<=32:
             raise ValueError('invalid counter framing')
         for variant in variants:
-            if (type(variant) is not dict or set(variant)!={'templateKwargs','schemaDescriptions'} or
+            if (type(variant) is not dict or not {'templateKwargs','schemaDescriptions'}<=set(variant)<=
+                    {'templateKwargs','schemaDescriptions','whenExtension','systemSuffix','systemHandling'} or
                     type(variant['schemaDescriptions']) is not bool or type(variant['templateKwargs']) is not dict or
                     set(variant['templateKwargs'])-{'enable_thinking','preserve_thinking','reasoning_effort'}):
                 raise ValueError('invalid counter framing')
+            if variant.get('systemHandling','leadingOnly') not in {'leadingOnly','verbatim','consolidate'}:
+                raise ValueError('unsupported system framing')
+            if ('systemSuffix' in variant or 'whenExtension' in variant):
+                if (variant.get('whenExtension') not in extensions or type(variant.get('systemSuffix')) is not str or
+                        not 0<len(variant['systemSuffix'].encode())<=4096):raise ValueError('unbound input framing')
             for key,value in variant['templateKwargs'].items():
                 if key=='reasoning_effort':
                     if type(value) is not str or len(value)>32:raise ValueError('invalid reasoning framing')
                 elif type(value) is not bool:raise ValueError('invalid thinking framing')
         self._tokenizer,self._model,self._variants=tokenizer,model,variants
         self._asset_check=asset_check
+        self._extensions=extensions
 
     def count_tokens(self,request):
         try:
             native=decode(encode(request,196608),196608)
-            if type(native) is not dict or set(native)-REQUEST_KEYS or native.get('model')!=self._model:
+            if type(native) is not dict or set(native)-REQUEST_KEYS-set(self._extensions) or native.get('model')!=self._model:
                 raise ValueError('unsupported native request')
+            if any(native[key]!=value for key,value in self._extensions.items() if key in native):
+                raise ValueError('native constraint drift')
             messages=native.get('messages')
             if type(messages) is not list or not 1<=len(messages)<=256:raise ValueError('unsupported messages')
             previous=None
@@ -92,7 +107,9 @@ class LocalChatCounter:
                 if (type(message) is not dict or set(message)-MESSAGE_KEYS or
                         message.get('role') not in {'system','user','assistant','tool'}):raise ValueError('unsupported message')
                 role=message['role']
-                if (role=='system' and index!=0) or (role==previous and role!='tool'):
+                trailing_system=(role=='system' and index==len(messages)-1 and previous=='tool' and any(
+                    v.get('systemHandling','leadingOnly')!='leadingOnly' for v in self._variants))
+                if (role=='system' and index!=0 and not trailing_system) or (role==previous and role!='tool'):
                     raise ValueError('unqualified role consolidation')
                 previous=role
                 content=message.get('content')
@@ -128,12 +145,24 @@ class LocalChatCounter:
             if self._asset_check is not None:self._asset_check()
             totals=[]
             for variant in self._variants:
+                if variant.get('whenExtension') not in native and 'whenExtension' in variant:continue
+                handling=variant.get('systemHandling','leadingOnly')
+                if handling=='leadingOnly' and any(m['role']=='system' for m in messages[1:]):continue
                 framed_tools=deepcopy(tools)
                 if framed_tools and variant['schemaDescriptions']:
                     for tool in framed_tools:tool['function']['parameters']=_descriptions(tool['function']['parameters'])
                 kwargs=dict(tokenize=False,add_generation_prompt=True,**variant['templateKwargs'])
                 if framed_tools:kwargs['tools']=framed_tools
-                rendered=self._tokenizer.apply_chat_template(deepcopy(messages),**kwargs)
+                framed_messages=deepcopy(messages)
+                if handling=='consolidate':
+                    parts=[m['content'] for m in framed_messages if m['role']=='system' and m['content']]
+                    if parts:framed_messages=[dict(role='system',content='\n\n'.join(parts))]+[
+                        m for m in framed_messages if m['role']!='system']
+                if 'systemSuffix' in variant:
+                    suffix=variant['systemSuffix']
+                    if framed_messages[0]['role']=='system':framed_messages[0]['content']+='\n\n'+suffix
+                    else:framed_messages.insert(0,dict(role='system',content=suffix))
+                rendered=self._tokenizer.apply_chat_template(framed_messages,**kwargs)
                 if type(rendered) is not str:raise ValueError('unsupported template output')
                 totals.append(len(self._tokenizer.encode(rendered,add_special_tokens=True)))
             if self._asset_check is not None:self._asset_check()
@@ -142,7 +171,7 @@ class LocalChatCounter:
             raise ValueError('local token counter cannot admit request') from None
 
 
-def load_local_counter(directory,*,assets,model,variants):
+def load_local_counter(directory,*,assets,model,variants,extensions=None):
     """Load tokenizer data only; caller constructs the public SDK registration."""
     verify_assets(directory,assets)
     if not {'tokenizer.json','tokenizer_config.json'}<=set(assets):raise ValueError('missing tokenizer assets')
@@ -151,17 +180,17 @@ def load_local_counter(directory,*,assets,model,variants):
     if any(version(name)!=expected for name,expected in LIBRARIES.items()):raise ValueError('unqualified tokenizer libraries')
     from transformers import AutoTokenizer
     tokenizer=AutoTokenizer.from_pretrained(str(directory),local_files_only=True,trust_remote_code=False)
-    return LocalChatCounter(tokenizer,model=model,variants=variants,
+    return LocalChatCounter(tokenizer,model=model,variants=variants,extensions=extensions,
         asset_check=lambda:verify_assets(directory,assets))
 
 
-def register_local_counter(directory,*,assets,model,variants,capacity):
+def register_local_counter(directory,*,assets,model,variants,capacity,extensions=None):
     """Bind public SDK provenance; serving qualification is a host responsibility."""
     from prosaic_runtime import TokenCounterDescriptor,TokenCounterRegistration
-    counter=load_local_counter(directory,assets=assets,model=model,variants=variants)
+    counter=load_local_counter(directory,assets=assets,model=model,variants=variants,extensions=extensions)
     implementation=digest(dict(sourceSha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),libraries=LIBRARIES))
     tokenizer_digest=digest(assets)
-    framing_digest=digest(dict(assets=assets,variants=variants,implementation=implementation))
+    framing_digest=digest(dict(assets=assets,variants=variants,extensions=extensions or {},implementation=implementation))
     descriptor=TokenCounterDescriptor(identity='local-hf-'+digest(dict(model=model,framing=framing_digest)),
         provider='openai-compatible',model=model,framing_revision='openai-chat-v1',
         context_capacity_tokens=integer(capacity,1),implementation_version='local-hf-v1-'+implementation,
