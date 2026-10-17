@@ -40,6 +40,7 @@ def validate_plan(plan):
     if version==2 and plan['dispatchPolicy']!='shared-execution-budget-v1':
         raise ValueError('invalid continuation policy')
     if type(plan['admitted']) is not bool:raise ValueError('invalid admission state')
+    for key in ('requiredTokens','availableTokens'):integer(plan[key])
     expected=make_plan(counter_descriptor=plan['counterDescriptor'],quote_identity=plan['quoteIdentity'],
         request_sha256=plan['requestSha256'],input_bounds=plan['inputBounds'],max_requests=plan['maxRequests'],
         output_tokens=plan['outputTokens'],token_ceiling=plan['tokenCeiling'],

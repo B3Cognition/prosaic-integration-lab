@@ -64,6 +64,17 @@ def test_malformed_v2_plan_is_rejected(change):
     with pytest.raises(ValueError):validate_plan(p)
 
 
+@pytest.mark.parametrize('version',[1,2])
+@pytest.mark.parametrize('field',['requiredTokens','availableTokens'])
+def test_derived_planning_totals_reject_equivalent_floats(version,field):
+    from lab_runner.memory_policy.budget import validate_plan
+    p=plan()
+    if version==1:
+        p['version']=1;p.pop('dispatchPolicy')
+    p[field]=float(p[field])
+    with pytest.raises(ValueError):validate_plan(p)
+
+
 def test_v2_requires_its_policy_and_cannot_be_silently_downgraded():
     from lab_runner.memory_policy.budget import validate_plan
     p=plan();del p['dispatchPolicy']
