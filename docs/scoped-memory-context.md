@@ -67,8 +67,11 @@ are `unclassified`. Traces are local qualification evidence, not billing records
 or invoices. Recovery preserves their bytes and never reconstructs the guard.
 Treat these files as sensitive and retain them with workflow receipts.
 
-Qualification establishes these host contracts with synthetic providers. A fresh
-held-out live comparison is still required to measure efficacy and refusal rates
-for both models. The previous live comparison is preserved and is not reused as
-a new test set. Production distributed memory, write governance and broader
-multi-agent/operational milestones remain separate work.
+Qualification establishes these host contracts with synthetic providers. The
+[fresh 24-sample live comparison](verification/scoped-memory-live-2026-10-17.md)
+completed under unchanged limits: smaller-model task success fell from 4/6 to
+2/6 with memory enabled; the larger model passed 5/6 in both arms but received
+no recall under the full-trajectory budget. Memory remains experimental. All
+earlier comparisons are preserved and were not reused as the new test set.
+Portable tool-outcome evidence and bounded recovery are the recommended next
+milestone; distributed memory and write governance remain separate work.

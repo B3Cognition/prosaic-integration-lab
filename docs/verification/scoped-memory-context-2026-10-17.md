@@ -126,3 +126,8 @@ selection quality, admitted/refused continuations, task success, repairs and
 actual/unknown usage separately. Do not tune on or relabel the previous held-out
 set. Broader multi-agent or distributed-memory milestones should follow this
 measurement rather than assume that narrower recall improves answers.
+
+The subsequent maintainer-authorized evaluation is now complete. Read the
+[fresh 24-sample live result](scoped-memory-live-2026-10-17.md) for actual outcomes,
+updated charged usage and next-milestone readiness. The allowances and proposed
+schedule above retain this offline checkpoint's original state.
