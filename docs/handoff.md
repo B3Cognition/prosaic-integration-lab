@@ -1,5 +1,24 @@
 # Codex handoff
 
+## SDK releases and experimental continuation budgeting complete — 2026-10-17
+
+Runtime0.9.7 and Harness0.9.4 are merged and publicly released, with downloaded
+bytes matching their exact-source qualification receipts. Core/adapters unchanged.
+Lab0.5.1+continuation.1 remains an unreleased local experimental candidate.
+Its explicit manifest pins the new public SDKs; the active release manifest and
+historic candidates/evidence remain unchanged. Opt-in version2 uses quotation for
+context planning and public Runtime shared-budget admission for actual native
+continuations; version1 stays default and current caps are unchanged.
+
+Read the [release/qualification ledger](verification/continuation-budgeting-2026-10-17.md)
+and [usage contract](continuation-budgeting.md). Full Lab1329passed; final focused35;
+installed and network-none Linux ARM6414both-wire scenarios plus10legacy replay
+scenarios per platform. Independent review: no blockers, one derived-count type
+validation minor deferred. No new live inference. Charge1442/588/1731251 versus
+ceilings1475/604/1976623, seven old unknown reservations retained;34ledger and
+428prior evidence hashes preserved. Next: frozen held-out validation that fits
+remaining33requests/16tools/245372tokens. Memory efficacy remains unproven.
+
 ## Fresh balanced memory comparison complete — 2026-10-17
 
 All12 fresh held-out samples settled with known usage under unchanged limits.

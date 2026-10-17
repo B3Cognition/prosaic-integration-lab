@@ -1,6 +1,6 @@
 # Continuation Budgeting Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Admit affordable variable native continuations without quotation-slot artifacts, preserving every current hard limit.
 
@@ -33,11 +33,11 @@
 
 **Interfaces:** Add strict `continuation_budget=False` to make_plan, assemble_context and ScopedContext. True creates plan version 2 with `dispatchPolicy='shared-execution-budget-v1'`; false emits identical v1 structure. Guard v2 enforces `min(contextCapacityTokens, tokenCeiling)-outputTokens` rather than inputBounds[index]. Preserve full quotation in plan and log quotedInputBound for v2 only. Trace reason `withinContext` means counted, not dispatched. Context identity binds opt-in policy; v1 omits it.
 
-- [ ] Write regressions for v2 variable counts above slot, arm-independent domain admission, strict version/policy validation, mandatory rejection, context/output limits and unchanged v1 behavior.
-- [ ] Run focused unit tests; expect new assertions fail before implementation.
-- [ ] Implement versioned plan, guard and context binding; keep validation exact and bounded.
-- [ ] Run focused unit tests; expect all pass.
-- [ ] Commit versioned continuation policy.
+- [x] Write regressions for v2 variable counts above slot, arm-independent domain admission, strict version/policy validation, mandatory rejection, context/output limits and unchanged v1 behavior.
+- [x] Run focused unit tests; expect new assertions fail before implementation.
+- [x] Implement versioned plan, guard and context binding; keep validation exact and bounded.
+- [x] Run focused unit tests; expect all pass.
+- [x] Commit versioned continuation policy.
 
 ### Task 2: Shared execution, installed qualification and evidence
 
@@ -45,11 +45,13 @@
 
 **Interfaces:** execute_case consumes the v2 frozen plan through its existing guard and execution_scope. No new live runner default. Smoke uses installed public Runtime/Harness and both provider wire formats; no private SDK imports. Candidate manifest binds downloaded release artifacts; existing release manifest and historic tool candidate remain unchanged.
 
-- [ ] Write functional regressions for the observed 1,307/1,280 and 1,211/1,152 slot mismatches, shared repair attempts, unknown usage, capacity/output errors, budget exhaustion, concurrent reservations, and receipt-only replay.
-- [ ] Run those tests; expect failures before integration or new fixture completion.
-- [ ] Complete integration, add installed smoke for both providers, and retain exact limits.
-- [ ] Run focused and full Lab suite, build wheel/sdist, inspect source payload and installed smoke; expect green with all skips/limits reported honestly.
-- [ ] Verify all historic ledger hashes and current ceilings unchanged; record zero live calls and qualification limits.
-- [ ] Commit implementation/evidence, then one fresh whole-branch review required by executing-plans; fix Important/Critical findings via one RED/GREEN pass and full suite. Preserve ledger.
+- [x] Write functional regressions for the observed 1,307/1,280 and 1,211/1,152 slot mismatches, shared repair attempts, unknown usage, capacity/output errors, budget exhaustion, concurrent reservations, and receipt-only replay.
+- [x] Run those tests; expect failures before integration or new fixture completion.
+- [x] Complete integration, add installed smoke for both providers, and retain exact limits.
+- [x] Run focused and full Lab suite, build wheel/sdist, inspect source payload and installed smoke; expect green with all skips/limits reported honestly.
+- [x] Verify all historic ledger hashes and current ceilings unchanged; record zero live calls and qualification limits.
+- [x] Commit implementation/evidence, then one fresh whole-branch review required by executing-plans; fix Important/Critical findings via one RED/GREEN pass and full suite. Preserve ledger.
 
 Self-review: both tasks share plan/guard semantics; Task 2 consumes Task 1's v2 format and same v1 default. Every review-focus input has a named regression above. This plan implements the spec without changing SDK execution semantics or requiring another model-specific fix.
+
+Final review: no Critical/Important findings; minor derived-count numeric typing gap deferred and recorded in qualification. Full Lab suite1329passed; installed and Linux ARM64 both-wire14-scenario qualification plus legacy10-scenario replay passed. No live inference or Lab publication.

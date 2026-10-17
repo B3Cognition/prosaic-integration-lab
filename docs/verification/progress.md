@@ -1,5 +1,17 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Public SDK releases and continuation budgeting — 2026-10-17
+
+The [complete ledger](continuation-budgeting-2026-10-17.md) records published
+Runtime0.9.7/Harness0.9.4, exact public byte verification and experimental Lab
+continuation budgeting. Version2 admits actual counted requests under one shared
+Runtime scope; version1 defaults, historical evidence and all limits remain.
+Full Lab1329passed; final focused35; both provider formats pass14installed and
+Linux ARM64 network-none scenarios, plus10legacy replay scenarios per platform.
+No live inference or Lab publication. One non-blocking derived-count numeric
+typing minor is deferred. Ready for fresh held-out validation, not a memory
+accuracy claim; remaining allowance33requests/16tools/245372tokens.
+
 ## Fresh balanced live memory comparison — 2026-10-17
 
 The [12-sample comparison](balanced-memory-live-2026-10-17.md) completed with
