@@ -82,7 +82,7 @@ def live_settings(path):
     return data,config,allowance
 
 
-def execute(*,output,repetitions=1,live_config=None):
+def execute(*,output,repetitions=1,live_config=None,token_counters=None):
     from .execution import execute_case
     from .fixture import fixture_provider
     from .recovery import run_recovery_cases
@@ -99,8 +99,11 @@ def execute(*,output,repetitions=1,live_config=None):
             reportedTokens=163840*repetitions,maxSamples=10*repetitions,timeoutSeconds=300)
         allowance_path=output/'allowance.json';data={}
     rows=schedule(suite,profiles,repetitions);ident=identity(suite,caps)
-    binding=digest(dict(identity=ident,schedule=rows,origin='live' if live else 'fixture'))
-    allowance=BenchmarkAllowance(allowance_path,identity=binding,limits=limits)
+    from .token_admission import admit_live_counters
+    counters=admit_live_counters(token_counters,config,aliases) if live else {}
+    binding=digest(dict(identity=ident,schedule=rows,origin='live' if live else 'fixture',
+        tokenAdmission={k:v.descriptor.to_dict() for k,v in counters.items()}))
+    allowance=BenchmarkAllowance(allowance_path,identity=binding,limits=limits,version=2)
     maximum={k:caps[k] for k in ('providerRequests','toolCalls','reportedTokens')}
     results=[];costs=[]
     cases={c['caseId']:c for c in suite['cases']}
@@ -124,7 +127,7 @@ def execute(*,output,repetitions=1,live_config=None):
                 if live:
                     slot=profiles.index(row['profileFingerprint'])
                     e=execute_case(cases[row['caseId']],config=config,profile=aliases[slot],output=output,
-                        sample_id=sample,limits=effective)
+                        sample_id=sample,limits=effective,token_counter=counters[aliases[slot]])
                 else:
                     with fixture_provider() as provider:
                         e=execute_case(cases[row['caseId']],config=provider.config,profile='fixture',output=output,
@@ -137,10 +140,13 @@ def execute(*,output,repetitions=1,live_config=None):
             e.update(benchmarkIdentity=binding,profileFingerprint=row['profileFingerprint'])
             private_write(path,e)
         actual=e['counts'] if e['counts']['reportedTokens'] is not None else None
-        allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None)
+        if claim is None or claim['state']!='unknown':
+            claim=allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None,
+                violation=e.get('admissionViolation') if actual is not None else None)
         public=public_result(cases[row['caseId']],e,profile_fingerprint=row['profileFingerprint'],repetition=row['repetition'])
+        public.update(reservationRetained=claim['state']=='unknown',reservationExceeded=claim['state']=='overrun')
         results.append(public);costs.append(estimate_cost(public,data.get('rateCard')))
-        if actual is None:break
+        if claim['state'] in {'unknown','overrun'}:break
     recovery_path=output/'recovery.json'
     if live:
         recovery=[]  # Fault probes are fixture evidence, never live model quality.

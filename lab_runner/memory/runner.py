@@ -75,7 +75,7 @@ def live_settings(path):
     return data,config,allowance
 
 
-def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario='correct',recover_only=False,evidence_format='raw'):
+def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario='correct',recover_only=False,evidence_format='raw',token_counters=None):
     if fixture==(live_config is not None):raise ValueError('select explicit memory execution mode')
     if not fixture and fixture_scenario!='correct':raise ValueError('fixture scenario in live mode')
     bundle=validate_bundle(load_suite() if bundle is None else bundle);out=private_directory(output)
@@ -89,9 +89,13 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
     else:
         data,config,allowance_path=live_settings(live_config);aliases=data['profiles'];limits=data['limits']
         profiles=[fingerprint(config.profiles[p]) for p in aliases]
+    from lab_runner.quality.token_admission import admit_live_counters,counter_identity
+    counters={} if fixture or recover_only else admit_live_counters(token_counters,config,aliases)
+    descriptors={} if fixture else counter_identity(counters,output=out,config=config,profiles=aliases,recover_only=recover_only)
     rows=schedule(bundle,profiles);origin='fixture' if fixture else 'live'
-    binding=digest(dict(identity=ident,schedule=rows,origin=origin))
-    allowance=BenchmarkAllowance(allowance_path,identity=binding,limits=limits)
+    binding=digest(dict(identity=ident,schedule=rows,origin=origin,
+        tokenAdmission=descriptors))
+    allowance=BenchmarkAllowance(allowance_path,identity=binding,limits=limits,version=2)
     maximum={k:LIMITS[k] for k in ('providerRequests','toolCalls','reportedTokens')}
     cases={c['caseId']:c for c in bundle['cases']};results=[];observed=dict(providerRequests=0,toolCalls=0)
     with ExitStack() as stack:
@@ -152,11 +156,12 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                     e=None
                 if e is not None:
                     actual=e['counts'] if e['counts']['reportedTokens'] is not None else None
-                    if claim['state']!='unknown':allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None)
+                    if claim['state']!='unknown':claim=allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None,
+                        violation=e.get('admissionViolation') if actual is not None else None)
                     if fixture:
                         for key in observed:observed[key]+=e['fixtureObserved'][key]
-                    results.append(public_result(case,e,row,available))
-                    if actual is None or claim['state']=='unknown':break
+                    results.append(public_result(case,e,row,available,claim=claim))
+                    if claim['state'] in {'unknown','overrun'}:break
                     continue
                 if allowance.status()['deadline']-time.time()<LIMITS['timeoutSeconds']:break
                 try:allowance.reserve(sample,maximum)
@@ -170,8 +175,9 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                             limits=asdict(config.limits),tool_directories=[],cli_sandbox=dict(mode='off',runtime_roots=[])))
                     before=provider.requests if provider is not None else None
                     try:
+                        options=dict(token_counter=counters[profile]) if counters else {}
                         e=execute_case(case,corpus=corpus,arm=row['arm'],config=config,profile=profile,
-                                       output=out,sample_id=sample,limits=LIMITS,evidence_format=evidence_format)
+                                       output=out,sample_id=sample,limits=LIMITS,evidence_format=evidence_format,**options)
                     finally:
                         if fixture:
                             journal_path=out/(sample+'-journal.json')
@@ -191,11 +197,12 @@ def execute(*,output,bundle=None,fixture=False,live_config=None,fixture_scenario
                         allowance.finish(sample,actual=None,evidence_digest=None);results.append(interrupted());break
             actual=e['counts'] if e['counts']['reportedTokens'] is not None else None
             if claim is None or claim['state']!='unknown':
-                allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None)
+                claim=allowance.finish(sample,actual=actual,evidence_digest=digest(e) if actual is not None else None,
+                    violation=e.get('admissionViolation') if actual is not None else None)
             if fixture:
                 for key in observed:observed[key]+=e['fixtureObserved'][key]
-            results.append(public_result(case,e,row,available))
-            if actual is None or claim is not None and claim['state']=='unknown':break
+            results.append(public_result(case,e,row,available,claim=claim))
+            if claim['state'] in {'unknown','overrun'}:break
     report=summarize(rows,results,identity=ident,origin=origin,fixture_counts=observed if fixture else None)
     private_write(out/'summary.json',report)
     return report

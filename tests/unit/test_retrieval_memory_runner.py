@@ -13,6 +13,48 @@ def bundle():
     return dict(version=1,suiteId='memory-development',cases=[case,second],corpus=d,historicalSources=s)
 
 
+def test_known_overrun_stops_runner_and_replays_truthfully(tmp_path,monkeypatch):
+    import lab_runner.memory.runner as runner
+    original=runner.execute_case
+    def overrun(*args,**kw):
+        e=original(*args,**kw);e['counts']['reportedTokens']=8516;return e
+    monkeypatch.setattr(runner,'execute_case',overrun)
+    report=runner.execute(output=tmp_path,bundle=bundle(),fixture=True)
+    assert report['executedSamples']==1 and report['reportedTokens']==8516
+    assert report['reservationExceededSamples']==1 and report['retainedUnknownSamples']==0
+    assert not report['baselineComplete']
+    ledger=json.loads((tmp_path/'allowance.json').read_bytes())
+    assert ledger['version']==2 and next(iter(ledger['samples'].values()))['state']=='overrun'
+    def forbidden(*args,**kw):raise AssertionError('network on overrun replay')
+    monkeypatch.setattr(socket,'socket',forbidden)
+    assert runner.execute(output=tmp_path,bundle=bundle(),fixture=True,recover_only=True)==report
+
+
+def test_existing_evidence_projects_durable_unknown_instead_of_stale_flag(tmp_path,monkeypatch):
+    import lab_runner.memory.runner as runner
+    from lab_runner.quality.allowance import BenchmarkAllowance
+    original=BenchmarkAllowance.finish
+    def retain(self,sample_id,**kw):return original(self,sample_id,actual=None,evidence_digest=None)
+    monkeypatch.setattr(BenchmarkAllowance,'finish',retain)
+    first=runner.execute(output=tmp_path,bundle=bundle(),fixture=True)
+    assert first['executedSamples']==1 and first['retainedUnknownSamples']==1
+    monkeypatch.setattr(BenchmarkAllowance,'finish',original)
+    def forbidden(*args,**kw):raise AssertionError('network on retained-claim replay')
+    monkeypatch.setattr(socket,'socket',forbidden)
+    assert runner.execute(output=tmp_path,bundle=bundle(),fixture=True,recover_only=True)==first
+
+
+def test_request_bound_violation_stops_next_sample_below_case_cap(tmp_path,monkeypatch):
+    import lab_runner.memory.runner as runner
+    original=runner.execute_case
+    def breach(*args,**kw):
+        e=original(*args,**kw);e['admissionViolation']='token_reservation_exceeded';return e
+    monkeypatch.setattr(runner,'execute_case',breach)
+    report=runner.execute(output=tmp_path,bundle=bundle(),fixture=True)
+    assert report['executedSamples']==1 and report['reportedTokens']==300
+    assert report['reservationExceededSamples']==1
+
+
 def test_preflight_never_opens_network_or_constructs_runtime(monkeypatch):
     from lab_runner.memory.runner import preflight
     def forbidden(*a,**k):raise AssertionError('network in preflight')

@@ -154,15 +154,17 @@ def _evidence(case,sample_id,h,journal,events,prepared,output,elapsed,recovered=
     return e
 
 
-def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw'):
+def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw',token_counter=None):
     from prosaic_harness import Harness,FileRunStore
+    from lab_runner.quality.token_admission import execution_scope,activate_scope
+    scope=execution_scope(limits,token_counter)
     workflow,journal,events,prepared=materials(case,corpus=corpus,arm=arm,config=config,profile=profile,
         output=output,sample_id=sample_id,limits=limits,evidence_format=evidence_format)
     store=FileRunStore(output/'store',namespace='retrieval-memory');store.initialize()
     h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events)
     began=time.monotonic()
     try:
-        h.run(prepared['request'])
+        with activate_scope(scope):h.run(prepared['request'])
         return _evidence(case,sample_id,h,journal,events,prepared,output,time.monotonic()-began)
     finally:store.close()
 

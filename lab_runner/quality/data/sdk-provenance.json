@@ -7,8 +7,8 @@
     },
     {
       "distribution": "b3-prosaic-runtime",
-      "sha256": "8611a7dcf86a0839e56deace55133a24f8ebedb7d46a9abe60c376617947d8f5",
-      "version": "0.9.6"
+      "sha256": "adf5454b3d3b8fac2c108ecd5c4462daf05d939a4ae76e8b2b40de8e68cf8c97",
+      "version": "0.9.7+budget.3"
     },
     {
       "distribution": "b3-prosaic-runtime-postgres",
@@ -26,6 +26,6 @@
       "version": "0.4.0"
     }
   ],
-  "manifestDigest": "1c4cca26b7aae4ef9fde9e35493e4264fc5ef4def15a5df05e979f590ff5d50b",
+  "manifestDigest": "a50422bfda63b43ab99d3736f0613b25bb9dd33f298862caa2f14388d6c63e96",
   "version": 1
 }

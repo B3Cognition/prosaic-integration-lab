@@ -138,6 +138,7 @@
     "lab_runner/quality/recovery.py",
     "lab_runner/quality/reporting.py",
     "lab_runner/quality/runner.py",
+    "lab_runner/quality/token_admission.py",
     "lab_runner/quality/scoring.py",
     "lab_runner/quality/suite.py",
     "lab_runner/retrieval_memory.py",
