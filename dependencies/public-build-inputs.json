@@ -121,6 +121,12 @@
     "lab_runner/memory/runner.py",
     "lab_runner/memory/scoring.py",
     "lab_runner/memory/suite.py",
+    "lab_runner/memory_policy/__init__.py",
+    "lab_runner/memory_policy/scoped.py",
+    "lab_runner/memory_policy/assembly.py",
+    "lab_runner/memory_policy/budget.py",
+    "lab_runner/memory_policy/native.py",
+    "lab_runner/memory_policy/trace.py",
     "lab_runner/quality/__init__.py",
     "lab_runner/quality/allowance.py",
     "lab_runner/quality/checks.py",
@@ -144,6 +150,7 @@
     "lab_runner/quality/suite.py",
     "lab_runner/retrieval_memory.py",
     "scripts/agent_quality_smoke.py",
-    "scripts/retrieval_memory_smoke.py"
+    "scripts/retrieval_memory_smoke.py",
+    "scripts/scoped_memory_smoke.py"
   ]
 }
