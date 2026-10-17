@@ -39,21 +39,24 @@ def code_digest():
     names=('corpus.py','context.py','contracts.py','execution.py','evidence.py','data/evidence-summary.schema.json')
     return digest(dict(memory={n:files(__package__).joinpath(n).read_text(encoding='utf-8') for n in names},
         checks=files('lab_runner.quality').joinpath('checks.py').read_text(encoding='utf-8'),
-        admission=files('lab_runner.quality').joinpath('token_admission.py').read_text(encoding='utf-8')))
+        admission=files('lab_runner.quality').joinpath('token_admission.py').read_text(encoding='utf-8'),
+        contextPolicy={p.name:p.read_text(encoding='utf-8') for p in files('lab_runner.memory_policy').iterdir() if p.name.endswith('.py')}))
 
 
-def freeze(case,corpus,arm,path,*,evidence_format='raw'):
+def freeze(case,corpus,arm,path,*,evidence_format='raw',context_builder=None):
     validate_format(evidence_format)
     if arm not in {'enabled','disabled'}:raise ValueError('invalid memory arm')
-    scope=digest(dict(tenantId=case['tenantId'],arm=arm,asOf=case['asOf'],entity=case['entity'],
+    scope_fields=dict(tenantId=case['tenantId'],arm=arm,asOf=case['asOf'],entity=case['entity'],
         topics=case['topics'],caseId=case['caseId'],task=case['task'],recordIndex=case['recordIndex'],
-        currentSources=case['records'],corpus=corpus.tenant_digest(case['tenantId']),code=code_digest(),evidenceFormat=evidence_format))
+        currentSources=case['records'],corpus=corpus.tenant_digest(case['tenantId']),code=code_digest(),evidenceFormat=evidence_format)
+    if context_builder is not None:scope_fields['contextPolicy']=context_builder.identity(case)
+    scope=digest(scope_fields)
     if path.exists():
         frozen=decode(path.read_bytes())
         if frozen['scopeDigest']!=scope or frozen['preparedDigest']!=digest(frozen['prepared']):
             raise ValueError('memory context drift')
         return frozen['prepared']
-    began=time.monotonic();prepared=prepare(case,corpus,arm)
+    began=time.monotonic();prepared=prepare(case,corpus,arm,context_builder=context_builder)
     if evidence_format=='typed':
         prepared['evidenceFormat']='typed'
         prepared['binding']=digest(dict(tenantId=case['tenantId'],arm=arm,request=prepared['request'],
@@ -63,7 +66,7 @@ def freeze(case,corpus,arm,path,*,evidence_format='raw'):
     return prepared
 
 
-def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_only=False,evidence_format='raw'):
+def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_only=False,evidence_format='raw',context_builder=None):
     from prosaic_harness import WorkflowFactory,WorkflowCatalog,WorkflowBindings,WorkflowPolicy,Validator
     from prosaic_runtime import CustomTool,ProsaicArtifact,ProsaicRuntime,RuntimeAdapter,Result
     identifier(sample_id);output=private_directory(output)
@@ -72,7 +75,15 @@ def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_
     current_index(case['recordIndex']);snapshot=current_sources(case['records'])
     validate_format(evidence_format)
     if evidence_format=='typed':admit_complete_index(case['recordIndex'],snapshot)
-    prepared=freeze(case,corpus,arm,output/(sample_id+'-prepared.json'),evidence_format=evidence_format)
+    prepared=freeze(case,corpus,arm,output/(sample_id+'-prepared.json'),evidence_format=evidence_format,context_builder=context_builder)
+    trace=None
+    if context_builder is not None and not recovery_only:
+        endpoint=config.profiles[profile]
+        descriptor=context_builder.counter_descriptor
+        if (descriptor['provider'],descriptor['model'])!=(endpoint.provider,endpoint.model) or endpoint.max_tokens!=512:
+            raise ValueError('scoped endpoint or output drift')
+        from lab_runner.memory_policy.trace import TraceRecorder
+        trace=TraceRecorder(output/(sample_id+'-context-trace.json'),provider_id=endpoint.provider)
     request=prepared['request']
     config=replace(config,default_profile=profile,routes={'memory':profile},
                    allowed_tools=frozenset({'lookup_records'}),tool_directories=())
@@ -80,11 +91,16 @@ def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_
     journal=decode(journal_path.read_bytes()) if journal_path.exists() else []
     active={};current={};began={}
     def events(event):
+        if trace is not None:trace.event(event)
         attempt=event.get('attempt_id')
         if event.get('event')=='started':current['id']=attempt;began[attempt]=time.monotonic()
         if event.get('event')=='completed' and attempt in began:events.timings[attempt]=time.monotonic()-began[attempt]
         if event.get('event')=='tool_started':active[attempt]=event['call_id']
-    events.timings={}
+    events.timings={};events.context_trace=trace
+    events.accounting=trace
+    if context_builder is not None and recovery_only:
+        from prosaic_runtime.accounting import MemoryRecorder
+        events.accounting=MemoryRecorder(namespace='scoped-memory',environment='qualification')
     tool_version='lookup-summary-v1' if evidence_format=='typed' else 'lookup-v1'
     def lookup(arguments,context):
         rows=[deepcopy(snapshot[key]) for key in arguments['recordIds']]
@@ -130,7 +146,7 @@ def materials(case,*,corpus,arm,config,profile,output,sample_id,limits,recovery_
         if recovery_only:
             return Result(1,'','receipt-only recovery forbids dispatch',metadata={'failure_reason':'receipt_only_recovery'})
         return execute(arguments)
-    adapter=RuntimeAdapter(ProsaicRuntime(config,custom_tools={'lookup_records':tool}),
+    adapter=RuntimeAdapter(ProsaicRuntime(config,custom_tools={'lookup_records':tool},**({'accounting':trace} if trace is not None else {})),
         'memory-receipt-guard-v1-'+code_digest(),invoke,max_attempts=1)
     workflow=WorkflowFactory(catalog=WorkflowCatalog(agents={'reviewer':artifact},schemas={'answer':schema_answer}),
         bindings=WorkflowBindings(config=config,custom_tools={'lookup_records':tool},runtime_adapter=adapter,validators={
@@ -148,6 +164,11 @@ def _evidence(case,sample_id,h,journal,events,prepared,output,elapsed,recovered=
     e['taskRepairs']=sum(semantic(event) for event in failures)
     e['schemaRepairs']=sum(not semantic(event) for event in failures)
     e.update(prepared=prepared,preparedDigest=digest(prepared),recovered=recovered)
+    if 'contextAssembly' in prepared:
+        if events.context_trace is not None:events.context_trace.finish(receipts)
+        trace_path=output/(sample_id+'-context-trace.json')
+        e['contextTrace']=dict(sha256=digest(decode(trace_path.read_bytes())),
+            localEvidence=True,usageAuthority='native receipts; proposal count is not dispatch count')
     frozen=decode((output/(sample_id+'-prepared.json')).read_bytes())
     e['retrievalMetrics']=dict(hostQueries=frozen['hostQueries'],elapsedSeconds=frozen['retrievalSeconds'],
         resultBytes=prepared['retrieval']['resultBytes'],resultCount=len(prepared['retrieval']['episodes']))
@@ -155,14 +176,23 @@ def _evidence(case,sample_id,h,journal,events,prepared,output,elapsed,recovered=
     return e
 
 
-def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw',token_counter=None):
+def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw',token_counter=None,context_builder=None):
     from prosaic_harness import Harness,FileRunStore
     from lab_runner.quality.token_admission import execution_scope,activate_scope
-    scope=execution_scope(limits,token_counter)
+    if context_builder is not None:
+        if token_counter is None or token_counter.descriptor.to_dict()!=context_builder.counter_descriptor:
+            raise ValueError('qualified scoped counter required')
     workflow,journal,events,prepared=materials(case,corpus=corpus,arm=arm,config=config,profile=profile,
-        output=output,sample_id=sample_id,limits=limits,evidence_format=evidence_format)
+        output=output,sample_id=sample_id,limits=limits,evidence_format=evidence_format,context_builder=context_builder)
+    if context_builder is not None:
+        from lab_runner.memory_policy.budget import guard_registration
+        plan=prepared['contextAssembly']['plan']
+        if plan['requestSha256']!=digest(prepared['request']):raise ValueError('context plan request drift')
+        guard=guard_registration(token_counter,plan,on_proposal=events.context_trace.proposals)
+        token_counter=guard.registration
+    scope=execution_scope(limits,token_counter)
     store=FileRunStore(output/'store',namespace='retrieval-memory');store.initialize()
-    h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events)
+    h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events,accounting=events.accounting)
     began=time.monotonic()
     try:
         with activate_scope(scope):h.run(prepared['request'])
@@ -170,15 +200,15 @@ def execute_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS
     finally:store.close()
 
 
-def recover_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw'):
+def recover_case(case,*,corpus,arm,config,profile,output,sample_id,limits=LIMITS,evidence_format='raw',context_builder=None):
     """Adopt receipts through Harness; any new Runtime invocation is denied."""
     from prosaic_harness import Harness,FileRunStore,RunNotFound
     if not (output/(sample_id+'-prepared.json')).exists():return None
     workflow,journal,events,prepared=materials(case,corpus=corpus,arm=arm,config=config,profile=profile,
-        output=output,sample_id=sample_id,limits=limits,recovery_only=True,evidence_format=evidence_format)
+        output=output,sample_id=sample_id,limits=limits,recovery_only=True,evidence_format=evidence_format,context_builder=context_builder)
     store=FileRunStore(output/'store',namespace='retrieval-memory');store.initialize()
     try:
-        h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events)
+        h=Harness(workflow,store=store,run_id=digest({'sampleId':sample_id})[:32],on_event=events,accounting=events.accounting)
         try:state=h.resume()
         except RunNotFound:return None
         if state['status']!='completed':return None

@@ -26,7 +26,8 @@ def current_sources(records):
     return decode(encode(records))
 
 
-def prepare(case,corpus,arm):
+def prepare(case,corpus,arm,*,context_builder=None):
+    if context_builder is not None:return context_builder.prepare(case,arm)
     if arm not in {'enabled','disabled'}:raise ValueError('invalid memory arm')
     identifier(case['caseId']);identifier(case['tenantId']);timestamp(case['asOf'])
     query=text(case['entity']+' '+' '.join(case['topics'])+' '+case['task'],8192)
