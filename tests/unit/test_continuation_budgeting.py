@@ -1,5 +1,4 @@
 """Quotation is planning evidence; shared Runtime allowance owns v2 dispatch."""
-from copy import deepcopy
 import pytest
 from test_memory_context_budget import descriptor,FixedCounter
 
@@ -39,6 +38,13 @@ def test_optional_context_cannot_create_a_larger_hard_continuation_slot():
         assert g.registration.counter.count_tokens({'model':'fixture-scoped','max_tokens':512})==1368
         ceilings.append(g.proposals[0]['inputCeiling'])
     assert ceilings==[7680,7680]
+
+
+@pytest.mark.parametrize('change,reason',[({'model':'other'},'modelMismatch'),
+    ({'max_tokens':513},'outputCeiling'),({'max_tokens':True},'outputCeiling')])
+def test_v2_cannot_change_model_or_fixed_output_budget(change,reason):
+    g=guard(plan());native={'model':'fixture-scoped','max_tokens':512};native.update(change)
+    with pytest.raises(ValueError,match=reason):g.registration.counter.count_tokens(native)
 
 
 @pytest.mark.parametrize('count,reason',[(513,'inputCeiling'),(True,'counterFailure')])

@@ -31,6 +31,10 @@ prepares the native request and an owned context plan. Pass it as
 receipt-only replay; recovery needs no executable counter and never calls the
 quote callback. `scripts/scoped_memory_smoke.py` is a complete synthetic example.
 
+The default version-1 policy below remains unchanged. For the opt-in version-2
+policy, see [continuation budgeting](continuation-budgeting.md): quotations guide
+context selection while Runtime admits actual requests against shared allowance.
+
 The trusted `quote_inputs(request)` callback must return four integer input
 ceilings, one for each permitted native proposal. `quote_identity` binds the
 host's quotation implementation and assets; do not reuse it for changed logic.

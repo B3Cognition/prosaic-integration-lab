@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased experimental continuation candidate
+
+- Adopt verified public Runtime 0.9.7 and Harness 0.9.4 in the experimental
+  benchmark manifest; keep the active release manifest and historic evidence.
+- Add opt-in version-2 continuation planning: quoted slots guide context
+  selection while shared Runtime admission enforces actual remaining allowance.
+- Preserve fixed case/cumulative limits, version-1 defaults and no-inference
+  receipt recovery. Memory efficacy remains unproven; no Lab release or live run.
+
 ## 0.5.0 — 2026-10-17
 
 - Add opt-in agent-quality and controlled retrieval-memory evaluation commands,
