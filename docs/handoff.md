@@ -1,5 +1,21 @@
 # Codex handoff
 
+## Response diagnostics qualified offline — 2026-10-18
+
+Runtime0.9.8+diagnostics.1 and Lab0.5.1+diagnostics.1 are local unreleased
+candidates. The [qualification ledger](verification/response-faults-2026-10-18.md)
+records portable response/usage classifications, sticky contradictory-error
+fencing, strict bounded SSE UTF8 and preserved receipt diagnostics. Harness
+requires no change. Runtime1345passed/2documented skips; Lab1333passed;
+installed57checks,36fault/replay,14continuation and10legacy scenarios pass.
+All five independent review findings closed. Exact candidate payloads audited;
+active releases and prior manifests/evidence unchanged. No live inference,
+push or publication. All35live ledgers still charge1456requests/595tools/
+1752686tokens, eight unknown reservations retained; remaining19/9/223937.
+Ready for a fresh bounded live comparison that fits full reservations, not a
+memory efficacy or live-provider certification claim. Eight full samples do
+not fit the current remaining request/tool allowance. Preserve old checkpoints.
+
 ## Strict validation fixed; fresh comparison stopped safely — 2026-10-17
 
 Lab0.5.1+continuation.2 fixes derived integer-field validation in both plan

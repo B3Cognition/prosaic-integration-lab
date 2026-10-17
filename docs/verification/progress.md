@@ -1,5 +1,17 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Response/usage fault qualification complete — 2026-10-18
+
+The [ledger](response-faults-2026-10-18.md) records private Runtime/Lab diagnostic
+candidates with1333passing Lab tests and1345passing Runtime tests (two documented
+source skips, installed gate passed separately). Installed57checks plus36native
+fault/replay,14continuation and10legacy scenarios pass. Both JSON/SSE wire formats
+are exercised; unknown usage blocks redispatch and contradictory errors cannot
+release tools. New diagnostic metadata is bounded and sanitized; complete operator
+Results retain their existing privacy contract. No live calls or publication.
+All35ledgers/eight unknown reservations and1048prior evidence files preserved.
+Memory remains experimental; readiness is for a budget-fitting live comparison.
+
 ## Strict validation and partial fresh comparison — 2026-10-17
 
 The [new checkpoint](continuation-memory-live-2026-10-17.md) closes the derived

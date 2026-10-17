@@ -1,0 +1,206 @@
+{
+  "candidates": [
+    {
+      "distribution": "b3-prosaic-runtime",
+      "installedFiles": 58,
+      "reviewedSourceFiles": 51,
+      "sdistSha256": "abff83f0d99eee150574e3b87630b4f0834326883179367cab251137026d72b4",
+      "sourceCommit": "21cca3f6cdcebb1d264a31e209af70b2c9249ec2",
+      "version": "0.9.8+diagnostics.1",
+      "wheelSha256": "43f29698a503f867e5d39b3ef6c31cdb066dc0ae0d4712d3ec67e0561603eb7e"
+    },
+    {
+      "distribution": "prosaic-integration-lab",
+      "installedFiles": 119,
+      "reviewedSourceFiles": 115,
+      "sdistSha256": "8c5cf00dbcd49315f2f27972f1fdf7c333998950d73c9f9e9d183d8c19550821",
+      "sourceCommit": "d7fe9097278db714d98a33d8695cd3678929e258",
+      "version": "0.5.1+diagnostics.1",
+      "wheelSha256": "6a7f42f5cf5da399f5b46a8d6d1cdd0149db080c8f7662a1cb712bd46444684e"
+    }
+  ],
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1456,
+    "reportedTokens": 1752686,
+    "toolCalls": 595
+  },
+  "earlierQualificationAttempts": [
+    {
+      "errors": [],
+      "failures": [
+        "tests/test_distribution_metadata.py::test_clean_archives_ship_index_metadata_and_owned_payloads[.-b3-prosaic-runtime-0.9.7-prosaic_runtime-b3-prosaic<0.5,>=0.4-licenses0]"
+      ],
+      "run": "runtime-full"
+    },
+    {
+      "errors": [],
+      "failures": [
+        "tests/test_conformance.py::test_canonical_order_owned_snapshot_and_source_version",
+        "tests/test_distribution_metadata.py::test_clean_archives_ship_index_metadata_and_owned_payloads[.-b3-prosaic-runtime-0.9.7-prosaic_runtime-b3-prosaic<0.5,>=0.4-licenses0]"
+      ],
+      "run": "runtime-final-full"
+    },
+    {
+      "errors": [
+        "tests/test_conformance.py::test_complete_openai_fixture_observes_all_checks_and_never_live_qualifies",
+        "tests/test_conformance.py::test_complete_native_fixture_observes_all_checks",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[required_tool-reply0-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[strict_json-reply1-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[strict_json-reply2-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[strict_json-reply3-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[strict_json-reply4-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[stream_terminal-reply5-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[stream_terminal-reply6-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[stream_terminal-reply7-failed]",
+        "tests/test_conformance.py::test_requested_flags_prose_and_unrelated_errors_cannot_pass[arguments_validated-reply8-failed]",
+        "tests/test_conformance.py::test_unknown_usage_halts_the_shared_suite",
+        "tests/test_conformance.py::test_shared_request_and_token_allowances_stop_before_next_scenario",
+        "tests/test_conformance.py::test_configured_off_checks_remain_unsupported",
+        "tests/test_conformance.py::test_dispatch_evidence_context_resets_after_cancel_and_next_suite",
+        "tests/test_conformance.py::test_native_missing_terminal_never_passes",
+        "tests/test_conformance.py::test_shared_deadline_stops_remaining_scenarios",
+        "tests/test_conformance.py::test_suite_clamps_provider_output_and_stops_on_unknown_usage",
+        "tests/test_conformance.py::test_private_collector_resets_on_propagating_observer_error",
+        "tests/test_conformance.py::test_constructor_time_is_charged_to_absolute_suite_deadline"
+      ],
+      "failures": [],
+      "run": "runtime-version-tests"
+    },
+    {
+      "errors": [],
+      "failures": [
+        "tests/unit/test_agent_quality_checks.py::test_changed_validator_orchestration_changes_workflow_and_recovery_identity",
+        "tests/unit/test_agent_quality_reporting.py::test_pinned_local_candidate_versions_are_reported_without_paths[0.9.3+finalize.1-True]",
+        "tests/unit/test_agent_quality_reporting.py::test_pinned_local_candidate_versions_are_reported_without_paths[0.9.3+../../private-False]",
+        "tests/unit/test_agent_quality_reporting.py::test_pinned_local_candidate_versions_are_reported_without_paths[0.9.3+https://private-False]",
+        "tests/unit/test_agent_quality_reporting.py::test_missing_samples_and_unknown_usage_are_not_complete",
+        "tests/unit/test_agent_quality_reporting.py::test_cost_and_latency_preserve_coverage",
+        "tests/unit/test_agent_quality_reporting.py::test_comparison_rejects_foreign_policies_and_mixed_origins",
+        "tests/unit/test_agent_quality_reporting.py::test_profile_summaries_do_not_hide_model_differences",
+        "tests/unit/test_agent_quality_reporting.py::test_provenance_binds_the_explicit_continuation_candidate_manifest",
+        "tests/unit/test_agent_quality_reporting.py::test_partial_schedules_never_establish_complete_baselines",
+        "tests/unit/test_agent_quality_reporting.py::test_full_comparison_identity_is_required",
+        "tests/unit/test_agent_quality_reporting.py::test_unknown_durations_are_missing_and_profiles_have_separate_latency",
+        "tests/unit/test_memory_grounding.py::test_grounding_helper_changes_bind_resume_and_schema_identity",
+        "tests/unit/test_memory_grounding.py::test_case_identity_changes_do_not_change_implementation_identity",
+        "tests/unit/test_recovery_qualification.py::test_native_recovery_cli_loads_current_application_in_sdk_only_subprocess",
+        "tests/unit/test_retrieval_memory_runner.py::test_known_overrun_stops_runner_and_replays_truthfully",
+        "tests/unit/test_retrieval_memory_runner.py::test_existing_evidence_projects_durable_unknown_instead_of_stale_flag",
+        "tests/unit/test_retrieval_memory_runner.py::test_request_bound_violation_stops_next_sample_below_case_cap",
+        "tests/unit/test_retrieval_memory_runner.py::test_preflight_never_opens_network_or_constructs_runtime",
+        "tests/unit/test_retrieval_memory_runner.py::test_format_changes_only_declared_format_and_prose_identity",
+        "tests/unit/test_retrieval_memory_runner.py::test_typed_fixture_consumes_public_summary_and_replays_without_network",
+        "tests/unit/test_retrieval_memory_runner.py::test_valid_foreign_history_does_not_change_study_identity",
+        "tests/unit/test_retrieval_memory_runner.py::test_fixture_runner_counts_native_calls_and_replays_without_provider",
+        "tests/unit/test_retrieval_memory_runner.py::test_unknown_usage_retains_full_reservation_and_stops_schedule",
+        "tests/unit/test_retrieval_memory_runner.py::test_wrong_fixture_answers_cannot_be_hidden_by_repair_or_memory",
+        "tests/unit/test_retrieval_memory_runner.py::test_different_corpus_or_arm_cannot_adopt_existing_study",
+        "tests/unit/test_retrieval_memory_runner.py::test_public_projection_drops_extra_private_counter_fields",
+        "tests/unit/test_retrieval_memory_runner.py::test_interrupted_inference_retains_retrieval_and_does_not_become_a_paired_loss",
+        "tests/unit/test_retrieval_memory_runner.py::test_runner_recovers_saved_receipt_only_without_network_or_new_samples[after-True]",
+        "tests/unit/test_retrieval_memory_runner.py::test_runner_recovers_saved_receipt_only_without_network_or_new_samples[before-False]",
+        "tests/unit/test_retrieval_memory_runner.py::test_saved_invalid_receipt_never_dispatches_a_repair_during_recovery",
+        "tests/unit/test_retrieval_memory_runner.py::test_independent_fixture_observations_survive_unrecoverable_failure_after_provider_completion",
+        "tests/unit/test_retrieval_memory_runner.py::test_transient_ordinary_publication_error_adopts_receipt_before_unknown_settlement",
+        "tests/unit/test_retrieval_memory_runner.py::test_later_receipt_adoption_keeps_an_already_unknown_reservation_fully_charged",
+        "tests/functional/test_agent_quality_cli.py::test_default_command_is_unexecuted",
+        "tests/functional/test_agent_quality_cli.py::test_preflight_does_not_construct_runtime_or_network",
+        "tests/functional/test_agent_quality_cli.py::test_full_fixture_command_and_duplicate_run",
+        "tests/functional/test_agent_quality_cli.py::test_interrupted_sample_is_unknown_on_reopen_not_unexecuted",
+        "tests/functional/test_agent_quality_execution.py::test_provenance_binds_the_effective_schema_bearing_instructions",
+        "tests/functional/test_agent_quality_profiles.py::test_complete_profiles_compare_correct_and_incorrect_trajectories",
+        "tests/functional/test_required_acceptance.py::test_ci_capability_selection_bootstraps_host_source_without_lab_install",
+        "tests/functional/test_retrieval_memory_cli.py::test_default_cli_is_pure_unexecuted",
+        "tests/functional/test_retrieval_memory_cli.py::test_typed_cli_preflight_is_explicit_and_pure",
+        "tests/functional/test_retrieval_memory_cli.py::test_explicit_fixture_cli_runs_real_native_calls",
+        "tests/functional/test_retrieval_memory_cli.py::test_cli_receipt_only_recovery_adopts_without_a_socket"
+      ],
+      "run": "lab-full"
+    },
+    {
+      "errors": [],
+      "failures": [
+        "tests/unit/test_recovery_qualification.py::test_native_recovery_cli_loads_current_application_in_sdk_only_subprocess",
+        "tests/functional/test_required_acceptance.py::test_ci_capability_selection_bootstraps_host_source_without_lab_install"
+      ],
+      "run": "lab-qualified"
+    }
+  ],
+  "historicalLedgerCount": 35,
+  "installedContinuationScenarios": 14,
+  "installedDiagnosticRegressionsAndOwnershipGate": 57,
+  "installedFaultScenarios": 36,
+  "installedLegacyScenarios": 10,
+  "labSourceSuite": {
+    "errors": 0,
+    "failures": 0,
+    "skipReasons": [],
+    "skipped": 0,
+    "tests": 1333
+  },
+  "limitations": [
+    "Offline fixtures are not live provider/model certification.",
+    "The prior unknown HTTP200 response cannot be reconstructed retrospectively.",
+    "New diagnostics are sanitized; existing whole Result metadata/stderr is operator-only.",
+    "Lab memory efficacy remains unproven and experimental.",
+    "No SDK or Lab publication, push, database or cross-platform release qualification."
+  ],
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "liveDispatches": 0,
+  "priorEvidence": {
+    "continuation-budget-evidence-20261017": {
+      "files": 282,
+      "manifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711"
+    },
+    "continuation-memory-evidence-20261017": {
+      "files": 338,
+      "manifestSha256": "62f2d7535eafda5f31b7c1e27ba65d98c6db709c26f4e04ed991324bd467d7a8"
+    },
+    "recovery-memory-evidence-20261017": {
+      "files": 428,
+      "manifestSha256": "32be0bff51b1fc2fb7aff3c8674eb7f3b1c55c2b750070bb3eb82658e557f96e"
+    }
+  },
+  "qualifiedOffline": true,
+  "remaining": {
+    "providerRequests": 19,
+    "reportedTokens": 223937,
+    "toolCalls": 9
+  },
+  "retainedUnknownReservations": 8,
+  "review": {
+    "allFiveClosed": true,
+    "critical": 0,
+    "fixRecheckPassed": 4,
+    "importantFound": 2,
+    "smallerFound": 3
+  },
+  "runtimeSourceSuite": {
+    "errors": 0,
+    "failures": 0,
+    "skipReasons": [
+      "requires a framework Python build",
+      "requires the separately mandatory clean installed-wheel gate"
+    ],
+    "skipped": 2,
+    "tests": 1347
+  },
+  "sdkManifestSha256": "0d204d48743b456f82571cb85f8027d0e8589bd1ab7e777307395e5510d4396f",
+  "unchangedManifests": {
+    "dependencies/continuation-candidate.json": "799801ff3f2c2c498ee7e43c7ee69f5fed2614b87d18cb5e37b7e9914b367b1b",
+    "dependencies/releases.json": "1c4cca26b7aae4ef9fde9e35493e4264fc5ef4def15a5df05e979f590ff5d50b",
+    "dependencies/tool-outcome-candidate.json": "db4ab01f1ada0bdb2fa12cb6a4a6e72ac80af912d44c49522e0b747409b180c4"
+  },
+  "version": 1
+}

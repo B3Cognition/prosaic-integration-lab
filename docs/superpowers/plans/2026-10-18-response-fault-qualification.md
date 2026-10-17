@@ -19,10 +19,10 @@ execution continues. No live inference, increase, push or release in this task.
 - [x] Bind a separate explicit checksum manifest to Runtime0.9.8+diagnostics.1
   and the four unchanged public SDK wheels. Update only this private Lab
   candidate's packaged provenance; preserve active releases and prior candidates.
-- [ ] Full Lab suite, exact-source wheel/sdist and installed payload audit;
+- [x] Full Lab suite, exact-source wheel/sdist and installed payload audit;
   repeat36installed fault/replay cases with that exact Lab candidate,14continuation
   and10legacy memory/replay scenarios. Record earlier setup/operator failures.
-- [ ] Preserve private qualification evidence and35historical ledger hashes.
+- [x] Preserve private qualification evidence and35historical ledger hashes.
   Report capability, limitations and readiness. Memory stays experimental.
 
 Ruling: the first generic candidate environment used Runtime's Python3.11 floor,
@@ -38,3 +38,11 @@ container, and assert one request/150known tokens for a permanent contradictory
 provider error. Preserve failed operator outputs; they are not product failures
 or completed qualification. The last36-scenario smoke passed, and final exact
 Lab candidate qualification remains pending.
+
+Completion: Lab1333passed in SDK-only source environment. Exact-source installed
+Lab candidate passes36fault/replay,14continuation and10legacy scenarios; Runtime
+source1345passed/2documented skips and57installed tests passed. All payloads
+audited, all review findings closed,676offline evidence files archived. Existing
+live charge1456/595/1752686 and eight unknown reservations unchanged. No live
+inference, publication or release qualification is claimed. Earlier setup
+failures and corrected operator assertions remain preserved in the evidence.
