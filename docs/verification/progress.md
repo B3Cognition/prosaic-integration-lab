@@ -1,5 +1,17 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Strict validation and partial fresh comparison — 2026-10-17
+
+The [new checkpoint](continuation-memory-live-2026-10-17.md) closes the derived
+integer-field minor with four regressions and1333passing source tests. Installed
+Lab0.5.1+continuation.2 passes14both-wire and10legacy scenarios. The frozen
+eight-sample comparison stopped after four known successes and one unknown
+larger-model response; three were not dispatched. Limits held, unknown charged,
+receipts replayed without network, historical evidence preserved. Memory has
+one smaller-model efficiency observation and no established efficacy benefit.
+Next recommended gap: provider-neutral failure diagnostics and usage fault
+qualification, keeping unknown-usage fencing. No publication or model tuning.
+
 ## Public SDK releases and continuation budgeting — 2026-10-17
 
 The [complete ledger](continuation-budgeting-2026-10-17.md) records published

@@ -1,5 +1,9 @@
 # Experimental continuation budgeting
 
+The [latest validation and live checkpoint](verification/continuation-memory-live-2026-10-17.md)
+records strict derived-field validation in Lab0.5.1+continuation.2 and an incomplete
+fresh comparison stopped on unknown provider usage. Memory efficacy is unproven.
+
 Lab now offers `ScopedContext(..., continuation_budget=True)`, built on public
 Runtime 0.9.7 and Harness 0.9.4 APIs. It is opt-in and provider-neutral. Memory
 remains experimental; this policy does not establish an accuracy benefit.

@@ -1,5 +1,20 @@
 # Codex handoff
 
+## Strict validation fixed; fresh comparison stopped safely — 2026-10-17
+
+Lab0.5.1+continuation.2 fixes derived integer-field validation in both plan
+versions. Source b0072fa: full1333passed, installed four regressions,
+14both-wire continuation and10legacy scenarios; exact-source payloads audited.
+The [fresh eight-sample study](verification/continuation-memory-live-2026-10-17.md)
+completed four samples, then stopped on larger-model missing/on unknown usage.
+Three samples remain unexecuted; no retry or forgiveness. Approval pairs pass
+both arms; smaller memory/on saves one correction, larger has no recall exposure.
+Memory benefit remains unproven. Charge1456requests/595tools/1752686tokens;
+remaining19/9/223937, eight unknown reservations retained across35ledgers.
+Next: provider-neutral response/usage failure diagnostics and synthetic fault
+qualification before another live efficacy run. Lab remains experimental;
+no new push/release. Prior checkpoints below retain their original state.
+
 ## SDK releases and experimental continuation budgeting complete — 2026-10-17
 
 Runtime0.9.7 and Harness0.9.4 are merged and publicly released, with downloaded
