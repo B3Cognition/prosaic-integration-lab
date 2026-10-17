@@ -43,19 +43,38 @@ cases than the earlier 96-sample design, explicitly limiting statistical power.
 - [x] Counter implementation: watched RED/GREEN tests for ownership, Unicode,
   tools/argument normalization, framing maximum, hashes, drift and closed input.
   Optional pinned tokenizer dependencies; generic configuration, no model IDs.
-- [ ] Offline qualification: freeze served tokenizer assets and rendering settings;
+- [x] Offline qualification: freeze served tokenizer assets and rendering settings;
   prove asset paths match read-only model status. Exercise real local tokenizers
   with synthetic requests and independent native framing checks. Build/checksum
   an installed Lab wheel, full source suite, fresh review and regression fixes.
-- [ ] Live development qualification: at most eight reserved inference requests,
+- [x] Live development qualification: at most eight reserved inference requests,
   both profiles and tool continuations/Unicode. Compare every counted input with
   provider input usage; retain all evidence. No dispatch on mismatch/unknown.
-- [ ] Freeze implementation/history, generate fresh six-case evaluation, qualify
+- [x] Freeze implementation/history, generate fresh six-case evaluation, qualify
   all 48 cases with a synthetic provider, then run the prepared live comparison.
   Audit every receipt/count/claim and replay with networking denied. Report
   model results, admission limits, uncertainty and next-milestone readiness.
 
 ## Progress
+
+Final candidate `0.5.1+counter.2` / `f6a18ad`: 1,229 source tests passed,
+109 installed Lab and 138 SDK payload files matched. Independent offline
+qualification covered 129 renderings / 102 requests with no undercounts;
+all eight live requests across six development probes passed. The operator's
+earlier missing working directory left one fully retained unknown reservation
+(2 requests / 1 tool / 8,192 tokens), without raising the cumulative ceiling.
+Charge before the comparison is 1,245 requests / 487 tools / 1,430,205 tokens.
+
+New history and implementation were frozen before six new current cases.
+All 48 fresh fixture samples and 96 actual-feature native fixture requests
+passed; replay was byte-identical with sockets denied. The 48-sample live
+comparison completed with unchanged limits/settings. All 48 claims are known;
+118 requests / 60 tools / 191,321 tokens, three correctly denied continuations,
+no overruns. Independent audit, unchanged-source/assets checks and byte-identical
+network-disabled replay passed. Cumulative charge is 1,363 / 547 / 1,621,526,
+with every prior unknown reservation retained. Thirty-two canonical historical
+ledgers sum to that charge. Fresh results and next-milestone readiness are in
+[the live report](../../verification/token-counter-memory-live-2026-10-17.md).
 
 Read-only catalogue confirms both original models are served. Tokenizer assets
 are present, including the pinned HF snapshot for the smaller profile. Existing
