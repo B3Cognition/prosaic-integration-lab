@@ -12,11 +12,14 @@ def implementation():
 
 
 class ScopedContext:
-    def __init__(self,corpus,*,counter_descriptor,quote_inputs,quote_identity,limits,output_tokens):
+    def __init__(self,corpus,*,counter_descriptor,quote_inputs,quote_identity,limits,output_tokens,
+                 continuation_budget=False):
         from prosaic_runtime import TokenCounterDescriptor
         from lab_runner.memory.execution import LIMITS
         if type(corpus) is not ScopedCorpus or not callable(quote_inputs):raise ValueError('trusted scoped policy required')
         if limits!=LIMITS or type(output_tokens) is not int or output_tokens!=512:raise ValueError('unchanged memory caps required')
+        if type(continuation_budget) is not bool:raise ValueError('invalid continuation policy')
+        self._continuation_budget=continuation_budget
         self.corpus=corpus;self.quote_inputs=quote_inputs;self._quote_identity=sha(quote_identity)
         self._descriptor=TokenCounterDescriptor.from_dict(counter_descriptor).to_dict()
         self._limits=decode(encode(limits));self._output=output_tokens
@@ -30,9 +33,11 @@ class ScopedContext:
         scope={k:case[k] for k in ('tenantId','entity','caseId','asOf','task')}
         scope.update(topics=trusted_topics,recordIndex=current_index(case['recordIndex']),
             currentSources=current_sources(case['records']))
-        return digest(dict(version=1,scope=scope,corpus=self.corpus.tenant_digest(case['tenantId']),
+        identity=dict(version=1,scope=scope,corpus=self.corpus.tenant_digest(case['tenantId']),
             counterDescriptor=self._descriptor,quoteIdentity=self._quote_identity,limits=self._limits,
-            outputTokens=self._output,implementation=implementation()))
+            outputTokens=self._output,implementation=implementation())
+        if self._continuation_budget:identity['dispatchPolicy']='shared-execution-budget-v1'
+        return digest(identity)
 
     def prepare(self,case,arm):
         if arm not in {'enabled','disabled'}:raise ValueError('invalid memory arm')
@@ -44,7 +49,8 @@ class ScopedContext:
         mandatory=dict(caseId=case['caseId'],task=case['task'],recordIndex=current_index(case['recordIndex']),draft=None)
         assembled=assemble_context(mandatory,r,quote_inputs=self.quote_inputs,counter_descriptor=self._descriptor,
             quote_identity=self._quote_identity,max_requests=self._limits['providerRequests'],
-            output_tokens=self._output,token_ceiling=self._limits['reportedTokens'])
+            output_tokens=self._output,token_ceiling=self._limits['reportedTokens'],
+            continuation_budget=self._continuation_budget)
         request,retrieval=assembled['request'],assembled['retrieval']
         return dict(request=request,retrieval=retrieval,arm=arm,
             binding=digest(dict(tenantId=case['tenantId'],arm=arm,request=request,retrieval=retrieval)),

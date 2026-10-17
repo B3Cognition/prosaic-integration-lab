@@ -4,7 +4,9 @@ from .budget import make_plan
 
 
 def assemble_context(mandatory,retrieval,*,quote_inputs,counter_descriptor,quote_identity,
-                     max_requests,output_tokens,token_ceiling,reported_tokens=0,inflight_tokens=0):
+                     max_requests,output_tokens,token_ceiling,reported_tokens=0,inflight_tokens=0,
+                     continuation_budget=False):
+    if type(continuation_budget) is not bool:raise ValueError('invalid continuation policy')
     mandatory=decode(encode(mandatory,65536),65536)
     retrieval=decode(encode(retrieval,65536),65536)
     if type(mandatory) is not dict or 'recalledEpisodes' in mandatory or not callable(quote_inputs):
@@ -26,7 +28,8 @@ def assemble_context(mandatory,retrieval,*,quote_inputs,counter_descriptor,quote
         plan=make_plan(counter_descriptor=counter_descriptor,quote_identity=quote_identity,
             request_sha256=digest(request),input_bounds=bounds,max_requests=max_requests,
             output_tokens=output_tokens,token_ceiling=token_ceiling,
-            reported_tokens=reported_tokens,inflight_tokens=inflight_tokens)
+            reported_tokens=reported_tokens,inflight_tokens=inflight_tokens,
+            continuation_budget=continuation_budget)
         return request,plan
     selected=[];decisions=[];request,plan=quote(selected)
     mandatory_admitted=plan['admitted']

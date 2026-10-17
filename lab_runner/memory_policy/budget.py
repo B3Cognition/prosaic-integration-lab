@@ -8,7 +8,9 @@ from lab_runner.memory.corpus import fields
 
 
 def make_plan(*,counter_descriptor,quote_identity,request_sha256,input_bounds,
-              max_requests,output_tokens,token_ceiling,reported_tokens,inflight_tokens):
+              max_requests,output_tokens,token_ceiling,reported_tokens,inflight_tokens,
+              continuation_budget=False):
+    if type(continuation_budget) is not bool:raise ValueError('invalid continuation policy')
     from prosaic_runtime import TokenCounterDescriptor
     descriptor=TokenCounterDescriptor.from_dict(counter_descriptor).to_dict()
     sha(quote_identity);sha(request_sha256);integer(max_requests,1,128)
@@ -19,24 +21,30 @@ def make_plan(*,counter_descriptor,quote_identity,request_sha256,input_bounds,
     capacity_fits=all(bound+output_tokens<=descriptor['contextCapacityTokens'] for bound in bounds)
     available=token_ceiling-reported_tokens-inflight_tokens
     integer(available);required=integer(sum(bounds)+max_requests*output_tokens)
-    return dict(version=1,admitted=required<=available and capacity_fits,counterDescriptor=descriptor,
+    plan=dict(version=2 if continuation_budget else 1,admitted=required<=available and capacity_fits,counterDescriptor=descriptor,
         quoteIdentity=quote_identity,requestSha256=request_sha256,inputBounds=bounds,
         maxRequests=max_requests,outputTokens=output_tokens,tokenCeiling=token_ceiling,
         reportedTokens=reported_tokens,inflightTokens=inflight_tokens,
         requiredTokens=required,availableTokens=available)
+    if continuation_budget:plan['dispatchPolicy']='shared-execution-budget-v1'
+    return plan
 
 
 def validate_plan(plan):
     plan=decode(encode(plan,32768),32768)
+    if type(plan) is not dict:raise ValueError('invalid trajectory plan')
+    version=integer(plan.get('version'),1,2)
     fields(plan,('version','admitted','counterDescriptor','quoteIdentity','requestSha256',
         'inputBounds','maxRequests','outputTokens','tokenCeiling','reportedTokens',
-        'inflightTokens','requiredTokens','availableTokens'))
-    integer(plan['version'],1,1)
+        'inflightTokens','requiredTokens','availableTokens')+ (('dispatchPolicy',) if version==2 else ()))
+    if version==2 and plan['dispatchPolicy']!='shared-execution-budget-v1':
+        raise ValueError('invalid continuation policy')
     if type(plan['admitted']) is not bool:raise ValueError('invalid admission state')
     expected=make_plan(counter_descriptor=plan['counterDescriptor'],quote_identity=plan['quoteIdentity'],
         request_sha256=plan['requestSha256'],input_bounds=plan['inputBounds'],max_requests=plan['maxRequests'],
         output_tokens=plan['outputTokens'],token_ceiling=plan['tokenCeiling'],
-        reported_tokens=plan['reportedTokens'],inflight_tokens=plan['inflightTokens'])
+        reported_tokens=plan['reportedTokens'],inflight_tokens=plan['inflightTokens'],
+        continuation_budget=version==2)
     if plan!=expected:raise ValueError('inconsistent trajectory plan')
     return plan
 
@@ -53,6 +61,10 @@ class _Guard:
     def count_tokens(self,native):
         with self._lock:
             index=self._index;reason=None;count=None
+            dynamic=self._plan['version']==2
+            ceiling=(max(0,min(self._plan['counterDescriptor']['contextCapacityTokens'],
+                self._plan['tokenCeiling'])-self._plan['outputTokens']) if dynamic else
+                self._plan['inputBounds'][index] if index<self._plan['maxRequests'] else None)
             owned=decode(encode(native,196608),196608)
             if type(owned) is not dict:raise ValueError('native request required')
             if index>=self._plan['maxRequests']:
@@ -71,10 +83,11 @@ class _Guard:
                         integer(count)
                     except Exception:reason='counterFailure';count=None
                     else:
-                        if count>self._plan['inputBounds'][index]:reason='inputCeiling'
+                        if count>ceiling:reason='inputCeiling'
             row=dict(proposal=index+1,requestSha256=digest(owned),inputBound=count,
-                inputCeiling=self._plan['inputBounds'][index] if index<self._plan['maxRequests'] else None,
-                outputCeiling=self._plan['outputTokens'],reason=reason or 'withinPlan')
+                inputCeiling=ceiling if index<self._plan['maxRequests'] else None,
+                outputCeiling=self._plan['outputTokens'],reason=reason or ('withinContext' if dynamic else 'withinPlan'))
+            if dynamic:row['quotedInputBound']=self._plan['inputBounds'][index] if index<self._plan['maxRequests'] else None
             self._proposals.append(row)
             if self._on_proposal is not None:self._on_proposal(self.proposals)
             if reason:raise ValueError(reason)
@@ -82,6 +95,11 @@ class _Guard:
 
 
 def guard_registration(base,plan,*,on_proposal=None):
+    """V2 counts the context domain; dispatch requires one shared ExecutionBudget.
+
+    A successful proposal is not a reservation, dispatch or usage observation.
+    Quotation slots select optional context; only Runtime may settle allowance.
+    """
     from prosaic_runtime import TokenCounterRegistration
     if type(base) is not TokenCounterRegistration:raise ValueError('qualified base counter required')
     plan=validate_plan(plan)
@@ -89,8 +107,9 @@ def guard_registration(base,plan,*,on_proposal=None):
     if on_proposal is not None and not callable(on_proposal):raise ValueError('invalid proposal observer')
     revision=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     binding=digest(dict(base=base.descriptor.to_dict(),plan=plan,implementation=revision))
+    version=plan['version']
     descriptor=replace(base.descriptor,identity='trajectory-'+binding,
-        implementation_version='trajectory-v1-'+revision,
+        implementation_version=f'trajectory-v{version}-'+revision,
         template_assets_digest=digest(dict(base=base.descriptor.template_assets_digest,plan=plan,implementation=revision)),
         guarantee='Qualified base counter within an enforced host input/output proposal domain. '
             'The serialized plan binds base provenance. Runtime owns actual shared allowance and unknown usage. '
