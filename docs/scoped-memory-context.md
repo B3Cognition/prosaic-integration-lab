@@ -79,3 +79,11 @@ Portable tool-outcome evidence and bounded recovery are implemented in the
 the installed SDKs, limits and remaining gaps. New validated trace outcomes are
 classified; the earlier unclassified failures retain their original evidence.
 Memory efficacy, distributed memory and write governance remain separate work.
+
+The subsequent [balanced12-sample comparison](verification/balanced-memory-live-2026-10-17.md)
+used the qualified tool-outcome candidates and fresh small-index cases. Smaller
+off/on success was0/3 versus1/3, larger3/3 versus3/3. The apparent smaller gain
+is confounded by fixed quotation ceilings; it does not establish memory reasoning
+benefit. Three safe continuation refusals expose a general planning gap despite
+available case-budget headroom. Memory remains experimental; the next policy
+milestone is adaptive continuation budgeting with unchanged outer limits.

@@ -1,5 +1,15 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Fresh balanced live memory comparison — 2026-10-17
+
+The [12-sample comparison](balanced-memory-live-2026-10-17.md) completed with
+25requests/14tools/34338tokens, no new unknown or overrun, and independent
+receipt/recorder/counter reconciliation plus network-denied replay. Both models,
+both arms and three fresh families were frozen before dispatch. Memory efficacy
+remains unproven: smaller0/3→1/3 is admission-confounded; larger3/3→3/3 with only
+one exposed pair. The next generic gap is continuation planning under unchanged
+outer caps. Prior ledgers/history preserved; no model tuning or publication.
+
 ## Tool outcomes and bounded recovery candidate — 2026-10-17
 
 Runtime classifies portable tool outcomes; Harness validates complete call

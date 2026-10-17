@@ -1,5 +1,20 @@
 # Codex handoff
 
+## Fresh balanced memory comparison complete — 2026-10-17
+
+All12 fresh held-out samples settled with known usage under unchanged limits.
+Smaller model off/on success is0/3 versus1/3; larger is3/3 versus3/3. The smaller
+gain is confounded by quotation-based continuation admission, not demonstrated
+reasoning improvement. All14 tools succeeded; three continuations were refused
+by fixed planning bounds despite available outer-budget headroom. Read the
+[audited comparison](verification/balanced-memory-live-2026-10-17.md).
+Cumulative charge1442requests/588tools/1731251tokens; remaining33/16/245372.
+Allseven historic unknown reservations remaincharged;34canonical ledgers preserved.
+Next recommended milestone: provider-neutral adaptive continuation planning
+under the same caps. Generic Runtime/Harness fixes are candidates for normal
+release qualification; Lab memory/planning remains experimental. No push/release
+was performed by this comparison.
+
 ## Provider-neutral tool outcomes and bounded recovery candidate — 2026-10-17
 
 The next operational-hardening milestone is implemented in local Runtime
