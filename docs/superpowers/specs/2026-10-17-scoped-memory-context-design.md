@@ -37,7 +37,7 @@ reasons; foreign IDs, counts and changes cannot affect local query output.
 
 ## Context and trajectory admission
 
-`assemble_context(mandatory, retrieval, *, quote_inputs, counter_identity,
+`assemble_context(mandatory, retrieval, *, quote_inputs, counter_descriptor, quote_identity,
 max_requests, output_tokens, token_ceiling, reported_tokens=0,
 inflight_tokens=0)` preserves all mandatory fields and owns its JSON inputs.
 The caller may not supply the reserved `recalledEpisodes` field. Start with empty
