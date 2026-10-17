@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prosaic-integration-lab"
-version = "0.5.1+context.1"
+version = "0.5.1+context.2"
 description = "Synthetic acceptance consumer for installed Prosaic releases"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx", "psycopg[binary]>=3.2,<4", "psycopg-pool>=3.2,<4", "PyYAML", "jsonschema", "pyuca", "PyJWT[crypto]>=2.15,<3"]

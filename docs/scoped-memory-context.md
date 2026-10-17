@@ -38,6 +38,9 @@ The plan reserves their sum plus four output ceilings of 512 under the unchanged
 8,192-token case cap. Optional recall is packed only when the complete plan fits.
 Mandatory task/index fields are never trimmed. A rejected mandatory plan is
 retained intact and its guard refuses all requests before HTTP.
+Valid quotations exceeding the descriptor's per-request context capacity also
+produce an admission refusal. Oversized optional episodes are excluded and
+smaller later candidates are still tried; malformed quotations remain errors.
 
 These are enforceable planning bounds, not estimates that guarantee arbitrary
 continuations will complete. A qualified Runtime counter measures each actual

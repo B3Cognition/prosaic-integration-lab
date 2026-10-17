@@ -12,5 +12,5 @@ def test_scoped_installed_smoke_has_complete_public_build_inputs(tmp_path):
     spec=importlib.util.spec_from_file_location('scoped_smoke',root/'scripts/scoped_memory_smoke.py')
     smoke=importlib.util.module_from_spec(spec);spec.loader.exec_module(smoke)
     result=smoke.run(tmp_path)
-    assert result['scenarios']==7 and result['providerRequests']==13 and result['toolCalls']==6
+    assert result['scenarios']==9 and result['providerRequests']==15 and result['toolCalls']==7
     assert result['replayAdditionalRequests']==0 and result['traceBytesPreserved'] is True

@@ -4,7 +4,7 @@ from memory_helpers import development
 from lab_runner.quality.contracts import digest,decode
 
 
-def policy(*,quote=None,entity='orchid',hostile=False,metadata_change=None):
+def policy(*,quote=None,entity='orchid',hostile=False,metadata_change=None,capacity=32768):
     from lab_runner.memory_policy.scoped import ScopedCorpus
     from lab_runner.memory_policy.native import ScopedContext
     from lab_runner.memory.execution import LIMITS
@@ -17,7 +17,7 @@ def policy(*,quote=None,entity='orchid',hostile=False,metadata_change=None):
     if metadata_change:metadata_change(d,s,metadata)
     scoped=ScopedCorpus(d,s,metadata)
     desc=TokenCounterDescriptor(identity='synthetic-memory',provider='openai-compatible',model='memory-fixture-a',
-        framing_revision='openai-chat-v1',context_capacity_tokens=32768,implementation_version='fixture1',
+        framing_revision='openai-chat-v1',context_capacity_tokens=capacity,implementation_version='fixture1',
         tokenizer_assets_digest='a'*64,template_assets_digest='b'*64,counting_kind='exact',
         guarantee='Synthetic loopback input units only.')
     builder=ScopedContext(scoped,counter_descriptor=desc.to_dict(),quote_inputs=quote or (lambda _:[100]*4),

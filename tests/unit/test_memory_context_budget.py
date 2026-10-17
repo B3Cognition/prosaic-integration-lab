@@ -12,11 +12,12 @@ def descriptor(provider='openai-compatible'):
         template_assets_digest='b'*64,counting_kind='exact',guarantee='Synthetic fixture only: reports100input tokens.')
 
 
-def assemble(*,mandatory=None,retrieval=None,quote=None,ceiling=8192,reported=0,inflight=0,provider='openai-compatible'):
+def assemble(*,mandatory=None,retrieval=None,quote=None,ceiling=8192,reported=0,inflight=0,provider='openai-compatible',capacity=32768):
     from lab_runner.memory_policy.assembly import assemble_context
+    desc=descriptor(provider).to_dict();desc['contextCapacityTokens']=capacity
     return assemble_context({'task':'current authority','recordIndex':['current']} if mandatory is None else mandatory,
         retrieve(load()) if retrieval is None else retrieval,quote_inputs=(lambda _: [100]*4) if quote is None else quote,
-        counter_descriptor=descriptor(provider).to_dict(),quote_identity='c'*64,max_requests=4,output_tokens=512,
+        counter_descriptor=desc,quote_identity='c'*64,max_requests=4,output_tokens=512,
         token_ceiling=ceiling,reported_tokens=reported,inflight_tokens=inflight)
 
 
@@ -58,6 +59,26 @@ def test_later_smaller_candidate_can_fit_after_oversized_candidate():
     a=assemble(retrieval=r,quote=lambda q:[2000]*4 if any(e['episodeId']=='big' for e in q['recalledEpisodes']) else [100]*4)
     assert [e['episodeId'] for e in a['request']['recalledEpisodes']]==['prior']
     assert a['decisions']==[dict(episodeId='big',reason='trajectoryBudget'),dict(episodeId='prior',reason='selected')]
+
+
+def test_optional_context_capacity_overflow_still_tries_later_fitting_episode():
+    from lab_runner.quality.contracts import encode
+    r=retrieve(load());big=deepcopy(r['episodes'][0]);big['episodeId']='big'
+    r['episodes']=[big,r['episodes'][0]];r['resultSha256']=digest(r['episodes']);r['resultBytes']=len(encode(r['episodes']))
+    a=assemble(retrieval=r,capacity=1024,
+        quote=lambda q:[600]*4 if any(e['episodeId']=='big' for e in q['recalledEpisodes']) else [100]*4)
+    assert a['plan']['admitted'] is True
+    assert [e['episodeId'] for e in a['request']['recalledEpisodes']]==['prior']
+    assert a['decisions']==[dict(episodeId='big',reason='contextCapacity'),dict(episodeId='prior',reason='selected')]
+
+
+def test_mandatory_context_capacity_overflow_returns_valid_rejected_plan():
+    from lab_runner.memory_policy.budget import validate_plan
+    a=assemble(capacity=1024,quote=lambda _:[600]*4)
+    assert a['plan']['requiredTokens']==4448 and a['plan']['availableTokens']==8192
+    assert a['plan']['admitted'] is False and validate_plan(a['plan'])==a['plan']
+    assert a['request']['task']=='current authority' and a['request']['recordIndex']==['current']
+    assert a['request']['recalledEpisodes']==[]
 
 
 @pytest.mark.parametrize('quote',[lambda _:[True]*4,lambda _:[-1]*4,lambda _:[100]*3,lambda _:[1.5]*4,lambda _:{'inputBounds':[100]*4}])

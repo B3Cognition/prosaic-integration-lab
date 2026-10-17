@@ -15,12 +15,13 @@ The released dependency manifest is unchanged.
 
 Watched regressions preceded implementation. Task 1 passed 20 scoped retrieval
 tests; Task 2 passed 23 planning/counter tests; Task 3 passed 13 native/recovery
-tests; the distribution test exercised seven additional scenarios. The final
+tests; independent review added three capacity regressions and expanded the
+distribution test to nine scenarios. The final
 source command was:
 
 ```text
 PATH=/private/tmp/prosaic-counter-test-env/bin:$PATH /private/tmp/prosaic-counter-test-env/bin/python -m pytest -q
-1286 passed, 1 existing Starlette deprecation warning, 188.64 seconds
+1289 passed, 1 existing Starlette deprecation warning, 190.05 seconds
 ```
 
 Coverage includes populated but irrelevant tenants, exact entity/topic filtering,
@@ -39,41 +40,73 @@ both products restored validated lineage and accurate native receipt counters.
 An oversized continuation is terminal before its HTTP request; the prior paid
 request and usage remain in evidence. No proposal count is used as dispatch.
 
-Candidate `0.5.1+context.1` wheel and source archive built with
+Candidate `0.5.1+context.2` wheel and source archive built with
 `python -m build --no-isolation`. Wheel SHA256:
-`9696678fb306a79a5d9e4456b3a4b83494c44a8b7f42fad62c0b61a14ee7bf92`.
+`4bd4804dcf4b89fd9e5d5d6c473bd8cb6a07a1d53fc6b904f0d65ba246e56e8d`.
 All 119 installed payload files matched the wheel; all 115 non-metadata payload
 files also matched reviewed source. The separate candidate environment was
 populated with hash-locked Lab dependencies and the five verified SDK wheels.
 The SDK audit matched every payload from all five wheels.
 
 ```text
-/private/tmp/prosaic-context-installed-env/bin/python -I -B scripts/scoped_memory_smoke.py --source-root /private/tmp/prosaic-lab-release-050 --output /private/tmp/prosaic-context-installed-evidence-1
-7 scenarios / 13 synthetic provider requests / 6 tools
+/private/tmp/prosaic-context-installed-env-2/bin/python -I -B /private/tmp/prosaic-lab-release-050/scripts/scoped_memory_smoke.py --source-root /private/tmp/prosaic-lab-release-050 --output /private/tmp/prosaic-context-installed-evidence-2
+9 scenarios / 15 synthetic provider requests / 7 tools
 pure preflight; network-denied replay; unchanged trace bytes
 ```
 
 The smoke script's absolute source path was used from outside the checkout.
 Scenarios are hostile eligible recall, populated irrelevant scope, trajectory
-recall exclusion, mandatory refusal, disabled memory, repair and unknown usage.
+recall exclusion, mandatory refusal, disabled memory, repair, unknown usage,
+optional context-capacity exclusion and mandatory context-capacity refusal.
 Actual receipts/recorder snapshots and frozen plans are retained privately under
 the output directory. Original candidate environments and historic evidence were
 not overwritten.
 
 The candidate consumer image built on Linux aarch64 from public build inputs and
 verified SDK wheels, image ID
-`sha256:5826f4551e6aa1edf3c9767d5dd899a31493bfd40e1a24942880c14098402b9d`.
-Imports and frozen preflight passed in its intended environment with
-`--network none --read-only`. This is an image/preflight check; the full external
+`sha256:1955026b0ea35e27a590720af3125beb6e931c62743570d2a857bd4402f79f4d`.
+Imports, frozen preflight and all nine native loopback fixture scenarios passed
+in its intended environment with `--network none --read-only`. The full external
 database/auth/billing service acceptance lane was not rerun and is not claimed.
 
 Private logs and build artifacts are retained under
 `/private/tmp/prosaic-context-*` and `/private/tmp/prosaic-scoped-*`.
-The fresh whole-change review is recorded separately after this verification.
+Candidate `context.1`, its environment and evidence were preserved separately.
+
+## Independent review and decisions
+
+The fresh whole-change review of `6044ce0..14f8987` found no Critical or Minor
+issues and one Important issue: valid quotes over per-request context capacity
+raised instead of producing admission refusals. Two unit regressions and a
+native zero-call regression were watched failing, then passing. Assembly now
+excludes oversized optional episodes and tries smaller later ones; mandatory
+capacity overflow preserves evidence with a rejected frozen plan. Malformed
+quotes still raise. Plan validation reconstructs the same capacity decision.
+The one fix pass passed all 1,289 tests and the rebuilt installed/image checks.
+No second review was substituted for those regressions.
+
+One implementation ruling expanded assembly inputs from counter name to full
+counter descriptor plus quotation identity. This detects provenance changes
+under the same name; its cost is two explicit trusted host inputs.
+
+The reviewer set aside three boundaries, retained deliberately:
+
+- Live efficacy/refusal rates remain unmeasured in this slice. Offline contract
+  readiness stands; the cost is that model benefit remains unknown until a
+  fresh comparison.
+- Distributed claims, malicious-host rewriting and financial-grade recorder
+  durability remain outside the documented local trusted-host reference. The
+  cost is no distributed, tamper-proof or billing-durability assurance.
+- Full external database/auth/billing acceptance remains unclaimed. No service
+  behavior changed; installed native fixtures and isolated image checks cover
+  this policy. External service interactions are not newly qualified.
+
+No deferred minor findings remain. The local branch is preserved for subsequent
+comparison; no merge, push or release is included.
 
 ## Readiness
 
-These controls are ready for a fresh comparison after final code review. They
+These controls are ready for a fresh comparison after review and its fix pass. They
 address retrieval scope, context admission, portable trajectory evidence and
 safe recovery. They do not establish memory benefit for either model, semantic
 retrieval quality, distributed write governance or production certification.

@@ -15,12 +15,11 @@ def make_plan(*,counter_descriptor,quote_identity,request_sha256,input_bounds,
     integer(output_tokens,1);integer(token_ceiling);integer(reported_tokens);integer(inflight_tokens)
     bounds=decode(encode(input_bounds,8192),8192)
     if type(bounds) is not list or len(bounds)!=max_requests:raise ValueError('full trajectory quotation required')
-    for bound in bounds:
-        integer(bound)
-        if bound+output_tokens>descriptor['contextCapacityTokens']:raise ValueError('counter context capacity')
+    for bound in bounds:integer(bound)
+    capacity_fits=all(bound+output_tokens<=descriptor['contextCapacityTokens'] for bound in bounds)
     available=token_ceiling-reported_tokens-inflight_tokens
     integer(available);required=integer(sum(bounds)+max_requests*output_tokens)
-    return dict(version=1,admitted=required<=available,counterDescriptor=descriptor,
+    return dict(version=1,admitted=required<=available and capacity_fits,counterDescriptor=descriptor,
         quoteIdentity=quote_identity,requestSha256=request_sha256,inputBounds=bounds,
         maxRequests=max_requests,outputTokens=output_tokens,tokenCeiling=token_ceiling,
         reportedTokens=reported_tokens,inflightTokens=inflight_tokens,

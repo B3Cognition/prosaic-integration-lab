@@ -1,6 +1,7 @@
 """Installed public native scoped-memory qualification; credential-free fixtures."""
 import argparse
 from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
 import sys
 
@@ -28,7 +29,8 @@ def run(output):
         if denied['value'] and event.startswith('socket.'):raise AssertionError('network in preflight/replay')
     sys.addaudithook(audit)
     results=[];total_requests=0;total_tools=0
-    for mode in ('hostile','irrelevant','budget','mandatory','disabled','repair','unknown'):
+    for mode in ('hostile','irrelevant','budget','mandatory','disabled','repair','unknown','capacity-optional','capacity-mandatory'):
+        active_descriptor=replace(descriptor,context_capacity_tokens=1024) if mode.startswith('capacity-') else descriptor
         case=deepcopy(load_suite()['cases'][0])
         case.update(tenantId='alpha',asOf='2026-02-01T00:00:00Z',entity='orchid',topics=['rollout'])
         old=dict(case['records']['metrics'],revision=1,value=90)
@@ -39,8 +41,9 @@ def run(output):
         metadata=dict(version=1,episodes=[dict(tenantId='alpha',episodeId='previous',entityId='maple' if mode=='irrelevant' else 'orchid',
             topics=['rollout'],expiresAt=None)],currentSources=[dict(tenantId='alpha',**ref)])
         def quote(request):
+            if mode=='capacity-mandatory' or mode=='capacity-optional' and request['recalledEpisodes']:return [600]*4
             return [2000]*4 if mode=='mandatory' else [1600]*4 if mode=='budget' and request['recalledEpisodes'] else [100]*4
-        builder=ScopedContext(ScopedCorpus(document,sources,metadata),counter_descriptor=descriptor.to_dict(),
+        builder=ScopedContext(ScopedCorpus(document,sources,metadata),counter_descriptor=active_descriptor.to_dict(),
             quote_inputs=quote,quote_identity=digest(dict(implementation='synthetic-smoke-v1',mode=mode)),limits=LIMITS,output_tokens=512)
         arm='disabled' if mode=='disabled' else 'enabled'
         denied['value']=True
@@ -52,11 +55,11 @@ def run(output):
         with fixture_provider([case],scenario=scenario) as provider:
             kw=dict(corpus=Corpus(document,sources),arm=arm,config=provider.config,profile='fixture-a',
                 output=output/mode,sample_id='installed',evidence_format='typed',context_builder=builder)
-            evidence=execute_case(case,**kw,token_counter=TokenCounterRegistration(descriptor,Counter()))
-            expected=0 if mode=='mandatory' else 4 if mode=='repair' else 1 if mode=='unknown' else 2
+            evidence=execute_case(case,**kw,token_counter=TokenCounterRegistration(active_descriptor,Counter()))
+            expected=0 if mode in {'mandatory','capacity-mandatory'} else 4 if mode=='repair' else 1 if mode=='unknown' else 2
             assert evidence['counts']['providerRequests']==provider.requests==expected
             if mode=='unknown':assert evidence['counts']['reportedTokens'] is None
-            elif mode=='mandatory':assert evidence['counts']['reportedTokens']==0 and not evidence['completed']
+            elif mode in {'mandatory','capacity-mandatory'}:assert evidence['counts']['reportedTokens']==0 and not evidence['completed']
             else:assert evidence['completed'] and score_case(case,evidence)['state']=='passed'
             assert bool(evidence['prepared']['request']['recalledEpisodes'])==(mode in {'hostile','repair','unknown'})
             trace=kw['output']/'installed-context-trace.json';before=trace.read_bytes()

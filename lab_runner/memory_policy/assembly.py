@@ -36,7 +36,8 @@ def assemble_context(mandatory,retrieval,*,quote_inputs,counter_descriptor,quote
             candidate_request,candidate_plan=quote(selected+[episode])
             if candidate_plan['admitted']:
                 selected.append(episode);request,plan=candidate_request,candidate_plan;reason='selected'
-            else:reason='trajectoryBudget'
+            else:reason='contextCapacity' if any(b+output_tokens>counter_descriptor['contextCapacityTokens']
+                for b in candidate_plan['inputBounds']) else 'trajectoryBudget'
         decisions.append(dict(episodeId=episode['episodeId'],reason=reason))
     reasons={d['episodeId']:d['reason'] for d in decisions}
     retrieval.update(episodes=selected,resultSha256=digest(selected),resultBytes=len(encode(selected)))

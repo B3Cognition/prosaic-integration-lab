@@ -104,3 +104,18 @@ def test_actual_continuation_over_plan_refuses_without_second_http(tmp_path):
         assert result['counts']['reportedTokens']==150 and not result['completed']
         trace=decode((tmp_path/'continuation-context-trace.json').read_bytes())
         assert [x['reason'] for x in trace['proposals']]==['withinPlan','inputCeiling']
+
+
+def test_mandatory_context_capacity_refusal_is_frozen_known_zero_call_failure(tmp_path):
+    from lab_runner.memory.fixture import fixture_provider
+    from lab_runner.memory.execution import execute_case
+    case,corpus,builder,counter=policy(capacity=1024,quote=lambda _:[600]*4)
+    with fixture_provider([case]) as provider:
+        result=execute_case(case,corpus=corpus,arm='enabled',config=provider.config,profile='fixture-a',
+            output=tmp_path,sample_id='capacity',context_builder=builder,token_counter=counter)
+        assert result['counts']==dict(providerRequests=0,toolCalls=0,reportedTokens=0)
+        assert provider.requests==0 and not result['completed']
+        assert result['prepared']['contextAssembly']['plan']['admitted'] is False
+        assert result['prepared']['request']['recordIndex']==case['recordIndex']
+        trace=decode((tmp_path/'capacity-context-trace.json').read_bytes())
+        assert trace['proposals'][0]['reason']=='mandatoryRejected'
