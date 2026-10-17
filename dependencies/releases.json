@@ -10,13 +10,13 @@
       "version": "0.4.1"
     },
     {
-      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.4/SHA256SUMS",
+      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.6/SHA256SUMS",
       "distribution": "b3-prosaic-runtime",
-      "filename": "b3_prosaic_runtime-0.9.4-py3-none-any.whl",
-      "sha256": "f2f88630933217cda791792d3a3341a36485690bbb39b81890a8f22ef2c4bde3",
-      "source_commit": "5f0a02b923173286debd8c2c01951aba35d84377",
-      "url": "https://files.pythonhosted.org/packages/e7/1e/ce9201d5157499c3fe5c96b92419f82118557550d499689b3200018bd8ad/b3_prosaic_runtime-0.9.4-py3-none-any.whl",
-      "version": "0.9.4"
+      "filename": "b3_prosaic_runtime-0.9.6-py3-none-any.whl",
+      "sha256": "8611a7dcf86a0839e56deace55133a24f8ebedb7d46a9abe60c376617947d8f5",
+      "source_commit": "ed78fc8fb80e68a5687781d7db05b5f7ae117877",
+      "url": "https://files.pythonhosted.org/packages/b7/3b/29a8432548bc3d95e3f2f5a9d624760177a00c9c1c75833bd41c51a6764a/b3_prosaic_runtime-0.9.6-py3-none-any.whl",
+      "version": "0.9.6"
     },
     {
       "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.0/SHA256SUMS",

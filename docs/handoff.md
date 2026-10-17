@@ -1,5 +1,9 @@
 # Codex handoff
 
+## Native tool and experimental memory release preparation — 2026-10-17
+
+The active train adopts published Runtime 0.9.6 with Core 0.4.1, Runtime recorder 0.3.0, Harness 0.9.0 and Harness store 0.4.0. The previous context train is preserved in `dependencies/releases-lab-context-0.5.0.json`. Agent-quality and controlled retrieval memory examples are opt-in; memory remains experimental. Historical live findings retain their original candidate identity. See [the release ledger](verification/release-0.5.0-2026-10-17.md) for final qualification and publication.
+
 ## Published timeout patch adoption — 2026-10-14
 
 The active manifest now pins published Runtime 0.9.3 and Harness 0.8.2, retaining

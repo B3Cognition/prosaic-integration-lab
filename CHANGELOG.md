@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.5.0 — 2026-10-17
+
+- Add opt-in agent-quality and controlled retrieval-memory evaluation commands,
+  strict evidence checks, bounded allowances and immutable recovery/replay.
+- Publish synthetic reference cases and qualified findings with explicit model
+  limitations; memory remains experimental and is not enabled by default.
+- Exercise both new examples in installed-wheel and rebuilt-sdist release gates.
 
 - Conversation candidate host boundaries: authenticated closed HTTP contracts,
   retained-session creation/quota registry, explicit separate storage readiness,

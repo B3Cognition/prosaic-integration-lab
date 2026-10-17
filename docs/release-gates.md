@@ -6,7 +6,10 @@ on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload
 audit. Jobs use read-only repository permissions, no paid provider credentials,
-and publish only a whitelisted summary. Raw `.lab` directories, JUnit capture,
+and publish whitelisted summaries plus the qualified synthetic Lab wheel/source
+archives from the successful released ARM64/PostgreSQL 16 cell. The new-train
+wheel and rebuilt-source consumers run the agent-quality and memory installed
+smokes. Raw `.lab` directories, JUnit capture,
 database backups, Docker logs, tokens and private configs are never uploaded.
 Runner labels follow [GitHub's hosted runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
 

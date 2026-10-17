@@ -189,6 +189,13 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
     verify_cli_versions(version,json.loads(manifest.read_bytes()))
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
+    from lab_runner.gates import NATIVE_TOOLS_TRAIN
+    selected = {item['distribution']: item['version']
+                for item in json.loads(manifest.read_bytes())['artifacts']}
+    if selected == NATIVE_TOOLS_TRAIN:
+        for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
+            run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
+                directory=directory, environment=environment)
     audit()
     return python
 
