@@ -7,7 +7,7 @@
     },
     {
       "distribution": "b3-prosaic-runtime",
-      "sha256": "3da40dec5c9c3c6afa850d622e6c37db8c954c34718796bf18298fc77609e1df",
+      "sha256": "3aaf4bdd0694826725fe5169be331d131338e279c466bc248c08ab98c1df0eef",
       "version": "0.9.7+tools.1"
     },
     {
@@ -17,7 +17,7 @@
     },
     {
       "distribution": "b3-prosaic-harness",
-      "sha256": "d20f0bc1deb00a6e2a92e31ef4bced2d605f8e04edcd021ba83053d52ee41a9e",
+      "sha256": "479f29031d2fb68293ca6ad17b3175f3c9b0793f7da20e803ea86475dd2ae547",
       "version": "0.9.1+tools.1"
     },
     {
@@ -26,6 +26,6 @@
       "version": "0.4.0"
     }
   ],
-  "manifestDigest": "867213f6c97b7457fbd04eb81fc3e2c3d43102c732ad37056cd136eef79e38eb",
+  "manifestDigest": "db4ab01f1ada0bdb2fa12cb6a4a6e72ac80af912d44c49522e0b747409b180c4",
   "version": 1
 }

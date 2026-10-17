@@ -13,8 +13,8 @@
       "distribution": "b3-prosaic-runtime",
       "filename": "b3_prosaic_runtime-0.9.7+tools.1-py3-none-any.whl",
       "qualification": "local-offline-candidate",
-      "sha256": "3da40dec5c9c3c6afa850d622e6c37db8c954c34718796bf18298fc77609e1df",
-      "source_commit": "ac3abc64a2450aa5e1ad5367d0920f6c930c0793",
+      "sha256": "3aaf4bdd0694826725fe5169be331d131338e279c466bc248c08ab98c1df0eef",
+      "source_commit": "869192a970d52d29c605dfade43fc3dcad82f0dc",
       "version": "0.9.7+tools.1"
     },
     {
@@ -30,8 +30,8 @@
       "distribution": "b3-prosaic-harness",
       "filename": "b3_prosaic_harness-0.9.1+tools.1-py3-none-any.whl",
       "qualification": "local-offline-candidate",
-      "sha256": "d20f0bc1deb00a6e2a92e31ef4bced2d605f8e04edcd021ba83053d52ee41a9e",
-      "source_commit": "6fa903ee0fa969ae8dfcb55a26b464aabaffb7e7",
+      "sha256": "479f29031d2fb68293ca6ad17b3175f3c9b0793f7da20e803ea86475dd2ae547",
+      "source_commit": "f86e5e14551cd7aa13bd0a2ec2dd41e4e84e6abf",
       "version": "0.9.1+tools.1"
     },
     {
