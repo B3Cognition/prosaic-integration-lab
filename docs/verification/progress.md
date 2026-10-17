@@ -1,5 +1,14 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Tool outcomes and bounded recovery candidate — 2026-10-17
+
+Runtime classifies portable tool outcomes; Harness validates complete call
+identity before bounded recovery; Lab consumes the installed public contracts.
+The [separate qualification ledger](tool-outcomes-recovery-2026-10-17.md) records
+exact local candidates, source and installed/container checks, independent
+review, limits and readiness. Released manifests and historical live evidence
+are preserved. No provider-specific tuning or live inference is included.
+
 ## Published SDK adoption checkpoint — 2026-10-13
 
 The active manifest now selects actual published Core 0.4.1, Runtime 0.9.0/

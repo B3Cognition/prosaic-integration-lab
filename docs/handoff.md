@@ -1,5 +1,16 @@
 # Codex handoff
 
+## Provider-neutral tool outcomes and bounded recovery candidate — 2026-10-17
+
+The next operational-hardening milestone is implemented in local Runtime
+`0.9.7+tools.1`, Harness `0.9.1+tools.1` and Lab `0.5.1+tools.1` candidates.
+[`dependencies/tool-outcome-candidate.json`](../dependencies/tool-outcome-candidate.json)
+pins the exact SDK family; the released manifest is unchanged. Read the
+[qualification and review record](verification/tool-outcomes-recovery-2026-10-17.md)
+before another live run. Recovery is opt-in, provider-neutral and bounded by the
+existing case limits. Historic tool errors remain unclassified. No live
+inference, merge, push or publication is included in this milestone.
+
 ## Native tool and experimental memory release preparation — 2026-10-17
 
 The active train adopts published Runtime 0.9.6 with Core 0.4.1, Runtime recorder 0.3.0, Harness 0.9.0 and Harness store 0.4.0. The previous context train is preserved in `dependencies/releases-lab-context-0.5.0.json`. Agent-quality and controlled retrieval memory examples are opt-in; memory remains experimental. Historical live findings retain their original candidate identity. See [the release ledger](verification/release-0.5.0-2026-10-17.md) for final qualification and publication.

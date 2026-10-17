@@ -73,5 +73,9 @@ completed under unchanged limits: smaller-model task success fell from 4/6 to
 2/6 with memory enabled; the larger model passed 5/6 in both arms but received
 no recall under the full-trajectory budget. Memory remains experimental. All
 earlier comparisons are preserved and were not reused as the new test set.
-Portable tool-outcome evidence and bounded recovery are the recommended next
-milestone; distributed memory and write governance remain separate work.
+Portable tool-outcome evidence and bounded recovery are implemented in the
+[next local candidate](tool-outcomes-recovery.md); its
+[qualification record](verification/tool-outcomes-recovery-2026-10-17.md) covers
+the installed SDKs, limits and remaining gaps. New validated trace outcomes are
+classified; the earlier unclassified failures retain their original evidence.
+Memory efficacy, distributed memory and write governance remain separate work.

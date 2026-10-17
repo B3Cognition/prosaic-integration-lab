@@ -40,10 +40,10 @@ on_outcome callback preserves model/journal result envelopes. Native events
 carry owned tool_outcome. RunPolicy.bounded_tool_recovery bool defaultsFalse;
 new Runtime capability flags gate consumers.
 
-- [ ] Watch failing unit/privacy/transport regressions, implement classifications.
-- [ ] Verify native and conversation/structured event ownership, replay, strict
+- [x] Watch failing unit/privacy/transport regressions, implement classifications.
+- [x] Verify native and conversation/structured event ownership, replay, strict
   stop, legacy continuation and both provider formats; budgets remain shared.
-- [ ] Run Runtime full suite, build candidate wheel/sdist; record/commit evidence.
+- [x] Run Runtime full suite, build candidate wheel/sdist; record/commit evidence.
 
 ### Task 2: Harness recovery policy
 
@@ -54,10 +54,10 @@ new `tests/test_bounded_tool_recovery.py`.
 whenFalse; true requires capabilities and passes Runtime flag. Required-tool
 feedback uses validated fixed categories only. Non-repairable evidence blocks.
 
-- [ ] Watch failing tests for correctable failure, missing tool, malformed or
+- [x] Watch failing tests for correctable failure, missing tool, malformed or
   wrong-version evidence, uncertain effects, completed repair and exhausted caps.
-- [ ] Implement public policy and receipt consumption; retain existing recovery.
-- [ ] Run full suite against installed Runtime candidate; build/commit Harness.
+- [x] Implement public policy and receipt consumption; retain existing recovery.
+- [x] Run full suite against installed Runtime candidate; build/commit Harness.
 
 ### Task 3: Lab opt-in adoption
 
@@ -69,19 +69,19 @@ inputs and packaged freeze metadata; version/guide.
 policy identity; trace saves only validated ToolOutcome evidence, legacyunknown
 is unclassified. No memory prompt/scorer/model settings changes.
 
-- [ ] Watch failing native tests, implement installed-public-API hooks.
-- [ ] Test shared unchanged limits, no inferred historical causes, zero-effect
+- [x] Watch failing native tests, implement installed-public-API hooks.
+- [x] Test shared unchanged limits, no inferred historical causes, zero-effect
   argument correction, unknown stop and immutable receipt-only trace replay.
-- [ ] Run full suite against installed candidates; build/commit Lab candidate.
+- [x] Run full suite against installed candidates; build/commit Lab candidate.
 
 ### Task 4: Installed qualification and final review
 
 **Files:** Lab installed smoke script, qualification guide/report; exact manifests
 and immutable private evidence. Candidate versions per spec.
 
-- [ ] Qualify fresh wheel/sdist installation and payload matching; exercise both
+- [x] Qualify fresh wheel/sdist installation and payload matching; exercise both
   wire formats, privacy, cap exhaustion and recovery with external network denied.
-- [ ] Build/run isolated consumer image checks; distinguish external service lanes.
-- [ ] Fresh whole-change review spanning all three repositories; one watched
+- [x] Build/run isolated consumer image checks; distinguish external service lanes.
+- [x] Fresh whole-change review spanning all three repositories; one watched
   RED→GREEN fix pass for Important/Critical findings, full suites green after fixes.
-- [ ] Preserve artifacts/ledgers, record actual qualification/readiness and commit.
+- [x] Preserve artifacts/ledgers, record actual qualification/readiness and commit.

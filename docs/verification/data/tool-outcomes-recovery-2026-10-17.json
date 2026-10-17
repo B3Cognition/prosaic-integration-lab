@@ -1,0 +1,115 @@
+{
+  "artifacts": [
+    {
+      "distribution": "b3-prosaic-runtime",
+      "installedFiles": 57,
+      "reviewedSourceFiles": 50,
+      "sourceArchiveSha256": "51e5ede93a6a2c3c7ed99b5a249b99c41af78e0778419e33f584feb14adb6890",
+      "sourceCommit": "869192a970d52d29c605dfade43fc3dcad82f0dc",
+      "version": "0.9.7+tools.1",
+      "wheelSha256": "3aaf4bdd0694826725fe5169be331d131338e279c466bc248c08ab98c1df0eef"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "installedFiles": 35,
+      "reviewedSourceFiles": 29,
+      "sourceArchiveSha256": "6f617582fcb5adfc654be6e77673f8058cc17cd1a9dc29c0bfeb2d86e73068bf",
+      "sourceCommit": "f86e5e14551cd7aa13bd0a2ec2dd41e4e84e6abf",
+      "version": "0.9.1+tools.1",
+      "wheelSha256": "479f29031d2fb68293ca6ad17b3175f3c9b0793f7da20e803ea86475dd2ae547"
+    },
+    {
+      "distribution": "prosaic-integration-lab",
+      "installedFiles": 119,
+      "reviewedSourceFiles": 115,
+      "sourceArchiveSha256": "1af7f677e23610163d542bbaf02892b58290a16c03ed1183f4aaccc592206320",
+      "sourceCommit": "355f08cdde6d988b8fabe0a44560cb78b535b791",
+      "version": "0.5.1+tools.1",
+      "wheelSha256": "52aca1ce4971a76af1fa80165c09c36eb2524ff73e2d91e65a0334747bb6171f"
+    }
+  ],
+  "externalServiceAcceptance": "not rerun; not claimed",
+  "host": {
+    "architecture": "arm64",
+    "os": "Darwin",
+    "python": "3.12.14"
+  },
+  "image": {
+    "architecture": "arm64",
+    "id": "sha256:51021c31a46723db45d4daea7b6296c6ce4869d263cfd322389dd5054d90bf1c",
+    "network": "none",
+    "os": "linux",
+    "providerRequests": 19,
+    "readOnly": true,
+    "scenarios": 10,
+    "toolCalls": 9
+  },
+  "installed": {
+    "harnessChecks": 24,
+    "mandatoryWheelGatePassed": true,
+    "memoryScenarios": 10,
+    "providerRequests": 19,
+    "replayAdditionalRequests": 0,
+    "runtimeChecks": 55,
+    "sdkPayloadAuditPassed": true,
+    "toolCalls": 9,
+    "traceBytesPreserved": true
+  },
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "live": {
+    "additionalProviderRequests": 0,
+    "ceilings": {
+      "providerRequests": 1475,
+      "reportedTokens": 1976623,
+      "toolCalls": 604
+    },
+    "charged": {
+      "providerRequests": 1417,
+      "reportedTokens": 1696913,
+      "toolCalls": 574
+    },
+    "previousCanonicalLedgerUnchanged": true,
+    "previousEvidenceArchiveUnchanged": true,
+    "remaining": {
+      "providerRequests": 58,
+      "reportedTokens": 279710,
+      "toolCalls": 30
+    },
+    "unknownReservations": 7
+  },
+  "origin": "synthetic-offline-fixtures",
+  "published": false,
+  "readiness": "Ready for a controlled fresh comparison within remaining allowance; model/memory efficacy unproven.",
+  "review": {
+    "critical": 0,
+    "declinedWithinScope": 0,
+    "fixPasses": 1,
+    "freshReviewers": 1,
+    "important": 2,
+    "importantFixed": 2,
+    "minor": 0
+  },
+  "sdkManifestSha256": "db4ab01f1ada0bdb2fa12cb6a4a6e72ac80af912d44c49522e0b747409b180c4",
+  "sourceSuites": {
+    "harness": {
+      "passed": 855,
+      "skipped": 2
+    },
+    "lab": {
+      "passed": 1294,
+      "skipped": 0
+    },
+    "runtime": {
+      "passed": 1290,
+      "skipped": 1
+    }
+  },
+  "status": "qualified-offline",
+  "version": 1
+}
