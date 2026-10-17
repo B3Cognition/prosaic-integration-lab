@@ -19,7 +19,8 @@ claims and retained model-study evidence.
 The next experimental milestone adds an opt-in
 [typed evidence consumer pattern](docs/verification/typed-evidence.md). It
 classifies verified, absent and unread facts without supplying a model decision.
-Its fresh live comparison is pending; released Lab 0.5.0 remains unchanged.
+Its fresh live comparison stopped on a token-budget overrun; the verification
+note records the incomplete results. Released Lab 0.5.0 remains unchanged.
 
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow

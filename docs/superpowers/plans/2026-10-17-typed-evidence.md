@@ -58,7 +58,7 @@
 - [x] Freeze implementation/corpus, then author twelve fresh cases; freeze evaluation without subsequent tuning.
 - [x] Build/install immutable wheel/source artifacts in fresh environments; run all96 fixture samples and provider-denied replay; verify package payloads and audit result hashes.
 - [x] Fresh whole-change review, one bounded correction pass if needed; restart freeze/evaluation if implementation tuning occurs after case exposure.
-- [ ] Compute all historic usage and worst-case reservations; request only necessary numerical live extension after offline preparation.
+- [x] Compute all historic usage and worst-case reservations; request only necessary numerical live extension after offline preparation.
 
 ### Task 4: Live comparison and findings
 
@@ -69,3 +69,12 @@
 - [ ] Dispatch only after allowance approval, preserve unknowns and all prior reservations, no hidden probes/retries.
 - [ ] Audit all receipts/current-source joins/scoring/usage and socket-denied byte-identical replay.
 - [ ] Explain observed summary versus memory effects and remaining roadmap gaps; do not label model improvement or provider portability beyond the evidence.
+
+**Execution outcome:** User approved the exact cumulative extension. The raw48
+completed; typed stopped at6samples when reported usage8516 exceeded the
+unchanged8192case reservation. No further dispatch. All54executed samples audited
+and denied-network replayed, with byte-identical original evidence. The324known
+excess is charged separately and the original reservation fully retained. The
+full comparison remains incomplete; do not check off full-run results. A general
+budget-admission/accounting milestone is proposed, pending user decision; any
+future code/policy change needs a new freeze and fresh evaluation.
