@@ -7,7 +7,7 @@ from test_retrieval_memory_runner import bundle
 def test_ordered_freeze_binds_corpus_code_and_evaluation_without_live_calls():
     from lab_runner.memory.freeze import development_manifest,evaluation_manifest,verify
     b=bundle();dev=development_manifest(b['corpus'],b['historicalSources'])
-    assert {'runner.py','suite.py'}<=set(dev['qualityDependencies'])
+    assert {'runner.py','suite.py','token_admission.py'}<=set(dev['qualityDependencies'])
     suite={k:b[k] for k in ('version','suiteId','cases')};evaluation=evaluation_manifest(suite,dev)
     verify(b,dev,evaluation)
     changed=deepcopy(b);changed['corpus']['episodes'][0]['note']='tuned after evaluation'

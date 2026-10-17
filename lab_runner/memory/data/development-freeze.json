@@ -1,32 +1,33 @@
 {
-  "version": 1,
+  "corpusDigest": "6e3d85412619290f80e56a728123a50f9f3d26c8886973ed43edcb953919b9a2",
+  "historicalSourcesDigest": "ce778ba8c71090815b92d20f21d1c9f322a3e52902355b5d342db0ed2727a778",
   "implementation": {
-    "fixture.py": "91a03b3af4f231ce954a5ec9d9d7e9186ee54619c76530577437c1a1194ab8c5",
-    "runner.py": "5d42b10b2f55d5e44ec65217f763b0fa9bd9dbadcea10994f2f987cfb06b7de3",
-    "execution.py": "87408ebf26c89672c53ee527bada982156cbae20a03ffaf1d19eef51ae17c733",
-    "suite.py": "610c9a5db9855945b23419ac401c1442b75907172fba752acd86137f4bc642cf",
-    "scoring.py": "7d74ddb64527414e8f0283941792b0ea785f8c85cf46805d1c106dc8361d098d",
+    "../retrieval_memory.py": "415a01380cea29854063fc744222a266b8de7b1bf2c3f506b9bcbbcfa55080ab",
     "__init__.py": "794f5b685779a01185502a545e3a8e951e5784c1185a05f1d26d66e0fde8cbcf",
     "context.py": "d3cd06ab7962c39cb586e9a50400e9ac2d17fb47d4ddba4648dc5f8d5db09c62",
     "contracts.py": "6f358d87edcbadf80d9f9157887851c20cb5d27962881e73dab64ef02e00279e",
-    "freeze.py": "029c6c39410eabca333a7549c9527df73de3cb375bdd3278366b4e012d47dbcd",
-    "evidence.py": "bb012c4ab8f476cf10b92f055d01ac62283e30c3d3ec8408e9f3cf3800643d60",
     "corpus.py": "828d8ee53f1b2765032663a80162777c5d42a8f87641b4eddb67038f4edce26a",
-    "reporting.py": "76c2d1dab66aa590bc9293c297f51d45f38407d3a799bdf60456a66750aafe05",
     "data/evidence-summary.schema.json": "16d74f90c7628f2365a63b3357a40d26c500cded12e09e385adc80449ec7adb3",
-    "../retrieval_memory.py": "415a01380cea29854063fc744222a266b8de7b1bf2c3f506b9bcbbcfa55080ab"
-  },
-  "qualityDependencies": {
-    "contracts.py": "8016c4967039cc15e59bbeed4085a4e741f1c836208459b79bb32073be22d94b",
-    "checks.py": "d2b07910d0bc92ff3d79f526251851faff89c662c0638e7b08282884a9535c84",
-    "execution.py": "f6af0dbd9b99adf7aed469d3e2ff2d02a607afaf6a3e29c7c0e19c879f8e55cd",
-    "scoring.py": "08df607887f18c16866ededc7d4cd89db762174a0089ff760c7ef2d8faaee45d",
-    "allowance.py": "1540a513b88c10ac119fb74cd81a1ae4afca19665b3d8c89af5ce68028960706",
-    "runner.py": "2190c11191cdf4f4709471b478e0e7d59530583094cbd13ac6eb88cf3275bc33",
-    "suite.py": "31695d93e0c1dc9a1d605c3d99749d5bf87bbce2dae2cd6a5e5555163c1a1ccd",
-    "data/answer.schema.json": "ac845f7fdc6dc3821afade1f8abb48dea6d6fab388a153f0ded1c4c09c5e0ad7"
+    "evidence.py": "bb012c4ab8f476cf10b92f055d01ac62283e30c3d3ec8408e9f3cf3800643d60",
+    "execution.py": "2697b212c909e210491028de17a5cc66c81e1ddc81a1173062295add270d6803",
+    "fixture.py": "91a03b3af4f231ce954a5ec9d9d7e9186ee54619c76530577437c1a1194ab8c5",
+    "freeze.py": "0680123f41a0daee54304484315bf0c18d5b21fc908eba7ea7757f5a69d6aff5",
+    "reporting.py": "7423db17db26b6af41c526ba783f095d513a6ecdd5dba7cf24cb7cd7852ae544",
+    "runner.py": "1ec58312c64fb8047fa94c23b0ed0f9d4063506a881e725cad42d56d300fe241",
+    "scoring.py": "7d74ddb64527414e8f0283941792b0ea785f8c85cf46805d1c106dc8361d098d",
+    "suite.py": "610c9a5db9855945b23419ac401c1442b75907172fba752acd86137f4bc642cf"
   },
   "proseDigest": "d91a90088f5de2b56e5d4cb8e4c19872dd61580cb767ab76c75745294b5cbf16",
-  "corpusDigest": "6e3d85412619290f80e56a728123a50f9f3d26c8886973ed43edcb953919b9a2",
-  "historicalSourcesDigest": "ce778ba8c71090815b92d20f21d1c9f322a3e52902355b5d342db0ed2727a778"
+  "qualityDependencies": {
+    "allowance.py": "66cf9bf7428508e3fc4444a8ff2e405c29c5f4d7d4d68807ba5453b63f9c0fa0",
+    "checks.py": "d2b07910d0bc92ff3d79f526251851faff89c662c0638e7b08282884a9535c84",
+    "contracts.py": "8016c4967039cc15e59bbeed4085a4e741f1c836208459b79bb32073be22d94b",
+    "data/answer.schema.json": "ac845f7fdc6dc3821afade1f8abb48dea6d6fab388a153f0ded1c4c09c5e0ad7",
+    "execution.py": "fa1a1ed555cfa225790c22c71e03608cfcbd426963f00cb6213d7c49028fa1b6",
+    "runner.py": "7b00d3b9a7290fd2bc28146f304df0be5050594ebf515e51da294f486aa03b66",
+    "scoring.py": "08df607887f18c16866ededc7d4cd89db762174a0089ff760c7ef2d8faaee45d",
+    "suite.py": "31695d93e0c1dc9a1d605c3d99749d5bf87bbce2dae2cd6a5e5555163c1a1ccd",
+    "token_admission.py": "978f7f0da23f68916bc34d4cc2df098bfef454f06a9279282159ac256528202c"
+  },
+  "version": 1
 }

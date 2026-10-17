@@ -61,15 +61,16 @@ def test_grounding_helper_changes_bind_resume_and_schema_identity():
     assert len(code_digest())==64
 
 
-def test_helper_source_drift_blocks_saved_context_before_retrieval(tmp_path,monkeypatch):
+@pytest.mark.parametrize('package,target',[('lab_runner.memory','contracts.py'),('lab_runner.quality','token_admission.py')])
+def test_helper_source_drift_blocks_saved_context_before_retrieval(tmp_path,monkeypatch,package,target):
     import lab_runner.memory.execution as execution
     case,corpus,_,_=development();path=tmp_path/'prepared.json'
     execution.freeze(case,corpus,'enabled',path);before=execution.code_digest();original=execution.files
     class ChangedText:
-        def read_text(self,**kw):return original('lab_runner.memory').joinpath('contracts.py').read_text(**kw)+'\n# changed contract\n'
+        def read_text(self,**kw):return original(package).joinpath(target).read_text(**kw)+'\n# changed contract\n'
     class ChangedRoot:
-        def joinpath(self,name):return ChangedText() if name=='contracts.py' else original('lab_runner.memory').joinpath(name)
-    monkeypatch.setattr(execution,'files',lambda package:ChangedRoot() if package=='lab_runner.memory' else original(package))
+        def joinpath(self,name):return ChangedText() if name==target else original(package).joinpath(name)
+    monkeypatch.setattr(execution,'files',lambda requested:ChangedRoot() if requested==package else original(requested))
     assert execution.code_digest()!=before
     def forbidden(*a,**kw):raise AssertionError('retrieval despite contract drift')
     monkeypatch.setattr(corpus,'retrieve',forbidden)

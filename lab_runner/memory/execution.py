@@ -38,7 +38,8 @@ fact rule regardless of the available values; report only available verified fac
 def code_digest():
     names=('corpus.py','context.py','contracts.py','execution.py','evidence.py','data/evidence-summary.schema.json')
     return digest(dict(memory={n:files(__package__).joinpath(n).read_text(encoding='utf-8') for n in names},
-        checks=files('lab_runner.quality').joinpath('checks.py').read_text(encoding='utf-8')))
+        checks=files('lab_runner.quality').joinpath('checks.py').read_text(encoding='utf-8'),
+        admission=files('lab_runner.quality').joinpath('token_admission.py').read_text(encoding='utf-8')))
 
 
 def freeze(case,corpus,arm,path,*,evidence_format='raw'):

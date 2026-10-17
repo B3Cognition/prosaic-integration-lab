@@ -38,7 +38,7 @@ def identity(bundle,*,evidence_format='raw'):
     source={p.name:p.read_text(encoding='utf-8') for p in files(__package__).iterdir() if p.name.endswith('.py')}
     source['data/evidence-summary.schema.json']=files(__package__).joinpath('data/evidence-summary.schema.json').read_text(encoding='utf-8')
     quality={n:files('lab_runner.quality').joinpath(n).read_text(encoding='utf-8') for n in
-             ('checks.py','execution.py','scoring.py','contracts.py','allowance.py','runner.py','suite.py')}
+             ('checks.py','execution.py','scoring.py','contracts.py','allowance.py','runner.py','suite.py','token_admission.py')}
     return dict(suiteId=bundle['suiteId'],suiteDigest=digest(bundle['cases']),
         corpusDigest=digest({c['caseId']:corpus.tenant_digest(c['tenantId']) for c in bundle['cases']}),
         implementationDigest=digest(dict(memory=source,quality=quality)),evidenceFormat=evidence_format,
