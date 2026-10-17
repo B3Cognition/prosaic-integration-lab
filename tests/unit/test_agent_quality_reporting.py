@@ -91,12 +91,12 @@ def test_report_does_not_echo_arbitrary_identity_or_recovery_data():
         summarize([],[],identity=benchmark_identity(),origin='fixture',recovery=[{'passed':True,'secret':'canary'}])
 
 
-def test_provenance_binds_the_explicit_continuation_candidate_manifest():
+def test_provenance_binds_the_explicit_response_diagnostics_candidate_manifest():
     from lab_runner.quality.runner import preflight
     from prosaic_integration_lab.dependencies import manifest_digest
     from pathlib import Path
     report=preflight()
-    manifest=Path(__file__).resolve().parents[2]/'dependencies/continuation-candidate.json'
+    manifest=Path(__file__).resolve().parents[2]/'dependencies/response-diagnostics-candidate.json'
     assert report['identity']['sdkManifestDigest']==manifest_digest(manifest)
 
 
