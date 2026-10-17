@@ -54,10 +54,10 @@
 
 **Interfaces:** Existing runner schedules48 per format; two separately bound formats form96 samples with paired aggregate analysis. Exact installed candidate/SDK digests and corpus/case hashes bind both.
 
-- [ ] Add new synthetic history topics and test old entries retained; finish code/prose qualification before development freeze.
-- [ ] Freeze implementation/corpus, then author twelve fresh cases; freeze evaluation without subsequent tuning.
-- [ ] Build/install immutable wheel/source artifacts in fresh environments; run all96 fixture samples and provider-denied replay; verify package payloads and audit result hashes.
-- [ ] Fresh whole-change review, one bounded correction pass if needed; restart freeze/evaluation if implementation tuning occurs after case exposure.
+- [x] Add new synthetic history topics and test old entries retained; finish code/prose qualification before development freeze.
+- [x] Freeze implementation/corpus, then author twelve fresh cases; freeze evaluation without subsequent tuning.
+- [x] Build/install immutable wheel/source artifacts in fresh environments; run all96 fixture samples and provider-denied replay; verify package payloads and audit result hashes.
+- [x] Fresh whole-change review, one bounded correction pass if needed; restart freeze/evaluation if implementation tuning occurs after case exposure.
 - [ ] Compute all historic usage and worst-case reservations; request only necessary numerical live extension after offline preparation.
 
 ### Task 4: Live comparison and findings
