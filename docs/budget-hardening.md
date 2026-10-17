@@ -1,5 +1,8 @@
 # Budget hardening candidate
 
+See [the completed offline qualification](verification/budget-hardening-2026-10-17.md)
+for source commits, wheel checksums, full-suite results and remaining limits.
+
 This milestone fixes operational bounds without model-specific prompts,
 tokenizer guesses, higher case limits or additional live inference. Core and
 Harness remain unchanged. Runtime's public ExecutionBudget owns process-local
