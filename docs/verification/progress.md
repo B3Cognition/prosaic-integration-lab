@@ -1,5 +1,16 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Eight-sample real-model handoff result — 2026-10-18
+
+[Live evaluation](real-handoffs-live-2026-10-18.md):8/8samples ran,0/8workflows
+passed planner. Smaller returns schema descriptions; larger exhausts512output
+tokens with incomplete JSON. No downstream worker/critic opportunity, so critic
+efficacy remains unmeasured. All usage known;8requests/0tools/7268tokens, eight
+copied-store recoveries without network. Current1476/601/1776439 versus ceilings
+1500/617/1976623, all8old unknowns retained. Fix the provider-neutral role/schema
+boundary and avoid unnecessary model generation of host-owned assignments before
+testing more complex collaboration. Study stayed frozen; no publication.
+
 ## Frozen real-model handoff preparation — 2026-10-18
 
 [Prepared](real-handoffs-2026-10-18.md):1388source tests,15installed regressions,

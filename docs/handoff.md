@@ -1,5 +1,24 @@
 # Codex handoff
 
+## Eight-sample real-model handoff evaluation complete — 2026-10-18
+
+The [live result](verification/real-handoffs-live-2026-10-18.md) ran all8frozen
+samples, four per model, under unchanged caps. All stopped at planner: smaller
+4/4schema descriptions instead of values; larger4/4incomplete JSON at512output
+tokens. Worker/tool/critic reached0; critic benefit unmeasurable, not negative
+efficacy evidence. No new unknown, overrun, timeout or counter violation.
+Study8requests/0tools/7268tokens; cumulative1476/601/1776439 versus approved
+1500/617/1976623, remaining24/16/200184;8old unknown reservations retained.
+Auditor reconciles all receipts/observations and copied-state recovery with
+network denied. No model/prompt/graph changes or extra probes during the study.
+Next: provider-neutral model-visible output contracts, deterministic host-owned
+assignment preparation, and direct worker/critic qualification before another
+fresh live evaluation. Memory remains experimental; no push/release.
+Preserved450new files;37canonical ledgers,36prior hashes unchanged. Latest ledger
+SHA256b87e25f97d522d3a89fb2dd953cc64ee09813d26dcbfc53f3ded9606f31aa17e.
+Closed operators expect their original36-ledger baseline and cannot be reused
+for a new run; create a fresh study root using the current37-ledger baseline.
+
 ## Real-model handoff evaluation frozen; allowance pending — 2026-10-18
 
 [Prepared study](verification/real-handoffs-2026-10-18.md) uses local experimental

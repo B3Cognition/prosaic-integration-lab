@@ -44,16 +44,16 @@ token_counter)` returns the same receipts/checkpoint/journal/counts plus elapsed
 time and persisted recorder/turn/counter observations. Caller owns allowance and
 explicit live opt-in. The existing synthetic executor remains the default.
 
-- [ ] Write failing real-HTTP fixture tests for measured execution, counter mismatch,
+- [x] Write failing real-HTTP fixture tests for measured execution, counter mismatch,
   missing counter, shared exhaustion and network-denied reconstruction.
-- [ ] Implement the public SDK executor and recording; focused tests pass.
-- [ ] Run complete Lab suite, build and audit a private candidate wheel; obtain
+- [x] Implement the public SDK executor and recording; focused tests pass.
+- [x] Run complete Lab suite, build and audit a private candidate wheel; obtain
   one fresh final review and fix important findings with RED/GREEN regressions.
-- [ ] Freeze four fresh cases (approve/reject/missing/conflict), eight scheduled
+- [x] Freeze four fresh cases (approve/reject/missing/conflict), eight scheduled
   samples across two models, independent expected fields, exact artifacts,
   serving/counter guards and analysis protocol. Qualify all cases offline with
   actual registered counters against synthetic HTTP; no live endpoint probes.
-- [ ] Request full allowance deficit after preparation: prior1468/601/1769171,
+- [x] Request full allowance deficit after preparation: prior1468/601/1769171,
   ceilings1475/604/1976623, full reservation32/16/65536. Need25requests/13tools,
   new ceilings1500/617/1976623. Preserve eight unknown reservations.
 
@@ -63,13 +63,13 @@ explicit live opt-in. The existing synthetic executor remains the default.
 All eight whole-case reservations must fit before starting. Stop on uncertainty,
 overrun or asset drift. No tuning/correction after live results.
 
-- [ ] Execute once per scheduled sample after allowance approval; save all receipts,
+- [x] Execute once per scheduled sample after allowance approval; save all receipts,
   counter proposals, observations and outcomes privately. Reconcile usage and
   copy/reconstruct saved state under a denied-network audit.
-- [ ] Report per-model worker correctness, critic catches/misses/false alarms,
+- [x] Report per-model worker correctness, critic catches/misses/false alarms,
   critic coverage and request/token/time cost; compare pre/post critic decisions
   within the same trajectory, not an invented randomized no-critic experiment.
-- [ ] Explain if evidence is insufficient to show critic benefit (including zero
+- [x] Explain if evidence is insufficient to show critic benefit (including zero
   natural worker-error opportunities). Attribute host safety separately. Preserve
   all ledgers and artifacts; update handoff/progress and commit locally.
 

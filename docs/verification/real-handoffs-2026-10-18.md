@@ -1,5 +1,9 @@
 # Frozen real-model handoff evaluation — preparation
 
+The user subsequently approved the requested allowance. The
+[completed live study](real-handoffs-live-2026-10-18.md) records all eight planner
+failures and known usage. This section preserves the original preparation state.
+
 No live inference has been dispatched for this study. The user authorized a
 frozen evaluation across both existing models, with current per-case limits and
 a separate request for the additional cumulative allowance needed.
