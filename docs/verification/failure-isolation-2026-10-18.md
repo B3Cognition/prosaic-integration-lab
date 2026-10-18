@@ -7,7 +7,7 @@ This milestone starts from that merged revision on `codex/durable-failure-recove
 
 ## Scope
 
-Experimental Lab `0.5.1+isolation.1` adds a private single-host containment journal
+Experimental Lab `0.5.1+isolation.2` adds a private single-host containment journal
 around whole SDK operations. It persists admission before dispatch, fences
 journal writers on explicit isolation, retains complete reservations and permits
 only explicit receipt-only recovery. Known overruns retain actual excess and
@@ -19,7 +19,7 @@ distributed queue or provider-specific recovery policy. No upstream SDK changes,
 model/prompt tuning, live calls or stable release are included. Memory and
 correction remain experimental; model/critic benefit remains unestablished.
 
-## Qualification
+## Initial qualification (`isolation.1`)
 
 - Unit tests: 14 RED missing-blueprint failures, then 14 GREEN. They cover
   process loss after admission/start/completion, concurrency, duplicate claims,
@@ -59,6 +59,32 @@ Candidate wheel SHA256:
 Candidate sdist SHA256:
 `b123512631b73f659860344b424fd430e438c8633d3348dba02aa03cd329e4db`.
 
+## One fresh review and material fix
+
+The independent `gpt-6-astra/high` reviewer found one Important issue at
+`e52acee`: a previously admitted item could start after another item's known
+overrun. The start gate now checks the journal-wide latch inside the same
+exclusive lock. Queued work stays reserved and requires explicit recovery.
+Six regressions (requests/tools/tokens × completion/recovery) failed RED before
+the fix; the focused suite then passed **25 tests**. The reviewer independently
+passed the original 19 tests and reproduced the issue. Zero Critical/Minor
+findings; declined-to-judge list empty. No re-review was dispatched.
+
+The fixed candidate is `isolation.2`; all original candidate evidence and
+installed environments remain intact. Its 135 source/wheel/installed payloads
+match. Final wheel SHA256:
+`549682edd6c0dd100c0e477140cb835790569c6fa64a1e249c9f7fab1d9b3088`.
+Final sdist SHA256:
+`1228038bb9019bbe93385d2fd2abe2b01509450f4b09a2093a0f7657e5818c79`.
+Final full source suite: **1678 passed**, one existing warning, 376.64 seconds.
+Repeated installed qualification passed four both-wire lanes /16 synthetic
+requests, four network-denied recoveries, three process-loss boundaries and
+six blocked queued starts. Repeated clean wheel/rebuilt-sdist public adoption
+passed, including owned cleanup; no stack execution or live calls. The one
+material fix pass is complete; no deferred minors or design rulings.
+Host qualification was Python3.12.14 /Darwin arm64; Linux/platform acceptance
+for this new candidate remains a future review-PR CI gate.
+
 ## Preserved limits and adoption boundary
 
 Per case remains 4 requests / 2 tools / 8192 reported tokens / 600 seconds /
@@ -73,12 +99,14 @@ The historical read-only verifier passed: six frozen live samples, 9853 guards,
 latest study's retained unknown. No replay/provider call occurred. Current
 canonical total remains 39 ledgers and nine unknown reservations.
 
-Local proof: `/private/tmp/prosaic-isolation-final-study-20261018`, installed
+Initial proof: `/private/tmp/prosaic-isolation-final-study-20261018`, installed
 environment `/private/tmp/prosaic-isolation-final-env`, artifacts
-`/private/tmp/prosaic-isolation-artifacts-20261018`. Preserve the initial failed
-report root `/private/tmp/prosaic-isolation-study-20261018` as well.
+`/private/tmp/prosaic-isolation-artifacts-20261018`. Final proof uses
+`/private/tmp/prosaic-isolation-qualified-study-20261018`, environment
+`/private/tmp/prosaic-isolation-qualified-env`, artifacts
+`/private/tmp/prosaic-isolation-qualified-artifacts-20261018`. Preserve the
+initial failed report root `/private/tmp/prosaic-isolation-study-20261018` as well.
 
-Final independent review will be recorded before closing this milestone.
 Before a new live evaluation: freeze new operators/cases and
 accounting baseline, qualify the consuming host's receipt verification, reserve
 all spend under current caps, and obtain live authorization. No new live run

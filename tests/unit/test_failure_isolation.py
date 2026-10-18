@@ -106,6 +106,34 @@ def test_known_overrun_is_honest_and_blocks_admission(tmp_path):
     with pytest.raises(ValueError):j.admit('other',binding='c'*64)
 
 
+@pytest.mark.parametrize('route',['completion','recovery'])
+@pytest.mark.parametrize('actual',[
+    dict(providerRequests=5,toolCalls=1,reportedTokens=300),
+    dict(providerRequests=2,toolCalls=3,reportedTokens=300),
+    dict(providerRequests=2,toolCalls=1,reportedTokens=10000)])
+def test_pre_admitted_work_cannot_start_after_any_recorded_overrun(tmp_path,route,actual):
+    path=tmp_path/'journal.json';j=journal(path)
+    first=j.admit('first',binding='b'*64)
+    queued=j.admit('queued',binding='c'*64)
+    j.start('first',first)
+    if route=='completion':
+        j.complete('first',first,actual=actual,evidence_digest='d'*64)
+    else:
+        j.isolate('first',binding='b'*64,decision_digest='e'*64)
+        j.recover('first',binding='b'*64,decision_digest='f'*64,
+                  actual=actual,evidence_digest='d'*64,outcome='failed')
+    j=journal(path)
+    assert j.status()['admissionBlocked']
+    with pytest.raises(ValueError):j.start('queued',queued)
+    assert j.inspect('queued')['state']=='admitted'
+    assert j.inspect('queued')['actual'] is None
+    assert j.status()['retained']['reportedTokens'] >= 16384
+    j.isolate('queued',binding='c'*64,decision_digest='e'*64)
+    j.recover('queued',binding='c'*64,decision_digest='f'*64,
+              actual=None,evidence_digest=None,outcome='unknown')
+    assert j.status()['admissionBlocked']
+
+
 def test_deadline_survives_restart_and_does_not_authorize_late_success(tmp_path,monkeypatch):
     import time
     j=journal(tmp_path/'journal.json');t=j.admit('one',binding='b'*64)

@@ -39,9 +39,9 @@
 - Consumes: `quality.allowance.private_write/private_directory/counts`, canonical digest/identifier helpers; public correction execution/recovery only in qualification.
 - Produces: `FailureIsolation(path, identity=sha256, limits=counts)` with `admit(work_id, binding=sha256) -> writer_token`, `start(work_id, token)`, `complete(work_id, token, actual=counts, evidence_digest=sha256, outcome='completed'|'failed')`, `isolate(work_id, binding=sha256, decision_digest=sha256)`, `recover(work_id, binding=sha256, decision_digest=sha256, actual=counts|None, evidence_digest=sha256|None, outcome='completed'|'failed'|'unknown')`, `inspect(work_id)`, `status()`.
 
-- [ ] Write behavioral tests: crash at admitted/started/completed boundaries, duplicate and concurrent admission, revoked token, drift, invalid counts, deadline, unknown recovery and overrun. Assert 4/2/8192 retained per item; a second case fits only inside 8/4/16384 containment limits.
-- [ ] Run focused tests; expect missing journal assertion failure.
-- [ ] Implement minimal journal and validation; no dispatcher, executor callbacks, retries or mutable SDK state.
-- [ ] Run focused tests; expect all pass. Add both-wire public SDK isolation/recovery qualification and installed-package smoke; watch missing smoke fail before implementation.
-- [ ] Write adoption guide with trusted-host authority and local durability limits; run full source suite, build and installed smoke with recovery network denied.
-- [ ] Commit implementation; record qualification and one fresh final review. Fix material findings test-first in one pass, rerun full suite. Preserve evidence and historical accounting unchanged.
+- [x] Write behavioral tests: crash at admitted/started/completed boundaries, duplicate and concurrent admission, revoked token, drift, invalid counts, deadline, unknown recovery and overrun. Assert 4/2/8192 retained per item; a second case fits only inside 8/4/16384 containment limits.
+- [x] Run focused tests; expect missing journal assertion failure.
+- [x] Implement minimal journal and validation; no dispatcher, executor callbacks, retries or mutable SDK state.
+- [x] Run focused tests; expect all pass. Add both-wire public SDK isolation/recovery qualification and installed-package smoke; watch missing smoke fail before implementation.
+- [x] Write adoption guide with trusted-host authority and local durability limits; run full source suite, build and installed smoke with recovery network denied.
+- [x] Commit implementation; record qualification and one fresh final review. Fix material findings test-first in one pass, rerun full suite. Preserve evidence and historical accounting unchanged.

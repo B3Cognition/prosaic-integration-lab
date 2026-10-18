@@ -146,7 +146,8 @@ class FailureIsolation:
         with self._lock():
             state = self._read()
             row = self._row(state, work_id)
-            if row['state'] != 'admitted' or row['token'] != token or time.time() >= row['deadline']:
+            if (row['state'] != 'admitted' or row['token'] != token or time.time() >= row['deadline'] or
+                    any(r['state'] == 'overrun' for r in state['work'].values())):
                 raise ValueError('dispatch intent denied')
             row['state'] = 'active'
             private_write(self.path, state)

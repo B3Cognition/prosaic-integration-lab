@@ -54,7 +54,8 @@ remaining = intent['deadline'] - time.time()
 if remaining <= 0:
     raise ValueError('explicit recovery required')
 budget = ExecutionBudget(timeout_s=remaining, max_provider_requests=4,
-                         max_tool_calls=2, max_reported_tokens=8192)
+                         max_tool_calls=2, max_reported_tokens=8192,
+                         cancelled=lambda: journal.status()['admissionBlocked'])
 with budget.activate():
     evidence = run_public_sdk_operation()
 # Host verifies receipt bindings, complete usage and domain acceptance first.
@@ -70,6 +71,11 @@ block another independently authorized identifier if the remaining containment
 capacity covers its full reservation. A **known overrun** records actual counts,
 retains the larger of actual and maximum in each dimension, marks the work
 failed and blocks all new admission. It cannot be erased through recovery.
+It also prevents already admitted, queued work from starting. Such work remains
+reserved and requires explicit isolation/recovery; it cannot bypass the latch.
+Use the enclosing budget's cancellation callback, as above, to stop further
+dispatches in already running operations when the shared overrun latch appears.
+An in-flight provider request still requires reconciliation.
 
 There are no refunds even for fully reconciled work. This deliberately avoids
 letting recovery enlarge a frozen allowance. Known actual counts remain visible

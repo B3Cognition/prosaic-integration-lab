@@ -93,9 +93,35 @@ os._exit(23)
         else:
             raise AssertionError('lost acknowledgement allowed duplicate admission')
         crashes.append(dict(boundary=boundary, exitCode=result.returncode, status=j.status()))
+    blocked = []
+    for route in ('completion', 'recovery'):
+        for dimension, excess in (('providerRequests', 5), ('toolCalls', 3), ('reportedTokens', 10000)):
+            lane = private_directory(root/('overrun-'+route+'-'+dimension))
+            j = isolation.FailureIsolation(lane/'containment.json', identity='a'*64, limits=limits)
+            first = j.admit('first', binding='b'*64)
+            queued = j.admit('queued', binding='c'*64)
+            j.start('first', first)
+            actual = dict(providerRequests=2, toolCalls=1, reportedTokens=300)
+            actual[dimension] = excess
+            if route == 'completion':
+                j.complete('first', first, actual=actual, evidence_digest='d'*64)
+            else:
+                j.isolate('first', binding='b'*64, decision_digest='e'*64)
+                j.recover('first', binding='b'*64, decision_digest='f'*64,
+                          actual=actual, evidence_digest='d'*64, outcome='failed')
+            try:
+                j.start('queued', queued)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('queued work started after a known overrun')
+            assert j.inspect('queued')['state'] == 'admitted'
+            assert j.status()['admissionBlocked']
+            blocked.append(dict(route=route, dimension=dimension, status=j.status()))
     private_write(args.output, dict(version=1, experimental=True, liveRequests=0,
-        syntheticRequests=sum(row['syntheticRequests'] for row in rows), lanes=rows, crashes=crashes))
-    print('failure isolation: 4 both-wire lanes, 4 network-denied recoveries, 3 process-loss boundaries; 0 live requests')
+        syntheticRequests=sum(row['syntheticRequests'] for row in rows), lanes=rows, crashes=crashes,
+        blockedQueuedStarts=blocked))
+    print('failure isolation: 4 both-wire lanes, 4 network-denied recoveries, 3 process-loss boundaries, 6 blocked queued starts; 0 live requests')
 
 
 if __name__ == '__main__':
