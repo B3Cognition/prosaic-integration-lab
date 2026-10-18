@@ -103,6 +103,17 @@ for this new candidate; fresh platform CI is the later PR integration gate.
 One material fix pass complete; no deferred minors. Scope rulings above remain
 explicit consumer/infrastructure responsibilities, with their adoption risks.
 
+Preserved261files in canonical reports `tool-approval-evidence-20261018`,
+including original/fixed artifacts, watched failures, complete suite logs,
+installed private journals/events, reviewer/ledger/rulings and historical proof.
+All copied and archived payloads were hash-verified. Archive
+`prosaic-tool-approval-evidence-20261018.tar.gz`, SHA256:
+`4cedb08707c3348869e21761964e08b263ed64b8331119024336b807e6d7224a`.
+Proof manifest SHA256:
+`8cacc5f02ca1a740f4a4bf58df7fe7138ca6431c3cb516b8704650fdc5138602`.
+Qualified executable source commitf038997; branch/worktree remain local for
+review-PR CI. No new milestone push/merge, release or live run was performed.
+
 ## Preserved limits
 
 Per case4requests/2tools/8192tokens/600seconds/output512, with original deadlines
