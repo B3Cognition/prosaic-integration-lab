@@ -100,6 +100,12 @@ untrusted usage on both wire formats, with denial before continuation. Preserve
 unsupported billing provenance; never convert missing usage into known zero.
 No production fix or retest of the frozen live study is included here.
 
+`roleCosts.observedTokens` remains unavailable for unsupported-format records;
+the separate `receiptedRoleUsage` projection preserves their numeric reported
+totals. Count completeness and unsupported billing/format provenance must be
+handled separately in the follow-up fix. No unsupported record is relabeled
+as a fully supported billing observation.
+
 ## Push, release and next work
 
 Push the reviewed Lab work for review, clearly experimental with this known
@@ -135,3 +141,13 @@ profile/asset provenance; final freeze was independently regenerated; prior
 SDK acceptance is not exhaustive production certification. Overreading those
 boundaries risks false benefit, counter-provenance or release claims. No deferred
 review minors. Nothing was pushed or published by this task.
+
+Preserved942files, including all live/offline evidence, the original frozen
+host/review,6network-denied recovery copies, the preparation archive and new
+synthetic counterexample. Canonical directory `bounded-correction-live-20261018`
+adds exactly one live ledger;39canonical ledgers now retain9unknowns. Archive
+`prosaic-correction-live-evidence-20261018.tar.gz`, SHA256
+`433dad09da08f53c5717a15245b93d7a4141ead392b0c0374fb1ea96a4bcfe89`.
+Closing verification checks all preserved file hashes, public projections,
+frozen9853guards and38historic ledgers with sockets denied. Frozen operational
+entry points are closed on their38-ledger baseline and must not be reused.

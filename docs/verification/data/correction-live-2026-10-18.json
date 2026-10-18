@@ -133,6 +133,13 @@
     "scoringError": "changed component accounting",
     "syntheticRequests": 2
   },
+  "preservation": {
+    "archive": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/prosaic-correction-live-evidence-20261018.tar.gz",
+    "archiveSha256": "433dad09da08f53c5717a15245b93d7a4141ead392b0c0374fb1ea96a4bcfe89",
+    "directory": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/bounded-correction-live-20261018",
+    "files": 942,
+    "manifestSha256": "d07fba44c0121e87a64a32b2fe9dc0864dd5917a700270e5aae41c5f8dadb9cb"
+  },
   "providerFailure": {
     "bodyBytes": 221,
     "bodySha256": "0b90c449e8bcb12a33a4169c34f362a1348e3f4371f9e971a7246c5805e7b67c",
