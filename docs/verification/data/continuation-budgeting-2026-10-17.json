@@ -1,0 +1,427 @@
+{
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1442,
+    "reportedTokens": 1731251,
+    "toolCalls": 588
+  },
+  "focusedFinalChecks": 35,
+  "host": {
+    "architecture": "arm64",
+    "os": "macOS",
+    "python": "3.12.14"
+  },
+  "installedContinuation": {
+    "limits": {
+      "outputTokens": 512,
+      "providerRequests": 4,
+      "reportedTokens": 8192,
+      "timeoutSeconds": 600,
+      "toolCalls": 2
+    },
+    "liveDispatches": 0,
+    "origin": "synthetic-loopback-only",
+    "results": [
+      {
+        "mode": "variable",
+        "provider": "openai-compatible",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exact-fit",
+        "provider": "openai-compatible",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exhausted",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "unknown",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 0,
+        "reservedTokens": 612,
+        "toolCalls": 0,
+        "usageComplete": false
+      },
+      {
+        "mode": "overrun",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 1600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "concurrent",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "request-cap",
+        "provider": "openai-compatible",
+        "providerRequests": 4,
+        "reportedTokens": 600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "variable",
+        "provider": "anthropic",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exact-fit",
+        "provider": "anthropic",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exhausted",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "unknown",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 0,
+        "reservedTokens": 612,
+        "toolCalls": 0,
+        "usageComplete": false
+      },
+      {
+        "mode": "overrun",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 1600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "concurrent",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "request-cap",
+        "provider": "anthropic",
+        "providerRequests": 4,
+        "reportedTokens": 600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      }
+    ],
+    "scenarios": 14,
+    "version": 1
+  },
+  "labCandidate": {
+    "distribution": "prosaic-integration-lab",
+    "installedFiles": 119,
+    "reviewedSourceFiles": 115,
+    "sourceArchiveSha256": "c8aa3b86509c2553f6f39f4cf89b8fb90c8c4ec6fa3e0bf7311e5f5ad30bf53a",
+    "sourceCommit": "1d983508d9f48080fa7be2998e34272749a4ad20",
+    "version": "0.5.1+continuation.1",
+    "wheelSha256": "030ad5b423dc97f7d09bdebf61fe655557cbb0a71350967fee222591eedc8864"
+  },
+  "legacyQualificationPerPlatform": {
+    "fixtureRequests": 19,
+    "replayAdditionalRequests": 0,
+    "scenarios": 10,
+    "toolCalls": 9,
+    "traceBytesPreserved": true
+  },
+  "limitations": [
+    "No new live memory comparison",
+    "Memory remains experimental and off by default",
+    "Quoted mandatory full trajectory must still fit before execution",
+    "No full external Lab database/auth/billing stack rerun",
+    "No distributed-effect or multi-agent handoff certification"
+  ],
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "linux": {
+    "architecture": "aarch64",
+    "capabilities": "none",
+    "image": "sha256:4bbb2fea544adf38e22ed451a6c8ce5eef41af96fdec89a0d385f9ff9fe2aad7",
+    "network": "none",
+    "os": "Linux",
+    "ownedContainersRemoved": true,
+    "python": "3.12.15",
+    "rootFilesystem": "read-only",
+    "user": "10001:10001"
+  },
+  "linuxContinuation": {
+    "limits": {
+      "outputTokens": 512,
+      "providerRequests": 4,
+      "reportedTokens": 8192,
+      "timeoutSeconds": 600,
+      "toolCalls": 2
+    },
+    "liveDispatches": 0,
+    "origin": "synthetic-loopback-only",
+    "results": [
+      {
+        "mode": "variable",
+        "provider": "openai-compatible",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exact-fit",
+        "provider": "openai-compatible",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exhausted",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "unknown",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 0,
+        "reservedTokens": 612,
+        "toolCalls": 0,
+        "usageComplete": false
+      },
+      {
+        "mode": "overrun",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 1600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "concurrent",
+        "provider": "openai-compatible",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "request-cap",
+        "provider": "openai-compatible",
+        "providerRequests": 4,
+        "reportedTokens": 600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "variable",
+        "provider": "anthropic",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exact-fit",
+        "provider": "anthropic",
+        "providerRequests": 2,
+        "reportedTokens": 300,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "exhausted",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 1,
+        "usageComplete": true
+      },
+      {
+        "mode": "unknown",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 0,
+        "reservedTokens": 612,
+        "toolCalls": 0,
+        "usageComplete": false
+      },
+      {
+        "mode": "overrun",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 1600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "concurrent",
+        "provider": "anthropic",
+        "providerRequests": 1,
+        "reportedTokens": 150,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      },
+      {
+        "mode": "request-cap",
+        "provider": "anthropic",
+        "providerRequests": 4,
+        "reportedTokens": 600,
+        "reservedTokens": 0,
+        "toolCalls": 0,
+        "usageComplete": true
+      }
+    ],
+    "scenarios": 14,
+    "version": 1
+  },
+  "liveDispatches": 0,
+  "preservation": {
+    "archiveSha256": "11ddd988e2a340b464438c84122c131b40db9ad1439c9f3b0a7f3baeb17e8b36",
+    "cumulativeCeilings": {
+      "providerRequests": 1475,
+      "reportedTokens": 1976623,
+      "toolCalls": 604
+    },
+    "cumulativeCharged": {
+      "providerRequests": 1442,
+      "reportedTokens": 1731251,
+      "toolCalls": 588
+    },
+    "evidenceFiles": 282,
+    "evidenceManifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711",
+    "historicalLedgerCount": 34,
+    "liveDispatches": 0,
+    "preserved": true,
+    "priorEvidenceFiles": 428,
+    "retainedUnknownReservations": 7,
+    "version": 1
+  },
+  "releaseManifestSha256": "1c4cca26b7aae4ef9fde9e35493e4264fc5ef4def15a5df05e979f590ff5d50b",
+  "remaining": {
+    "providerRequests": 33,
+    "reportedTokens": 245372,
+    "toolCalls": 16
+  },
+  "retainedUnknownReservations": 7,
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "minorDeferred": [
+      "Derived requiredTokens and availableTokens accept numerically equal floats through dictionary equality, also present in v1; hard Runtime caps remain strict."
+    ],
+    "rulings": [
+      "Offline checks do not establish live tokenizer/provider behavior or memory efficacy; separate frozen live validation required.",
+      "Publication and exact SDK provenance were independently verified with public downloads, successful workflows and source payload audits.",
+      "Final wheel/container checks completed independently after reviewer dispatch; both wire formats and legacy replay passed.",
+      "Cross-version recovery under changed implementation identity is not promised; preserved original environments remain authoritative, and in-place upgrades require separate migration qualification."
+    ]
+  },
+  "sdkManifestSha256": "799801ff3f2c2c498ee7e43c7ee69f5fed2614b87d18cb5e37b7e9914b367b1b",
+  "sdkReleases": [
+    {
+      "candidateRun": 39061836495,
+      "distribution": "b3-prosaic-runtime",
+      "installedFiles": 57,
+      "promotionAttempt": 2,
+      "promotionRun": 39062844433,
+      "publicBytesMatch": true,
+      "pypiUrl": "https://pypi.org/project/b3-prosaic-runtime/0.9.7/",
+      "qualificationReceipts": 24,
+      "releaseUrl": "https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.9.7",
+      "reviewedSourceFiles": 50,
+      "sourceArchiveSha256": "08785066327b5e800d47d36a37df20f2c1368eef988634aae8774fbdac084b7a",
+      "sourceCommit": "c63bd16120dbbded4b742bf94a79e16a9e47a389",
+      "version": "0.9.7",
+      "wheelSha256": "3caebab8602d0a55d0a119be9cbbb2b0d24c922979d9f7ab0a5839defd4674bb"
+    },
+    {
+      "candidateRun": 39063280993,
+      "distribution": "b3-prosaic-harness",
+      "installedFiles": 35,
+      "promotionAttempt": 2,
+      "promotionRun": 39063830690,
+      "publicBytesMatch": true,
+      "pypiUrl": "https://pypi.org/project/b3-prosaic-harness/0.9.4/",
+      "qualificationReceipts": 24,
+      "releaseUrl": "https://github.com/B3Cognition/prosaic-harness/releases/tag/v0.9.4",
+      "reviewedSourceFiles": 29,
+      "sourceArchiveSha256": "955b3dfdd4204a6da4b052dc52c5de223481a360b3db271b43344ee675f90536",
+      "sourceCommit": "7861459f2452f1ad66717cfb45f62be4ed5caf23",
+      "version": "0.9.4",
+      "wheelSha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b"
+    }
+  ],
+  "sourceTests": {
+    "failed": 0,
+    "passed": 1329,
+    "skipped": 0,
+    "warning": "Existing Starlette HTTP-client deprecation",
+    "warnings": 1
+  },
+  "status": "offline-qualified-experimental",
+  "version": 1
+}

@@ -10,13 +10,13 @@
       "version": "0.4.1"
     },
     {
-      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.6/SHA256SUMS",
+      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.7/SHA256SUMS",
       "distribution": "b3-prosaic-runtime",
-      "filename": "b3_prosaic_runtime-0.9.6-py3-none-any.whl",
-      "sha256": "8611a7dcf86a0839e56deace55133a24f8ebedb7d46a9abe60c376617947d8f5",
-      "source_commit": "ed78fc8fb80e68a5687781d7db05b5f7ae117877",
-      "url": "https://files.pythonhosted.org/packages/b7/3b/29a8432548bc3d95e3f2f5a9d624760177a00c9c1c75833bd41c51a6764a/b3_prosaic_runtime-0.9.6-py3-none-any.whl",
-      "version": "0.9.6"
+      "filename": "b3_prosaic_runtime-0.9.7-py3-none-any.whl",
+      "sha256": "3caebab8602d0a55d0a119be9cbbb2b0d24c922979d9f7ab0a5839defd4674bb",
+      "source_commit": "c63bd16120dbbded4b742bf94a79e16a9e47a389",
+      "url": "https://files.pythonhosted.org/packages/48/5c/e9549aaf7987731cc4dc0a1ce7645f6096851ac72a6a0f00a0ecbe69a3a5/b3_prosaic_runtime-0.9.7-py3-none-any.whl",
+      "version": "0.9.7"
     },
     {
       "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.0/SHA256SUMS",
@@ -28,13 +28,13 @@
       "version": "0.3.0"
     },
     {
-      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.0/SHA256SUMS",
+      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.4/SHA256SUMS",
       "distribution": "b3-prosaic-harness",
-      "filename": "b3_prosaic_harness-0.9.0-py3-none-any.whl",
-      "sha256": "6c9d2c2bcfcb6ac5720547db492d64526074431fa639ec2e030f88b2a633309c",
-      "source_commit": "1db61abf1b648affe1d67a5069f15ce9c9b4c9d3",
-      "url": "https://files.pythonhosted.org/packages/aa/9f/bf656398edb51bfec4840b7eefa51e125f4823cad44e4e0d541981bf6321/b3_prosaic_harness-0.9.0-py3-none-any.whl",
-      "version": "0.9.0"
+      "filename": "b3_prosaic_harness-0.9.4-py3-none-any.whl",
+      "sha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b",
+      "source_commit": "7861459f2452f1ad66717cfb45f62be4ed5caf23",
+      "url": "https://files.pythonhosted.org/packages/3b/1c/7dc4f3a41873173cab2e9650623b237fbc41915f46fa07d50f77a7b45305/b3_prosaic_harness-0.9.4-py3-none-any.whl",
+      "version": "0.9.4"
     },
     {
       "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.0/SHA256SUMS",

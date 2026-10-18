@@ -9,7 +9,7 @@ import threading
 @contextmanager
 def fixture_provider(cases,scenario='correct'):
     from prosaic_runtime import EndpointConfig,RuntimeConfig
-    if scenario not in {'correct','wrong','missing_usage','invalid_json','repair_fact_ids','repair_source','repair_absence'}:raise ValueError('invalid memory fixture')
+    if scenario not in {'correct','wrong','missing_usage','invalid_json','repair_fact_ids','repair_source','repair_absence','public_summary','repair_arguments'}:raise ValueError('invalid memory fixture')
     by_id={c['caseId']:c for c in cases}
     class Provider:
         requests=0
@@ -31,14 +31,31 @@ def fixture_provider(cases,scenario='correct'):
             arguments=json.loads(text.rsplit('## Arguments\n',1)[1])
             retry=bool(arguments.get('validation_feedback'))
             if not any(m['role']=='tool' for m in request['messages']):
-                ids=case['requiredRecords']
+                if scenario=='public_summary':
+                    from lab_runner.quality.checks import parse_task
+                    public=arguments['request'];authority,_,_=parse_task(public['task'])
+                    latest={}
+                    for row in public['recordIndex']:
+                        if row['authority']==authority and (row['factId'] not in latest or row['revision']>latest[row['factId']]['revision']):
+                            latest[row['factId']]=row
+                    ids=[r['recordId'] for r in latest.values()][:4]
+                else:ids=case['requiredRecords']
+                if scenario=='repair_arguments' and not retry:ids=['unlisted-record']
                 if scenario=='repair_source' and not retry:
                     ids=[k for k,v in case['records'].items() if v['authority']=='observer'][:4]
                 message=dict(role='assistant',content=None,tool_calls=[dict(id='memory-lookup',type='function',
                     function=dict(name='lookup_records',arguments=json.dumps({'recordIds':ids})))])
                 finish='tool_calls'
             else:
-                answer=case['expected']
+                if scenario=='public_summary':
+                    from importlib.resources import files
+                    from jsonschema import Draft202012Validator
+                    from lab_runner.quality.checks import assess_evidence
+                    result=json.loads(next(m['content'] for m in reversed(request['messages']) if m['role']=='tool'))['result']
+                    schema=json.loads(files('lab_runner.memory').joinpath('data/evidence-summary.schema.json').read_text())
+                    Draft202012Validator(schema).validate(result)
+                    answer=assess_evidence(arguments['request'],result['records'])['answer']
+                else:answer=case['expected']
                 if scenario=='wrong':answer={**answer,'decision':'reject' if answer['decision']=='approve' else 'approve'}
                 if scenario=='repair_fact_ids' and not retry:answer={**answer,'facts':case['requiredRecords']}
                 if scenario=='repair_absence' and not retry:answer={**answer,'decision':'reject'}

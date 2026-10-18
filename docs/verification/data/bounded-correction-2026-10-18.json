@@ -1,0 +1,56 @@
+{
+  "SDKChanges": false,
+  "artifacts": {
+    "prosaic_integration_lab-0.5.1+correction.2-py3-none-any.whl": "d341f7000fe8c63d73f4b5d59c40f45c93b4572d86fc421431fa4d6448961a78",
+    "prosaic_integration_lab-0.5.1+correction.2.tar.gz": "41b718aa41c87309681586dc6069fc9aed49ce260d45cae7036cf75c9274f390"
+  },
+  "causalModelBenefitEstablished": false,
+  "ceilings": {
+    "providerRequests": 1524,
+    "reportedTokens": 1976623,
+    "toolCalls": 625
+  },
+  "charged": {
+    "providerRequests": 1494,
+    "reportedTokens": 1805193,
+    "toolCalls": 605
+  },
+  "coreChanges": false,
+  "existingWarnings": 1,
+  "focusedTests": 57,
+  "historicalLedgers": 38,
+  "implementationHead": "2537e61",
+  "installedArmSamples": 48,
+  "installedFilesVerified": 131,
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "liveRequests": 0,
+  "malformedOutputChecks": 2,
+  "matchedPairs": 24,
+  "networkDeniedRecoveries": 54,
+  "origin": "synthetic",
+  "preservation": {
+    "archive": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/prosaic-correction-evidence-20261018.tar.gz",
+    "archiveSha256": "e90b1cf1cab8830bcb25dbdae78edbd4ef1b1d0aff59369156074f75165a221e",
+    "evidenceDirectory": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/bounded-correction-evidence-20261018",
+    "files": 4177,
+    "manifestSha256": "a3de4adc58692f38f87661577895ec82306aa6482411be646c3f2e6ecd92a593"
+  },
+  "review": {
+    "critical": 0,
+    "declinedToJudge": [],
+    "deferred": [],
+    "fixed": 2,
+    "important": 2,
+    "minor": 0
+  },
+  "sourceSuiteSeconds": 344.65,
+  "sourceTests": 1581,
+  "unknownReservations": 8,
+  "version": "0.5.1+correction.2"
+}

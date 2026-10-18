@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -123,7 +124,8 @@ def wheel_identity(path):
         metadata=[name for name in names if name.endswith('.dist-info/METADATA')]
         if len(metadata)!=1:raise ValueError('invalid Lab wheel metadata')
         info=BytesParser().parsebytes(wheel.read(metadata[0]))
-        if info.get('Name')!='prosaic-integration-lab' or info.get('Version')!='0.5.0':
+        expected=tomllib.loads((ROOT/'pyproject.toml').read_text())['project']['version']
+        if info.get('Name')!='prosaic-integration-lab' or info.get('Version')!=expected:
             raise ValueError('unexpected Lab distribution')
         files={name:hashlib.sha256(wheel.read(name)).hexdigest() for name in names
                if not name.endswith(('/','/RECORD'))}
@@ -144,7 +146,6 @@ assert controller.history(session.session_id)==()
 from importlib.metadata import distribution, packages_distributions
 import prosaic_integration_lab, lab_runner
 lab=distribution('prosaic-integration-lab')
-assert lab.version=='0.5.0'
 for module in (prosaic_integration_lab,lab_runner):
     assert set(packages_distributions()[module.__name__])=={'prosaic-integration-lab'}
     assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
@@ -189,10 +190,8 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
     verify_cli_versions(version,json.loads(manifest.read_bytes()))
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
-    from lab_runner.gates import NATIVE_TOOLS_TRAIN
-    selected = {item['distribution']: item['version']
-                for item in json.loads(manifest.read_bytes())['artifacts']}
-    if selected == NATIVE_TOOLS_TRAIN:
+    from lab_runner.gates import supports_consumer_blueprints
+    if supports_consumer_blueprints(json.loads(manifest.read_bytes())):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
                 directory=directory, environment=environment)

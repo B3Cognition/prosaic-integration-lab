@@ -1,0 +1,1013 @@
+{
+  "summary": {
+    "allClaimsKnown": true,
+    "binding": "cd6988b2f6f89197ed25a4a0f731dc657a257c96a4caee2692137374df78eb5d",
+    "complete": true,
+    "counterViolations": 0,
+    "criticConclusion": "Not measurable: no worker or critic ran. No efficacy claim.",
+    "cumulativeCeilings": {
+      "providerRequests": 1500,
+      "reportedTokens": 1976623,
+      "toolCalls": 617
+    },
+    "cumulativeCharged": {
+      "providerRequests": 1476,
+      "reportedTokens": 1776439,
+      "toolCalls": 601
+    },
+    "frozenScheduleUnchanged": true,
+    "gaps": [
+      "Model-visible role/output contract is ambiguous and omits an explicit output schema.",
+      "Planner duplicates an already host-computed assignment instead of performing useful planning.",
+      "No real worker, tool or critic handoff was exercised; targeted downstream controls remain needed."
+    ],
+    "models": {
+      "local": {
+        "attempted": 4,
+        "criticAccuracy": null,
+        "criticReached": 0,
+        "criticRequests": 0,
+        "criticTokens": 0,
+        "elapsedSeconds": 59.48031608303427,
+        "falseAlarm": 0,
+        "flawCaught": 0,
+        "flawMissed": 0,
+        "inputTokens": 1807,
+        "medianSeconds": 13.744999583504978,
+        "outputCapTerminations": 0,
+        "outputTokens": 1522,
+        "plannerPassed": 0,
+        "reviewableWorkerFlaws": 0,
+        "scheduled": 4,
+        "schemaDescriptions": 4,
+        "workerReached": 0
+      },
+      "local-strong": {
+        "attempted": 4,
+        "criticAccuracy": null,
+        "criticReached": 0,
+        "criticRequests": 0,
+        "criticTokens": 0,
+        "elapsedSeconds": 290.9796701660089,
+        "falseAlarm": 0,
+        "flawCaught": 0,
+        "flawMissed": 0,
+        "inputTokens": 1891,
+        "medianSeconds": 73.8883832704887,
+        "outputCapTerminations": 4,
+        "outputTokens": 2048,
+        "plannerPassed": 0,
+        "reviewableWorkerFlaws": 0,
+        "scheduled": 4,
+        "schemaDescriptions": 0,
+        "workerReached": 0
+      }
+    },
+    "origin": "live",
+    "outputTokenLimit": 512,
+    "perCaseLimits": {
+      "providerRequests": 4,
+      "reportedTokens": 8192,
+      "timeoutSeconds": 600,
+      "toolCalls": 2
+    },
+    "receivedResponseKinds": [
+      "message"
+    ],
+    "receivedUsageStates": [
+      "unsupported"
+    ],
+    "remaining": {
+      "providerRequests": 24,
+      "reportedTokens": 200184,
+      "toolCalls": 16
+    },
+    "studyUsage": {
+      "providerRequests": 8,
+      "reportedTokens": 7268,
+      "toolCalls": 0
+    },
+    "unknownHistoricalReservationsRetained": 8,
+    "unknownNewReservations": 0
+  },
+  "analysis": {
+    "complete": true,
+    "interpretation": "Within-trajectory detection/cost only; no randomized ablation, no repair round or production-autonomy claim. Independent host gates enforce safety even when the critic misses a flaw. Zero reviewed worker flaws cannot establish a detection benefit.",
+    "models": {
+      "local": {
+        "attempted": 4,
+        "criticCorrect": 0,
+        "criticReached": 0,
+        "criticRequests": 0,
+        "criticTokens": 0,
+        "criticUsageComplete": true,
+        "evidenceAvailable": 4,
+        "falseAlarm": 0,
+        "flawCaught": 0,
+        "flawMissed": 0,
+        "incorrectEscalation": 0,
+        "invalidReview": 0,
+        "samples": 4,
+        "scheduled": 4,
+        "unknownSamples": 0,
+        "workerCorrect": 0,
+        "workerFlawReviewed": 0,
+        "workerReached": 0
+      },
+      "local-strong": {
+        "attempted": 4,
+        "criticCorrect": 0,
+        "criticReached": 0,
+        "criticRequests": 0,
+        "criticTokens": 0,
+        "criticUsageComplete": true,
+        "evidenceAvailable": 4,
+        "falseAlarm": 0,
+        "flawCaught": 0,
+        "flawMissed": 0,
+        "incorrectEscalation": 0,
+        "invalidReview": 0,
+        "samples": 4,
+        "scheduled": 4,
+        "unknownSamples": 0,
+        "workerCorrect": 0,
+        "workerFlawReviewed": 0,
+        "workerReached": 0
+      }
+    },
+    "samples": [
+      {
+        "alias": "local",
+        "caseId": "handoff-approve-larch306",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 856,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 20.537144083005842,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "approve",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-approve-larch306-p1",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-approve-larch306",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 979,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 67.80567895801505,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "approve",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-approve-larch306-p2",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-reject-cedar307",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 976,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 73.00404208299005,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "reject",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-reject-cedar307-p2",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-reject-cedar307",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 895,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 15.511228707997361,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "reject",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-reject-cedar307-p1",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-missing-maple308",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 788,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 11.978770459012594,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "missing",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-missing-maple308-p1",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-missing-maple308",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 978,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 75.39722466701642,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "missing",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-missing-maple308-p2",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-conflict-alder309",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 1006,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 74.77272445798735,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "conflict",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-conflict-alder309-p2",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-conflict-alder309",
+        "category": "notReviewed",
+        "claim": "known",
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 790,
+          "toolCalls": 0
+        },
+        "criticCorrect": false,
+        "criticOutputAvailable": false,
+        "criticReached": false,
+        "criticRequests": 0,
+        "criticSeconds": null,
+        "criticTokens": null,
+        "elapsedSeconds": 11.45317283301847,
+        "evidenceAvailable": true,
+        "expectedReview": null,
+        "falseAlarm": false,
+        "family": "conflict",
+        "firstFailure": "planner",
+        "flawCaught": false,
+        "flawMissed": false,
+        "incorrectEscalation": false,
+        "invalidReview": false,
+        "observedReview": null,
+        "outcome": "blocked",
+        "sampleId": "handoff-conflict-alder309-p1",
+        "workerCorrect": false,
+        "workerFlawReviewed": false,
+        "workerIssues": null,
+        "workerOutputAvailable": false,
+        "workerReached": false
+      }
+    ]
+  },
+  "audit": {
+    "audited": true,
+    "charged": {
+      "providerRequests": 8,
+      "reportedTokens": 7268,
+      "toolCalls": 0
+    },
+    "complete": true,
+    "cumulativeCharged": {
+      "providerRequests": 1476,
+      "reportedTokens": 1776439,
+      "toolCalls": 601
+    },
+    "samples": [
+      {
+        "alias": "local",
+        "caseId": "handoff-approve-larch306",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 1747,
+            "bodySha256": "11c7b712f8a28fcc83ec63f2dbe959982c8f98cee65ad8bbb64d406668b9c60f",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-approve-larch306-p1",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 856,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-approve-larch306",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 2454,
+            "bodySha256": "73ebf5ed384d87733858460d6b90cd40a7990a9c6e3a4b4940eea2762185712a",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-approve-larch306-p2",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 979,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-reject-cedar307",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 2773,
+            "bodySha256": "cc0c21ce6d7a85c7d7b69f7f41dac58d4370d8e0cbe5802f4f0a88e7cdd4c2aa",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-reject-cedar307-p2",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 976,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-reject-cedar307",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 1884,
+            "bodySha256": "9d600ddce5e100d0379aa0639955c67c24bbd85bc1c7239ba924bca2b650f32f",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-reject-cedar307-p1",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 895,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-missing-maple308",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 1551,
+            "bodySha256": "c60cc631c6fec9c0af9c64d3f2fa42b17d0cb85cf98ba890d3c3aee44693a2a8",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-missing-maple308-p1",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 788,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-missing-maple308",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 2924,
+            "bodySha256": "f8091032663f567960c0fd4e38a5c01b0c46c03be304a94d4f6d18e62631aa27",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-missing-maple308-p2",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 978,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-conflict-alder309",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 2807,
+            "bodySha256": "e5b1bb253cf91e07bc9e382f1fd8fe4ef363333cac0d04ea69ba221538fd5cab",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-conflict-alder309-p2",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 1006,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-conflict-alder309",
+        "claim": "known",
+        "counterViolations": [],
+        "diagnostics": [
+          {
+            "bodyBytes": 1483,
+            "bodySha256": "68b462bc92ac9481bf1decf19aa1b4eaca2f36f99b5190b3346c320054ea02f0",
+            "httpStatus": 200,
+            "requestIndex": 1,
+            "responseKind": "message",
+            "usageState": "unsupported"
+          }
+        ],
+        "evidenceAvailable": true,
+        "finalEvidenceFile": true,
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "receiptRecoveryAdditionalRequests": 0,
+        "sampleId": "handoff-conflict-alder309-p1",
+        "score": {
+          "counts": {
+            "providerRequests": 1,
+            "reportedTokens": 790,
+            "toolCalls": 0
+          },
+          "firstFailure": "planner",
+          "outcome": "blocked",
+          "qualityPassed": false,
+          "roles": [
+            "planner"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "notRun",
+            "planner": "failed",
+            "worker": "notRun"
+          },
+          "version": 1
+        },
+        "traceAvailable": true,
+        "unreceiptedObservations": 0
+      }
+    ],
+    "unknownHistoricalReservationsRetained": 8,
+    "unknownNewReservations": 0
+  },
+  "failureDiagnostics": {
+    "changedFrozenScoring": false,
+    "posthocDescriptive": true,
+    "samples": [
+      {
+        "alias": "local",
+        "assignmentMatches": false,
+        "elapsedSeconds": 20.537144083005842,
+        "exitCode": 0,
+        "extraAssignmentKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "failureReason": null,
+        "finishReason": "stop",
+        "inputTokens": 446,
+        "missingAssignmentKeys": [
+          "assignmentId",
+          "authority",
+          "caseId",
+          "requiredFacts",
+          "version"
+        ],
+        "outputTokens": 410,
+        "parseError": null,
+        "parsedObjectKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-approve-larch306-p1",
+        "schemaDescription": true,
+        "step": "planner",
+        "validationMessages": [
+          "$: additionalProperties validation failed; $: required validation failed; $: required validation failed; $: required validation failed; $: required validation failed"
+        ]
+      },
+      {
+        "alias": "local-strong",
+        "assignmentMatches": false,
+        "elapsedSeconds": 67.80567895801505,
+        "exitCode": 1,
+        "extraAssignmentKeys": null,
+        "failureReason": null,
+        "finishReason": "length",
+        "inputTokens": 467,
+        "missingAssignmentKeys": null,
+        "outputTokens": 512,
+        "parseError": "JSONDecodeError",
+        "parsedObjectKeys": null,
+        "reasoningContentObserved": true,
+        "sampleId": "handoff-approve-larch306-p2",
+        "schemaDescription": false,
+        "step": "planner",
+        "validationMessages": []
+      },
+      {
+        "alias": "local-strong",
+        "assignmentMatches": false,
+        "elapsedSeconds": 73.00404208299005,
+        "exitCode": 1,
+        "extraAssignmentKeys": null,
+        "failureReason": null,
+        "finishReason": "length",
+        "inputTokens": 464,
+        "missingAssignmentKeys": null,
+        "outputTokens": 512,
+        "parseError": "JSONDecodeError",
+        "parsedObjectKeys": null,
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-reject-cedar307-p2",
+        "schemaDescription": false,
+        "step": "planner",
+        "validationMessages": []
+      },
+      {
+        "alias": "local",
+        "assignmentMatches": false,
+        "elapsedSeconds": 15.511228707997361,
+        "exitCode": 0,
+        "extraAssignmentKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "failureReason": null,
+        "finishReason": "stop",
+        "inputTokens": 443,
+        "missingAssignmentKeys": [
+          "assignmentId",
+          "authority",
+          "caseId",
+          "requiredFacts",
+          "version"
+        ],
+        "outputTokens": 452,
+        "parseError": null,
+        "parsedObjectKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-reject-cedar307-p1",
+        "schemaDescription": true,
+        "step": "planner",
+        "validationMessages": [
+          "$: additionalProperties validation failed; $: required validation failed; $: required validation failed; $: required validation failed; $: required validation failed"
+        ]
+      },
+      {
+        "alias": "local",
+        "assignmentMatches": false,
+        "elapsedSeconds": 11.978770459012594,
+        "exitCode": 0,
+        "extraAssignmentKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "failureReason": null,
+        "finishReason": "stop",
+        "inputTokens": 445,
+        "missingAssignmentKeys": [
+          "assignmentId",
+          "authority",
+          "caseId",
+          "requiredFacts",
+          "version"
+        ],
+        "outputTokens": 343,
+        "parseError": null,
+        "parsedObjectKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-missing-maple308-p1",
+        "schemaDescription": true,
+        "step": "planner",
+        "validationMessages": [
+          "$: additionalProperties validation failed; $: required validation failed; $: required validation failed; $: required validation failed; $: required validation failed"
+        ]
+      },
+      {
+        "alias": "local-strong",
+        "assignmentMatches": false,
+        "elapsedSeconds": 75.39722466701642,
+        "exitCode": 1,
+        "extraAssignmentKeys": null,
+        "failureReason": null,
+        "finishReason": "length",
+        "inputTokens": 466,
+        "missingAssignmentKeys": null,
+        "outputTokens": 512,
+        "parseError": "JSONDecodeError",
+        "parsedObjectKeys": null,
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-missing-maple308-p2",
+        "schemaDescription": false,
+        "step": "planner",
+        "validationMessages": []
+      },
+      {
+        "alias": "local-strong",
+        "assignmentMatches": false,
+        "elapsedSeconds": 74.77272445798735,
+        "exitCode": 1,
+        "extraAssignmentKeys": null,
+        "failureReason": null,
+        "finishReason": "length",
+        "inputTokens": 494,
+        "missingAssignmentKeys": null,
+        "outputTokens": 512,
+        "parseError": "JSONDecodeError",
+        "parsedObjectKeys": null,
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-conflict-alder309-p2",
+        "schemaDescription": false,
+        "step": "planner",
+        "validationMessages": []
+      },
+      {
+        "alias": "local",
+        "assignmentMatches": false,
+        "elapsedSeconds": 11.45317283301847,
+        "exitCode": 0,
+        "extraAssignmentKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "failureReason": null,
+        "finishReason": "stop",
+        "inputTokens": 473,
+        "missingAssignmentKeys": [
+          "assignmentId",
+          "authority",
+          "caseId",
+          "requiredFacts",
+          "version"
+        ],
+        "outputTokens": 317,
+        "parseError": null,
+        "parsedObjectKeys": [
+          "$schema",
+          "properties",
+          "required",
+          "type"
+        ],
+        "reasoningContentObserved": false,
+        "sampleId": "handoff-conflict-alder309-p1",
+        "schemaDescription": true,
+        "step": "planner",
+        "validationMessages": [
+          "$: additionalProperties validation failed; $: required validation failed; $: required validation failed; $: required validation failed; $: required validation failed"
+        ]
+      }
+    ]
+  }
+}

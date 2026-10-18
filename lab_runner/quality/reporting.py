@@ -23,8 +23,10 @@ def public_result(case,evidence,*,profile_fingerprint,repetition):
 
 
 def _row(row):
-    if set(row)!=ROW_KEYS or row['state'] not in STATES or not set(row['reasons'])<=REASONS:
+    optional={'reservationRetained','reservationExceeded'}
+    if not ROW_KEYS<=set(row)<=ROW_KEYS|optional or row['state'] not in STATES or not set(row['reasons'])<=REASONS:
         raise ValueError('invalid benchmark result')
+    if any(type(row[k]) is not bool for k in optional if k in row):raise ValueError('invalid budget marker')
     identifier(row['sampleId']);identifier(row['caseId']);sha(row['profileFingerprint']);integer(row['repetition'],1,10)
     if type(row['firstPass']) is not bool or type(row['criticDetected']) is not bool:raise ValueError('invalid result')
     if row['elapsedSeconds'] is None and row['state']=='unknown':pass
@@ -124,7 +126,10 @@ def summarize(schedule,results,*,identity,origin,recovery):
     return dict(version=1,identity=identity,origin=origin,schedule=schedule,results=results,profiles=profiles,
         scheduledSamples=len(schedule),executedSamples=len(results),stateCounts=state_counts,
         baselineComplete=full_inventory and len(results)==len(schedule) and usage_complete and
-            origin!='unexecuted' and all(r['passed'] for r in recovery),
+            origin!='unexecuted' and all(r['passed'] for r in recovery) and not any(
+                r.get('reservationRetained',False) or r.get('reservationExceeded',False) for r in results),
+        retainedUnknownSamples=sum(r.get('reservationRetained',False) for r in results),
+        reservationExceededSamples=sum(r.get('reservationExceeded',False) for r in results),
         taskSuccess=dict(passed=passed,attempted=len(results),rate=passed/len(results) if results else None),
         usageComplete=usage_complete,reportedTokens=sum(r['counts']['reportedTokens'] for r in results) if usage_complete else None,
         providerRequests=_sum_known(r['counts']['providerRequests'] for r in results),

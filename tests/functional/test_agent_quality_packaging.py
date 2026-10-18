@@ -15,6 +15,8 @@ def test_built_archives_include_every_quality_resource(tmp_path):
     wheel=next(tmp_path.glob('*.whl'));sdist=next(tmp_path.glob('*.tar.gz'))
     with zipfile.ZipFile(wheel) as archive:
         assert required<={Path(n).name for n in archive.namelist() if '/quality/data/' in n}
+        assert 'lab_runner/memory/evidence.py' in archive.namelist()
+        assert 'lab_runner/memory/data/evidence-summary.schema.json' in archive.namelist()
     with tarfile.open(sdist) as archive:
         assert required<={Path(n).name for n in archive.getnames() if '/quality/data/' in n}
         assert any(n.endswith('/configs/agent-quality.example.json') for n in archive.getnames())

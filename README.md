@@ -16,10 +16,16 @@ The experimental [agent-quality](docs/agent-quality.md) and
 [retrieval-memory](docs/retrieval-memory.md) examples have separate capability
 claims and retained model-study evidence.
 
+The next experimental milestone adds an opt-in
+[typed evidence consumer pattern](docs/verification/typed-evidence.md). It
+classifies verified, absent and unread facts without supplying a model decision.
+Its fresh live comparison stopped on a token-budget overrun; the verification
+note records the incomplete results. Released Lab 0.5.0 remains unchanged.
+
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.6/recorder 0.3.0 and Harness 0.9.0/store 0.4.0 with Core 0.4.1.
+0.9.7/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -39,8 +45,8 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.6' 'b3-prosaic-runtime-postgres==0.3.0' \
-  'b3-prosaic-harness==0.9.0' 'b3-prosaic-harness-postgres==0.4.0'
+  'b3-prosaic-runtime==0.9.7' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.9.4' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -114,9 +120,9 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.6 |
+| `b3-prosaic-runtime` | 0.9.7 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
-| `b3-prosaic-harness` | 0.9.0 |
+| `b3-prosaic-harness` | 0.9.4 |
 | `b3-prosaic-harness-postgres` | 0.4.0 |
 
 Preparation downloads the actual pinned public URLs and verifies the original
@@ -382,4 +388,20 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval-memory.md) for opt-in local evaluation commands. These consumer examples use public SDK APIs and retain bounded live allowances, immutable evidence and offline replay.
 
-The [fresh memory comparison](docs/verification/memory-grounding-live-2026-10-17.md) found a one-case smaller-model gain, no larger-model gain, increased token costs and unresolved smaller-model missing-evidence failures. Memory remains experimental and disabled unless explicitly selected.
+The [typed handoff example](docs/typed-handoffs.md) adds offline planner/worker/critic contracts, independent evidence gates and full-trajectory scoring under the same limits. It remains experimental and makes no live reasoning claim.
+
+The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner. The opt-in [direct worker/critic example](docs/direct-handoffs.md) removes host-owned assignment generation from the model. Its [frozen live study](docs/verification/direct-handoffs-live-2026-10-18.md) found partial critic warnings, without complete verification or demonstrated answer improvement.
+
+The [provider-neutral role qualification blueprint](docs/role-qualification.md) gives consumers reusable policy checks, configuration-bound qualification and evidence-grounded diagnostics. Consumers supply their own roles, evidence policies, suites and model settings. [Offline proof](docs/verification/role-qualification-2026-10-18.md) uses scripted responses; it does not certify either local model or admit synthetic qualifications for live use.
+
+The opt-in [bounded correction blueprint](docs/bounded-correction.md) adds one
+host-verified correction and a matched no-critic baseline under the same per-arm
+limits. Consumers adapt the evidence policy and qualify their own roles; scripted
+offline proof does not establish model or critic benefit.
+The [fresh live comparison](docs/verification/correction-live-2026-10-18.md)
+stopped on unknown usage with no eligible matched pairs. A separate offline
+unsupported-usage guard defect is fixed in the experimental candidate and
+[qualified offline](docs/verification/usage-guard-2026-10-18.md). This does not
+establish critic benefit or production readiness.
+
+The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

@@ -25,7 +25,7 @@ def checks_digest():
     # Include both assessment and callback orchestration: either can change
     # acceptance behavior and must invalidate recovery/comparison bindings.
     return digest({name:files(__package__).joinpath(name).read_text(encoding='utf-8')
-                   for name in ('checks.py','execution.py')})
+                   for name in ('checks.py','execution.py','sdk_provenance.py')})
 
 
 def parse_task(task):

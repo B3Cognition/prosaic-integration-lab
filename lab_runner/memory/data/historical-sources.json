@@ -576,6 +576,294 @@
         "authority": "auditor",
         "revision": 1
       }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "zircon-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "zircon-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "zircon-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "zircon-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "tundra-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "tundra-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "tundra-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "tundra-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "boreal-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "boreal-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "boreal-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "boreal-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "feldspar-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "feldspar-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "feldspar-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "feldspar-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "helios-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "helios-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "helios-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "helios-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "sable-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "sable-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "sable-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "sable-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ember-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ember-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ember-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ember-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ripple-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ripple-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ripple-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ripple-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "marsh-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "marsh-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "marsh-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "marsh-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cairn-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cairn-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cairn-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cairn-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
     }
   ]
 }

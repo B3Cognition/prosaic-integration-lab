@@ -1,0 +1,54 @@
+{
+  "artifacts": {
+    "installedFilesVerified": 127,
+    "sdistSha256": "a26be6877946bf8496a5010619989e2589404dfbb7641874101c0147c1fb1bc6",
+    "wheelSha256": "2d36fd1e96009f9a093220592648a654dee19afb568d1b13b60e3c6c24dc0483"
+  },
+  "ceilings": {
+    "providerRequests": 1524,
+    "reportedTokens": 1976623,
+    "toolCalls": 625
+  },
+  "charged": {
+    "providerRequests": 1494,
+    "reportedTokens": 1805193,
+    "toolCalls": 605
+  },
+  "focusedTests": 46,
+  "installedFilesVerified": 127,
+  "installedWireLanes": 24,
+  "labVersion": "0.5.1+roles.2",
+  "limitations": [
+    "Trusted host inputs and independent report pinning required.",
+    "Consumers own domain coverage and expiry/requalification policy.",
+    "Offline plumbing does not establish model fitness, answer gains or production readiness."
+  ],
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "liveRequests": 0,
+  "origin": "synthetic",
+  "preservation": {
+    "archive": "/private/tmp/prosaic-role-evidence-20261018.tar.gz",
+    "archiveSha256": "558d53effc722f728814fe3c0ea38fb71ee955a16fffce3666c032efb6a55159",
+    "files": 410,
+    "manifestSha256": "5a4372e6c3aa3ca10f578f8afefed3ec180f2649999649907af5e2a2ca8624cb"
+  },
+  "review": {
+    "critical": 0,
+    "important": 2,
+    "importantFixed": 2,
+    "minor": 0,
+    "passes": 1
+  },
+  "sourceTests": 1524,
+  "syntheticLiveEligible": 0,
+  "syntheticRoleQualifications": 4,
+  "unchangedHistoricalLedgers": 38,
+  "unknownReservationsRetained": 8,
+  "warning": "Existing Starlette TestClient/httpx deprecation warning; no failures or skips."
+}

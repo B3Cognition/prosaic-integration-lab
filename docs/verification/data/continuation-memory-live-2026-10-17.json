@@ -1,0 +1,221 @@
+{
+  "complete": false,
+  "completedKnownSamples": 4,
+  "continuationRefusals": [],
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1456,
+    "reportedTokens": 1752686,
+    "toolCalls": 595
+  },
+  "labVersion": "0.5.1+continuation.2",
+  "memoryBenefitEstablished": false,
+  "networkDeniedReceiptReplay": true,
+  "nextMilestone": "Provider-neutral failure observability and synthetic response/usage fault qualification",
+  "pairs": [
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "approve",
+      "memoryExposed": true,
+      "model": "smaller",
+      "requestDifference": -2,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": false,
+      "tokenDifference": -2197
+    },
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "approve",
+      "memoryExposed": false,
+      "model": "larger",
+      "requestDifference": 0,
+      "requestIdentical": true,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": -36
+    }
+  ],
+  "plannedSamples": 8,
+  "preservation": {
+    "allHistoricalLedgerCount": 35,
+    "archiveSha256": "709db8e9d52bc9a5d19ec4580aafaf18cfa41813a8322f2f69e604164b781ce5",
+    "canonicalLedgerSha256": "2f8cd1fdc5638904d5434f1ea4a53fc51593a21d6ee4a99922b067c992310ae2",
+    "cumulativeCharged": {
+      "providerRequests": 1456,
+      "reportedTokens": 1752686,
+      "toolCalls": 595
+    },
+    "preserved": true,
+    "retainedUnknownReservations": 8
+  },
+  "qualification": {
+    "bothWireContinuationScenarios": 14,
+    "installedStrictRegressions": 4,
+    "legacyScenarios": 10,
+    "sourceTestsPassed": 1333
+  },
+  "quotedSlotOverages": [],
+  "remaining": {
+    "providerRequests": 19,
+    "reportedTokens": 223937,
+    "toolCalls": 9
+  },
+  "results": [
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "decision": "reject",
+          "exitCode": 0
+        },
+        {
+          "answerFieldIssues": [],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 4952,
+        "toolCalls": 2
+      },
+      "family": "approve",
+      "inputTokens": 4702,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 250,
+      "sampleId": "approve-continuation-104-p1-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 2
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2755,
+        "toolCalls": 1
+      },
+      "family": "approve",
+      "inputTokens": 2622,
+      "memoryExposed": true,
+      "model": "smaller",
+      "outputTokens": 133,
+      "sampleId": "approve-continuation-104-p1-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2786,
+        "toolCalls": 1
+      },
+      "family": "approve",
+      "inputTokens": 2553,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 233,
+      "sampleId": "approve-continuation-104-p2-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2750,
+        "toolCalls": 1
+      },
+      "family": "approve",
+      "inputTokens": 2553,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 197,
+      "sampleId": "approve-continuation-104-p2-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "nonzeroRuntimeExit",
+            "invalidAnswerFormat"
+          ],
+          "decision": null,
+          "exitCode": 1
+        }
+      ],
+      "claimState": "unknown",
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": null,
+        "toolCalls": 0
+      },
+      "family": "missing",
+      "inputTokens": null,
+      "memoryExposed": true,
+      "model": "larger",
+      "outputTokens": null,
+      "sampleId": "missing-continuation-104-p2-enabled",
+      "state": "failed",
+      "toolOutcomes": {}
+    }
+  ],
+  "sourceCommit": "b0072fa668d8d0d16a14e5ba95b183fedd344da7",
+  "studyCharged": {
+    "providerRequests": 14,
+    "reportedTokens": 21435,
+    "toolCalls": 7
+  },
+  "toolOutcomes": {
+    "ok": 5
+  },
+  "traceBytesPreserved": true,
+  "unexecutedSamples": 3,
+  "unknownSamples": 1,
+  "version": 1
+}

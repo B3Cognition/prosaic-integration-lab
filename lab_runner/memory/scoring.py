@@ -1,6 +1,7 @@
 """Check trusted host receipts against current sources, never against recalled notes."""
 from lab_runner.quality.contracts import decode,digest,encode,identifier,integer
 from lab_runner.quality.scoring import answer_issues
+from .evidence import summarize_lookup,validate_format,admit_complete_index
 
 
 def score_case(case,evidence):
@@ -9,11 +10,16 @@ def score_case(case,evidence):
         encode(evidence);identifier(evidence['sampleId'])
         if evidence['version']!=1 or evidence['caseId']!=case['caseId']:raise ValueError('identity')
         prepared=evidence['prepared']
+        evidence_format=validate_format(prepared.get('evidenceFormat','raw'))
+        tool_version='lookup-summary-v1' if evidence_format=='typed' else 'lookup-v1'
+        if evidence_format=='typed':admit_complete_index(case['recordIndex'],case['records'])
         if digest(prepared)!=evidence['preparedDigest']:raise ValueError('prepared context')
         req=prepared['request'];retrieval=prepared['retrieval'];arm=prepared['arm']
         if arm not in {'enabled','disabled'} or req!={k:case[k] for k in ('caseId','task','recordIndex')}|{
                 'draft':None,'recalledEpisodes':retrieval['episodes']}:raise ValueError('request')
-        if prepared['binding']!=digest(dict(tenantId=case['tenantId'],arm=arm,request=req,retrieval=retrieval)):
+        scope=dict(tenantId=case['tenantId'],arm=arm,request=req,retrieval=retrieval)
+        if evidence_format=='typed':scope['evidenceFormat']='typed'
+        if prepared['binding']!=digest(scope):
             raise ValueError('scope')
         if retrieval['resultSha256']!=digest(retrieval['episodes']) or retrieval['resultBytes']!=len(encode(retrieval['episodes'])):
             raise ValueError('retrieval')
@@ -35,15 +41,19 @@ def score_case(case,evidence):
             integer(row['callIndex']);identity=(row['invocationId'],row['callId']);call=(row['invocationId'],row['callIndex'])
             if identity in matched or call in calls or identity not in completions:raise ValueError('unmatched lookup')
             matched.add(identity);calls.add(call)
-            if row['sampleId']!=evidence['sampleId'] or row['status']!='ok' or row['toolVersion']!='lookup-v1':
+            if row['sampleId']!=evidence['sampleId'] or row['status']!='ok' or row['toolVersion']!=tool_version:
                 raise ValueError('journal')
             ids=row['recordIds']
             if not 1<=len(ids)<=4 or len(set(ids))!=len(ids):raise ValueError('records')
-            if row['signature']!=digest(dict(tool_name='lookup_records',tool_version='lookup-v1',arguments={'recordIds':ids})):
+            if row['signature']!=digest(dict(tool_name='lookup_records',tool_version=tool_version,arguments={'recordIds':ids})):
                 raise ValueError('tool signature')
             if row['recordsSha256']!=digest([case['records'][key] for key in ids]):raise ValueError('source drift')
+            if evidence_format=='typed':
+                response=summarize_lookup(req,[case['records'][key] for key in ids])
+                if row['resultSha256']!=digest(response) or row['resultBytes']!=len(encode(response)):
+                    raise ValueError('summary drift')
             events=[ev for ev in by_id[row['invocationId']]['events'] if ev.get('event')=='tool_completed' and
-                ev.get('status')=='ok' and ev.get('name')=='lookup_records' and ev.get('tool_version')=='lookup-v1' and ev.get('call_id')==row['callId']]
+                ev.get('status')=='ok' and ev.get('name')=='lookup_records' and ev.get('tool_version')==tool_version and ev.get('call_id')==row['callId']]
             if len(events)!=1:raise ValueError('lookup event')
             metrics['totalCalls']+=1;metrics['requestedRecords']+=len(ids)
             metrics['duplicateRecords']+=len(set(ids)&read)

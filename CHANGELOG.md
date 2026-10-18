@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased experimental consumer blueprints
+
+- Add provider-neutral typed evidence, bounded context/continuation, scoped
+  memory, tool-error diagnostics, role qualification and bounded correction
+  examples with a no-critic baseline. Consumers own evidence policy and model
+  qualification; memory and correction stay opt-in and experimental.
+- Fix the correction usage guard for complete numeric counts whose pricing
+  status is unsupported. Unavailable counts stop work; role costs preserve
+  known counts independently of pricing support. Policy v2 keeps historical
+  evidence separate. Offline qualification does not establish model benefit.
+
+## Unreleased experimental continuation candidate
+
+- Adopt verified public Runtime 0.9.7 and Harness 0.9.4 in the experimental
+  benchmark manifest; keep the active release manifest and historic evidence.
+- Add opt-in version-2 continuation planning: quoted slots guide context
+  selection while shared Runtime admission enforces actual remaining allowance.
+- Preserve fixed case/cumulative limits, version-1 defaults and no-inference
+  receipt recovery. Memory efficacy remains unproven; no Lab release or live run.
+
 ## 0.5.0 — 2026-10-17
 
 - Add opt-in agent-quality and controlled retrieval-memory evaluation commands,

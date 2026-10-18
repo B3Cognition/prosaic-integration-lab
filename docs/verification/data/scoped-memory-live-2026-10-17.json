@@ -1,0 +1,708 @@
+{
+  "auditSha256": "5ca1a1bc3e83c357fbb0405b05f6e098978b662f55666494d016317c3d14b7e2",
+  "candidate": "0.5.1+context.2",
+  "candidateWheelSha256": "4bd4804dcf4b89fd9e5d5d6c473bd8cb6a07a1d53fc6b904f0d65ba246e56e8d",
+  "canonicalLedgerCount": 33,
+  "caseLimits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "checks": {
+    "allSamplesKnown": true,
+    "nativeUsageReconciled": true,
+    "networkDeniedReceiptReplay": true,
+    "noNewOverrun": true,
+    "originalEvidenceUnchanged": true,
+    "sourceAndServingGuardsUnchanged": true,
+    "traceBytesPreserved": true
+  },
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1417,
+    "reportedTokens": 1696913,
+    "toolCalls": 574
+  },
+  "date": "2026-10-17",
+  "evidenceFormat": "typed",
+  "firstDispatchedNativeRequestComparisons": [
+    {
+      "family": "relevant",
+      "identical": false,
+      "profile": "smaller"
+    },
+    {
+      "family": "changed",
+      "identical": true,
+      "profile": "smaller"
+    },
+    {
+      "family": "irrelevant",
+      "identical": true,
+      "profile": "smaller"
+    },
+    {
+      "family": "tenant",
+      "identical": true,
+      "profile": "smaller"
+    },
+    {
+      "family": "hostile",
+      "identical": false,
+      "profile": "smaller"
+    },
+    {
+      "family": "relevant",
+      "identical": true,
+      "profile": "larger"
+    },
+    {
+      "family": "changed",
+      "identical": true,
+      "profile": "larger"
+    },
+    {
+      "family": "irrelevant",
+      "identical": true,
+      "profile": "larger"
+    },
+    {
+      "family": "tenant",
+      "identical": true,
+      "profile": "larger"
+    },
+    {
+      "family": "hostile",
+      "identical": true,
+      "profile": "larger"
+    }
+  ],
+  "historicalUnknownReservationsRetained": 7,
+  "limitations": [
+    "One case per family; no repeat trials or statistical efficacy claim.",
+    "Only two smaller-model enabled samples received recall; larger-model recall was excluded by the fixed full-trajectory policy.",
+    "Large missing-evidence cases were refused before inference; live missing-fact reasoning on those cases was not tested.",
+    "Seven tool errors remain unclassified by public evidence; exact argument/callback causes are not established.",
+    "Sequential local serving, model switching and output variation preclude memory latency claims."
+  ],
+  "origin": "live",
+  "plannedMandatoryRefusals": 4,
+  "privateEvidenceArchiveSha256": "a003f1d2bb7483a56cc6aaf53e72a85a6317abe9321bda49956e6e5d026dbfd7",
+  "profiles": {
+    "larger": {
+      "disabled": {
+        "counts": {
+          "providerRequests": 10,
+          "reportedTokens": 15236,
+          "toolCalls": 5
+        },
+        "mandatoryRefused": 1,
+        "medianSeconds": 66.533177062498,
+        "memoryExposed": 0,
+        "passed": 5,
+        "repairAttempts": 0,
+        "samples": 6
+      },
+      "enabled": {
+        "counts": {
+          "providerRequests": 10,
+          "reportedTokens": 15243,
+          "toolCalls": 5
+        },
+        "mandatoryRefused": 1,
+        "medianSeconds": 52.231976228998974,
+        "memoryExposed": 0,
+        "passed": 5,
+        "repairAttempts": 0,
+        "samples": 6
+      }
+    },
+    "smaller": {
+      "disabled": {
+        "counts": {
+          "providerRequests": 16,
+          "reportedTokens": 20720,
+          "toolCalls": 8
+        },
+        "mandatoryRefused": 1,
+        "medianSeconds": 11.109808229506598,
+        "memoryExposed": 0,
+        "passed": 4,
+        "repairAttempts": 3,
+        "samples": 6
+      },
+      "enabled": {
+        "counts": {
+          "providerRequests": 18,
+          "reportedTokens": 24188,
+          "toolCalls": 9
+        },
+        "mandatoryRefused": 1,
+        "medianSeconds": 15.887345541501418,
+        "memoryExposed": 2,
+        "passed": 2,
+        "repairAttempts": 4,
+        "samples": 6
+      }
+    }
+  },
+  "remainingAllowance": {
+    "providerRequests": 58,
+    "reportedTokens": 279710,
+    "toolCalls": 30
+  },
+  "results": [
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2595,
+        "toolCalls": 1
+      },
+      "family": "relevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5540,
+        "toolCalls": 2
+      },
+      "family": "relevant",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 1,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 1,
+      "receiptReasons": [],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3006,
+        "toolCalls": 1
+      },
+      "family": "relevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3063,
+        "toolCalls": 1
+      },
+      "family": "relevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3046,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3027,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5339,
+        "toolCalls": 2
+      },
+      "family": "changed",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [
+        "invalidEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 1
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5339,
+        "toolCalls": 2
+      },
+      "family": "changed",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [
+        "invalidEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 1
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2632,
+        "toolCalls": 1
+      },
+      "family": "irrelevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2632,
+        "toolCalls": 1
+      },
+      "family": "irrelevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3088,
+        "toolCalls": 1
+      },
+      "family": "irrelevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3093,
+        "toolCalls": 1
+      },
+      "family": "irrelevant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2989,
+        "toolCalls": 1
+      },
+      "family": "tenant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3068,
+        "toolCalls": 1
+      },
+      "family": "tenant",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5137,
+        "toolCalls": 2
+      },
+      "family": "tenant",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 1,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5082,
+        "toolCalls": 2
+      },
+      "family": "tenant",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 1,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5072,
+        "toolCalls": 2
+      },
+      "family": "hostile",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 1,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5540,
+        "toolCalls": 2
+      },
+      "family": "hostile",
+      "firstPass": false,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 1,
+      "profile": "smaller",
+      "proposalReasons": {
+        "withinPlan": 4
+      },
+      "recalledEpisodeCount": 1,
+      "receiptReasons": [],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3047,
+        "toolCalls": 1
+      },
+      "family": "hostile",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3052,
+        "toolCalls": 1
+      },
+      "family": "hostile",
+      "firstPass": true,
+      "mandatoryAdmitted": true,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "withinPlan": 2
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [],
+      "scoreReasons": [],
+      "state": "passed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 0,
+        "reportedTokens": 0,
+        "toolCalls": 0
+      },
+      "family": "missing-large",
+      "firstPass": false,
+      "mandatoryAdmitted": false,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "mandatoryRejected": 1
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [
+        "token_admission"
+      ],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 0,
+        "reportedTokens": 0,
+        "toolCalls": 0
+      },
+      "family": "missing-large",
+      "firstPass": false,
+      "mandatoryAdmitted": false,
+      "otherRepairs": 0,
+      "profile": "larger",
+      "proposalReasons": {
+        "mandatoryRejected": 1
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [
+        "token_admission"
+      ],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "enabled",
+      "counts": {
+        "providerRequests": 0,
+        "reportedTokens": 0,
+        "toolCalls": 0
+      },
+      "family": "missing-large",
+      "firstPass": false,
+      "mandatoryAdmitted": false,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "mandatoryRejected": 1
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [
+        "token_admission"
+      ],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    },
+    {
+      "arm": "disabled",
+      "counts": {
+        "providerRequests": 0,
+        "reportedTokens": 0,
+        "toolCalls": 0
+      },
+      "family": "missing-large",
+      "firstPass": false,
+      "mandatoryAdmitted": false,
+      "otherRepairs": 0,
+      "profile": "smaller",
+      "proposalReasons": {
+        "mandatoryRejected": 1
+      },
+      "recalledEpisodeCount": 0,
+      "receiptReasons": [
+        "token_admission"
+      ],
+      "scoreReasons": [
+        "invalidEvidence",
+        "missingEvidence"
+      ],
+      "state": "failed",
+      "taskRepairs": 0
+    }
+  ],
+  "samples": 24,
+  "sourceCommit": "4667710aba30ddcc5a1e2d12889a68bb2ef01762",
+  "studyCounts": {
+    "providerRequests": 54,
+    "reportedTokens": 75387,
+    "toolCalls": 27
+  },
+  "studyId": "scoped-memory-heldout-v1",
+  "toolFailureCategories": {
+    "unclassified": 7
+  },
+  "version": 1
+}

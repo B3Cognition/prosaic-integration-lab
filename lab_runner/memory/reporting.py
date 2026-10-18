@@ -11,7 +11,7 @@ def retrieval_metrics(gold,retrieved,available):
         availableGoldCount=len(gold&available),corpusCoverage=None if not gold else len(gold&available)/len(gold))
 
 
-def public_result(case,evidence,row,available):
+def public_result(case,evidence,row,available,*,claim=None):
     verdict=score_case(case,evidence)
     counts={k:evidence['counts'][k] for k in ('providerRequests','toolCalls','reportedTokens')}
     for k in ('providerRequests','toolCalls') :integer(evidence['counts'][k])
@@ -26,7 +26,8 @@ def public_result(case,evidence,row,available):
         if type(value) not in (int,float) or not math.isfinite(value) or value<0:raise ValueError('invalid memory duration')
     public_row={k:row[k] for k in ('sampleId','caseId','profileFingerprint','arm')}
     return public_row|verdict|dict(family=case['family'],counts=counts,firstPass=evidence['firstPass'],
-        reservationRetained=evidence.get('reservationRetained',False),
+        reservationRetained=(claim['state'] in {'pending','unknown'} if claim is not None else evidence.get('reservationRetained',False)),
+        reservationExceeded=claim is not None and claim['state']=='overrun',
         schemaRepairs=evidence['schemaRepairs'],taskRepairs=evidence['taskRepairs'],elapsedSeconds=evidence['elapsedSeconds'],
         hostQueries=evidence['retrievalMetrics']['hostQueries'],retrievalSeconds=evidence['retrievalMetrics']['elapsedSeconds'],
         resultBytes=evidence['retrievalMetrics']['resultBytes'],
@@ -48,8 +49,10 @@ def summarize(rows,results,*,identity,origin,fixture_counts=None):
     passed=sum(r['state']=='passed' for r in results);attempted=len(results)
     usage=bool(results) and all(r['counts']['reportedTokens'] is not None for r in results)
     report=dict(version=1,origin=origin,identity=identity,schedule=rows,results=results,scheduledSamples=len(rows),
-        executedSamples=attempted,baselineComplete=len(results)==len(rows) and usage,usageComplete=usage,
+        executedSamples=attempted,baselineComplete=len(results)==len(rows) and usage and not any(
+            r.get('reservationRetained',False) or r.get('reservationExceeded',False) for r in results),usageComplete=usage,
         retainedUnknownSamples=sum(r.get('reservationRetained',False) for r in results),
+        reservationExceededSamples=sum(r.get('reservationExceeded',False) for r in results),
         taskSuccess=dict(passed=passed,attempted=attempted,rate=None if not attempted else passed/attempted),
         stateCounts={**{state:sum(r['state']==state for r in results) for state in ('passed','failed','unknown')},'notRun':len(rows)-len(results)},
         hostQueries=None if any(r['hostQueries'] is None for r in results) else sum(r['hostQueries'] for r in results),schemaRepairs=sum(r['schemaRepairs'] for r in results),

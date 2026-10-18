@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prosaic-integration-lab"
-version = "0.5.0"
+version = "0.5.1+ci.2"
 description = "Synthetic acceptance consumer for installed Prosaic releases"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx", "psycopg[binary]>=3.2,<4", "psycopg-pool>=3.2,<4", "PyYAML", "jsonschema", "pyuca", "PyJWT[crypto]>=2.15,<3"]
 
 [project.optional-dependencies]
 test = ["pytest", "build"]
+token-counters = ["transformers==5.17.0", "tokenizers==0.23.2", "jinja2==3.1.6"]
 
 [tool.setuptools.packages.find]
 where = ["src", "."]

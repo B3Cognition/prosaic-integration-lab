@@ -174,11 +174,16 @@ def extract(case,sample_id,harness,journal,elapsed,*,timings=None):
         reason=state['reason'],workflowDigest=digest(harness.workflow.definition),
         attempts=[dict(invocationId=r['id'],step=r['step'],exitCode=r['result']['exit_code'],
                         reportedTokens=r['result']['token_usage'],elapsedSeconds=(timings or {}).get(r['id'])) for r in receipts])
+    result['admissionViolation']=('token_reservation_exceeded' if any(
+        r['result']['metadata'].get('failure_reason')=='token_reservation_exceeded' or
+        r['result']['metadata'].get('token_admission_violation')=='token_reservation_exceeded' for r in receipts) else None)
     return result
 
 
-def execute_case(case,*,config,profile,output,sample_id,limits):
+def execute_case(case,*,config,profile,output,sample_id,limits,token_counter=None):
     from prosaic_harness import Harness,FileRunStore
+    from .token_admission import execution_scope,activate_scope
+    scope=execution_scope(limits,token_counter)
     output=private_directory(output)
     workflow,journal,on_event=materials(case,config,profile,sample_id,limits,
                                       journal_path=output/(sample_id+'-journal.json'))
@@ -187,7 +192,7 @@ def execute_case(case,*,config,profile,output,sample_id,limits):
     harness=Harness(workflow,store=store,run_id=run_id,on_event=on_event)
     began=time.monotonic()
     try:
-        harness.run(public_case(case))
+        with activate_scope(scope):harness.run(public_case(case))
         result=extract(case,sample_id,harness,journal,time.monotonic()-began,timings=on_event.timings)
         private_write(output/(sample_id+'-execution.json'),result)
         return result

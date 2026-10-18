@@ -54,8 +54,10 @@ def private_write(path, value):
 
 
 class BenchmarkAllowance:
-    def __init__(self,path,*,identity,limits):
+    def __init__(self,path,*,identity,limits,version=1):
         self.path=Path(path); self.identity=sha(identity)
+        if type(version) is not int or version not in (1,2):raise ValueError('unsupported allowance version')
+        self.version=version
         if type(limits) is not dict or set(limits) != {*DIMENSIONS,'maxSamples','timeoutSeconds'}:
             raise ValueError('invalid benchmark ceilings')
         self.limits={k:integer(v,1,1_000_000_000) for k,v in limits.items()}
@@ -66,7 +68,7 @@ class BenchmarkAllowance:
             if self.path.exists(): self._read()
             else:
                 now=time.time()
-                private_write(self.path,dict(version=1,identity=identity,limits=self.limits,
+                private_write(self.path,dict(version=version,identity=identity,limits=self.limits,
                     startedAt=now,deadline=now+self.limits['timeoutSeconds'],samples={}))
 
     @contextmanager
@@ -84,7 +86,7 @@ class BenchmarkAllowance:
                 state=decode(os.read(fd,4_194_305))
             finally:os.close(fd)
             if (set(state) != {'version','identity','limits','startedAt','deadline','samples'} or
-                    type(state['version']) is not int or state['version'] != 1 or
+                    type(state['version']) is not int or state['version'] != self.version or
                     state['identity'] != self.identity or state['limits'] != self.limits or
                     type(state['samples']) is not dict or len(state['samples'])>self.limits['maxSamples'] or
                     type(state['startedAt']) not in (int,float) or
@@ -92,21 +94,27 @@ class BenchmarkAllowance:
                 raise ValueError('benchmark binding mismatch')
             for sample,row in state['samples'].items():
                 identifier(sample)
-                if set(row) != {'maximum','actual','state','evidenceDigest'} or row['state'] not in {'pending','unknown','known'}:
+                states={'pending','unknown','known'}|({'overrun'} if self.version==2 else set())
+                keys={'maximum','actual','state','evidenceDigest'}|({'violation'} if self.version==2 else set())
+                if set(row) != keys or row['state'] not in states:
                     raise ValueError('invalid reservation')
+                violation=row.get('violation')
+                if violation not in (None,'token_reservation_exceeded'):raise ValueError('invalid admission violation')
                 counts(row['maximum'])
-                if row['state']=='known':
+                if row['state'] in {'known','overrun'}:
                     counts(row['actual']);sha(row['evidenceDigest'])
-                    if any(row['actual'][k]>row['maximum'][k] for k in DIMENSIONS):raise ValueError('overspent')
-                elif row['actual'] is not None or row['evidenceDigest'] is not None:
+                    exceeded=violation is not None or any(row['actual'][k]>row['maximum'][k] for k in DIMENSIONS)
+                    if exceeded != (row['state']=='overrun'):raise ValueError('invalid overrun evidence')
+                elif row['actual'] is not None or row['evidenceDigest'] is not None or violation is not None:
                     raise ValueError('invalid uncertainty')
-            if any(self._retained(state)[k]>self.limits[k] for k in DIMENSIONS):raise ValueError('overspent')
+            if (any(self._retained(state)[k]>self.limits[k] for k in DIMENSIONS) and
+                    not any(r['state']=='overrun' for r in state['samples'].values())):raise ValueError('overspent')
             return state
         except (OSError,KeyError,TypeError):raise ValueError('benchmark allowance unavailable') from None
 
     @staticmethod
     def _retained(state):
-        return {k:sum((r['actual'] if r['state']=='known' else r['maximum'])[k]
+        return {k:sum((r['actual'] if r['state'] in {'known','overrun'} else r['maximum'])[k]
                       for r in state['samples'].values()) for k in DIMENSIONS}
 
     def reserve(self,sample_id,maximum):
@@ -115,23 +123,29 @@ class BenchmarkAllowance:
             state=self._read();retained=self._retained(state)
             if (time.time()>=state['deadline'] or sample_id in state['samples'] or
                     len(state['samples'])>=self.limits['maxSamples'] or
-                    any(r['state']=='unknown' for r in state['samples'].values()) or
+                    any(r['state'] in {'unknown','overrun'} for r in state['samples'].values()) or
                     any(retained[k]+maximum[k]>self.limits[k] for k in DIMENSIONS)):
                 raise ValueError('benchmark allowance exhausted or sample claimed')
             row=dict(maximum=maximum,actual=None,state='pending',evidenceDigest=None)
+            if self.version==2:row['violation']=None
             state['samples'][sample_id]=row;private_write(self.path,state)
             return decode(encode(row))
 
-    def finish(self,sample_id,*,actual,evidence_digest):
+    def finish(self,sample_id,*,actual,evidence_digest,violation=None):
         identifier(sample_id)
+        if violation not in (None,'token_reservation_exceeded') or (self.version==1 and violation is not None):
+            raise ValueError('invalid admission violation')
+        if violation is not None and actual is None:raise ValueError('known breach requires known actual')
         if actual is not None:actual=counts(actual);sha(evidence_digest)
         elif evidence_digest is not None:raise ValueError('unknown evidence')
         with self._lock():
             state=self._read();previous=state['samples'][sample_id]
-            if actual is not None and any(actual[k]>previous['maximum'][k] for k in DIMENSIONS):
+            exceeded=actual is not None and (violation is not None or any(actual[k]>previous['maximum'][k] for k in DIMENSIONS))
+            if exceeded and self.version==1:
                 raise ValueError('benchmark reservation exceeded')
             row=dict(maximum=previous['maximum'],actual=actual,
-                     state='unknown' if actual is None else 'known',evidenceDigest=evidence_digest)
+                     state='unknown' if actual is None else 'overrun' if exceeded else 'known',evidenceDigest=evidence_digest)
+            if self.version==2:row['violation']=violation
             if previous['state']!='pending' and previous!=row:
                 raise ValueError('conflicting benchmark settlement')
             state['samples'][sample_id]=row;private_write(self.path,state)
@@ -140,10 +154,14 @@ class BenchmarkAllowance:
     def status(self):
         with self._lock():
             state=self._read();retained=self._retained(state)
-            return dict(retained=retained,remaining={k:self.limits[k]-retained[k] for k in DIMENSIONS},
+            result=dict(retained=retained,remaining={k:max(0,self.limits[k]-retained[k]) for k in DIMENSIONS},
                 pendingSamples=sum(r['state']=='pending' for r in state['samples'].values()),
                 unknownSamples=sum(r['state']=='unknown' for r in state['samples'].values()),
                 samples=len(state['samples']),deadline=state['deadline'])
+            if self.version==2:
+                result.update(excess={k:max(0,retained[k]-self.limits[k]) for k in DIMENSIONS},
+                    overrunSamples=sum(r['state']=='overrun' for r in state['samples'].values()))
+            return result
 
     def sample(self,sample_id):
         identifier(sample_id)

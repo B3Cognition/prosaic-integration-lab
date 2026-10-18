@@ -91,12 +91,14 @@ def test_report_does_not_echo_arbitrary_identity_or_recovery_data():
         summarize([],[],identity=benchmark_identity(),origin='fixture',recovery=[{'passed':True,'secret':'canary'}])
 
 
-def test_provenance_binds_the_published_sdk_manifest():
-    from lab_runner.quality.runner import preflight
+@pytest.mark.parametrize('runtime,filename',[('0.9.7','releases.json'),('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
+def test_provenance_binds_the_selected_sdk_manifest(monkeypatch,runtime,filename):
+    from lab_runner.quality import runner
     from prosaic_integration_lab.dependencies import manifest_digest
     from pathlib import Path
-    report=preflight()
-    manifest=Path(__file__).resolve().parents[2]/'dependencies/releases.json'
+    monkeypatch.setattr(runner,'provenance',lambda:{'b3-prosaic':'0.4.1','b3-prosaic-runtime':runtime,'b3-prosaic-harness':'0.9.4'})
+    report=runner.preflight()
+    manifest=Path(__file__).resolve().parents[2]/'dependencies'/filename
     assert report['identity']['sdkManifestDigest']==manifest_digest(manifest)
 
 

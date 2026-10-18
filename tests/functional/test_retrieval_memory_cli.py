@@ -15,6 +15,17 @@ def test_default_cli_is_pure_unexecuted(monkeypatch,capsys):
     assert result['origin']=='unexecuted' and result['executedSamples']==0
 
 
+def test_typed_cli_preflight_is_explicit_and_pure(monkeypatch,capsys):
+    import lab_runner.memory.runner as runner
+    from lab_runner.retrieval_memory import main
+    monkeypatch.setattr(runner,'load_suite',bundle)
+    def forbidden(*args,**kwargs):raise AssertionError('socket used in typed preflight')
+    monkeypatch.setattr(socket,'socket',forbidden)
+    assert main(['--typed-evidence'])==0
+    result=json.loads(capsys.readouterr().out)
+    assert result['identity']['evidenceFormat']=='typed' and result['executedSamples']==0
+
+
 def test_explicit_fixture_cli_runs_real_native_calls(monkeypatch,tmp_path,capsys):
     import lab_runner.memory.runner as runner
     from lab_runner.retrieval_memory import main
