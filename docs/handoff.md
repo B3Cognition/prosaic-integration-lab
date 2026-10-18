@@ -1,5 +1,14 @@
 # Codex handoff
 
+## PR18 merged; durable failure isolation in offline qualification — 2026-10-18
+
+PR18 was marked ready and merged at `1c52747` after all four exact-head required
+CI lanes passed. The next [consumer blueprint](failure-isolation.md) adds local
+durable admission, isolated uncertainty, revoked journal writers and explicit
+receipt-only recovery. It creates no allowance and makes no retry decisions.
+Memory/correction remain experimental; no live run or SDK change is authorized.
+Qualification results will be recorded separately before completion.
+
 ## PR18 CI repair on the public SDK train — 2026-10-18
 
 [Qualification](verification/pr18-ci-2026-10-18.md): active manifest advances to
