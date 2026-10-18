@@ -1,5 +1,22 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Frozen direct worker/critic live result — 2026-10-18
+
+[Evaluation](direct-handoffs-live-2026-10-18.md):12fresh samples,41host checks,
+12actual-counter offline lanes, reviewed/frozen before approved dispatch.
+Smaller critic correctly escalated all four flawed drafts it reviewed but
+identified only5/14required issue fields; clean control accepted. Larger's three
+critic controls truncated at512output, and neither full-handoff worker reached
+critic. Both models passed the worker-only case;0/2full-handoff workers passed
+per model. Detection warnings do not establish complete verification or repair.
+All usage known:18/4/28754; cumulative1494/605/1805193 against1524/625/1976623.
+No new unknown/timeout/overrun/counter violation; old8unknown reservations remain
+fully charged. Network-denied copied-state recovery made zero additional calls.
+Preserved795files and ledger38; all37old ledger hashes unchanged. Models, SDKs,
+package contracts and per-case caps unchanged. No source fix/push/release or
+memory rollout. Next: role capability qualification and source-grounded diagnostics
+before a bounded repair/ablation study; autonomous readiness remains open.
+
 ## Direct-role output contracts qualified offline — 2026-10-18
 
 [Qualification](direct-handoffs-2026-10-18.md): Lab 0.5.1+direct.2, executable

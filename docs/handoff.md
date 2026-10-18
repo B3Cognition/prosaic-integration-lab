@@ -1,5 +1,33 @@
 # Codex handoff
 
+## Frozen direct worker/critic live evaluation complete — 2026-10-18
+
+[Result](verification/direct-handoffs-live-2026-10-18.md):12/12fresh samples ran
+under unchanged caps. Each model passed1/3workers. Smaller critic accepted the
+clean control and correctly escalated2/2actual flaws plus2/2seeded flaws, but
+all four issue lists were incomplete (5/14required fields; zero invented fields).
+Larger controls3/3unusable at512output; full-handoff workers also truncated, so
+natural critic benefit remains unmeasured. No answer repair was tested.
+Independent host gates prevented acceptance of wrong full-handoff results.
+Study18requests/4tools/28754tokens; cumulative1494/605/1805193 versus approved
+ceilings1524/625/1976623, remaining30/20/171430. All usage known, no new unknown,
+timeout, overrun or counter violation;8old unknown reservations remain charged.
+All receipts/accounting reconcile; copied-state recovery denies sockets and
+makes zero additional calls. Prepared host41tests/12offline lanes; one fresh
+review with3Important fixes before approval. Package/SDK/models stay frozen.
+Preserved795new files, canonical ledger38; prior37ledger hashes unchanged.
+Archive `prosaic-direct-live-evidence-final-20261018.tar.gz`, SHA256
+`cbccd6bd9f717b6983186b53365a045218110c4ef4452f0a8cc5c81ca4e8990b`.
+Private study `/private/tmp/prosaic-direct-live-study-20261018`; preserve all
+intermediate evidence, including the initial report-directory preservation
+failure. No frozen dispatch/audit/analysis code changed after live observation.
+Closed operators expect37historical ledgers and cannot dispatch again after
+canonical publication. Use a fresh root/baseline for future work.
+Next recommended development milestone: provider-neutral role qualification,
+source-grounded review diagnostics and separately qualified bounded correction
+with a no-critic baseline. No new milestone implementation/live allowance is
+authorized by this recommendation. Memory stays experimental; no push/release.
+
 ## Direct worker/critic offline qualification — 2026-10-18
 
 Opt-in Lab 0.5.1+direct.2 adds explicit model-visible JSON contracts, host-prepared

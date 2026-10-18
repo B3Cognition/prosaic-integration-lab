@@ -42,7 +42,7 @@ immutable inputs; runner reserves each full case and settles receipt-derived cou
   mutated bindings, unknown/overrun/retry and interruption phases; deny recovery sockets.
 - [x] Audit installed code/wheels, historical ledgers/evidence and serving guards.
 - [x] One fresh whole-host review; fix material findings with RED/GREEN evidence.
-- [ ] Freeze final binding and ask precisely24requests/8tools; no token increase.
+- [x] Freeze final binding and ask precisely24requests/8tools; no token increase.
 
 ### Task 2: Execute the frozen operational evaluation and report
 
@@ -51,12 +51,12 @@ immutable inputs; runner reserves each full case and settles receipt-derived cou
 **Interfaces:** consumes Task1 frozen proof and explicit allowance approval. Uses
 unchanged installed `direct.execute_case`/`recover_case` and immutable receipts.
 
-- [ ] After approval only, persist consent bound to proof; reserve/run12samples,
+- [x] After approval only, persist consent bound to proof; reserve/run12samples,
   no redispatch, halt on unknown/overrun/counter violation.
-- [ ] Reconcile receipts with accounting/diagnostics; copied-state recovery with sockets denied.
-- [ ] Count actual worker flaws reviewed, critic detections/false alarms and costs;
+- [x] Reconcile receipts with accounting/diagnostics; copied-state recovery with sockets denied.
+- [x] Count actual worker flaws reviewed, critic detections/false alarms and costs;
   report controls separately, including unreached stages and small-sample limits.
-- [ ] Preserve new evidence and canonical ledger, verify all old hashes and charged unknowns;
+- [x] Preserve new evidence and canonical ledger, verify all old hashes and charged unknowns;
   commit sanitized report locally and retain branch/worktree.
 
 Preflight: Task1 produces the exact frozen proof, schedule and driver consumed by

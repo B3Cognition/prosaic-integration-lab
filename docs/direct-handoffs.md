@@ -57,3 +57,12 @@ and deliberate bad responses. Scripted transport success demonstrates plumbing,
 contracts and host enforcement; it cannot demonstrate model obedience, critic
 benefit, memory improvement or production readiness. Those require separately
 authorized real-model studies. Memory remains experimental.
+
+The [frozen live study](verification/direct-handoffs-live-2026-10-18.md) completed
+12fresh samples under the same caps. The smaller critic warned on all four
+flawed drafts it reviewed but missed required issue fields in every one; the
+larger critic's three controls produced no usable result at512output tokens.
+Both passed the worker-only case; neither passed a full handoff. These findings
+support role qualification and source-grounded diagnostics before unattended
+repair. Keep host validation authoritative and separate a warning from a complete
+review or improved answer.
