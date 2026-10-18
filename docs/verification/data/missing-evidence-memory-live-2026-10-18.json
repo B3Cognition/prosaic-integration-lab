@@ -1,0 +1,280 @@
+{
+  "candidateVersions": {
+    "harness": "0.9.4",
+    "lab": "0.5.1+diagnostics.1",
+    "runtime": "0.9.8+diagnostics.1"
+  },
+  "cases": 1,
+  "complete": true,
+  "continuationRefusals": [],
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1468,
+    "reportedTokens": 1769171,
+    "toolCalls": 601
+  },
+  "fullReservation": {
+    "providerRequests": 16,
+    "reportedTokens": 32768,
+    "toolCalls": 8
+  },
+  "generalMemoryBenefitEstablished": false,
+  "knownSamples": 4,
+  "limitations": [
+    "One case per family, one stochastic trajectory per arm; descriptive only.",
+    "One missing-evidence case only; no approve/reject coverage.",
+    "One case excludes invalidated sources, rejection, large indexes and broad multi-agent evaluation.",
+    "No inference-based case/prompt/settings edits or reruns; both arms use bounded recovery.",
+    "No-recall arm differences cannot be attributed to memory content."
+  ],
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "memoryBenefitObserved": false,
+  "networkDeniedReceiptReplay": true,
+  "nextMilestone": "Offline provider-neutral typed multi-agent handoff and full-trajectory qualification",
+  "pairs": [
+    {
+      "disabledPassed": false,
+      "enabledPassed": false,
+      "family": "missing",
+      "memoryExposed": true,
+      "model": "smaller",
+      "requestDifference": 0,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 608
+    },
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "missing",
+      "memoryExposed": true,
+      "model": "larger",
+      "requestDifference": 0,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 221
+    }
+  ],
+  "preservation": {
+    "allHistoricalLedgerCount": 36,
+    "archiveSha256": "1e914fae14214cbdfa0b0e146fb515979e10b4e96067789e581c7cd071855b3a",
+    "canonicalLedgerSha256": "17ec7b530bf04810a3911987855a9fff01f7faa535b1807aadf2910cda443a06",
+    "cumulativeCeilings": {
+      "providerRequests": 1475,
+      "reportedTokens": 1976623,
+      "toolCalls": 604
+    },
+    "cumulativeCharged": {
+      "providerRequests": 1468,
+      "reportedTokens": 1769171,
+      "toolCalls": 601
+    },
+    "evidenceFiles": 178,
+    "evidenceManifestSha256": "8ce12f1d7cb686b141638f264c5a3ea0df24c81761bdb7ebef8fb47e136e0119",
+    "preserved": true,
+    "priorEvidence": {
+      "continuation-budget-evidence-20261017": {
+        "files": 282,
+        "manifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711"
+      },
+      "continuation-memory-evidence-20261017": {
+        "files": 338,
+        "manifestSha256": "62f2d7535eafda5f31b7c1e27ba65d98c6db709c26f4e04ed991324bd467d7a8"
+      },
+      "recovery-memory-evidence-20261017": {
+        "files": 428,
+        "manifestSha256": "32be0bff51b1fc2fb7aff3c8674eb7f3b1c55c2b750070bb3eb82658e557f96e"
+      },
+      "response-fault-evidence-20261018": {
+        "files": 676,
+        "manifestSha256": "89551e7ce6a2c6cc8e2f82e4ab8dec29f05d2771c5e9aa9cac9a6d34e9cb35b2"
+      }
+    },
+    "retainedUnknownReservations": 8
+  },
+  "quotedSlotOverages": [
+    {
+      "hardInputCeiling": 7680,
+      "inputBound": 1212,
+      "quotedInputBound": 1152,
+      "reason": "withinContext",
+      "sampleId": "missing-diagnostics-205-p1-disabled"
+    }
+  ],
+  "recallExposedModelPairs": 2,
+  "remaining": {
+    "providerRequests": 7,
+    "reportedTokens": 207452,
+    "toolCalls": 3
+  },
+  "results": [
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "decision": "approve",
+          "exitCode": 0
+        },
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 4874,
+        "toolCalls": 2
+      },
+      "diagnosticKinds": {
+        "message": 4
+      },
+      "diagnosticUsage": {
+        "unsupported": 4
+      },
+      "family": "missing",
+      "inputTokens": 4690,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 184,
+      "sampleId": "missing-diagnostics-205-p1-disabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 2
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "decision": "approve",
+          "exitCode": 0
+        },
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "decision": "approve",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5482,
+        "toolCalls": 2
+      },
+      "diagnosticKinds": {
+        "message": 4
+      },
+      "diagnosticUsage": {
+        "unsupported": 4
+      },
+      "family": "missing",
+      "inputTokens": 5298,
+      "memoryExposed": true,
+      "model": "smaller",
+      "outputTokens": 184,
+      "sampleId": "missing-diagnostics-205-p1-enabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 2
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "decision": "insufficient",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3175,
+        "toolCalls": 1
+      },
+      "diagnosticKinds": {
+        "message": 2
+      },
+      "diagnosticUsage": {
+        "unsupported": 2
+      },
+      "family": "missing",
+      "inputTokens": 2783,
+      "memoryExposed": true,
+      "model": "larger",
+      "outputTokens": 392,
+      "sampleId": "missing-diagnostics-205-p2-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "decision": "insufficient",
+          "exitCode": 0
+        }
+      ],
+      "claimState": "known",
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2954,
+        "toolCalls": 1
+      },
+      "diagnosticKinds": {
+        "message": 2
+      },
+      "diagnosticUsage": {
+        "unsupported": 2
+      },
+      "family": "missing",
+      "inputTokens": 2479,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 475,
+      "sampleId": "missing-diagnostics-205-p2-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    }
+  ],
+  "scheduledSamples": 4,
+  "studyCounts": {
+    "providerRequests": 12,
+    "reportedTokens": 16485,
+    "toolCalls": 6
+  },
+  "toolOutcomes": {
+    "ok": 6
+  },
+  "traceBytesPreserved": true,
+  "unknownReservationsRetained": 8,
+  "version": 1
+}

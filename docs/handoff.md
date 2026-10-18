@@ -1,5 +1,23 @@
 # Codex handoff
 
+## Fresh four-sample missing-evidence comparison complete — 2026-10-18
+
+The [audited held-out comparison](verification/missing-evidence-memory-live-2026-10-18.md)
+completed all four samples with known usage under unchanged limits. Both enabled
+arms actually recalled relevant history. Smaller off/on failed both after the
+permitted correction; fact/citation fields were correct but decision remained
+approve despite missing-authority feedback. Larger off/on passed first attempt.
+No observed memory benefit; recall added608/221tokens without fewer requests or
+tools. All6tools succeeded, no continuation refused, one quote overage correctly
+admitted by shared budgeting. New diagnostics show message/unsupported usage
+details; numerical totals reconcile, no pricing/cost qualification claimed.
+Cumulative1468requests/601tools/1769171tokens; remaining7/3/207452. Eight unknown
+reservations and35previous ledgers unchanged;36thledger appended,178new evidence
+files preserved. No product/model/default changes, push or release. Ready for
+offline provider-neutral typed multi-agent handoff/trajectory qualification;
+memory remains experimental. Another full4sample study cannot fit remaining
+request/tool reservations. Prior checkpoints below retain original state.
+
 ## Response diagnostics qualified offline — 2026-10-18
 
 Runtime0.9.8+diagnostics.1 and Lab0.5.1+diagnostics.1 are local unreleased

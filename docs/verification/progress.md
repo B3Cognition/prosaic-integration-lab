@@ -1,5 +1,19 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Fresh four-sample missing-evidence memory comparison — 2026-10-18
+
+All4samples completed with known usage in the
+[new audited study](missing-evidence-memory-live-2026-10-18.md). Both models had
+recall exposure: smaller failed both arms (wrong decision after feedback), larger
+passed both immediately. Memory added tokens and saved no request/tool/correction;
+one case does not establish general efficacy. Shared continuation budgeting
+admitted one over-quotation bound safely; all6tools succeeded. Usage quantities
+reconcile despite unsupported extended usage details. Study12requests/6tools/
+16485tokens; cumulative1468/601/1769171, remaining7/3/207452. All eight historical
+unknown reservations retained;36canonical ledgers and178new evidence files
+preserved. No product change/publication; next recommended work is offline
+provider-neutral typed multi-agent handoff and trajectory evaluation.
+
 ## Response/usage fault qualification complete — 2026-10-18
 
 The [ledger](response-faults-2026-10-18.md) records private Runtime/Lab diagnostic
