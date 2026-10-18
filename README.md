@@ -398,5 +398,8 @@ The opt-in [bounded correction blueprint](docs/bounded-correction.md) adds one
 host-verified correction and a matched no-critic baseline under the same per-arm
 limits. Consumers adapt the evidence policy and qualify their own roles; scripted
 offline proof does not establish model or critic benefit.
+The [fresh live comparison](docs/verification/correction-live-2026-10-18.md)
+stopped on unknown usage with no eligible matched pairs. A separate offline
+unsupported-usage guard defect currently blocks promotion of this example.
 
 The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

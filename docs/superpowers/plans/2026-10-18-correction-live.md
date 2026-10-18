@@ -32,12 +32,17 @@ independent case oracle, durable sample reservations, immutable frozen guards.
 **Interfaces:** `build_inputs(seed)`, `oracle(case,rows,rules)`, `guard(authorized)`,
 `run(proof,...,check=...)` around public execute/recover/score/compare APIs.
 
-- [ ] RED→GREEN: fresh balanced cases/oracle, exact consent, drift/claims,
+- [x] RED→GREEN: fresh balanced cases/oracle, exact consent, drift/claims,
   conservative settlement and failure-inclusive matching/recovery.
-- [ ] Run16actual-counter synthetic lanes plus fault tests; original counters
+- [x] Run16actual-counter synthetic lanes plus fault tests; original counters
   and131installedpayloads/SDKs verified; one fresh final host review.
-- [ ] Freeze all relevant bytes and calculate exact extra allowance; request it
+- [x] Freeze all relevant bytes and calculate exact extra allowance; request it
   with concrete offline proof; wait for literal explicit approval.
-- [ ] Dispatch frozen schedule once, reserve each full sample, stop on uncertainty.
-- [ ] Independent source/accounting audit and network-denied recovery, preserve
+- [x] Dispatch frozen schedule once, reserve each full sample, stop on uncertainty.
+- [x] Independent source/accounting audit and network-denied recovery, preserve
   every result, ledger and previous guard; report benefit/gaps/release/next work.
+
+Outcome: stopped at6of16 on unknown usage as frozen;10unrun, no retries.
+0matchedpairs, causalcriticbenefit unavailable. Separate synthetic probe found
+an unsupported-usage component-guard gap; stable promotion blocked pending an
+offline generic fix. Frozen live code and existing per-case limits unchanged.

@@ -1,5 +1,29 @@
 # Codex handoff
 
+## Frozen correction comparison safely stopped; promotion blocked — 2026-10-18
+
+[Audited partial findings](verification/correction-live-2026-10-18.md):6of16
+samples claimed,5known/1unknown; remaining10unrun, no retries.0matchedpairs,
+so causal critic benefit unmeasured. Smaller critic named1of2flawed fields and
+neither correction repaired the draft; larger critic/corrector never called.
+One correct larger worker passed directly, two workers hit512tokenlength;
+HTTP200providererror with missing usage stopped the full frozen schedule.
+
+Charged15requests/5tools/29975tokens including unknownfull4/2/8192reservation;
+cumulative1509/610/1835168 versus1558/637/1976623.9unknowns now fully retained.
+Per-arm limits unchanged.6network-denied state recoveries,9853frozen guards and
+38old ledgers verified; no SDK/Core/executableLabchanges, push or release.
+
+Separate synthetic test confirms a generic Lab bug: `unsupported` numeric usage
+can bypass the component-bound latch, allowing continuation until scoring fails.
+No such breach was observed live. Fix/qualify this offline before promotion or
+another live run. Push for review recommended; stable Lab release blocked on
+that fix, public SDK train and clean-consumer release acceptance. Next broad
+milestone: durable failure isolation/explicit recovery, preserving unknown
+reservations and avoiding automatic retries. Keep models/prompts frozen; no
+local-model tuning proposed. Frozen operators are closed after canonical live
+ledger preservation; future work needs a fresh root/accounting baseline.
+
 ## Bounded correction blueprint — 2026-10-18
 
 Opt-in Lab0.5.1+correction.2 adds provider-neutral sanitized feedback and matched

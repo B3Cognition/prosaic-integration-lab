@@ -1,5 +1,11 @@
 # Provider-neutral bounded correction
 
+**Experimental; promotion blocked.** The fresh live evaluation stopped on
+unknown usage and found a separate offline guard defect for unsupported usage
+formats with numeric totals. Until that defect is fixed and qualified, do not
+rely on this example's component-bound latch for production admission.
+[Partial results and release gates](verification/correction-live-2026-10-18.md).
+
 This opt-in Integration Lab blueprint shows how a consumer can correct one
 well-formed draft using verified field diagnostics, then measure the extra value
 of a critic against a no-critic baseline. It uses public Runtime and Harness APIs.
