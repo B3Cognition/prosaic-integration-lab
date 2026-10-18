@@ -3,6 +3,7 @@ from copy import deepcopy
 from dataclasses import replace
 from pathlib import Path
 from urllib.parse import urlsplit
+import time
 from lab_runner.quality.contracts import digest, decode, encode, identifier
 from lab_runner.quality.allowance import private_directory, private_write
 from .contracts import LIMITS, request_for, assignment, schemas, target, review_target, worker_issues
@@ -140,4 +141,48 @@ def recover_case(case, *, config, output, sample_id):
         # after critic. No earlier-stage recovery may launch a new model call.
         if pending is not None and pending['step']=='critic':h.resume()
         return _collect(h,journal)
+    finally:store.close()
+
+
+def execute_counted_case(case, *, config, output, sample_id, token_counter):
+    """Opt-in measured execution. Host owns counter qualification and allowance.
+
+    There is deliberately no synthetic counter fallback. This API itself grants
+    no paid-call authorization; the study host must reserve a complete case.
+    """
+    from prosaic_runtime import ExecutionBudget,TokenCounterRegistration
+    from prosaic_harness import Harness,FileRunStore
+    from lab_runner.quality.token_admission import admit_live_counters
+    from lab_runner.memory_policy.trace import TraceRecorder
+    alias=config.default_profile
+    registration=admit_live_counters({alias:token_counter},config,[alias])[alias]
+    workflow,request,journal=materials(case,config,output,sample_id)
+    path=Path(output)/(sample_id+'-context-trace.json')
+    trace=TraceRecorder(path,provider_id=config.profiles[alias].provider)
+    proposals=[];started={};timings={}
+    class Measured:
+        def count_tokens(self,native):
+            bound=registration.counter.count_tokens(native)
+            proposals.append(dict(inputBound=bound,nativeSha256=digest(native)))
+            trace.proposals(proposals)
+            return bound
+    def events(event):
+        trace.event(event)
+        key=event.get('attempt_id')
+        if event.get('event')=='started':started[key]=time.monotonic()
+        if event.get('event')=='completed' and key in started:timings[key]=time.monotonic()-started[key]
+    counter=TokenCounterRegistration(registration.descriptor,Measured())
+    scope=ExecutionBudget(timeout_s=LIMITS['timeoutSeconds'],max_provider_requests=LIMITS['providerRequests'],
+        max_tool_calls=LIMITS['toolCalls'],max_reported_tokens=LIMITS['reportedTokens'],token_counter=counter)
+    store=FileRunStore(Path(output)/'store',namespace='typed-handoffs');store.initialize()
+    began=time.monotonic()
+    try:
+        h=Harness(workflow,store=store,run_id=digest(dict(sampleId=sample_id))[:32],on_event=events,accounting=trace)
+        with scope.activate():h.run(request)
+        result=_collect(h,journal)
+        trace.finish(result['receipts'])
+        result.update(elapsedSeconds=time.monotonic()-began,invocationTimings=timings,
+            counterDescriptor=registration.descriptor.to_dict(),
+            contextTrace=dict(fileName=path.name,sha256=digest(decode(path.read_bytes()))))
+        return result
     finally:store.close()
