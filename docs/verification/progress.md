@@ -1,5 +1,19 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Direct-role output contracts qualified offline — 2026-10-18
+
+[Qualification](direct-handoffs-2026-10-18.md): Lab 0.5.1+direct.2, executable
+source 7c77df8; explicit closed output schemas and host assignment, compact worker
+result, host-projected actual evidence for critic. Independent worker, critic
+controls and full handoffs; no metadata-copy planner call. Final 1,478 source
+tests, 90 focused tests, 76 installed both-wire cases, 36 unchanged-counter frame
+trajectories. Review found unread-decision mismatch, semantic-wire coverage gap
+and stop-quality misgrading; all fixed after 15 failing regressions, then green
+suite. 156 wire mutations rejected. Quotes 1,506–5,287 under 8,192. Zero live
+requests, unchanged current caps/charged usage and all historical reservations.
+Prior 2,596 evidence files / 37 ledgers / eight unknown reservations verified.
+No release, push, SDK changes or memory rollout; real critic benefit unmeasured.
+
 ## Eight-sample real-model handoff result — 2026-10-18
 
 [Live evaluation](real-handoffs-live-2026-10-18.md):8/8samples ran,0/8workflows

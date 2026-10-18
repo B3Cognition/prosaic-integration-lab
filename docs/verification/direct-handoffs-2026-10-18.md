@@ -1,78 +1,98 @@
 # Direct worker and critic: offline qualification — 2026-10-18
 
-Experimental Lab0.5.1+direct.1 closes the model-visible contract gap exposed by
+Experimental Lab 0.5.1+direct.2 closes the model-visible contract gap exposed by
 the [first live handoff study](real-handoffs-live-2026-10-18.md). The host prepares
 the assignment, workers return compact typed values, and critics receive actual
-invocation-bound records from the host. No planner/model metadata-copy step is
-required. The old version1 path and all historical evidence are preserved.
+invocation-bound records from the host. No model planner copies host metadata.
+The old version1 path and all historical evidence are preserved.
 
 [Machine-readable result](data/direct-handoffs-2026-10-18.json) records executable
-source628b66f, exact wheel/sdist hashes and unchanged allowance. These are local
-experimental artifacts, with no push or release. No SDK source changed.
+source 7c77df8, exact wheel/sdist hashes and unchanged allowance. These are local
+experimental artifacts. No SDK source changed; nothing was pushed or released.
 
 ## Evidence
 
-- Watched initial RED for missing direct-role implementation; malformed-output
-  scoring and invalid controlled record types also failed before fixes.
-- Focused direct tests:68passed. Complete source suite:1456passed in286.97seconds,
-  one existing Starlette/httpx deprecation warning. Source Python3.12.14 uses
-  installed SDKs and no installed Lab, preserving import-isolation tests.
-- Built wheel and source distribution, installed into a separate environment,
-  verified125source payloads and129installed files byte-for-byte against the wheel
-  and committed source. All five installed SDK payloads match the unchanged
-  checksum manifest; `pip check` passes.
-- Installed isolated-mode smoke:70both-wire scenarios, all safely enforced.
-  Actual HTTP payloads must contain the closed role schema, host assignment and
-  correctly scoped critic evidence. Controls cover all five draft-field flaws;
-  bad reviews, schema descriptions, invalid JSON, wrong bindings, unknown usage,
-  reported overrun and repeated native tools cannot complete successfully.
--30synthetic trajectories exercise the **unchanged registered counters** for
+- Final focused tests: **90 passed**. Complete source suite: **1,478 passed** in
+  389.06 seconds, with one existing Starlette/httpx deprecation warning. Source
+  Python 3.12.14 uses installed SDKs and no installed Lab.
+- Built and separately installed wheel/source distribution. Verified 125 source
+  payloads and 129 installed files against the wheel and committed executable
+  source. All five installed SDK payloads match the unchanged checksum manifest;
+  dependency consistency passes.
+- Installed isolated smoke: **76 scenarios across both provider wires**, all
+  safely enforced. Each actual HTTP request must carry the complete normative
+  schema and semantic instructions, correct host task/index and exact tool
+  results. Controls cover all five draft-field flaws. Bad reviews, schema
+  descriptions, malformed JSON, wrong bindings, unknown usage, overruns and
+  repeated native tools cannot complete successfully.
+- **36 synthetic trajectories** exercise the unchanged registered counters for
   both existing models in worker-only, critic-only and full modes. Controlled
-  input-bound quotations plus512output tokens/request range1492–5240, within8192.
-  The maxima are4991for the smaller profile and5240for the larger. This qualifies
-  framing/admission for these shapes, not arbitrary future model continuations.
-- Every installed smoke case reconstructs receipts without additional requests.
-  Counter qualification additionally denies socket operations during recovery;
-  receipts and traces remain unchanged. Source tests also block claim reuse and
-  prove one shared budget can stop critic dispatch after worker usage.
-- Verified2596prior evidence files,3155frozen guards,37canonical live ledgers and
-  all eight historical unknown reservations. No prior evidence or serving asset
-  changed. The first smoke invocation completed its cases but failed to write its
-  report to a non-private parent; the successful invocation uses a private output
-  directory. Both logs and evidence sets are retained.
+  input-bound quotations plus 512 output tokens per request range **1,506–5,287**,
+  within 8,192. Profile maxima: smaller 5,037; larger 5,287. This establishes
+  supported framing and admission for tested shapes, not arbitrary continuations.
+- Every installed case reconstructs receipts without more requests. Counter
+  qualification also denies socket operations during recovery; receipts and
+  traces remain unchanged. Source tests prove claim reuse cannot dispatch and
+  worker usage can exhaust the shared budget before critic dispatch.
+- Verified 2,596 prior evidence files, 3,155 frozen guards, 37 canonical live
+  ledgers and all eight historical unknown reservations. Serving assets and
+  prior evidence are unchanged.
+
+## Independent review and fixes
+
+One fresh reviewer confirmed scoped host evidence, separate controls, safe gates
+and recovery identity rejection. It found an unread-decision mismatch and
+insufficient semantic-wire qualification. It also found stop-scoring behavior,
+regraded Important because an authorized stop must preserve measured role quality.
+All three were fixed in one pass; **15 review regressions failed before fixes**.
+
+Direct-v2 unread results now always return insufficient, including when required
+facts are read but an extra current authoritative fact is unread. Version1 is
+unchanged. Status precedence is explicit: conflict, unread, missing, ready.
+Human stop preserves role qualification and reports a stopped outcome.
+
+Both-wire mutation tests reject **136 removed/contradicted semantic clauses,
+12 schema mutations, six public-request mutations and two changed tool results**.
+The fixture compares against independent normative text/schema rather than
+importing production instructions. Scripted responses still do not demonstrate
+model reasoning. No deferred minors; no second review was substituted for the
+failing-then-passing regressions and green full suite.
+
+The original candidate, first smoke report-directory failure and intermediate
+review logs/evidence remain retained alongside the corrected candidate. The first
+smoke completed cases but its report parent was not private; successful runs use
+private output directories.
 
 ## Limits and interpretation
 
-Zero live requests. Per-case limits remain4requests/2tools/8192reported tokens/
-600seconds/output512; cumulative ceilings1500/617/1976623 and charged usage
-1476/601/1776439 remain unchanged. Remaining allowance24requests/16tools/200184
-tokens; full reservations are still required before any live study.
+**Zero live requests.** Per-case limits remain four requests, two tools,
+8,192 reported tokens, 600 seconds and 512 output tokens. Cumulative ceilings
+remain 1,500 / 617 / 1,976,623; charged usage remains 1,476 / 601 / 1,776,439.
+Remaining allowance is 24 requests, 16 tools and 200,184 tokens. A trusted host
+must reserve the full case before any live dispatch.
 
-The worker and critic can now be reached and evaluated independently. Correct
-missing/unread/conflict controls require escalation. A correct critic detecting a
-controlled flaw passes its own test; a bad naturally produced worker still fails
-full-task quality even when caught. A host gate independently prevents acceptance.
-These scripted outcomes demonstrate contracts, evidence transfer and enforcement.
-They do **not** show either real model obeying the contracts or a critic improving
-accuracy. Critic benefit remains unmeasured. Memory remains experimental.
+Worker and critic can now be evaluated independently. Correct missing, unread
+and conflict controls escalate. Detecting a controlled flaw passes the critic's
+own qualification; a naturally wrong worker still fails full-task quality even
+when caught. Host checks remain authoritative.
 
-The next milestone is a small frozen real-model study with direct worker and
-critic lanes plus full handoffs, under the same per-case caps. Only observed
-native worker mistakes and correct critic detections can establish critic value;
-controlled drafts provide separate coverage. Broader planning/delegation, durable
-memory, production failover and hosted-provider behavior remain open gaps.
+These results establish contracts, evidence transfer and enforcement. They do
+**not** show either real model following the contracts or a critic improving
+accuracy. Critic benefit remains unmeasured; memory remains experimental. The
+next step is a small frozen direct-role real-model evaluation under unchanged
+limits. Planning/delegation, durable memory, production failover and hosted-model
+behavior remain broader gaps.
 
 ## Reproduction
 
 ```text
 PATH=/private/tmp/prosaic-failure-lab-source-env/bin:$PATH /private/tmp/prosaic-failure-lab-source-env/bin/python -m pytest -q
-python -m build --no-isolation --outdir /private/tmp/prosaic-direct-artifacts
+python -m build --no-isolation --outdir /private/tmp/prosaic-direct-artifacts-final
 python -I scripts/direct_handoff_smoke.py --source-root /absolute/lab/checkout --output /private/fresh/report.json --evidence-dir /private/fresh/evidence
 python -I scripts/audit_install.py --manifest dependencies/response-diagnostics-candidate.json --wheel-dir /verified/sdk/cache --expected-sha 0d204d48743b456f82571cb85f8027d0e8589bd1ab7e777307395e5510d4396f
 ```
 
-Local counter operator:`/private/tmp/prosaic-direct-counter-qualify.py`;
-candidate environment:`/private/tmp/prosaic-direct-env/bin/python`;
-private results:`/private/tmp/prosaic-direct-study-20261018`.
-The previous live environment and all prior operators are retained unchanged.
-Final independent review is pending at this checkpoint.
+Local counter operator: `/private/tmp/prosaic-direct-counter-qualify-final.py`;
+candidate environment: `/private/tmp/prosaic-direct-final-env/bin/python`;
+private results: `/private/tmp/prosaic-direct-final-study-20261018`.
+The previous live environment and all prior operators remain unchanged.

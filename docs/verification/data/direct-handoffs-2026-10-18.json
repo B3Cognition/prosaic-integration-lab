@@ -2,18 +2,18 @@
   "counterQualification": {
     "byProfile": {
       "local": {
-        "maximumQuotedTokens": 4991,
-        "minimumQuotedTokens": 1492,
-        "samples": 15
+        "maximumQuotedTokens": 5037,
+        "minimumQuotedTokens": 1506,
+        "samples": 18
       },
       "local-strong": {
-        "maximumQuotedTokens": 5240,
-        "minimumQuotedTokens": 1530,
-        "samples": 15
+        "maximumQuotedTokens": 5287,
+        "minimumQuotedTokens": 1545,
+        "samples": 18
       }
     },
     "networkDeniedRecovery": true,
-    "samples": 30,
+    "samples": 36,
     "unchangedGuardDigest": "a864988530c5e9805cd5244eb521525e8d649129ef9b6fe2edafa74e360b670c"
   },
   "cumulativeCeilings": {
@@ -27,23 +27,23 @@
     "toolCalls": 601
   },
   "existingWarnings": 1,
-  "focusedTests": 68,
+  "focusedTests": 90,
   "installed": {
     "byMode": {
-      "critic": 28,
-      "handoff": 32,
-      "worker": 10
+      "critic": 30,
+      "handoff": 34,
+      "worker": 12
     },
-    "contractChecks": 132,
-    "controls": 28,
+    "contractChecks": 144,
+    "controls": 30,
     "providers": [
       "openai-compatible",
       "anthropic"
     ],
-    "qualityPassed": 36,
+    "qualityPassed": 38,
     "receiptOnlyRecoveryAdditionalRequests": 0,
-    "safe": 70,
-    "scenarios": 70
+    "safe": 76,
+    "scenarios": 76
   },
   "limits": {
     "outputTokens": 512,
@@ -59,14 +59,27 @@
     "installedFiles": 129,
     "liveRequests": 0,
     "priorEvidenceFilesVerified": 2596,
-    "sdistSha256": "a967d14cf35abbb7d673cd8a04160cbb826db13fc15847fad12e9fa28bf9067c",
-    "sourceCommit": "628b66fe93cc750075f79f4642088c46484752bb",
+    "sdistSha256": "9f05718c513518dd87c93967b7f365891e81e292569013316192239793e7fd8c",
+    "sourceCommit": "7c77df8fd79374ba37db570508748b7005a7107a",
     "sourceFiles": 125,
     "unknownReservationsRetained": 8,
-    "version": "0.5.1+direct.1",
-    "wheelSha256": "9f946a2b782f4fa367b632cc98df8ce6f71800d30306a18a02cd1c4ec062cc13"
+    "version": "0.5.1+direct.2",
+    "wheelSha256": "4baab48617da709e4092161f836c25278acb97df0f67485b33afb5d92f6afc1a"
+  },
+  "review": {
+    "criticalFindings": 0,
+    "deferredMinors": [],
+    "importantFindingsFixed": 3,
+    "nestedSchemaMutations": 12,
+    "publicRequestMutations": 6,
+    "realModelEfficacy": "unmeasured",
+    "reviewRegressionsFailedBeforeFix": 15,
+    "semanticClauseMutations": 136,
+    "stopScoringRegradedImportant": true,
+    "toolResultMutations": 2
   },
   "sdkManifestSha256": "0d204d48743b456f82571cb85f8027d0e8589bd1ab7e777307395e5510d4396f",
-  "sourceTests": 1456,
-  "version": 1
+  "sourceTestSeconds": 389.06,
+  "sourceTests": 1478,
+  "version": 2
 }

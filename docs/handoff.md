@@ -1,5 +1,25 @@
 # Codex handoff
 
+## Direct worker/critic offline qualification — 2026-10-18
+
+Opt-in Lab 0.5.1+direct.2 adds explicit model-visible JSON contracts, host-prepared
+assignments and invocation-scoped host evidence for the critic. Worker-only,
+critic-only controls and full handoffs skip the model planner.
+[Guide](direct-handoffs.md), [qualification](verification/direct-handoffs-2026-10-18.md).
+Final: 1,478 source tests, 76 installed both-wire scenarios, 36 unchanged-counter
+offline trajectories. One fresh review; three material findings fixed with
+RED→GREEN regressions. Largest quoted path: 5,287 tokens. Zero live requests.
+Prior 2,596 files / 37 ledgers / eight unknown reservations verified unchanged.
+Ceilings 1,500 requests / 617 tools / 1,976,623 tokens; charged usage
+1,476 / 601 / 1,776,439. Per-case four / two / 8,192 / 600 seconds / output 512.
+No push, release, SDK source change or memory rollout. Real-model contract
+compliance and critic benefit remain unmeasured. Next: a small frozen direct-role
+live study with full reservations under current limits.
+Executable source 7c77df8; candidate environment
+`/private/tmp/prosaic-direct-final-env/bin/python`; results
+`/private/tmp/prosaic-direct-final-study-20261018`. Previous live environment and
+initial candidate/evidence remain intact.
+
 ## Eight-sample real-model handoff evaluation complete — 2026-10-18
 
 The [live result](verification/real-handoffs-live-2026-10-18.md) ran all8frozen

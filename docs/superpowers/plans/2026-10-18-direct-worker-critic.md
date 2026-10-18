@@ -57,9 +57,9 @@ qualification reuses unchanged descriptors/assets on synthetic HTTP only.
 - [x] Build private candidate, install separately, audit exact payloads and SDKs.
 - [x] Run installed smoke plus controlled request-frame quotation for both existing
   model counters in worker/critic/full modes; preserve result and source identities.
-- [ ] One fresh whole-change review. Fix Important/Critical findings with RED/GREEN
+- [x] One fresh whole-change review. Fix Important/Critical findings with RED/GREEN
   regressions and full suite; defer minors explicitly.
-- [ ] Record actual coverage, limitations and unchanged37ledgers/2596old files;
+- [x] Record actual coverage, limitations and unchanged37ledgers/2596old files;
   commit locally. No live dispatch or claim of real critic effectiveness.
 
 Preflight: contracts→execution→wire fixture/scorer→installed qualification share
