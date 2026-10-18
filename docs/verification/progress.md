@@ -373,3 +373,17 @@ passed. Memory/correction remain experimental. No SDK change or live allowance
 spent; all current limits and historical reservations preserved. New candidate
 still needs review-PR CI before integration or any release.
 [Detailed qualification](failure-isolation-2026-10-18.md).
+
+# Provider-neutral tool authorization and human approval (2026-10-18)
+
+PR19 merged216941a after its exact reviewed head passed all four CI cells.
+New experimental host approval registry qualifies exact action/scope/version
+bindings, separate trusted decisions, durable one-shot consent and read-only
+recovery. Finalapproval.2:1729source/51focused tests;24installed both-wire lanes,
+25network-denied recoveries, subprocess-loss proof and idempotent revoked/spent
+decision recovery.137payloads and clean public wheel/rebuilt-sdist adoption pass.
+One Important review finding fixed test-first in one pass; zero deferred minors.
+Explicit scope rulings retain authentication/UI, model efficacy, domain effects,
+distributed/storage guarantees and fresh platform CI as separate responsibilities.
+Limits and historical reservations unchanged; no live calls/SDK change/release.
+[Detailed qualification](tool-approval-2026-10-18.md).

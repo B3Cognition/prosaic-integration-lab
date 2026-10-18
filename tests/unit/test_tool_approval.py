@@ -121,6 +121,22 @@ def test_lost_decision_ack_replay_after_spending_never_renews_permission(tmp_pat
     assert len(j.inspect('one')['decisions'])==1
 
 
+def test_original_approval_ack_replay_after_revocation_returns_current_state(tmp_path):
+    j=gate(tmp_path/'approval.json',approvers=['operator','second']);p=propose(j);approve(j,p)
+    revoked=approve(j,p,actor='second',approved=False,decision_digest='d'*64)
+    assert approve(j,p)==revoked
+    assert len(j.inspect('one')['decisions'])==2
+    assert not j.authorizer('one')(ARGS,context())
+    with pytest.raises(ValueError):approve(j,p,decision_digest='e'*64)
+    assert j.inspect('one')==revoked
+
+
+def test_audit_decision_digest_cannot_be_reused_for_a_conflicting_decision(tmp_path):
+    j=gate(tmp_path/'approval.json');p=propose(j);approved=approve(j,p)
+    with pytest.raises(ValueError):approve(j,p,approved=False)  # same audit ID, different boolean
+    assert j.inspect('one')==approved
+
+
 def test_process_loss_after_permission_never_reissues_consent(tmp_path):
     path=tmp_path/'approval.json';j=gate(path);p=propose(j);approve(j,p)
     code='''

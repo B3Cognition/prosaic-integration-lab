@@ -52,7 +52,11 @@ gate.decide(proposal_id, actor=authenticated_reviewer_id,
             decision_digest=host_audit_event_digest)
 tool = CustomTool('publish_document', 'Publish an approved document',
                   closed_parameters_schema, domain_handler, 'publish-v1',
-                  with_context=True, authorize=gate.authorizer(proposal_id))
+                  with_context=True, authorize=gate.authorizer(proposal_id),
+                  operation_key=trusted_business_key_resolver)
+# Register this tool and pass a durable public ToolJournal implementation:
+result = runtime.run(artifact, arguments, operation_context=trusted_invocation_scope,
+                     policy=bounded_host_policy, tool_journal=durable_tool_journal)
 ```
 
 Supply a public `InvocationScope` with invocation, run, step and operation
@@ -73,6 +77,8 @@ verification; they do not need to reproduce this fixture's domain or models.
 States are pending, approved, denied, revoked and spent. Denial cannot become
 approval; approved actions can be revoked before claiming. Exact host-decision
 replay returns current state without renewing permission, including after spend.
+An older approval replay after revocation returns revoked. Audit decision
+identifiers cannot be reused for different actors or decisions.
 Different/conflicting decisions fail. No reset or automatic reapproval exists.
 
 Before returning True, the authorizer durably marks consent spent under an
@@ -96,6 +102,10 @@ that journal, workflow receipts or provider accounting. Because consent is
 one-shot, a second Runtime invocation is denied even when an effect receipt
 could be replayed. Read existing evidence directly through the consumer's
 reconciliation path; recovery must not drive the tool again.
+The business-key resolver must derive a tenant-safe operation identity from
+trusted host state, as in the existing service example, and change its tool
+version when its semantics change. The short snippet assumes the host already
+registered the tool, journal, accounting and bounded execution configuration.
 
 Quiesce old workers and reconcile SDK/domain evidence before considering new
 work. Any new action needs fresh human authorization, a new proposal identifier

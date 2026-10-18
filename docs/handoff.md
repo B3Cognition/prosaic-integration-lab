@@ -1,15 +1,17 @@
 # Codex handoff
 
-## PR19 merged; tool approval qualified pending final review — 2026-10-18
+## PR19 merged; tool approval qualified offline — 2026-10-18
 
 PR19 merged at216941a after rechecking its exact reviewed head and four green
 CI lanes. New experimental [tool approval blueprint](tool-approval.md) binds
 exact actions to trusted host decisions and consumes consent durably once.
 It uses public Runtime APIs; it neither authenticates actor strings nor records
 effect completion. [Offline proof](verification/tool-approval-2026-10-18.md):
-1727source/49focused tests;24installed both-wire scenarios,25network-denied
-recoveries and a subprocess-loss check.137payloads and clean public wheel/
-rebuilt-sdist adoption pass. Final independent review pending. Memory/correction
+Finalapproval.2:1729source/51focused tests;24installed both-wire scenarios,
+25network-denied recoveries and a subprocess-loss check.137payloads and clean
+public wheel/rebuilt-sdist adoption pass. One fresh review's Important replay
+defect fixed with watched regressions, including immutable audit identities;
+zero deferred minors. Six scope rulings are explicit in the qualification. Memory/correction
 stay experimental, limits and nine unknown reservations unchanged, no live run
 or SDK change. Keep new branch local pending review and later PR/CI.
 

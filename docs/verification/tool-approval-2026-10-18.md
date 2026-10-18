@@ -10,7 +10,7 @@ This next experimental milestone starts from that merge on
 
 ## Scope and authority
 
-Lab0.5.1+approval.1 adds a consumer-owned private approval registry and a public
+Lab0.5.1+approval.2 adds a consumer-owned private approval registry and a public
 Runtime CustomTool authorization example. Proposals bind exact arguments,
 tool/version, full invocation scope, evidence and host policy. Separate trusted
 host decisions approve, deny or revoke; permission is durably spent once before
@@ -55,11 +55,53 @@ Initial candidate sdist SHA256:
 
 Full source suite: **1727 passed**, one existing Starlette/httpx deprecation
 warning,393.61seconds on Python3.12.14/Darwin arm64. One fresh independent final
-review is pending before completion. Initial installed environment `/private/tmp/prosaic-approval-initial-env`,
+review found one Important issue described below. Initial installed environment `/private/tmp/prosaic-approval-initial-env`,
 proof `/private/tmp/prosaic-approval-study-20261018`, artifacts
 `/private/tmp/prosaic-approval-artifacts-20261018`. Preserve these even if review
 requires a new candidate. Synthetic fixtures use declared synthetic token units;
 no live counter/model qualification is implied.
+
+## One fresh review and material fix pass
+
+Independent gpt-6-astra/high review of2b4934c passed49focused tests and inspected
+the full/installed/distribution proof. One Important: replaying original approval
+after later revocation raised instead of returning revoked. No permission bypass,
+but lost-ack recovery broke the specified idempotence contract. The fix scans
+all prior decisions by immutable audit identity and returns current state for
+exact matches. A second watched regression prevents one audit ID being reused
+with different contents; persisted history also rejects duplicate audit IDs.
+Both regressions were RED before the fix. No Critical/Minor findings; no
+re-review. The final candidate is approval.2, with new artifacts/environment;
+all initial candidate proof remains unchanged.
+
+Review scope rulings: authentication/human UI/session/deployment integration is
+consumer-owned (wrong integration can authorize the wrong actor); live-model
+attack resistance is unmeasured (fixture proof must not be overstated); external
+effects/transactions/distributed guarantees require SDK/domain journals (risk
+of duplicate or uncertain effects); production storage/clock/backup controls
+remain infrastructure duties (rollback can revive consent); fresh candidate
+platform CI is a later PR gate (earlier CI could miss new platform faults).
+The author ran the full/package/historical checks while the reviewer reran the
+focused suite and inspected receipts; independent reproduction is thus limited.
+These are explicit boundaries, not deferred defects or promotion claims.
+
+Fixed candidate approval.2 has137matching source/wheel/installed payloads.
+Wheel SHA256:
+`dbfb6c0887ccf19ef1829116b2fbbc47e8416f44e60412b259192b67facaa31d`.
+Sdist SHA256:
+`ee9ea47277499ee1e1a985dd12627211c28e198852839ce28dcf722ed89ebeb8`.
+Final installed environment `/private/tmp/prosaic-approval-qualified-env`, proof
+`/private/tmp/prosaic-approval-qualified-study-20261018`, artifacts
+`/private/tmp/prosaic-approval-qualified-artifacts-20261018`.
+Final fix qualification: **1729 source tests passed**, one existing warning,
+391.50seconds; **51 focused tests passed**. Repeated installed proof passed
+24both-wire scenarios,25network-denied recoveries, subprocess-loss recovery and
+revoked/spent decision replay plus conflicting audit-identity checks.50synthetic
+requests, zero live requests. Repeated clean public wheel/rebuilt-sdist adoption
+and137payload reconciliation passed. Local stack execution remains unperformed
+for this new candidate; fresh platform CI is the later PR integration gate.
+One material fix pass complete; no deferred minors. Scope rulings above remain
+explicit consumer/infrastructure responsibilities, with their adoption risks.
 
 ## Preserved limits
 

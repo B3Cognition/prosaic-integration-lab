@@ -60,10 +60,25 @@ os._exit(23)
         assert restored.inspect('one')['state']=='spent'
         ctx=ToolExecutionContext(scope,'apply_change','v1',1,digest(action),time.monotonic()+600,lambda:False)
         assert not restored.authorizer('one')(action,ctx)
+        assert restored.decide('one',actor='operator',proposal_digest=p['proposalDigest'],
+                               approved=True,decision_digest='c'*64)['state']=='spent'
+        history=tool_approval.ApprovalGate(crash/'history.json',identity='a'*64,
+                                         tools={'apply_change':'v1'},approvers=['operator'])
+        preview=history.propose('one',tool_name='apply_change',scope=scope,arguments=action,evidence_digest='b'*64)
+        decision=dict(actor='operator',proposal_digest=preview['proposalDigest'],approved=True,decision_digest='c'*64)
+        history.decide('one',**decision)
+        try:history.decide('one',**(decision|dict(approved=False)))
+        except ValueError:pass
+        else:raise AssertionError('audit identity reused for a different decision')
+        revoked=history.decide('one',**(decision|dict(approved=False,decision_digest='d'*64)))
+        assert history.decide('one',**decision)==revoked and revoked['state']=='revoked'
+        assert len(history.inspect('one')['decisions'])==2
+        assert not history.authorizer('one')(action,ctx)
     finally:denied[0]=False
     private_write(args.output,dict(version=1,experimental=True,liveRequests=0,lanes=reports,
         syntheticRequests=sum(r['providerRequests'] for r in reports),networkDeniedRecoveries=len(reports)+1,
-        processLoss=dict(exitCode=23,state='spent',permissionReissued=False)))
+        processLoss=dict(exitCode=23,state='spent',permissionReissued=False),
+        decisionRecovery=dict(approvalReplayAfterRevocation=True,conflictingAuditDigestRejected=True)))
     print(f'approval: {len(reports)} both-wire lanes, {len(reports)+1} network-denied recoveries, process-loss proof; zero live requests')
 
 

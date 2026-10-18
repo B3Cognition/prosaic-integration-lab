@@ -106,6 +106,7 @@ class ApprovalGate:
         if type(decisions) is not list or len(decisions) > 2:
             raise ValueError('invalid host decisions')
         previous = p['createdAt']
+        seen = set()
         for d in decisions:
             if (type(d) is not dict or set(d) != {'actor', 'approved', 'decisionDigest', 'decidedAt'} or
                     d['actor'] not in self._policy['approvers'] or type(d['approved']) is not bool or
@@ -113,6 +114,9 @@ class ApprovalGate:
                     (d['approved'] and d['decidedAt'] >= p['expiresAt'])):
                 raise ValueError('invalid host decision')
             sha(d['decisionDigest'])
+            if d['decisionDigest'] in seen:
+                raise ValueError('conflicting audit decision')
+            seen.add(d['decisionDigest'])
             previous = d['decidedAt']
         approved = [d['approved'] for d in decisions]
         expected = {'pending': [], 'approved': [True], 'denied': [False], 'revoked': [True, False], 'spent': [True]}
@@ -168,9 +172,11 @@ class ApprovalGate:
             if row['proposalDigest'] != proposal_digest:
                 raise ValueError('stale or different human review')
             decision = dict(actor=actor, approved=approved, decisionDigest=decision_digest)
-            if row['state'] in {'approved', 'denied', 'revoked', 'spent'} and row['decisions'] and all(
-                    row['decisions'][-1][k] == v for k, v in decision.items()):
-                return self._view(row)
+            for previous in row['decisions']:
+                if previous['decisionDigest'] == decision_digest:
+                    if any(previous[k] != v for k, v in decision.items()):
+                        raise ValueError('conflicting audit decision')
+                    return self._view(row)
             if row['state'] not in {'pending', 'approved'} or (row['state'] == 'approved' and approved):
                 raise ValueError('consent cannot be renewed or reset')
             now = time.time()
