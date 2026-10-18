@@ -49,4 +49,4 @@ consume public SDK config and optional qualified token counter; use Task1 helper
 - [x] Full source suite, build and exact installed payload audit in fresh env;
   synthetic both-wire smoke and immutable historical accounting verification.
 - [x] One fresh final reviewer; material fixes in one RED→GREEN pass and green suite.
-- [ ] Preserve proof, document adoption/limits, commit locally and retain branch.
+- [x] Preserve proof, document adoption/limits, commit locally and retain branch.

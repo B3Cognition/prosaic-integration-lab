@@ -1,5 +1,24 @@
 # Codex handoff
 
+## Bounded correction blueprint — 2026-10-18
+
+Opt-in Lab0.5.1+correction.2 adds provider-neutral sanitized feedback and matched
+no-critic comparison helpers, plus a separate one-shot rollout consumer through
+public SDKs. [Adoption guide](bounded-correction.md),
+[qualification](verification/bounded-correction-2026-10-18.md). Both arms receive
+the same verified diagnostics/evidence; critic hints cannot bypass host gates.
+Unusable/interrupted corrections keep honest field diagnostics and observed or
+unresolved costs. Each arm retains4requests/2tools/8192tokens/600s/output512.
+
+Installed offline proof:48scripted arms/24matched pairs,54network-denied
+recoveries,2malformed-output checks,131installed payloads verified. One fresh
+review's2Important findings reproduced RED and fixed in one pass; no deferred
+minors. Final source counts and preservation hashes are in the qualification.
+No live calls, new allowance, SDK/Core change, model tuning, push or release.
+38ledgers/8unknowns and charges1494/605/1805193 remain unchanged. Keep branch and
+worktree. Consumers qualify their own roles/counters and reserve both arms
+before future live use; synthetic proof establishes no model/critic benefit.
+
 ## Consumer role qualification blueprint qualified offline — 2026-10-18
 
 The maintainer clarified the goal: reusable framework/consumer adoption, not
