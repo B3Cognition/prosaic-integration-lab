@@ -33,9 +33,9 @@ installed smoke script, package version and experimental documentation.
 **Interfaces:** `complete_counts(usage) -> tuple[int,int,int] | None` accepts only
 complete normalized counts with reported/unsupported status; no mutation.
 
-- [ ] Add count-contract and both-wire guard regressions; watch them fail.
-- [ ] Implement shared count interpretation, latch unavailable counts, revise policy and role scoring.
-- [ ] Run focused and full source suites; build and install a fresh candidate.
-- [ ] Run installed synthetic fault matrix, SDK/payload audits and immutable historical proof check.
-- [ ] Record exact results and limitations; commit; one fresh final review with any material fixes verified test-first.
+- [x] Add count-contract and both-wire guard regressions; watch them fail.
+- [x] Implement shared count interpretation, latch unavailable counts, revise policy and role scoring.
+- [x] Run focused and full source suites; build and install a fresh candidate.
+- [x] Run installed synthetic fault matrix, SDK/payload audits and immutable historical proof check.
+- [x] Record exact results and limitations; commit; one fresh final review with any material fixes verified test-first.
 - [ ] Push reviewed branch, create and attach PR; no release or live dispatch.

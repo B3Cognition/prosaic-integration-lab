@@ -25,7 +25,8 @@ observations, receipts, reports and reservations were not rewritten.
 ## Offline qualification
 
 Candidate `0.5.1+usage.1` uses the unchanged checksum-pinned response-diagnostics
-SDK manifest. Qualification uses scripted loopback responses, not real models.
+SDK manifest: **unpublished Runtime `0.9.8+diagnostics.1`** and Harness `0.9.4`.
+Qualification uses scripted loopback responses, not real models.
 
 - Test-first reproductions: both supported wire formats allowed four requests
   after an unsupported input breach; complete unsupported usage erased all
@@ -55,6 +56,14 @@ Reproduce installed checks using the commands in the
 SDK payloads. The full source-suite result, artifact identities, review and
 preservation receipt are recorded in the accompanying
 [qualification data](data/usage-guard-2026-10-18.json).
+
+One fresh independent review found no Critical or Important issues and approved
+draft experimental publication. It independently reran the 20 count-contract
+tests and checked installed evidence and v1-frame rejection. One minor remains:
+the historical pinned manifest's note says “Public SDK bytes” despite its
+explicit private Runtime entry. Its checksum is preserved; this report and the
+PR identify the unpublished version. The review does not certify real models,
+SDK internals, production trace durability, or merge/release acceptance.
 
 ## Limits and readiness
 
