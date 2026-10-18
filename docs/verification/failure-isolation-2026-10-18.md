@@ -107,6 +107,17 @@ environment `/private/tmp/prosaic-isolation-final-env`, artifacts
 `/private/tmp/prosaic-isolation-qualified-artifacts-20261018`. Preserve the
 initial failed report root `/private/tmp/prosaic-isolation-study-20261018` as well.
 
+Preserved **341** files in the canonical reports directory
+`durable-failure-evidence-20261018` (original/fixed artifacts, RED/GREEN and full
+logs, installed journals, review/ledger, public distribution receipts, historical
+verifier and merge receipt). Verified the copy and every archived payload.
+Archive `prosaic-durable-failure-evidence-20261018.tar.gz`, SHA256:
+`2983a213242007b4cd3ffc38b57381545f8c9007c35ba8ab164a883b3b3e2847`.
+Proof manifest SHA256:
+`13f70a0cf77d630c77a81238cb2f12d3019f57d1e58e3f951159236718bde2e2`.
+Qualified executable source commit: `ee89d3f`. Keep the local branch and worktree;
+review-PR CI and any release/live decisions remain separate gates.
+
 Before a new live evaluation: freeze new operators/cases and
 accounting baseline, qualify the consuming host's receipt verification, reserve
 all spend under current caps, and obtain live authorization. No new live run

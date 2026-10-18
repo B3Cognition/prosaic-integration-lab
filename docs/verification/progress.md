@@ -360,6 +360,7 @@ owned engine resources. The original failure remains preserved. A fresh demo
 not counted as product bugs. The full evidence, fix ownership/acceptance and
 conditional deferrals are in
 `production-readiness-2026-10-09.md`.
+
 # Durable failure isolation and explicit recovery (2026-10-18)
 
 PR18 merged at1c52747 after all four required exact-head CI lanes passed.
@@ -372,4 +373,3 @@ passed. Memory/correction remain experimental. No SDK change or live allowance
 spent; all current limits and historical reservations preserved. New candidate
 still needs review-PR CI before integration or any release.
 [Detailed qualification](failure-isolation-2026-10-18.md).
-
