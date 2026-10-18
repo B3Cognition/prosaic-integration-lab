@@ -33,5 +33,7 @@
   "memoryExperimental": true,
   "correctionExperimental": true,
   "unpublishedDiagnosticsQualifiedByPublicCI": false,
-  "remoteAcceptance": "See exact-head PR18 checks and PR qualification summary; not inferred from local tests."
+  "remoteAcceptance": "See exact-head PR18 checks and PR qualification summary; not inferred from local tests.",
+  "implementationHead": "c92a29c",
+  "review": {"critical": 0, "important": 0, "minor": 0, "independentFocusedTests": 60}
 }
