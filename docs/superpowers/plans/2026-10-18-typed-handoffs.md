@@ -38,18 +38,18 @@ ExecutionBudget and existing task assessment. Produce `execute_case` and
 `recover_case` receipt evidence; `score_trajectory` reports quality separately
 from safe stopping, first failure, counts and role order.
 
-- [ ] Write behavior tests for good approval/rejection, missing/conflicting/unread
+- [x] Write behavior tests for good approval/rejection, missing/conflicting/unread
   evidence, wrong assignment/result binding, wrong worker decision, missed/false
   critic finding, invalid JSON, unknown usage and receipt-only reconstruction.
-- [ ] Run focused tests and observe missing implementation fail (RED).
-- [ ] Implement closed contracts, trusted case validation, graph/validators,
+- [x] Run focused tests and observe missing implementation fail (RED).
+- [x] Implement closed contracts, trusted case validation, graph/validators,
   shared budget, synthetic both-wire transport and evidence scoring.
-- [ ] Run focused tests: all pass. Run the full Lab suite: no failures.
-- [ ] Build an isolated private Lab wheel, install with unchanged SDK family;
+- [x] Run focused tests: all pass. Run the full Lab suite: no failures.
+- [x] Build an isolated private Lab wheel, install with unchanged SDK family;
   run installed both-wire smoke and payload/provenance checks.
-- [ ] Obtain one independent whole-change review; fix important findings with
+- [x] Obtain one independent whole-change review; fix important findings with
   RED/GREEN regressions and rerun suite. Record limitations and actual evidence.
-- [ ] Commit local changes and final verification ledger. No push/release.
+- [x] Commit local changes and final verification ledger. No push/release.
 
 Preflight: contracts/execution/scoring share assignment and result schema;
 single task keeps this interface atomic. Native execution and prior planning

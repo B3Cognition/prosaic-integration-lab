@@ -388,4 +388,6 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval-memory.md) for opt-in local evaluation commands. These consumer examples use public SDK APIs and retain bounded live allowances, immutable evidence and offline replay.
 
-The [fresh memory comparison](docs/verification/memory-grounding-live-2026-10-17.md) found a one-case smaller-model gain, no larger-model gain, increased token costs and unresolved smaller-model missing-evidence failures. Memory remains experimental and disabled unless explicitly selected.
+The [typed handoff example](docs/typed-handoffs.md) adds offline planner/worker/critic contracts, independent evidence gates and full-trajectory scoring under the same limits. It remains experimental and makes no live reasoning claim.
+
+The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

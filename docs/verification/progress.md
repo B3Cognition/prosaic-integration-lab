@@ -1,5 +1,15 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Offline typed handoffs — 2026-10-18
+
+[Qualification](typed-handoffs-2026-10-18.md) records1373source tests,40new
+regressions,30installed both-wire scenarios plus3review regressions, exact payload
+audits and closed review findings. Lab-only local0.5.1+handoffs.2: typed assignment,
+worker evidence/result and critic review, independent gates, explicit escalation,
+stage-by-stage quality/safety and no-call receipt recovery. Current caps and live
+usage unchanged; memory remains experimental. No SDK release or live reasoning,
+database/platform or production-autonomy qualification is implied.
+
 ## Fresh four-sample missing-evidence memory comparison — 2026-10-18
 
 All4samples completed with known usage in the

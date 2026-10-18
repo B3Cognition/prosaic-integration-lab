@@ -1,0 +1,878 @@
+{
+  "audit": {
+    "cumulativeCharged": {
+      "providerRequests": 1468,
+      "reportedTokens": 1769171,
+      "toolCalls": 601
+    },
+    "historicalLedgerCount": 36,
+    "historicalLedgerHashesVerified": 36,
+    "installedFiles": 124,
+    "liveRequests": 0,
+    "priorEvidence": [
+      {
+        "files": 428,
+        "manifestSha256": "32be0bff51b1fc2fb7aff3c8674eb7f3b1c55c2b750070bb3eb82658e557f96e",
+        "name": "recovery-memory-evidence-20261017"
+      },
+      {
+        "files": 282,
+        "manifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711",
+        "name": "continuation-budget-evidence-20261017"
+      },
+      {
+        "files": 338,
+        "manifestSha256": "62f2d7535eafda5f31b7c1e27ba65d98c6db709c26f4e04ed991324bd467d7a8",
+        "name": "continuation-memory-evidence-20261017"
+      },
+      {
+        "files": 676,
+        "manifestSha256": "89551e7ce6a2c6cc8e2f82e4ab8dec29f05d2771c5e9aa9cac9a6d34e9cb35b2",
+        "name": "response-fault-evidence-20261018"
+      },
+      {
+        "files": 178,
+        "manifestSha256": "8ce12f1d7cb686b141638f264c5a3ea0df24c81761bdb7ebef8fb47e136e0119",
+        "name": "missing-evidence-memory-evidence-20261018"
+      }
+    ],
+    "sdistSha256": "acb981cb7193565b9649ce608ec8330a040d7aa18e57eddb38812a8cb44c9851",
+    "sourceCommit": "dc69d1f7bfa35ae80ad404fbd7ec74afbcc543c8",
+    "sourceFiles": 120,
+    "unknownReservationsRetained": 8,
+    "version": "0.5.1+handoffs.2",
+    "wheelSha256": "10d8cfa6441e8b1d4dc440f8710edc213f8e5393c092fd86006a26f855dfdb62"
+  },
+  "installed": {
+    "liveRequests": 0,
+    "origin": "synthetic",
+    "scenarios": [
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "accepted",
+        "provider": "openai",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "correct",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "accepted",
+        "provider": "openai",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "reject",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "missing",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "conflict",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "unread",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "wrong_worker",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "missed_flaw",
+        "stages": {
+          "critic": "failed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "critic",
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "false_critic",
+        "stages": {
+          "critic": "failed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 150,
+          "toolCalls": 0
+        },
+        "firstFailure": "planner",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner"
+        ],
+        "safe": true,
+        "scenario": "wrong_assignment",
+        "stages": {
+          "critic": "notRun",
+          "planner": "failed",
+          "worker": "notRun"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "wrong_binding",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "invalid_json",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": null,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "unknown_usage",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "forged_evidence",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "repeat_tools",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 9400,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "openai",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "overrun",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "accepted",
+        "provider": "anthropic",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "correct",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "accepted",
+        "provider": "anthropic",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "reject",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "missing",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": null,
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": true,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "conflict",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "unread",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "wrong_worker",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "missed_flaw",
+        "stages": {
+          "critic": "failed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "critic",
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "false_critic",
+        "stages": {
+          "critic": "failed",
+          "planner": "passed",
+          "worker": "passed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 1,
+          "reportedTokens": 150,
+          "toolCalls": 0
+        },
+        "firstFailure": "planner",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner"
+        ],
+        "safe": true,
+        "scenario": "wrong_assignment",
+        "stages": {
+          "critic": "notRun",
+          "planner": "failed",
+          "worker": "notRun"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "wrong_binding",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "invalid_json",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": null,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "unknown_usage",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "escalated",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker",
+          "critic"
+        ],
+        "safe": true,
+        "scenario": "forged_evidence",
+        "stages": {
+          "critic": "passed",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 450,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "repeat_tools",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      },
+      {
+        "counts": {
+          "providerRequests": 3,
+          "reportedTokens": 9400,
+          "toolCalls": 1
+        },
+        "firstFailure": "worker",
+        "outcome": "blocked",
+        "provider": "anthropic",
+        "qualityPassed": false,
+        "replayAdditionalRequests": 0,
+        "roles": [
+          "planner",
+          "worker"
+        ],
+        "safe": true,
+        "scenario": "overrun",
+        "stages": {
+          "critic": "notRun",
+          "planner": "passed",
+          "worker": "failed"
+        },
+        "version": 1
+      }
+    ]
+  },
+  "reviewRegressions": {
+    "liveRequests": 0,
+    "scenarios": [
+      {
+        "additionalRecoveryRequests": 0,
+        "scenario": "wrong_worker",
+        "score": {
+          "counts": {
+            "providerRequests": 4,
+            "reportedTokens": 600,
+            "toolCalls": 1
+          },
+          "firstFailure": "worker",
+          "outcome": "escalated",
+          "qualityPassed": false,
+          "roles": [
+            "planner",
+            "worker",
+            "critic"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "passed",
+            "planner": "passed",
+            "worker": "failed"
+          },
+          "version": 1
+        }
+      },
+      {
+        "additionalRecoveryRequests": 0,
+        "scenario": "missed_flaw",
+        "score": {
+          "counts": {
+            "providerRequests": 4,
+            "reportedTokens": 600,
+            "toolCalls": 1
+          },
+          "firstFailure": "worker",
+          "outcome": "escalated",
+          "qualityPassed": false,
+          "roles": [
+            "planner",
+            "worker",
+            "critic"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "failed",
+            "planner": "passed",
+            "worker": "failed"
+          },
+          "version": 1
+        }
+      },
+      {
+        "additionalRecoveryRequests": 0,
+        "scenario": "missing",
+        "score": {
+          "counts": {
+            "providerRequests": 4,
+            "reportedTokens": 600,
+            "toolCalls": 1
+          },
+          "firstFailure": null,
+          "outcome": "stopped",
+          "qualityPassed": true,
+          "roles": [
+            "planner",
+            "worker",
+            "critic"
+          ],
+          "safe": true,
+          "stages": {
+            "critic": "passed",
+            "planner": "passed",
+            "worker": "passed"
+          },
+          "version": 1
+        }
+      }
+    ]
+  },
+  "sourceTests": 1373,
+  "focusedTests": 40,
+  "independentReview": {
+    "critical": 0,
+    "importantFixed": 2,
+    "minorDeferred": 0
+  }
+}

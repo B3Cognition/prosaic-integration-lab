@@ -1,5 +1,22 @@
 # Codex handoff
 
+## Offline typed handoffs qualified — 2026-10-18
+
+Lab0.5.1+handoffs.2 adds experimental request-bound planner/worker/critic
+contracts and full-trajectory scoring using the same installed SDK candidate
+family. [Qualification](verification/typed-handoffs-2026-10-18.md):1373source tests,
+40focused regressions,30installed both-wire scenarios and3review regressions pass.
+Both independent Important reporting findings closed with RED/GREEN tests;
+no deferred minors. Missing/unread/conflicting evidence and disagreement cannot
+approve; human review offers stop only. Four-request cap permits no extra repair.
+Saved final critic receipt adopts without calls; missing receipt blocks;
+earlier interruption is inspection-only. Exact source dc69d1f and wheel audited.
+No live calls, SDK changes, push or release. Memory remains experimental with no
+new efficacy claim. All1902prior evidence files and36ledgers verify; charge still
+1468/601/1769171 versus1475/604/1976623,8unknown retained. Next: frozen real-model
+handoff evaluation once its full reservation fits authorized remaining allowance;
+full four-sample comparison cannot fit7requests/3tools. Prior checkpoints retained.
+
 ## Fresh four-sample missing-evidence comparison complete — 2026-10-18
 
 The [audited held-out comparison](verification/missing-evidence-memory-live-2026-10-18.md)
