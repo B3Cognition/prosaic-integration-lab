@@ -1,0 +1,309 @@
+{
+  "origin": "offline",
+  "liveDispatched": false,
+  "binding": "cd6988b2f6f89197ed25a4a0f731dc657a257c96a4caee2692137374df78eb5d",
+  "guardFiles": 3155,
+  "scheduledSamples": 8,
+  "sourceTests": 1388,
+  "installedRegressionTests": 15,
+  "priorCharged": {
+    "providerRequests": 1468,
+    "reportedTokens": 1769171,
+    "toolCalls": 601
+  },
+  "existingCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "requestedCeilings": {
+    "providerRequests": 1500,
+    "reportedTokens": 1976623,
+    "toolCalls": 617
+  },
+  "fullReservation": {
+    "providerRequests": 32,
+    "reportedTokens": 65536,
+    "toolCalls": 16
+  },
+  "unknownReservationsRetained": 8,
+  "offline": {
+    "caseDigest": "206f09f8429d287e88e3b5b6a9d55184105c4429b92d0b829911fb94e3176dfd",
+    "counterDescriptors": {
+      "local": {
+        "contextCapacityTokens": 32768,
+        "countingKind": "conservativeUpperBound",
+        "framingRevision": "openai-chat-v1",
+        "guarantee": "Maximum over explicit frozen HF text/tool framing variants. Requires host qualification against the serving profile and unchanged assets/settings. Media, historical reasoning, mid-system/consecutive user roles, unknown schema/request fields are rejected. No arbitrary-server or billing guarantee; no measured offsets or model weights.",
+        "identity": "local-hf-32e9493d7a4ae6609d9b0d34d3d7e32b84e230e7928ac3b583b0c1962ba9dbcb",
+        "implementationVersion": "local-hf-v1-6fa071a415188e11b50e42af044b6fa235be2360938d1f180b22258ad0c0bdf1",
+        "model": "mlx-community--Qwen2.5-Coder-7B-Instruct-4bit",
+        "provider": "openai-compatible",
+        "templateAssetsDigest": "6c9fa93f817822c32a0c74ec91e8f9abf6db467d5db44762b6cfa973d5b33904",
+        "tokenizerAssetsDigest": "e46ace45dca31a8ddcfe6167a80cd6c22863674587ba72d57bc73e98d29f1177"
+      },
+      "local-strong": {
+        "contextCapacityTokens": 262144,
+        "countingKind": "conservativeUpperBound",
+        "framingRevision": "openai-chat-v1",
+        "guarantee": "Maximum over explicit frozen HF text/tool framing variants. Requires host qualification against the serving profile and unchanged assets/settings. Media, historical reasoning, mid-system/consecutive user roles, unknown schema/request fields are rejected. No arbitrary-server or billing guarantee; no measured offsets or model weights.",
+        "identity": "local-hf-0283ce46df451fbae7c0a5df47c80e7b5df80df167a38e45150eacabef2fd471",
+        "implementationVersion": "local-hf-v1-6fa071a415188e11b50e42af044b6fa235be2360938d1f180b22258ad0c0bdf1",
+        "model": "ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ",
+        "provider": "openai-compatible",
+        "templateAssetsDigest": "b9a8637f06026e4db9eebaa3e8cd04b510df253413d65753f0742e8917ea3baa",
+        "tokenizerAssetsDigest": "0a63284ee8cefeec78e6692e3dbddc3d92628fcf66bfb7b799962d0a0ec29b6f"
+      }
+    },
+    "goldDigest": "bc151a6a7e6d4a8b445869bbf7dbf112191b253855c70bfffa0ea7870d90b4ad",
+    "liveRequests": 0,
+    "qualified": true,
+    "samples": [
+      {
+        "alias": "local",
+        "caseId": "handoff-approve-larch306",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          450,
+          887,
+          881,
+          1132
+        ],
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "qualityPassed": true,
+        "quotedTokens": 5398,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-approve-larch306-p1"
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-approve-larch306",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          467,
+          1039,
+          896,
+          1142
+        ],
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "qualityPassed": true,
+        "quotedTokens": 5592,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-approve-larch306-p2"
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-reject-cedar307",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          464,
+          1026,
+          883,
+          1111
+        ],
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "qualityPassed": true,
+        "quotedTokens": 5532,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-reject-cedar307-p2"
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-reject-cedar307",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          447,
+          869,
+          863,
+          1094
+        ],
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "qualityPassed": true,
+        "quotedTokens": 5321,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-reject-cedar307-p1"
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-missing-maple308",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          449,
+          874,
+          868,
+          1082
+        ],
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "qualityPassed": true,
+        "quotedTokens": 5321,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-missing-maple308-p1"
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-missing-maple308",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          466,
+          1030,
+          887,
+          1098
+        ],
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "qualityPassed": true,
+        "quotedTokens": 5529,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-missing-maple308-p2"
+      },
+      {
+        "alias": "local-strong",
+        "caseId": "handoff-conflict-alder309",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          494,
+          1064,
+          961,
+          1138
+        ],
+        "profileFingerprint": "b8e9d93ed1f2bc30b6af5924c32932ecc0c75754bcbab0a93cc038683810d843",
+        "qualityPassed": true,
+        "quotedTokens": 5705,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-conflict-alder309-p2"
+      },
+      {
+        "alias": "local",
+        "caseId": "handoff-conflict-alder309",
+        "counts": {
+          "providerRequests": 4,
+          "reportedTokens": 600,
+          "toolCalls": 1
+        },
+        "inputBounds": [
+          477,
+          909,
+          943,
+          1126
+        ],
+        "profileFingerprint": "f0f6d65255a186267e7e4241b5e6532624d0fcc4ad2f50cd70531817af1cb2a9",
+        "qualityPassed": true,
+        "quotedTokens": 5503,
+        "replayAdditionalRequests": 0,
+        "sampleId": "handoff-conflict-alder309-p1"
+      }
+    ]
+  },
+  "reporting": {
+    "cases": [
+      {
+        "attempted": 8,
+        "passed": true,
+        "phase": "known",
+        "unknown": 0
+      },
+      {
+        "attempted": 1,
+        "passed": true,
+        "phase": "reserved",
+        "unknown": 1
+      },
+      {
+        "attempted": 1,
+        "passed": true,
+        "phase": "receipts-only",
+        "unknown": 1
+      },
+      {
+        "attempted": 1,
+        "passed": true,
+        "phase": "unsettled-file",
+        "unknown": 1
+      }
+    ],
+    "liveRequests": 0,
+    "qualified": true
+  },
+  "payload": {
+    "cumulativeCharged": {
+      "providerRequests": 1468,
+      "reportedTokens": 1769171,
+      "toolCalls": 601
+    },
+    "historicalLedgerCount": 36,
+    "historicalLedgerHashesVerified": 36,
+    "installedFiles": 125,
+    "liveRequests": 0,
+    "priorEvidence": [
+      {
+        "files": 428,
+        "manifestSha256": "32be0bff51b1fc2fb7aff3c8674eb7f3b1c55c2b750070bb3eb82658e557f96e",
+        "name": "recovery-memory-evidence-20261017"
+      },
+      {
+        "files": 282,
+        "manifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711",
+        "name": "continuation-budget-evidence-20261017"
+      },
+      {
+        "files": 338,
+        "manifestSha256": "62f2d7535eafda5f31b7c1e27ba65d98c6db709c26f4e04ed991324bd467d7a8",
+        "name": "continuation-memory-evidence-20261017"
+      },
+      {
+        "files": 676,
+        "manifestSha256": "89551e7ce6a2c6cc8e2f82e4ab8dec29f05d2771c5e9aa9cac9a6d34e9cb35b2",
+        "name": "response-fault-evidence-20261018"
+      },
+      {
+        "files": 178,
+        "manifestSha256": "8ce12f1d7cb686b141638f264c5a3ea0df24c81761bdb7ebef8fb47e136e0119",
+        "name": "missing-evidence-memory-evidence-20261018"
+      },
+      {
+        "files": 46,
+        "manifestSha256": "ef80e559654bef5aadbde6a5a3747f1f9501ab83d541de2a09ba5052f27ce83e",
+        "name": "prosaic-handoff-evidence-20261018"
+      }
+    ],
+    "sdistSha256": "a95668d5ef3896744c4104cf0714ee01b69ec2f7f56e535b1d09552336e22bb9",
+    "sourceCommit": "fef4182ec08742c88d6ac3f2109bb188a983c119",
+    "sourceFiles": 121,
+    "unknownReservationsRetained": 8,
+    "version": "0.5.1+handoffs.4",
+    "wheelSha256": "629a4965590b2e75b704bdd7ec446959373a22e549dd44b46e94a921d454953d"
+  },
+  "review": {
+    "importantFixed": 3,
+    "minorDeferred": [
+      "Private audit destination is one-use; use a fresh path for a repeat audit."
+    ]
+  }
+}

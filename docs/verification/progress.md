@@ -1,5 +1,14 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Frozen real-model handoff preparation — 2026-10-18
+
+[Prepared](real-handoffs-2026-10-18.md):1388source tests,15installed regressions,
+eight actual-counter fixture trajectories and four reporting/interruption phases
+pass; exact source/wheel/SDK checks pass. Four fresh cases per model, unchanged
+graph/prose/caps and no memory. Three Important review issues fixed; audit repeat
+path minor deferred. User approval requested for25requests/13tools; no dispatch
+or new live efficacy finding. Preserve eight old unknown charges and36ledgers.
+
 ## Offline typed handoffs — 2026-10-18
 
 [Qualification](typed-handoffs-2026-10-18.md) records1373source tests,40new

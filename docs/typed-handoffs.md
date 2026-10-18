@@ -51,3 +51,13 @@ OpenAI-compatible and Anthropic fixture messages exercise transport differences;
 scripted agents do not demonstrate real-model reasoning or memory improvement.
 Memory remains experimental. Live comparisons, hosted providers, PostgreSQL,
 container platforms and release qualification are separate work.
+
+## Opt-in counted evaluation
+
+`execute_counted_case` accepts a host-qualified `TokenCounterRegistration` bound
+to the selected provider/model. It uses one shared Runtime budget and persists
+counter proposals, observations, events and immutable Harness receipts. It does
+not grant paid-call authorization or reserve allowance; the trusted study host
+must do both before calling it. There is no synthetic-counter fallback.
+The [frozen evaluation preparation](verification/real-handoffs-2026-10-18.md)
+keeps model profiles, handoff prompts/graph and all per-case limits unchanged.

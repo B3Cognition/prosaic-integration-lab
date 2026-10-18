@@ -1,5 +1,22 @@
 # Codex handoff
 
+## Real-model handoff evaluation frozen; allowance pending — 2026-10-18
+
+[Prepared study](verification/real-handoffs-2026-10-18.md) uses local experimental
+Lab0.5.1+handoffs.4, exact sourcefef4182. Full1388tests and15installed regressions
+pass;8fixture trajectories use actual qualified counters,4reporting/interruption
+phases pass. All3Important review findings fixed; one one-use-audit-path minor
+deferred. No live requests. Graph/prose/models/per-case caps unchanged; memory off.
+Bindingcd6988b2f6f89197ed25a4a0f731dc657a257c96a4caee2692137374df78eb5d
+freezes4fresh cases×2models and3155guard files. Full reservation32requests/16tools/
+65536tokens needs25requests/13tools beyond current headroom; token ceiling stays.
+Question sent to user; no approval yet. Do not create allowance-approval.json or
+dispatch until explicit approval arrives. Cumulative charge1468/601/1769171,
+ceilings1475/604/1976623,8unknown retained. Requested new ceilings1500/617/1976623.
+Private host operators `/private/tmp/prosaic-real-handoff-{common,live,audit,analyze}.py`,
+installed environment `/private/tmp/prosaic-handoff-real-env/bin/python`, root
+`/private/tmp/prosaic-real-handoff-study-20261018`. Preserve all prior evidence.
+
 ## Offline typed handoffs qualified — 2026-10-18
 
 Lab0.5.1+handoffs.2 adds experimental request-bound planner/worker/critic
