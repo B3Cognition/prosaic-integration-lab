@@ -1,0 +1,67 @@
+{
+  "additional": {
+    "providerRequests": 24,
+    "reportedTokens": 0,
+    "toolCalls": 8
+  },
+  "binding": "38fbd83351a0497c35010c671129ed9cc388062d84ff1aba1ddccef4ccf0d7eb",
+  "canonicalHistoricalLedgers": 37,
+  "cases": 6,
+  "cumulativePrior": {
+    "providerRequests": 1476,
+    "reportedTokens": 1776439,
+    "toolCalls": 601
+  },
+  "currentCeilings": {
+    "providerRequests": 1500,
+    "reportedTokens": 1976623,
+    "toolCalls": 617
+  },
+  "executableSource": "7c77df8fd79374ba37db570508748b7005a7107a",
+  "fullReservation": {
+    "providerRequests": 48,
+    "reportedTokens": 98304,
+    "toolCalls": 24
+  },
+  "guardFiles": 6317,
+  "historicalEvidenceFiles": 2596,
+  "hostTests": 31,
+  "labVersion": "0.5.1+direct.2",
+  "liveRequests": 0,
+  "maximumQuotedTokens": 5885,
+  "minimumQuotedTokens": 1749,
+  "models": {
+    "local": {
+      "model": "mlx-community--Qwen2.5-Coder-7B-Instruct-4bit",
+      "provider": "openai-compatible"
+    },
+    "local-strong": {
+      "model": "ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ",
+      "provider": "openai-compatible"
+    }
+  },
+  "modesPerModel": {
+    "critic": 3,
+    "handoff": 2,
+    "worker": 1
+  },
+  "offlineCases": 12,
+  "origin": "offline-preparation",
+  "perCase": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "priorOfflineEvidenceFiles": 1996,
+  "priorSamplesChecked": 601,
+  "requestedCeilings": {
+    "providerRequests": 1524,
+    "reportedTokens": 1976623,
+    "toolCalls": 625
+  },
+  "samples": 12,
+  "status": "prepared_review_pending_allowance_not_approved",
+  "unknownHistoricalReservations": 8
+}
