@@ -96,3 +96,9 @@ Local counter operator: `/private/tmp/prosaic-direct-counter-qualify-final.py`;
 candidate environment: `/private/tmp/prosaic-direct-final-env/bin/python`;
 private results: `/private/tmp/prosaic-direct-final-study-20261018`.
 The previous live environment and all prior operators remain unchanged.
+
+[Preservation proof](data/direct-handoffs-preservation-2026-10-18.json) binds 1,996
+new evidence files, including both candidates, failed/intermediate logs, review
+workspace and source diff. Archive: `/private/tmp/prosaic-direct-evidence-20261018.tar.gz`;
+manifest: `/private/tmp/prosaic-direct-evidence-20261018/evidence-manifest.json`.
+Historical evidence and live ledgers are verified separately and remain unchanged.

@@ -19,6 +19,8 @@ Executable source 7c77df8; candidate environment
 `/private/tmp/prosaic-direct-final-env/bin/python`; results
 `/private/tmp/prosaic-direct-final-study-20261018`. Previous live environment and
 initial candidate/evidence remain intact.
+Preserved 1,996 new files in `/private/tmp/prosaic-direct-evidence-20261018.tar.gz`;
+hashes are in the qualification's preservation proof. Keep this branch/worktree.
 
 ## Eight-sample real-model handoff evaluation complete — 2026-10-18
 
