@@ -16,6 +16,7 @@ def output_schemas():
 
 def expected_worker(request,records):
     value=target(request,records)
+    if value['status']=='unread':value['answer']['decision']='insufficient'
     return {k:value[k] for k in ('assignmentId','status','answer')}
 
 
@@ -48,6 +49,7 @@ status ready: all available current authoritative facts were read and all requir
 status missing: the complete index lacks a required authoritative fact; return insufficient.
 status unread: a current authoritative fact exists in the index but was not read; return insufficient.
 status conflict: multiple authoritative records share a highest revision; return insufficient with facts=[] and citations=[].
+Status precedence is conflict, then unread, then missing, then ready.
 For other statuses, list and cite only actually read current authoritative facts.
 facts holds factId labels; citations pairs each factId with its exact recordId.
 '''

@@ -19,6 +19,11 @@ critic must identify wrong binding, status, decision, facts and citations. Corre
 missing, unread and conflicting evidence still requires escalation. Independent
 host checks remain authoritative even when a critic misses a flaw.
 
+Status precedence is conflict, then unread, then missing, then ready. Unread
+always means an insufficient decision, including when the two required facts are
+read but another current authoritative fact remains unread. Facts and citations
+still list the current records actually read. Version1 behavior is unchanged.
+
 Ordinary full execution needs three requests and one tool; worker-only needs two
 requests and one tool; critic-only needs one request and no tools. All modes use
 the unchanged outer limits: four requests, two tools, 8,192 reported tokens,
@@ -29,6 +34,8 @@ exhausted continuation reservations stop execution rather than raising caps.
 `score_direct` reports each role separately, the first failure, task quality and
 safe stopping. A detected bad worker still fails task quality in full mode; a
 correct critic detecting a controlled flaw can pass its own qualification.
+Taking the permitted stop action preserves that measured qualification and reports
+a stopped outcome; it never authorizes approval.
 `recover_case` only verifies and reads saved state; it never drives a graph node.
 Reusing an execution claim fails before dispatch. Changed identities must use a
 new study and output directory.

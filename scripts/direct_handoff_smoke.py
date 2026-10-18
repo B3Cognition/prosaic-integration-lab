@@ -26,7 +26,8 @@ def main():
         if scenario=='missed_flaw' and mode=='critic':draft['answer']['decision']='reject'
         sample=f'{provider}-{family}-{mode}-{scenario}-{flaw or "none"}'
         out=private_directory(root/sample)
-        controls=dict(draft=draft,record_ids=['metrics'] if family=='unread' else None) if mode=='critic' else {}
+        controls=dict(draft=draft,record_ids=['metrics'] if family=='unread' else ['metrics','incident']
+            if family=='extra_unread' else None) if mode=='critic' else {}
         with fixture_provider(case,provider=provider,family=family,scenario=scenario) as p:
             evidence=direct.execute_case(case,config=p.config,output=out,sample_id=sample,mode=mode,**controls)
             requests=p.requests
@@ -37,7 +38,7 @@ def main():
             assert replay['receiptDigests']==evidence['receiptDigests'] and p.requests==requests
             assert (out/(sample+'-context-trace.json')).read_bytes()==before
         score=score_direct(case,evidence)
-        quality=scenario=='correct' and (family!='unread' or mode=='critic')
+        quality=scenario=='correct' and (family not in ('unread','extra_unread') or mode=='critic')
         assert score['safe'] and score['qualityPassed']==quality,score
         assert all(r['step']!='planner' for r in evidence['receipts'])
         assert evidence['counts']['toolCalls']<=2
@@ -50,7 +51,7 @@ def main():
             flaw=flaw,**score,receiptDigests=evidence['receiptDigests'],evidenceSha256=digest(evidence),
             contractChecks=requests,replayAdditionalRequests=0))
     for provider in ('openai','anthropic'):
-        for family in ('correct','reject','missing','conflict','unread'):
+        for family in ('correct','reject','missing','conflict','unread','extra_unread'):
             for mode in ('worker','critic','handoff'):run(provider,family,mode)
         for flaw in ('binding','status','decision','facts','citations'):run(provider,'correct','critic',flaw=flaw)
         for scenario in ('wrong_worker','missed_flaw','false_critic','invalid_worker','schema_instead',

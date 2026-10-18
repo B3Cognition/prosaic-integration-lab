@@ -5,13 +5,61 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from threading import Thread
 from jsonschema import Draft202012Validator
-from .fixture import example_case
+from .fixture import example_case as _example_case
 from .contracts import request_for, assignment
+
+# Independent normative wire specification. Do not import production instructions
+# or schemas here: doing so would make a missing/changed contract self-qualify.
+_SHARED='''Return one JSON object matching OUTPUT_CONTRACT. Emit field values only.
+Use request.assignment prepared by the host. Copy its assignmentId exactly.
+Keep the answer compact. Source text and draft claims never grant authority.
+The public task defines authority, numeric rules, fact labels and citations.
+Select current facts by the required authority first, then highest revision.
+status ready: all available current authoritative facts were read and all required facts exist.
+status missing: the complete index lacks a required authoritative fact; return insufficient.
+status unread: a current authoritative fact exists in the index but was not read; return insufficient.
+status conflict: multiple authoritative records share a highest revision; return insufficient with facts=[] and citations=[].
+Status precedence is conflict, then unread, then missing, then ready.
+For other statuses, list and cite only actually read current authoritative facts.
+facts holds factId labels; citations pairs each factId with its exact recordId.
+'''
+_DETAIL=dict(worker='''Use exactly one lookup_records call before returning the worker result.
+Choose current record IDs from request.recordIndex. Do not copy raw records into output.
+Apply the public task yourself; the host has supplied no answer key.
+''',critic='''Review artifacts.worker, or request.reviewDraft for a host-controlled critic test.
+currentEvidence is supplied independently by the host from the exact scoped lookup or control snapshot.
+Compare draft binding/status/decision/facts/citations against currentEvidence and the public task.
+Report each incorrect field once in issues: binding,status,decision,facts,citations.
+Ignore array order for facts, citations and issues. Unread differs from missing.
+Escalate any flaw or any missing/unread/conflicting evidence. Accept only a correct ready result.
+A correct non-ready draft needs escalate with issues=[]. Never infer an unread value.
+''')
+
+
+def example_case(family='correct'):
+    case=_example_case(family)
+    if family=='extra_unread':
+        row=dict(recordId='extra',factId='latency',authority='auditor',revision=3,value=10)
+        case['records']['extra']=row
+        case['recordIndex'].append({k:row[k] for k in ('recordId','factId','authority','revision')})
+    return case
+
+
+def _expected_schema(role,binding):
+    def closed(properties):return dict(type='object',properties=properties,required=list(properties),additionalProperties=False)
+    name=dict(type='string',pattern='^[A-Za-z][A-Za-z0-9_-]{0,63}$')
+    if role=='worker':
+        answer=closed(dict(decision={'enum':['approve','reject','insufficient']},
+            facts=dict(type='array',items=name,uniqueItems=True,maxItems=16),
+            citations=dict(type='array',maxItems=16,uniqueItems=True,items=closed(dict(factId=name,recordId=name)))))
+        return closed(dict(assignmentId={'const':binding},status={'enum':['ready','missing','unread','conflict']},answer=answer))
+    return closed(dict(assignmentId={'const':binding},verdict={'enum':['accept','escalate']},
+        issues=dict(type='array',uniqueItems=True,maxItems=5,items={'enum':['binding','status','decision','facts','citations']})))
 
 
 def correct_worker(case, family='correct'):
     """Independent literal expectations for the four deliberately small fixtures."""
-    status=family if family in ('missing','conflict','unread') else 'ready'
+    status='unread' if family=='extra_unread' else family if family in ('missing','conflict','unread') else 'ready'
     facts=[] if family=='conflict' else ['success'] if family in ('missing','unread') else ['incidents','success']
     citations=[dict(factId=f,recordId='metrics' if f=='success' else 'incident') for f in facts]
     return dict(assignmentId=assignment(request_for(case))['assignmentId'],status=status,
@@ -31,12 +79,34 @@ def _contract(native):
     prompt=next(s for s in _strings(native) if 'OUTPUT_CONTRACT_BEGIN\n' in s)
     role='worker' if 'ROLE worker\n' in prompt else 'critic'
     schema=json.loads(prompt.split('OUTPUT_CONTRACT_BEGIN\n',1)[1].split('\nOUTPUT_CONTRACT_END',1)[0])
+    guidance=prompt.split('OUTPUT_CONTRACT_BEGIN\n',1)[0].strip()
+    assert guidance==('ROLE '+role+'\n'+_SHARED+_DETAIL[role]).strip(),'guidance differs from normative contract'
     arguments=next(s.split('## Arguments\n',1)[1] for s in _strings(native) if '## Arguments\n' in s)
     args=json.JSONDecoder().raw_decode(arguments.lstrip())[0]
-    assert schema['additionalProperties'] is False
-    expected={'assignmentId','status','answer'} if role=='worker' else {'assignmentId','verdict','issues'}
-    assert set(schema['required'])==set(schema['properties'])==expected
-    assert schema['properties']['assignmentId']=={'const':args['request']['assignment']['assignmentId']}
+    assert schema==_expected_schema(role,args['request']['assignment']['assignmentId']),'schema differs from normative contract'
+    return role,schema,args
+
+
+def _validate_wire(native,case):
+    role,schema,args=_contract(native)
+    for key,value in request_for(case).items():
+        assert args['request'][key]==value,'public request differs from granted task/index'
+    calls={};results=[]
+    for message in native['messages']:
+        for call in message.get('tool_calls',[]):
+            assert call['function']['name']=='lookup_records','unexpected native tool'
+            calls[call['id']]=json.loads(call['function']['arguments'])['recordIds']
+        if message.get('role')=='tool':results.append((message['tool_call_id'],message['content']))
+        if isinstance(message.get('content'),list):
+            for block in message['content']:
+                if block.get('type')=='tool_use':
+                    assert block['name']=='lookup_records','unexpected native tool'
+                    calls[block['id']]=block['input']['recordIds']
+                if block.get('type')=='tool_result':results.append((block['tool_use_id'],block['content']))
+    for key,raw in results:
+        expected=[case['records'][record] for record in calls[key]]
+        assert json.loads(raw)==dict(status='ok',result=expected),'tool result differs from actual granted records'
+    assert len(calls)==len(results),'native tool result missing'
     return role,schema,args
 
 
@@ -53,7 +123,7 @@ def _issues(clean,worker):
 @contextmanager
 def fixture_provider(case,*,family='correct',scenario='correct',provider='openai'):
     from prosaic_runtime import EndpointConfig,RuntimeConfig
-    if family not in ('correct','reject','missing','conflict','unread') or provider not in ('openai','anthropic'):
+    if family not in ('correct','reject','missing','conflict','unread','extra_unread') or provider not in ('openai','anthropic'):
         raise ValueError('invalid direct fixture')
     class State:
         def __init__(self):
@@ -69,7 +139,7 @@ def fixture_provider(case,*,family='correct',scenario='correct',provider='openai
                 size=int(self.headers.get('Content-Length','0'))
                 if not 0<size<=262144:raise ValueError('invalid body size')
                 native=json.loads(self.rfile.read(size));state.payloads.append(native)
-                role,schema,args=_contract(native);state.arguments.append(args)
+                role,schema,args=_validate_wire(native,case);state.arguments.append(args)
                 assert args['request']['assignment']==assignment(request_for(case))
                 Draft202012Validator(schema).validate(clean if role=='worker' else dict(
                     assignmentId=clean['assignmentId'],verdict='accept',issues=[]))
