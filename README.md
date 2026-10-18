@@ -394,4 +394,9 @@ The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2
 
 The [provider-neutral role qualification blueprint](docs/role-qualification.md) gives consumers reusable policy checks, configuration-bound qualification and evidence-grounded diagnostics. Consumers supply their own roles, evidence policies, suites and model settings. [Offline proof](docs/verification/role-qualification-2026-10-18.md) uses scripted responses; it does not certify either local model or admit synthetic qualifications for live use.
 
+The opt-in [bounded correction blueprint](docs/bounded-correction.md) adds one
+host-verified correction and a matched no-critic baseline under the same per-arm
+limits. Consumers adapt the evidence policy and qualify their own roles; scripted
+offline proof does not establish model or critic benefit.
+
 The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.
