@@ -16,6 +16,10 @@ The experimental [agent-quality](docs/agent-quality.md) and
 [retrieval-memory](docs/retrieval-memory.md) examples have separate capability
 claims and retained model-study evidence.
 
+The experimental [durable failure isolation blueprint](docs/failure-isolation.md)
+adds conservative host admission and explicit receipt-only recovery around public
+SDK operations. It preserves reservations and never automatically replays work.
+
 The next experimental milestone adds an opt-in
 [typed evidence consumer pattern](docs/verification/typed-evidence.md). It
 classifies verified, absent and unread facts without supplying a model decision.
