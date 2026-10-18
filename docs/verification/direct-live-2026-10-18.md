@@ -3,7 +3,8 @@
 The user requests fresh held-out worker/critic evaluation across both existing
 models under current limits. No live inference has occurred in this study.
 [Preparation data](data/direct-live-prepared-2026-10-18.json) records the current
-candidate binding; final host review and extra allowance approval are pending.
+final candidate binding; offline qualification and review fixes are complete.
+Extra allowance approval is pending.
 
 Six newly seeded cases are each crossed with both models, with model order
 counterbalanced:12samples total. Each model gets one worker-only case, three
@@ -15,11 +16,23 @@ remain outside model arguments. Models, prompts, schemas and package stay frozen
 
 The unchanged Lab0.5.1+direct.2 candidate uses executable source7c77df8 and the
 same qualified SDKs/counters. Package code is unchanged from1478source tests.
-The private host's full31test suite passes; all12frozen lanes passed synthetic
-HTTP qualification with actual counters. Quotes1749–5885tokens fit8192, including
+The private host's full41test suite passes; all12frozen lanes passed synthetic
+HTTP qualification with actual counters. Quotes1777–5928tokens fit8192, including
 512output tokens per request. End-to-end host tests exercise run→accounting audit
 →independent analysis, plus unknown usage, honest overrun and interrupted claims.
 Copied-state recovery denies sockets and preserves original receipt/trace bytes.
+
+The fresh whole-host review identified three Important findings, all fixed
+before live dispatch: component token breaches now stop continuations and later
+samples even below the combined token ceiling; case IDs are opaque and disclose
+no control label; critic observations remain in coverage and cost accounting
+when interrupted before receipt persistence. Unresolved intents remain explicit
+and their token costs uncertain. Invalid/unavailable reviews receive no success
+credit. The final suite covers both token components on initial/final responses,
+serial observation order/ambiguity and interrupted critic calls. Original inputs,
+scripts, proof and qualification evidence were preserved and all6317old guard
+hashes verified against that preservation. Opaque IDs use the original seed;
+tasks, source records/indexes, values and case order are unchanged.
 
 Preparation verifies37historical ledgers,2596older evidence files,1996direct
 offline evidence files and eight fully charged unknown reservations. Frozen
@@ -36,7 +49,8 @@ per-case increase. Approval is not yet granted and no live ledger exists.
 
 Analysis will separate natural worker flaws from host-authored controls, count
 unreached or invalid critic responses honestly, and report false alarms and
-critic request/token costs. A correct critique does not repair an answer in this
+critic request/token costs, including observed calls without receipts and
+unresolved intents. A correct critique does not repair an answer in this
 graph. Independent host checks already enforce safety. This small study can
 measure within-trajectory detection and cost, not a causal task-accuracy gain,
 general model certification or production autonomy. Zero natural flaw

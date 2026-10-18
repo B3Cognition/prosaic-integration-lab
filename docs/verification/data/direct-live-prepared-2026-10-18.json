@@ -4,7 +4,7 @@
     "reportedTokens": 0,
     "toolCalls": 8
   },
-  "binding": "38fbd83351a0497c35010c671129ed9cc388062d84ff1aba1ddccef4ccf0d7eb",
+  "binding": "a2777498cb51b69a740bea3a9b60de02619287eed2e6668907af18377da49635",
   "canonicalHistoricalLedgers": 37,
   "cases": 6,
   "cumulativePrior": {
@@ -23,13 +23,13 @@
     "reportedTokens": 98304,
     "toolCalls": 24
   },
-  "guardFiles": 6317,
+  "guardFiles": 6415,
   "historicalEvidenceFiles": 2596,
-  "hostTests": 31,
+  "hostTests": 41,
   "labVersion": "0.5.1+direct.2",
   "liveRequests": 0,
-  "maximumQuotedTokens": 5885,
-  "minimumQuotedTokens": 1749,
+  "maximumQuotedTokens": 5928,
+  "minimumQuotedTokens": 1777,
   "models": {
     "local": {
       "model": "mlx-community--Qwen2.5-Coder-7B-Instruct-4bit",
@@ -62,6 +62,13 @@
     "toolCalls": 625
   },
   "samples": 12,
-  "status": "prepared_review_pending_allowance_not_approved",
+  "review": {
+    "critical": 0,
+    "important": 3,
+    "importantFixed": 3,
+    "minor": 0,
+    "passes": 1
+  },
+  "status": "qualified_review_fixes_complete_allowance_not_approved",
   "unknownHistoricalReservations": 8
 }

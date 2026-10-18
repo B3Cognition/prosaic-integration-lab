@@ -36,12 +36,12 @@ private host tests; sanitized preparation in `docs/verification/direct-live-2026
 independently computes a compact worker value; `guard(authorized=False)` binds all
 immutable inputs; runner reserves each full case and settles receipt-derived counts.
 
-- [ ] Write/observe RED for independent oracle, fresh schedule and budget/approval gates.
-- [ ] Implement private host, six seeded cases, controls and source-bound oracle.
-- [ ] Qualify all12frozen samples with actual counters on synthetic HTTP; reject
+- [x] Write/observe RED for independent oracle, fresh schedule and budget/approval gates.
+- [x] Implement private host, six seeded cases, controls and source-bound oracle.
+- [x] Qualify all12frozen samples with actual counters on synthetic HTTP; reject
   mutated bindings, unknown/overrun/retry and interruption phases; deny recovery sockets.
-- [ ] Audit installed code/wheels, historical ledgers/evidence and serving guards.
-- [ ] One fresh whole-host review; fix material findings with RED/GREEN evidence.
+- [x] Audit installed code/wheels, historical ledgers/evidence and serving guards.
+- [x] One fresh whole-host review; fix material findings with RED/GREEN evidence.
 - [ ] Freeze final binding and ask precisely24requests/8tools; no token increase.
 
 ### Task 2: Execute the frozen operational evaluation and report
