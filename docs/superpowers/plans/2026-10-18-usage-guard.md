@@ -38,4 +38,7 @@ complete normalized counts with reported/unsupported status; no mutation.
 - [x] Run focused and full source suites; build and install a fresh candidate.
 - [x] Run installed synthetic fault matrix, SDK/payload audits and immutable historical proof check.
 - [x] Record exact results and limitations; commit; one fresh final review with any material fixes verified test-first.
-- [ ] Push reviewed branch, create and attach PR; no release or live dispatch.
+- [x] Push reviewed branch, create and attach PR; no release or live dispatch.
+
+Published as [draft PR #18](https://github.com/B3Cognition/prosaic-integration-lab/pull/18).
+Offline qualification and independent review are recorded in the verification report.

@@ -39,6 +39,7 @@
   "sdkSourceChanges": false,
   "activeReleaseManifestChanged": false,
   "releaseCreated": false,
+  "draftPullRequest": "https://github.com/B3Cognition/prosaic-integration-lab/pull/18",
   "preservation": {
     "evidenceDirectory": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/usage-guard-evidence-20261018",
     "archive": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/prosaic-usage-guard-evidence-20261018.tar.gz",

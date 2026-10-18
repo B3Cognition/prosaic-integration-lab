@@ -10,7 +10,7 @@ and baseline matrices pass, with network-denied recovery. Source-suite, artifact
 and review results are in the qualification data. No live calls or SDK changes;
 limits and all nine unknown reservations remain charged unchanged.
 
-Push this reviewed branch as an experimental PR, not a release. Memory and
+The reviewed branch is published in [draft PR #18](https://github.com/B3Cognition/prosaic-integration-lab/pull/18), without a release. Memory and
 correction remain opt-in; no critic/model benefit is established. Public SDK
 train and clean-consumer/platform/database acceptance remain release gates.
 Next broad milestone: durable failure isolation and explicit recovery; any new

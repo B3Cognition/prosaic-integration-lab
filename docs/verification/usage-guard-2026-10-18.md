@@ -1,5 +1,7 @@
 # Provider-neutral usage guard — 2026-10-18
 
+Published for review in [draft PR #18](https://github.com/B3Cognition/prosaic-integration-lab/pull/18).
+
 The experimental Lab candidate fixes a consumer admission defect found after
 the [stopped live comparison](correction-live-2026-10-18.md). The old observer
 enforced component bounds only for `reported` usage. A synthetic counterexample
