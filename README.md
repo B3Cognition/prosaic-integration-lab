@@ -390,6 +390,8 @@ See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval
 
 The [typed handoff example](docs/typed-handoffs.md) adds offline planner/worker/critic contracts, independent evidence gates and full-trajectory scoring under the same limits. It remains experimental and makes no live reasoning claim.
 
-The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner, before any critic ran. The opt-in [direct worker/critic example](docs/direct-handoffs.md) adds explicit model-facing output contracts and host-prepared assignments for independent role qualification. Critic benefit remains unmeasured in real models.
+The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner. The opt-in [direct worker/critic example](docs/direct-handoffs.md) removes host-owned assignment generation from the model. Its [frozen live study](docs/verification/direct-handoffs-live-2026-10-18.md) found partial critic warnings, without complete verification or demonstrated answer improvement.
+
+The [provider-neutral role qualification blueprint](docs/role-qualification.md) gives consumers reusable policy checks, configuration-bound qualification and evidence-grounded diagnostics. Consumers supply their own roles, evidence policies, suites and model settings. [Offline proof](docs/verification/role-qualification-2026-10-18.md) uses scripted responses; it does not certify either local model or admit synthetic qualifications for live use.
 
 The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

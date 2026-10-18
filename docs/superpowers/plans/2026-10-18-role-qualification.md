@@ -29,10 +29,10 @@ public installed SDKs remain unchanged. No transport or prompt tuning.
 **Interfaces:** `FieldCheck`, `assess_output`, `qualification_binding`,
 `qualification_report`, `require_qualification`; all pure/no dispatch.
 
-- [ ] Write failing tests: alternate-domain checks and sanitized diagnostics,
+- [x] Write failing tests: alternate-domain checks and sanitized diagnostics,
   malformed JSON/schema, abstention/unknown/budget failure, remote refs,
   complete coverage, changed binding, synthetic/stale/tampered reports.
-- [ ] Run focused tests RED; implement minimal APIs; run GREEN and commit.
+- [x] Run focused tests RED; implement minimal APIs; run GREEN and commit.
 
 ### Task 2: Scoped diagnostics adapter and adoptable offline blueprint
 
@@ -42,11 +42,11 @@ public installed SDKs remain unchanged. No transport or prompt tuning.
 **Interfaces:** `diagnose_direct(case,evidence)` consumes unchanged direct-v2
 receipts; uses Task1 field checks; never changes scoring, arguments or execution.
 
-- [ ] Write/observe RED for complete worker/critic diagnostics, partial warnings,
+- [x] Write/observe RED for complete worker/critic diagnostics, partial warnings,
   invalid output and scoped evidence corruption; implement and run GREEN.
-- [ ] Add an installed-wheel synthetic smoke using both wire fixtures and a
+- [x] Add an installed-wheel synthetic smoke using both wire fixtures and a
   second domain's contract; demonstrate offline report cannot admit live use.
-- [ ] Run full source suite, build/audit/install in fresh environment, smoke.
-- [ ] One fresh whole-change review; fix material findings in one RED/GREEN pass.
-- [ ] Record zero live calls and unchanged ledgers, adoption boundaries and
+- [x] Run full source suite, build/audit/install in fresh environment, smoke.
+- [x] One fresh whole-change review; fix material findings in one RED/GREEN pass.
+- [x] Record zero live calls and unchanged ledgers, adoption boundaries and
   limitations; commit locally and preserve branch/evidence.

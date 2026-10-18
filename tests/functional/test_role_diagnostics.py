@@ -85,3 +85,40 @@ def test_truncated_output_is_unusable_and_not_semantic_guesswork(tmp_path):
     assert r['roles']['worker']['status']=='failed'
     assert any(d['code'] in ('schema_mismatch','invalid_json','unusable_output') for d in r['roles']['worker']['diagnostics'])
     assert r['roles']['critic']['status']=='unavailable'
+
+
+@pytest.mark.parametrize('fault',['unknown','empty','negative','bool','receipt_total','timeout','unknown_time'])
+def test_incomplete_or_inconsistent_case_accounting_never_qualifies(tmp_path,fault):
+    case=example_case()
+    with fixture_provider(case) as p:e=execute_case(case,config=p.config,output=tmp_path,sample_id='account',mode='worker')
+    if fault=='unknown':e['counts']['reportedTokens']=None
+    if fault=='empty':e['counts']={}
+    if fault=='negative':e['counts']['reportedTokens']=-100
+    if fault=='bool':e['counts']['providerRequests']=True
+    if fault=='receipt_total':e['counts']['reportedTokens']+=1
+    if fault=='timeout':e['elapsedSeconds']=601
+    if fault=='unknown_time':e.pop('elapsedSeconds')
+    r=adapter()(case,e)['roles']['worker']
+    assert r['status']!='passed'
+    assert any(d['code'] in ('unknown_usage','unverified_accounting','budget_violation','unknown_timing') for d in r['diagnostics'])
+
+
+def test_changed_control_scope_cannot_reinterpret_a_saved_critic_response(tmp_path):
+    case=example_case();draft=correct_worker(case,'unread')
+    with fixture_provider(case,family='unread') as p:
+        e=execute_case(case,config=p.config,output=tmp_path,sample_id='scope-selector',mode='critic',draft=draft,record_ids=['metrics'])
+    receipt=e['receipts'][0];review=decode(receipt['result']['stdout'])
+    review['issues']=['status','decision','facts','citations']
+    receipt['result']['stdout']=encode(review).decode();e['receiptDigests']=[digest(receipt)]
+    assert adapter()(case,e)['roles']['critic']['status']=='failed'
+    e['controlledRecordIds']=None
+    r=adapter()(case,e)['roles']['critic']
+    assert r['status']=='failed' and r['diagnostics'][0]['code']=='unverified_evidence'
+
+
+def test_projected_argument_attestation_binds_the_actual_fetched_records(tmp_path):
+    case=example_case()
+    with fixture_provider(case) as p:e=execute_case(case,config=p.config,output=tmp_path,sample_id='projection')
+    e['journal'][0]['recordIds']=['metrics'];e['journal'][0]['recordsSha256']=digest([case['records']['metrics']])
+    r=adapter()(case,e)
+    assert all(any(d['code']=='unverified_evidence' for d in value['diagnostics']) for value in r['roles'].values())

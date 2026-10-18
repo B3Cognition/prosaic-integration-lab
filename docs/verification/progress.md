@@ -1,5 +1,17 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Provider-neutral consumer role blueprint — 2026-10-18
+
+[Guide](../role-qualification.md), [qualification](role-qualification-2026-10-18.md).
+Generic role checks/qualification are independent of the rollout example and
+provider/model choice. Scope/accounting diagnostics use saved public evidence;
+consumers own domain policies, suites, authorization and held-out model tuning.
+Final roles.2 candidate:1524source/46focused tests pass,24installed synthetic
+both-wire lanes,4synthetic qualification records denied live use;127installed
+files verified and SDK packages unchanged. One fresh review,2Important fixes
+verified9RED→GREEN, no minors. Zero live calls and unchanged per-case/cumulative
+budgets,38ledgers and8old unknown reservations. No SDK changes or release.
+
 ## Frozen direct worker/critic live result — 2026-10-18
 
 [Evaluation](direct-handoffs-live-2026-10-18.md):12fresh samples,41host checks,

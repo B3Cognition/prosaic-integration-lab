@@ -4,6 +4,7 @@ This reads saved host state only. It does not alter execution/scoring, trust a
 model's source claims, disclose expected values, or replace accounting admission.
 """
 from jsonschema import Draft202012Validator
+import math
 from lab_runner.quality.contracts import decode, digest
 from lab_runner.role_qualification import FieldCheck, assess_output
 from .contracts import request_for, assignment, LIMITS
@@ -26,11 +27,12 @@ def _sources(case, evidence):
     by_role={r['step']:r for r in receipts};mode=evidence['mode']
     if mode not in ('worker','critic','handoff') or set(by_role)-({'worker','critic'} if mode=='handoff' else {mode}):
         raise ValueError('foreign role')
-    scoped=[];subject=None
+    scoped=[];subject=None;control_ids=None
     if mode=='critic':
         subject=evidence['controlledDraft'];ids=evidence['controlledRecordIds']
         ids=sorted(case['records']) if ids is None else ids
         if type(ids) is not list or not ids or len(set(ids))!=len(ids):raise ValueError('invalid control scope')
+        control_ids=ids
         scoped=[case['records'][k] for k in ids]
         if not Draft202012Validator(output_schemas()['worker']).is_valid(subject):raise ValueError('invalid control draft')
     elif 'worker' in by_role:
@@ -48,12 +50,54 @@ def _sources(case, evidence):
     if mode=='critic':expected_request['reviewDraft']=subject
     for receipt in receipts:
         if receipt['arguments']['request']!=expected_request:raise ValueError('changed request')
+        adapter=receipt['result']['metadata']['runtime_adapter_v1']
+        expected_version='direct-v2-'+digest(dict(request=expected_request,snapshot=case['records'],mode=mode,ids=control_ids))
+        if adapter['version']!=expected_version:raise ValueError('changed execution scope')
+        if receipt['step']=='critic':
+            projected=receipt['arguments']|dict(currentEvidence=dict(assignmentId=binding['assignmentId'],
+                origin='hostControl' if mode=='critic' else 'workerLookup',records=scoped))
+            if (len(adapter['attempts'])!=1 or adapter['attempts'][0]['arguments_sha256']!=digest(projected)):
+                raise ValueError('changed projected evidence')
     if mode=='handoff' and 'critic' in by_role:
         args=by_role['critic']['arguments']
         if (not Draft202012Validator(output_schemas()['worker']).is_valid(subject)
                 or args['artifact_bindings']['worker']['id']!=by_role['worker']['id']
                 or args['artifacts']['worker']!=subject):raise ValueError('foreign worker binding')
     return request,binding,by_role,scoped,subject
+
+
+def _accounting(evidence):
+    """Reconcile public saved totals; this does not replace recorder admission."""
+    codes=[]
+    def add(code):
+        if code not in codes:codes.append(code)
+    def count(value):return type(value) is int and value>=0
+    try:
+        totals=evidence['counts']
+        if set(totals)!= {'providerRequests','toolCalls','reportedTokens'}:raise ValueError('totals')
+        if any(not count(totals[k]) for k in ('providerRequests','toolCalls')):raise ValueError('counts')
+        if totals['reportedTokens'] is not None and not count(totals['reportedTokens']):raise ValueError('tokens')
+        requests=tools=tokens=0;complete=True
+        for receipt in evidence['receipts']:
+            result=receipt['result'];budget=result['metadata']['invocation_budgets_v1'];usage=result['token_usage']
+            if (any(not count(budget[k]) for k in ('provider_requests','tool_calls','reported_tokens'))
+                    or type(budget['usage_complete']) is not bool or usage is not None and not count(usage)):
+                raise ValueError('receipt accounting')
+            requests+=budget['provider_requests'];tools+=budget['tool_calls']
+            if budget['provider_requests']>2 or budget['tool_calls']>1:add('budget_violation')
+            if usage is None or not budget['usage_complete']:complete=False
+            elif budget['reported_tokens']!=usage:raise ValueError('receipt tokens')
+            else:tokens+=usage
+        if not complete or totals['reportedTokens'] is None:add('unknown_usage')
+        if totals!=dict(providerRequests=requests,toolCalls=tools,reportedTokens=tokens if complete else None):
+            raise ValueError('unreconciled totals')
+        if any(totals[k] is not None and totals[k]>LIMITS[k] for k in totals):add('budget_violation')
+    except (ValueError,KeyError,TypeError):add('unverified_accounting')
+    elapsed=evidence.get('elapsedSeconds')
+    if type(elapsed) not in (int,float) or not math.isfinite(elapsed) or elapsed<0:add('unknown_timing')
+    elif elapsed>LIMITS['timeoutSeconds']:add('budget_violation')
+    if evidence.get('admissionViolation'):add('budget_violation')
+    return codes
 
 
 def diagnose_direct(case, evidence):
@@ -78,8 +122,7 @@ def diagnose_direct(case, evidence):
         [('/assignmentId',clean['assignmentId'],'equal'),('/status',clean['status'],'equal'),
          ('/answer/decision',clean['answer']['decision'],'equal'),('/answer/facts',clean['answer']['facts'],'set'),
          ('/answer/citations',clean['answer']['citations'],'set')]]
-    counts=evidence['counts'];budget_violation=any(counts.get(k) is not None and counts[k]>v for k,v in LIMITS.items()
-        if k!='timeoutSeconds') or bool(evidence.get('admissionViolation'))
+    accounting_codes=_accounting(evidence)
     results={}
     for role in roles:
         receipt=receipts.get(role)
@@ -96,7 +139,12 @@ def diagnose_direct(case, evidence):
             try:review=decode(result['stdout'])
             except (TypeError,ValueError):pass
         assessment=assess_output(result['stdout'],schemas[role],checks=checks,exit_code=result['exit_code'],
-            usage_known=result['token_usage'] is not None,budget_violation=budget_violation)
+            usage_known=result['token_usage'] is not None and 'unknown_usage' not in accounting_codes,
+            budget_violation='budget_violation' in accounting_codes)
+        for code in accounting_codes:
+            item=dict(code=code,field='',evidenceRefs=[])
+            if item not in assessment['diagnostics']:assessment['diagnostics'].append(item)
+        if accounting_codes:assessment['status']='failed'
         if role=='critic':
             usable=result['exit_code']==0 and Draft202012Validator(schemas['critic']).is_valid(review)
             wanted=set(target['issues']);found=set(review['issues']) if usable else set()

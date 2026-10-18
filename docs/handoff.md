@@ -1,5 +1,32 @@
 # Codex handoff
 
+## Consumer role qualification blueprint qualified offline — 2026-10-18
+
+The maintainer clarified the goal: reusable framework/consumer adoption, not
+hardening specific local models. [Adoption guide](role-qualification.md),
+[proof](verification/role-qualification-2026-10-18.md). Generic role assessment,
+configuration-bound qualification and host-pinned admission helpers live in Lab;
+a separate rollout adapter verifies scoped evidence and reports all field errors,
+missed/unsupported critique issues and partial warning coverage. Consumers supply
+their own roles, policies, evidence grants, suites, models and requalification.
+No SDK/Core changes, model-specific branching, prompt tuning, repair or live run.
+Final Lab0.5.1+roles.2:1524source tests,46focused tests,24installed both-wire
+synthetic lanes; four synthetic qualifications explicitly rejected for live use.
+127installed files match source/wheel; five SDK payloads unchanged. One fresh
+review found2Important accounting/scope gaps, fixed with9RED→GREEN regressions;
+no minors. Existing Starlette deprecation warning only. Current per-case and
+cumulative limits unchanged; charged1494/605/1805193 versus1524/625/1976623,
+38canonical ledgers/eight unknown reservations untouched. Read-only historical
+verification passed. No inference allowance spent, push or release. Existing
+frozen model evidence/environments retained. Keep this branch/worktree; any
+future live study requires separate frozen consumer-owned cases and authorization.
+Preserved410offline evidence files; archive
+`prosaic-role-evidence-20261018.tar.gz`, SHA256
+`558d53effc722f728814fe3c0ea38fb71ee955a16fffce3666c032efb6a55159`.
+Final installed environment `/private/tmp/prosaic-role-final-env`; metadata
+`/private/tmp/prosaic-role-study-20261018`; closing verifier
+`/private/tmp/prosaic-role-verify.py` is read-only and makes no provider calls.
+
 ## Frozen direct worker/critic live evaluation complete — 2026-10-18
 
 [Result](verification/direct-handoffs-live-2026-10-18.md):12/12fresh samples ran

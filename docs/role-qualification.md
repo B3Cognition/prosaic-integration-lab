@@ -53,6 +53,13 @@ omitted fields. This avoids treating partial detection as complete verification.
 Receipt arguments remain original; evidence projection at transmission is owned
 by the separately qualified public Runtime adapter.
 
+It also binds the normalized control selector and actual critic projection to
+the recorded adapter/argument hashes, reconciles typed case totals with public
+receipt accounting, and rejects unknown usage or unknown/overrun case timing.
+Recovered receipts alone may not contain the original case timing: retain the
+trusted host's complete execution record when qualifying a role. These checks
+complement, and do not replace, Runtime recorder/admission and consumer allowance.
+
 ## Bind qualification to the configuration consumers actually deploy
 
 ```python
@@ -64,7 +71,7 @@ from lab_runner.quality.contracts import digest
 binding = qualification_binding(
     role="shipping-worker", schema=shipping_schema,
     profile_fingerprint=host_profile_fingerprint,
-    adapter_revision="shipping-adapter-v1",
+    adapter_revision=host_role_adapter_digest,
     evaluator_revision="shipping-rules-v3",
     evidence_revision="authorized-manifest-v2",
     suite_revision="shipping-role-suite-v1",
@@ -89,6 +96,10 @@ outputs; cover valid answers, deliberate flaws, non-ready evidence, abstention,
 invalid/truncated output, scope/binding failures and each domain rule. Include
 every measured result; do not select only passing samples. This is application
 policy: a generic helper cannot know which cases adequately cover your domain.
+
+Compute `host_role_adapter_digest` from your exact role instructions, tool
+contracts, evidence projection code and relevant SDK/transport versions, or pin
+an equivalent immutable artifact revision. Prompt/tool changes must change it.
 
 Changing the schema, profile fingerprint (model/provider/settings), adapter,
 evaluator, evidence policy, suite revision or limits invalidates the prior
