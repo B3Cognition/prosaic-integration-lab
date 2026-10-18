@@ -57,7 +57,10 @@ It never resumes a model node. Duplicate execution of a claimed sample is
 refused. Diagnostics distinguish receipted counts, observed calls and unresolved
 intents. An observed but unreceipted response keeps its known usage visible;
 an unresolved intent does not become a fabricated request count or zero token
-usage. Incomplete accounting prevents a known cost comparison. A consumer must
+usage. Corrector reachability includes receipts, observations and unresolved
+intents. Interrupted and unresolved execution have separate effects; unusable
+final artifacts have unavailable field deltas and receive no verified repair
+credit. Incomplete accounting prevents a known cost comparison. A consumer must
 keep the full unknown reservation charged and reconcile it externally before
 choosing any new sample. Persisted evidence is host-owned, not an untrusted input
 that these helpers authenticate cryptographically.

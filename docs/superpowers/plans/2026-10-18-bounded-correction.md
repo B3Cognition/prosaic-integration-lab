@@ -29,9 +29,9 @@ consumer graph through public SDKs, one outer shared budget and nested caps.
 **Interfaces:** `correction_feedback`, `compare_corrections` consume trusted
 consumer diagnostics/bindings and evidence reports; never execute models.
 
-- [ ] RED→GREEN: sanitize feedback, bind draft/evidence, filter unsupported advice,
+- [x] RED→GREEN: sanitize feedback, bind draft/evidence, filter unsupported advice,
   separate warning from verification and reject unmatched/unknown comparisons.
-- [ ] Commit pure helpers and behavioral tests from an alternate domain.
+- [x] Commit pure helpers and behavioral tests from an alternate domain.
 
 ### Task 2: One-shot consumer graph, offline proof and adoption guide
 
@@ -41,12 +41,12 @@ consumer diagnostics/bindings and evidence reports; never execute models.
 **Interfaces:** `execute_correction`, `recover_correction`, `score_correction`
 consume public SDK config and optional qualified token counter; use Task1 helpers.
 
-- [ ] RED→GREEN both arms: success/skip, bad/missing/unread drafts, partial/false
+- [x] RED→GREEN both arms: success/skip, bad/missing/unread drafts, partial/false
   critic, ignored/regressed correction, bad JSON/binding, unexpected tools,
   exhausted/unknown/overrun budgets, unchanged evidence and zero-call recovery.
-- [ ] Build graph/fixture/installed smoke, ensuring actual wire feedback has no
+- [x] Build graph/fixture/installed smoke, ensuring actual wire feedback has no
   gold and corrected results cannot bypass host checks.
-- [ ] Full source suite, build and exact installed payload audit in fresh env;
+- [x] Full source suite, build and exact installed payload audit in fresh env;
   synthetic both-wire smoke and immutable historical accounting verification.
-- [ ] One fresh final reviewer; material fixes in one RED→GREEN pass and green suite.
+- [x] One fresh final reviewer; material fixes in one RED→GREEN pass and green suite.
 - [ ] Preserve proof, document adoption/limits, commit locally and retain branch.

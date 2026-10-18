@@ -164,3 +164,39 @@ def test_unresolved_critic_intent_is_visible_without_inventing_usage(tmp_path):
         assert score['roleCosts']['critic']['unresolvedIntents']==1
         assert score['roleCosts']['critic']['observedTokens'] is None and not score['accountingComplete']
         assert p.requests==3
+
+
+@pytest.mark.parametrize('scenario',['invalid_correction','corrector_tools'])
+def test_unusable_correction_does_not_claim_verified_field_resolutions(tmp_path,scenario):
+    c,f=modules();case=f.example_case(scenario)
+    with f.fixture_provider(case,scenario=scenario) as p:
+        e=c.execute_correction(case,config=p.config,output=tmp_path,sample_id='unusable')
+    score=c.score_correction(case,e)
+    assert not score['finalArtifactCorrect'] and not score['taskAccepted']
+    assert score['initialIssueFields']==['decision'] and score['finalIssueFields'] is None
+    assert score['resolvedIssueFields'] is None and score['newIssueFields'] is None
+
+
+@pytest.mark.parametrize('lost_response',[False,True])
+def test_interrupted_corrector_is_reached_and_has_no_assessable_final_fields(tmp_path,lost_response):
+    from lab_runner.quality.contracts import encode
+    c,f=modules();case=f.example_case('wrong_decision')
+    def stop(event):
+        if event.get('event')=='completed' and event.get('step')=='corrector':raise KeyboardInterrupt
+    with f.fixture_provider(case,scenario='wrong_decision') as p:
+        with pytest.raises(KeyboardInterrupt):
+            c.execute_correction(case,config=p.config,output=tmp_path,sample_id='interrupted',arm='critic',on_event=stop)
+        if lost_response:
+            path=tmp_path/'interrupted-context-trace.json';trace=decode(path.read_bytes())
+            call=next(k for k,v in trace['intents'].items() if v['context']['step_id']=='corrector')
+            trace['observations'].pop(call);path.write_bytes(encode(trace))
+        p.deny=True
+        e=c.recover_correction(case,config=p.config,output=tmp_path,sample_id='interrupted',arm='critic')
+        score=c.score_correction(case,e)
+        assert score['correctionReached'] and score['correctionCalled']==(not lost_response)
+        assert score['correctionEffect']==('unresolved' if lost_response else 'interrupted')
+        assert score['finalIssueFields'] is None and score['resolvedIssueFields'] is None and score['newIssueFields'] is None
+        assert not score['finalArtifactCorrect'] and not score['taskAccepted'] and not score['accountingComplete']
+        cost=score['roleCosts']['corrector']
+        assert cost['unresolvedIntents']==int(lost_response)
+        assert cost['observedTokens']==(None if lost_response else 150) and p.requests==4

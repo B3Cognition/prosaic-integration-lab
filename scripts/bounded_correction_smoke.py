@@ -13,11 +13,11 @@ def main():
     args=parser.parse_args()
     from lab_runner.handoffs import correction as c,correction_fixture as f
     from lab_runner.bounded_correction import compare_corrections
-    from lab_runner.quality.contracts import digest
+    from lab_runner.quality.contracts import digest,decode
     from lab_runner.quality.allowance import private_directory,private_write
     from lab_runner.role_qualification import LIMITS
     assert not Path(c.__file__).resolve().is_relative_to(args.source_root.resolve())
-    root=private_directory(args.evidence_dir);samples=[];pairs=[];recoveries=[]
+    root=private_directory(args.evidence_dir);samples=[];pairs=[];recoveries=[];faults=[]
     denied=[False]
     def guard(event,arguments):
         if denied[0] and event in ('socket.connect','socket.connect_ex','socket.getaddrinfo'):
@@ -54,28 +54,49 @@ def main():
                         recoveries.append(dict(sample=sample,receiptDigests=restored['receiptDigests'],networkAttempts=0))
                 finally:denied[0]=False
                 assert p.requests==requests and not p.errors
-        # An interrupted observed request remains visible without a receipt or redispatch.
-        case=f.example_case('wrong_decision');sample=provider+'-interrupted';out=private_directory(root/sample)
-        def stop(event):
-            if event.get('event')=='completed' and event.get('step')=='critic':raise KeyboardInterrupt
-        with f.fixture_provider(case,provider=provider,scenario='wrong_decision') as p:
-            try:c.execute_correction(case,config=p.config,output=out,sample_id=sample,arm='critic',on_event=stop)
-            except KeyboardInterrupt:pass
-            else:raise AssertionError('interruption missing')
-            assert p.requests==3;p.deny=True;denied[0]=True
-            try:
-                evidence=c.recover_correction(case,config=p.config,output=out,sample_id=sample,arm='critic')
-                score=c.score_correction(case,evidence)
-            finally:denied[0]=False
-            assert score['roleCosts']['critic']['unreceiptedObservations']==1
-            assert score['roleCosts']['critic']['observedTokens']==150 and not score['accountingComplete']
-            assert score['counts']['reportedTokens'] is None and not score['correctionCalled'] and p.requests==3
-            assert not p.errors
-            private_write(out/'recovered-evidence.json',evidence);private_write(out/'score.json',score)
-            recoveries.append(dict(sample=sample,networkAttempts=0,score=score))
+        # Observed and unresolved interrupted roles cannot disappear from measurement.
+        for role,lost_response in [('critic',False),('corrector',False),('corrector',True)]:
+            case=f.example_case('wrong_decision');sample=provider+'-interrupted-'+role+('-lost' if lost_response else '')
+            out=private_directory(root/sample)
+            def stop(event):
+                if event.get('event')=='completed' and event.get('step')==role:raise KeyboardInterrupt
+            with f.fixture_provider(case,provider=provider,scenario='wrong_decision') as p:
+                try:c.execute_correction(case,config=p.config,output=out,sample_id=sample,arm='critic',on_event=stop)
+                except KeyboardInterrupt:pass
+                else:raise AssertionError('interruption missing')
+                requests=3 if role=='critic' else 4;assert p.requests==requests
+                if lost_response:
+                    path=out/(sample+'-context-trace.json');trace=decode(path.read_bytes())
+                    call=next(k for k,v in trace['intents'].items() if v['context']['step_id']==role)
+                    trace['observations'].pop(call);private_write(path,trace)
+                p.deny=True;denied[0]=True
+                try:
+                    evidence=c.recover_correction(case,config=p.config,output=out,sample_id=sample,arm='critic')
+                    score=c.score_correction(case,evidence)
+                finally:denied[0]=False
+                cost=score['roleCosts'][role]
+                assert cost['unreceiptedObservations']==int(not lost_response)
+                assert cost['observedTokens']==(None if lost_response else 150) and not score['accountingComplete']
+                assert score['counts']['reportedTokens'] is None and p.requests==requests
+                if role=='corrector':
+                    assert score['correctionReached'] and score['correctionCalled']==(not lost_response)
+                    assert score['correctionEffect']==('unresolved' if lost_response else 'interrupted')
+                    assert score['resolvedIssueFields'] is score['newIssueFields'] is None
+                else:assert not score['correctionCalled']
+                assert not p.errors
+                private_write(out/'recovered-evidence.json',evidence);private_write(out/'score.json',score)
+                recoveries.append(dict(sample=sample,networkAttempts=0,score=score))
+        sample=provider+'-invalid-correction';out=private_directory(root/sample);case=f.example_case('invalid_correction')
+        with f.fixture_provider(case,provider=provider,scenario='invalid_correction') as p:
+            evidence=c.execute_correction(case,config=p.config,output=out,sample_id=sample)
+            score=c.score_correction(case,evidence)
+            assert not score['finalArtifactCorrect'] and not score['taskAccepted'] and not p.errors
+            assert score['resolvedIssueFields'] is score['newIssueFields'] is None
+            private_write(out/'evidence.json',evidence);private_write(out/'score.json',score)
+            faults.append(dict(sample=sample,score=score))
     private_write(args.output,dict(origin='synthetic',liveRequests=0,limits=LIMITS,samples=samples,pairs=pairs,
-        recoveries=recoveries,causalModelBenefitEstablished=False,proofDigest=digest(samples)))
-    print('Installed correction blueprint:48 scripted arms,24 matched pairs,50 network-denied recoveries; zero live requests.')
+        recoveries=recoveries,faults=faults,causalModelBenefitEstablished=False,proofDigest=digest(samples)))
+    print('Installed correction blueprint:48 scripted arms,24 matched pairs,54 network-denied recoveries,2 malformed-output checks; zero live requests.')
 
 
 if __name__=='__main__':main()

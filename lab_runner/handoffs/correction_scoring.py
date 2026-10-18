@@ -100,7 +100,9 @@ def score(case,evidence):
         and type(elapsed) in (int,float) and math.isfinite(elapsed) and 0<=elapsed<=600)
     clean=expected_worker(request,rows)
     initial_ok=bool(draft is not None and not worker_issues(clean,draft))
-    final=_parsed(by_role.get('corrector'),'corrector') if 'corrector' in by_role else draft
+    correction_called=bool(role_costs['corrector']['providerRequests'])
+    correction_reached=bool('corrector' in by_role or correction_called or role_costs['corrector']['unresolvedIntents'])
+    final=_parsed(by_role.get('corrector'),'corrector') if correction_reached else draft
     final_ok=bool(final is not None and not worker_issues(clean,final))
     accepted=evidence['checkpoint']['status']=='completed'
     safe_stopped=not accepted or final_ok and clean['status']=='ready' and within
@@ -113,18 +115,22 @@ def score(case,evidence):
             policyRevision=digest(dict(protocol=PROTOCOL,counter=evidence['envelope']['counterDescriptor'])),limits=dict(LIMITS))
     initial_issues=worker_issues(clean,draft) if draft is not None else None
     final_issues=worker_issues(clean,final) if final is not None else None
-    added=sorted(set(final_issues or [])-set(initial_issues or []))
-    resolved=sorted(set(initial_issues or [])-set(final_issues or []))
-    correction_called=bool(role_costs['corrector']['providerRequests'])
+    assessable=initial_issues is not None and final_issues is not None
+    added=sorted(set(final_issues)-set(initial_issues)) if assessable else None
+    resolved=sorted(set(initial_issues)-set(final_issues)) if assessable else None
+    effect=('not_run' if not correction_reached else
+        ('interrupted' if correction_called else 'unresolved') if 'corrector' not in by_role else
+        'not_dispatched' if not correction_called else 'unusable' if final is None else
+        'regressed' if added else 'repaired' if not initial_ok and final_ok else
+        'unchanged' if draft==final else 'changed_unrepaired')
     reported_counts=dict(counts)
     if not accounting_complete:reported_counts['reportedTokens']=None
     return dict(arm=arm,match=match,matchedEligible=match is not None,
         initialArtifactCorrect=initial_ok,finalArtifactCorrect=final_ok,taskAccepted=accepted,
         safe=bool(within and safe_stopped),safeStopped=bool(safe_stopped),withinLimits=within,
-        correctionReached='corrector' in by_role,criticReached=bool(by_role.get('critic') or role_costs.get('critic',{}).get('providerRequests') or role_costs.get('critic',{}).get('unresolvedIntents')),
+        correctionReached=correction_reached,criticReached=bool(by_role.get('critic') or role_costs.get('critic',{}).get('providerRequests') or role_costs.get('critic',{}).get('unresolvedIntents')),
         correctionCalled=correction_called,criticCalled=bool(role_costs.get('critic',{}).get('providerRequests')),roleCosts=role_costs,
-        correctionEffect='not_run' if 'corrector' not in by_role else 'not_dispatched' if not correction_called else 'unusable' if final is None else 'regressed' if added
-            else 'repaired' if not initial_ok and final_ok else 'unchanged' if draft==final else 'changed_unrepaired',
+        correctionEffect=effect,
         initialIssueFields=initial_issues,finalIssueFields=final_issues,newIssueFields=added,resolvedIssueFields=resolved,
         counts=reported_counts,receiptCounts=counts,accountingComplete=accounting_complete,
         outcome='accepted' if accepted else 'escalated' if evidence['checkpoint']['status']=='waiting' else 'blocked')
