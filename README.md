@@ -400,6 +400,8 @@ limits. Consumers adapt the evidence policy and qualify their own roles; scripte
 offline proof does not establish model or critic benefit.
 The [fresh live comparison](docs/verification/correction-live-2026-10-18.md)
 stopped on unknown usage with no eligible matched pairs. A separate offline
-unsupported-usage guard defect currently blocks promotion of this example.
+unsupported-usage guard defect is fixed in the experimental candidate and
+[qualified offline](docs/verification/usage-guard-2026-10-18.md). This does not
+establish critic benefit or production readiness.
 
 The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

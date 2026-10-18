@@ -1,5 +1,22 @@
 # Codex handoff
 
+## Usage guard fixed offline; experimental review PR — 2026-10-18
+
+[Qualification](verification/usage-guard-2026-10-18.md): complete numeric usage
+now enforces input/output bounds independently of pricing support. Missing or
+untrusted component counts latch a stop; role costs retain known unsupported
+counts. Policy v2 keeps the frozen v1 study separate. Both-wire installed fault
+and baseline matrices pass, with network-denied recovery. Source-suite, artifact
+and review results are in the qualification data. No live calls or SDK changes;
+limits and all nine unknown reservations remain charged unchanged.
+
+Push this reviewed branch as an experimental PR, not a release. Memory and
+correction remain opt-in; no critic/model benefit is established. Public SDK
+train and clean-consumer/platform/database acceptance remain release gates.
+Next broad milestone: durable failure isolation and explicit recovery; any new
+live evaluation needs fresh frozen operators and an audited accounting baseline.
+The historical checkpoints below describe their state at the time.
+
 ## Frozen correction comparison safely stopped; promotion blocked — 2026-10-18
 
 [Audited partial findings](verification/correction-live-2026-10-18.md):6of16

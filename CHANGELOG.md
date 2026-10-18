@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased experimental consumer blueprints
+
+- Add provider-neutral typed evidence, bounded context/continuation, scoped
+  memory, tool-error diagnostics, role qualification and bounded correction
+  examples with a no-critic baseline. Consumers own evidence policy and model
+  qualification; memory and correction stay opt-in and experimental.
+- Fix the correction usage guard for complete numeric counts whose pricing
+  status is unsupported. Unavailable counts stop work; role costs preserve
+  known counts independently of pricing support. Policy v2 keeps historical
+  evidence separate. Offline qualification does not establish model benefit.
+
 ## Unreleased experimental continuation candidate
 
 - Adopt verified public Runtime 0.9.7 and Harness 0.9.4 in the experimental

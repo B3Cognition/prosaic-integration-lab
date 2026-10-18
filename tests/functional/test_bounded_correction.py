@@ -13,6 +13,42 @@ def modules():
 
 
 @pytest.mark.parametrize('provider',['openai','anthropic'])
+@pytest.mark.parametrize('stage,requests',[('lookup',1),('worker',2),('critic',3),('corrector',4)])
+@pytest.mark.parametrize('fault',['input','output','missing','partial','invalid'])
+def test_usage_guard_stops_at_fault_before_next_role_or_acceptance(tmp_path,provider,stage,requests,fault):
+    c,f=modules();case=f.example_case()
+    with f.fixture_provider(case,provider=provider,usage_fault=fault,usage_stage=stage) as p:
+        evidence=c.execute_correction(case,config=p.config,output=tmp_path,sample_id='guard',arm='critic')
+        assert not p.errors and p.requests==requests
+        assert evidence['admissionViolation'] and evidence['componentBreaches']
+        score=c.score_correction(case,evidence)
+        assert not score['taskAccepted'] and not score['withinLimits']
+        assert score['safeStopped']
+        if fault in ('input','output'):
+            kind='inputBoundExceeded' if fault=='input' else 'outputBoundExceeded'
+            assert [b['kind'] for b in evidence['componentBreaches']]==[kind]
+            assert all(o['usage']['status']=='unsupported' for o in list(evidence['callObservations'].values())[-1:])
+        else:
+            assert score['roleCosts']['worker' if stage=='lookup' else stage]['observedTokens'] is None
+            assert score['counts']['reportedTokens'] is None
+        p.deny=True;before=p.requests
+        restored=c.recover_correction(case,config=p.config,output=tmp_path,sample_id='guard',arm='critic')
+        assert c.score_correction(case,restored)==score and p.requests==before
+
+
+@pytest.mark.parametrize('provider',['openai','anthropic'])
+def test_unsupported_pricing_preserves_complete_role_counts_and_normal_acceptance(tmp_path,provider):
+    c,f=modules();case=f.example_case()
+    with f.fixture_provider(case,provider=provider,usage_fault='complete',usage_stage='all') as p:
+        evidence=c.execute_correction(case,config=p.config,output=tmp_path,sample_id='known',arm='critic')
+        score=c.score_correction(case,evidence)
+        assert not p.errors and p.requests==4 and score['taskAccepted'] and score['safe']
+        assert [score['roleCosts'][k]['observedTokens'] for k in ('worker','critic','corrector')]==[300,150,150]
+        assert score['counts']['reportedTokens']==600
+        assert all(o['usage']['status']=='unsupported' for o in evidence['callObservations'].values())
+
+
+@pytest.mark.parametrize('provider',['openai','anthropic'])
 @pytest.mark.parametrize('scenario',['correct','wrong_decision','missing','unread','critic_partial','critic_false','ignore_feedback','regress'])
 def test_matched_arms_share_grounding_and_never_accept_an_incorrect_correction(tmp_path,provider,scenario):
     c,f=modules();case=f.example_case(scenario);scores=[];evidence=[]

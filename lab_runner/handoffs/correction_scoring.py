@@ -2,6 +2,7 @@
 import math
 from jsonschema import Draft202012Validator
 from lab_runner.quality.contracts import decode,digest
+from lab_runner.quality.usage_counts import complete_counts
 from lab_runner.role_qualification import LIMITS
 from .contracts import request_for,assignment
 from .direct_contracts import output_schemas,instructions,expected_worker,worker_issues
@@ -68,17 +69,17 @@ def score(case,evidence):
     if len(calls)!=len(set(calls)) or len(calls)!=counts['providerRequests']:raise ValueError('duplicate/missing provider calls')
     intents=evidence['callIntents'];observations=evidence['callObservations']
     if not set(calls)<=set(intents) or not set(observations)<=set(intents):raise ValueError('foreign observation')
-    component=[];observed=0;all_reported=True
+    component=[];observed=0;all_counted=True
     for call,observation in observations.items():
-        usage=observation['usage'];bound=evidence['callBounds'][call]
-        if usage['status']=='unknown':all_reported=False;continue
-        inp,out,total=(usage[k] for k in ('input_tokens','output_tokens','total_tokens'))
-        if any(type(n) is not int or n<0 for n in (inp,out,total)) or inp+out!=total:raise ValueError('invalid observed usage')
+        values=complete_counts(observation.get('usage'));bound=evidence['callBounds'][call]
+        if values is None:
+            all_counted=False;component.append(dict(callId=call,kind='usageUnavailable'));continue
+        inp,out,total=values
         observed+=total
         if inp>bound['inputBound']:component.append(dict(callId=call,kind='inputBoundExceeded'))
         if out>512:component.append(dict(callId=call,kind='outputBoundExceeded'))
-    accounting_complete=bool(known and evidence['checkpoint']['pending'] is None and set(calls)==set(intents)==set(observations))
-    if all_reported and accounting_complete and observed!=counts['reportedTokens']:raise ValueError('observed token mismatch')
+    accounting_complete=bool(known and all_counted and evidence['checkpoint']['pending'] is None and set(calls)==set(intents)==set(observations))
+    if accounting_complete and observed!=counts['reportedTokens']:raise ValueError('observed token mismatch')
     if {(v['callId'],v['kind']) for v in component}!={(v['callId'],v['kind']) for v in evidence['componentBreaches']}:
         raise ValueError('changed component accounting')
     role_costs={}
@@ -89,9 +90,10 @@ def score(case,evidence):
         role_receipted=set(receipt['result']['metadata'].get('accounting_v1',{}).get('provider_call_ids',[])) if receipt else set()
         if not role_receipted<=role_intents:raise ValueError('foreign role accounting')
         unresolved=role_intents-role_observed
-        known_role=not unresolved and all(observations[k]['usage']['status']=='reported' for k in role_observed)
+        role_counts=[complete_counts(observations[k].get('usage')) for k in role_observed]
+        known_role=not unresolved and all(value is not None for value in role_counts)
         role_costs[role]=dict(providerRequests=len(role_observed|role_receipted),observedRequests=len(role_observed),
-            observedTokens=sum(observations[k]['usage']['total_tokens'] for k in role_observed) if known_role else None,
+            observedTokens=sum(value[2] for value in role_counts) if known_role else None,
             unresolvedIntents=len(unresolved),unreceiptedObservations=len(role_observed-role_receipted))
     if any(v['context']['step_id'] not in allowed for v in intents.values()):raise ValueError('foreign role intent')
     elapsed=evidence['elapsedSeconds']

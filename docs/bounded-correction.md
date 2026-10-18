@@ -1,10 +1,11 @@
 # Provider-neutral bounded correction
 
-**Experimental; promotion blocked.** The fresh live evaluation stopped on
-unknown usage and found a separate offline guard defect for unsupported usage
-formats with numeric totals. Until that defect is fixed and qualified, do not
-rely on this example's component-bound latch for production admission.
-[Partial results and release gates](verification/correction-live-2026-10-18.md).
+**Experimental.** The fresh live evaluation stopped on unknown usage and found
+a separate offline guard defect for unsupported usage formats with numeric totals.
+The v2 candidate fixes the guard; see the
+[offline qualification](verification/usage-guard-2026-10-18.md).
+[Partial live results and release gates](verification/correction-live-2026-10-18.md)
+remain applicable; model benefit and production readiness are unproven.
 
 This opt-in Integration Lab blueprint shows how a consumer can correct one
 well-formed draft using verified field diagnostics, then measure the extra value
@@ -48,6 +49,16 @@ outer public Runtime budget covers the entire arm. Critic and corrector each
 also have a nested one-request, zero-tool budget. These caps debit the enclosing
 budget; they never replenish it. There is at most one correction and no retry
 loop. Unknown usage, failed admission or a component token overrun stops work.
+
+The v2 policy interprets count completeness separately from pricing support.
+Normalized `reported` and `unsupported` observations both enforce input/output
+bounds when all three counts are consistent nonnegative signed 64-bit integers.
+Their raw status remains unchanged: known counts do not imply known pricing.
+Missing, partial, contradictory or untrusted counts latch `usageUnavailable`,
+stop continuation and acceptance, and remain unknown in role summaries.
+Complete unsupported counts remain visible in role costs. The scorer reconstructs
+the same checks. Policy v2 cannot be paired with v1; recover historical v1 runs
+using their original pinned environment rather than migrating saved evidence.
 
 Outside the explicitly named synthetic loopback fixture, execution requires a
 matching qualified token-counter registration. That registration is not live
@@ -101,6 +112,8 @@ resolution:
 ```text
 python -I scripts/bounded_correction_smoke.py --source-root REPO \
   --evidence-dir PRIVATE_STUDY/lanes --output PRIVATE_STUDY/result.json
+python -I scripts/usage_guard_smoke.py --source-root REPO \
+  --evidence-dir PRIVATE_STUDY/usage --output PRIVATE_STUDY/usage.json
 ```
 
 Use a new private study directory. The fixture independently specifies both

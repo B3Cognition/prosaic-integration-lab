@@ -8,13 +8,14 @@ from jsonschema import Draft202012Validator
 from lab_runner.quality.contracts import decode,encode,digest,identifier
 from lab_runner.quality.allowance import private_directory,private_write
 from lab_runner.quality.runner import fingerprint
+from lab_runner.quality.usage_counts import complete_counts
 from lab_runner.role_qualification import FieldCheck,assess_output,LIMITS
 from lab_runner.bounded_correction import correction_feedback
 from .contracts import request_for,assignment
 from .direct_contracts import output_schemas,instructions,expected_worker,worker_issues
 from .execution import _collect
 
-PROTOCOL='bounded-correction-v1'
+PROTOCOL='bounded-correction-v2'
 ISSUE_PATHS=dict(binding='/assignmentId',status='/status',decision='/answer/decision',
                  facts='/answer/facts',citations='/answer/citations')
 _WORKER_DETAIL='''Use exactly one lookup_records call before returning the worker result.
@@ -176,10 +177,11 @@ def execute_correction(case,*,config,output,sample_id,arm='no-critic',token_coun
             if not proposals:raise ValueError('missing counted request')
             bounds[intent['provider_call_id']]=dict(proposals[-1]);super().prepare(intent);save_admission()
         def observe(self,call_id,observation):
-            super().observe(call_id,observation);usage=observation['usage']
-            if usage['status']=='reported':
-                for condition,kind in [(usage['input_tokens']>bounds[call_id]['inputBound'],'inputBoundExceeded'),
-                                       (usage['output_tokens']>512,'outputBoundExceeded')]:
+            super().observe(call_id,observation);counts=complete_counts(observation.get('usage'))
+            if counts is None:breaches.append(dict(callId=call_id,kind='usageUnavailable'))
+            else:
+                for condition,kind in [(counts[0]>bounds[call_id]['inputBound'],'inputBoundExceeded'),
+                                       (counts[1]>512,'outputBoundExceeded')]:
                     if condition:breaches.append(dict(callId=call_id,kind=kind))
             save_admission()
     trace=GuardedTrace(tracepath,provider_id=ep.provider);save_admission()
@@ -202,12 +204,17 @@ def execute_correction(case,*,config,output,sample_id,arm='no-critic',token_coun
         with budget.activate():h.run(request)
         result=_collect(h,journal);trace.finish(result['receipts'])
         result.update(sampleId=sample_id,arm=arm,envelope=envelope,elapsedSeconds=time.monotonic()-began,
-            admissionViolation='token_reservation_exceeded' if breaches or budget.reservation_exceeded else None,
+            admissionViolation=_violation(breaches,budget.reservation_exceeded),
             componentBreaches=deepcopy(breaches),callBounds=deepcopy(bounds),
             callObservations=deepcopy(trace.observations),callIntents=deepcopy(trace.intents),
             contextTrace=dict(fileName=tracepath.name,sha256=digest(decode(tracepath.read_bytes()))))
         private_write(out/(sample_id+'-result.json'),result);return result
     finally:store.close()
+
+
+def _violation(breaches,reservation_exceeded=False):
+    if any(b['kind']=='usageUnavailable' for b in breaches):return 'usage_unavailable'
+    return 'token_reservation_exceeded' if breaches or reservation_exceeded else None
 
 
 def recover_correction(case,*,config,output,sample_id,arm='no-critic'):
@@ -230,7 +237,7 @@ def recover_correction(case,*,config,output,sample_id,arm='no-critic'):
         tracepath=out/(sample_id+'-context-trace.json');trace=decode(tracepath.read_bytes())
         admission=decode((out/(sample_id+'-admission.json')).read_bytes())
         result.update(sampleId=sample_id,arm=arm,envelope=envelope,elapsedSeconds=None,
-            admissionViolation='token_reservation_exceeded' if admission['breaches'] else None,
+            admissionViolation=_violation(admission['breaches']),
             componentBreaches=admission['breaches'],callBounds=admission['bindings'],
             callObservations=trace['observations'],callIntents=trace['intents'],
             contextTrace=dict(fileName=tracepath.name,sha256=digest(trace)))

@@ -1,5 +1,14 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Provider-neutral usage guard — 2026-10-18
+
+[Qualification](usage-guard-2026-10-18.md): policy v2 enforces complete numeric
+counts for reported/unsupported usage and stops on unavailable counts. Role
+costs use the same completeness rule. Both-wire installed guard and baseline
+checks pass, with zero live calls; limits, 39 ledgers and nine unknown
+reservations remain unchanged. Memory/correction remain experimental. The
+current review PR is distinct from stable SDK/Lab release acceptance.
+
 ## Provider-neutral consumer role blueprint — 2026-10-18
 
 [Guide](../role-qualification.md), [qualification](role-qualification-2026-10-18.md).

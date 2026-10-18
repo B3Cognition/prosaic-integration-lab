@@ -33,7 +33,7 @@ def _issues(clean,draft):
 
 
 @contextmanager
-def fixture_provider(case,*,provider='openai',scenario='wrong_decision'):
+def fixture_provider(case,*,provider='openai',scenario='wrong_decision',usage_fault=None,usage_stage='lookup'):
     from prosaic_runtime import RuntimeConfig,EndpointConfig
     class State:
         def __init__(self):self.requests=0;self.errors=[];self.feedbacks=[];self.deny=False;self.roles=[]
@@ -99,6 +99,18 @@ def fixture_provider(case,*,provider='openai',scenario='wrong_decision'):
                 if role=='worker' and not done and scenario in ('overrun','input_breach','output_breach'):
                     inp,out=(100,9000) if scenario=='overrun' else (101,50) if scenario=='input_breach' else (1,513)
                     response['usage']=dict(input_tokens=inp,output_tokens=out) if provider=='anthropic' else dict(prompt_tokens=inp,completion_tokens=out,total_tokens=inp+out)
+                stage='lookup' if role=='worker' and not done else 'worker' if role=='worker' else role
+                if usage_fault is not None and (usage_stage=='all' or usage_stage==stage):
+                    # Independent native-wire cases; the SDK normalizes these, not the host.
+                    inp,out=(101,50) if usage_fault=='input' else (100,513) if usage_fault=='output' else (100,50)
+                    usage=(dict(input_tokens=inp,output_tokens=out) if provider=='anthropic' else
+                        dict(prompt_tokens=inp,completion_tokens=out,total_tokens=inp+out))
+                    usage['unrecognized_extension']=1
+                    if usage_fault=='missing':response.pop('usage',None)
+                    else:
+                        if usage_fault=='partial':usage.pop('input_tokens' if provider=='anthropic' else 'prompt_tokens')
+                        if usage_fault=='invalid':usage['output_tokens' if provider=='anthropic' else 'completion_tokens']=True
+                        response['usage']=usage
                 raw=json.dumps(response).encode();self.send_response(200);self.send_header('Content-Type','application/json')
                 self.send_header('Content-Length',str(len(raw)));self.end_headers();self.wfile.write(raw)
             except Exception as error:
