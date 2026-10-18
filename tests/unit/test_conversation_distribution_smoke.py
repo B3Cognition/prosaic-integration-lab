@@ -5,6 +5,7 @@ from pathlib import Path
 import tarfile
 import json
 import hashlib
+import tomllib
 from types import SimpleNamespace
 
 import pytest
@@ -18,9 +19,22 @@ def implementation():
     return module
 
 
+def test_wheel_identity_requires_current_source_version_instead_of_historical_release(tmp_path):
+    import zipfile
+    module=implementation();current=tomllib.loads((module.ROOT/'pyproject.toml').read_text())['project']['version']
+    def wheel(version):
+        path=tmp_path/(version+'.whl')
+        with zipfile.ZipFile(path,'w') as z:
+            z.writestr('prosaic_integration_lab.dist-info/METADATA',
+                'Name: prosaic-integration-lab\nVersion: '+version+'\n')
+        return path
+    assert module.wheel_identity(wheel(current))['version']==current
+    with pytest.raises(ValueError):module.wheel_identity(wheel('0.0.0'))
+
+
 @pytest.mark.parametrize('native_tools', [False, True])
 def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, native_tools):
-    from lab_runner.gates import CONTEXT_TRAIN, NATIVE_TOOLS_TRAIN
+    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN
     module = implementation()
     calls = []
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
@@ -30,7 +44,7 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
         INDEX='https://pypi.org/simple', AUDIT_LAUNCH='', PUBLIC_EXAMPLE=''))
     monkeypatch.setattr(module, 'run', lambda argv, **kwargs: calls.append(argv) or b'{}')
     manifest = tmp_path / 'manifest.json'
-    versions = NATIVE_TOOLS_TRAIN if native_tools else CONTEXT_TRAIN
+    versions = CONSUMER_BLUEPRINT_TRAIN if native_tools else CONTEXT_TRAIN
     manifest.write_text(json.dumps({'artifacts': [{'distribution': key, 'version': value}
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,

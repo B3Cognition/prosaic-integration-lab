@@ -86,6 +86,7 @@ def test_changed_validator_orchestration_changes_workflow_and_recovery_identity(
     from prosaic_harness import Harness,FileRunStore
     (tmp_path/'checks.py').write_text('assessment implementation')
     (tmp_path/'execution.py').write_text('validator orchestration one')
+    (tmp_path/'sdk_provenance.py').write_text('closed SDK qualification profiles')
     monkeypatch.setattr(checks,'files',lambda package:tmp_path)
     suite=load_suite();config=RuntimeConfig({'fixture':EndpointConfig('http://127.0.0.1:1/v1','fixture')},{},'fixture')
     before=identity(suite,CASE_LIMITS)

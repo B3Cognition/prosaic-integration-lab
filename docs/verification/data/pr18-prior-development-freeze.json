@@ -1,0 +1,39 @@
+{
+  "corpusDigest": "6e3d85412619290f80e56a728123a50f9f3d26c8886973ed43edcb953919b9a2",
+  "historicalSourcesDigest": "ce778ba8c71090815b92d20f21d1c9f322a3e52902355b5d342db0ed2727a778",
+  "implementation": {
+    "../retrieval_memory.py": "415a01380cea29854063fc744222a266b8de7b1bf2c3f506b9bcbbcfa55080ab",
+    "__init__.py": "794f5b685779a01185502a545e3a8e951e5784c1185a05f1d26d66e0fde8cbcf",
+    "context.py": "cf06d51282c44c6c8c3eb8df24cce097b52f1fe54ea7a77475b83dba4cfe157d",
+    "contracts.py": "6f358d87edcbadf80d9f9157887851c20cb5d27962881e73dab64ef02e00279e",
+    "corpus.py": "828d8ee53f1b2765032663a80162777c5d42a8f87641b4eddb67038f4edce26a",
+    "data/evidence-summary.schema.json": "16d74f90c7628f2365a63b3357a40d26c500cded12e09e385adc80449ec7adb3",
+    "evidence.py": "bb012c4ab8f476cf10b92f055d01ac62283e30c3d3ec8408e9f3cf3800643d60",
+    "execution.py": "0552d4bf272dfb0113d0e20f280826d0a7b2b9cc584b634b80a8bbe7056f4cf3",
+    "fixture.py": "2aa687962465938fa3425b3863f80f32ec3788acf1d65b0c4a13757306895b9c",
+    "freeze.py": "d1f823c47864348637cdbc455c42f5f55bf43d694f544531f0c249c300a90530",
+    "reporting.py": "7423db17db26b6af41c526ba783f095d513a6ecdd5dba7cf24cb7cd7852ae544",
+    "runner.py": "1ec58312c64fb8047fa94c23b0ed0f9d4063506a881e725cad42d56d300fe241",
+    "scoring.py": "7d74ddb64527414e8f0283941792b0ea785f8c85cf46805d1c106dc8361d098d",
+    "suite.py": "610c9a5db9855945b23419ac401c1442b75907172fba752acd86137f4bc642cf"
+  },
+  "proseDigest": "d91a90088f5de2b56e5d4cb8e4c19872dd61580cb767ab76c75745294b5cbf16",
+  "qualityDependencies": {
+    "../memory_policy/__init__.py": "d0d4125cae4368c137f1f48853e5123be1e8f6d46f90ed638f842f86e608fdab",
+    "../memory_policy/assembly.py": "cad1a65ad5948e20fd39cb66d0256b28fe13db792ecb7b423633935f195ab119",
+    "../memory_policy/budget.py": "615a1dfc19823cd0665111a4bb232e26d3c8802fe74ccf9d64d303182156d80a",
+    "../memory_policy/native.py": "c50096e227c3003b331b3ea5a4684a017ed2d3fd9e1d978e5cc28201caed714c",
+    "../memory_policy/scoped.py": "fb7bb5d18635519812e64b8d4711a6ce2cae175c2a4926576fb88773462ccad1",
+    "../memory_policy/trace.py": "edefcbbd12822800e7f6a0f340f75f048ffa8d7e525ed89a0489225ce7bdce61",
+    "allowance.py": "66cf9bf7428508e3fc4444a8ff2e405c29c5f4d7d4d68807ba5453b63f9c0fa0",
+    "checks.py": "d2b07910d0bc92ff3d79f526251851faff89c662c0638e7b08282884a9535c84",
+    "contracts.py": "8016c4967039cc15e59bbeed4085a4e741f1c836208459b79bb32073be22d94b",
+    "data/answer.schema.json": "ac845f7fdc6dc3821afade1f8abb48dea6d6fab388a153f0ded1c4c09c5e0ad7",
+    "execution.py": "fa1a1ed555cfa225790c22c71e03608cfcbd426963f00cb6213d7c49028fa1b6",
+    "runner.py": "7b00d3b9a7290fd2bc28146f304df0be5050594ebf515e51da294f486aa03b66",
+    "scoring.py": "08df607887f18c16866ededc7d4cd89db762174a0089ff760c7ef2d8faaee45d",
+    "suite.py": "31695d93e0c1dc9a1d605c3d99749d5bf87bbce2dae2cd6a5e5555163c1a1ccd",
+    "token_admission.py": "978f7f0da23f68916bc34d4cc2df098bfef454f06a9279282159ac256528202c"
+  },
+  "version": 1
+}

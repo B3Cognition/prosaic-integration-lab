@@ -11,7 +11,8 @@ def development_manifest(corpus,historical_sources):
     source['../retrieval_memory.py']=hashlib.sha256(files('lab_runner').joinpath('retrieval_memory.py').read_bytes()).hexdigest()
     common={name:hashlib.sha256(files('lab_runner.quality').joinpath(name).read_bytes()).hexdigest()
         for name in ('contracts.py','checks.py','execution.py','scoring.py','allowance.py','runner.py','suite.py',
-                     'token_admission.py','data/answer.schema.json')}
+                     'token_admission.py','sdk_provenance.py','data/sdk-provenance-public.json',
+                     'data/sdk-provenance.json','data/answer.schema.json')}
     common.update({'../memory_policy/'+p.name:hashlib.sha256(p.read_bytes()).hexdigest()
         for p in files('lab_runner.memory_policy').iterdir() if p.name.endswith('.py')})
     return dict(version=1,implementation=source,qualityDependencies=common,proseDigest=digest(PROSE),

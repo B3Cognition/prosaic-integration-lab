@@ -1,5 +1,12 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## PR18 public CI repair — 2026-10-18
+
+[Report](pr18-ci-2026-10-18.md): update published dependency pins and closed
+provenance selection, recognize the exact new SDK train and verify current
+distribution versions instead of 0.5.0. All required gates retained; experimental
+memory/correction and candidate diagnostics claims remain separate.
+
 ## Provider-neutral usage guard — 2026-10-18
 
 [Qualification](usage-guard-2026-10-18.md): policy v2 enforces complete numeric

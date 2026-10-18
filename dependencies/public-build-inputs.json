@@ -139,6 +139,8 @@
     "lab_runner/quality/data/review.schema.json",
     "lab_runner/quality/data/reviewer.md",
     "lab_runner/quality/data/sdk-provenance.json",
+    "lab_runner/quality/data/sdk-provenance-public.json",
+    "lab_runner/quality/sdk_provenance.py",
     "lab_runner/quality/execution.py",
     "lab_runner/quality/fixture.py",
     "lab_runner/quality/recovery.py",

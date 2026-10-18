@@ -25,7 +25,7 @@ note records the incomplete results. Released Lab 0.5.0 remains unchanged.
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.6/recorder 0.3.0 and Harness 0.9.0/store 0.4.0 with Core 0.4.1.
+0.9.7/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -45,8 +45,8 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.6' 'b3-prosaic-runtime-postgres==0.3.0' \
-  'b3-prosaic-harness==0.9.0' 'b3-prosaic-harness-postgres==0.4.0'
+  'b3-prosaic-runtime==0.9.7' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.9.4' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -120,9 +120,9 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.6 |
+| `b3-prosaic-runtime` | 0.9.7 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
-| `b3-prosaic-harness` | 0.9.0 |
+| `b3-prosaic-harness` | 0.9.4 |
 | `b3-prosaic-harness-postgres` | 0.4.0 |
 
 Preparation downloads the actual pinned public URLs and verifies the original

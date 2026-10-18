@@ -108,7 +108,7 @@ jobs:
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
         run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
-      - name: Qualify released Lab wheel and exact source distribution consumers
+      - name: Qualify current Lab distributions with public SDKs
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:
           RUNNER_CELL: ${{ matrix.runner }}
@@ -119,7 +119,7 @@ jobs:
           if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
             flags+=(--run-stack)
           fi
-          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-*-py3-none-any.whl --sdist dist/prosaic_integration_lab-*.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Qualify exact candidate Lab wheel and source distribution consumers
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         env:
@@ -131,7 +131,7 @@ jobs:
           if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
             flags+=(--run-stack)
           fi
-          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-*-py3-none-any.whl --sdist dist/prosaic_integration_lab-*.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Build immutable consumer
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
@@ -163,14 +163,14 @@ jobs:
       - name: Run optional context comparison with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.context_assembly }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --context-assembly --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
-      - name: Retain qualified Lab release bytes
+      - name: Retain qualified Lab build bytes
         if: ${{ success() && !inputs.candidate && matrix.runner == 'ubuntu-24.04-arm' && matrix.postgres == 16 }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: lab-release-bytes
           path: |
-            dist/prosaic_integration_lab-0.5.0-py3-none-any.whl
-            dist/prosaic_integration_lab-0.5.0.tar.gz
+            dist/prosaic_integration_lab-*-py3-none-any.whl
+            dist/prosaic_integration_lab-*.tar.gz
           if-no-files-found: error
           retention-days: 90
       - name: Upload safe gate summary only

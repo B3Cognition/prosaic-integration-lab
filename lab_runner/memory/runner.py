@@ -7,6 +7,7 @@ import time
 from lab_runner.quality.allowance import BenchmarkAllowance,private_directory,private_write
 from lab_runner.quality.contracts import decode,digest,integer,sha,identifier
 from lab_runner.quality.runner import fingerprint,provenance
+from lab_runner.quality.sdk_provenance import qualified_sdk
 from lab_runner.quality.suite import resource
 from .corpus import Corpus
 from .execution import execute_case,recover_case,freeze,LIMITS,PROSE
@@ -32,13 +33,11 @@ def schedule(bundle,profiles):
 def identity(bundle,*,evidence_format='raw'):
     validate_format(evidence_format)
     corpus=Corpus(bundle['corpus'],bundle['historicalSources'])
-    sdk=decode(resource('sdk-provenance.json'));installed=provenance()
-    qualified={a['distribution']:a['version'] for a in sdk['artifacts']}
-    if any(qualified.get(k)!=v for k,v in installed.items()):raise ValueError('unqualified memory SDK')
+    installed=provenance();sdk=qualified_sdk(installed)
     source={p.name:p.read_text(encoding='utf-8') for p in files(__package__).iterdir() if p.name.endswith('.py')}
     source['data/evidence-summary.schema.json']=files(__package__).joinpath('data/evidence-summary.schema.json').read_text(encoding='utf-8')
     quality={n:files('lab_runner.quality').joinpath(n).read_text(encoding='utf-8') for n in
-             ('checks.py','execution.py','scoring.py','contracts.py','allowance.py','runner.py','suite.py','token_admission.py')}
+             ('checks.py','execution.py','scoring.py','contracts.py','allowance.py','runner.py','suite.py','token_admission.py','sdk_provenance.py')}
     return dict(suiteId=bundle['suiteId'],suiteDigest=digest(bundle['cases']),
         corpusDigest=digest({c['caseId']:corpus.tenant_digest(c['tenantId']) for c in bundle['cases']}),
         implementationDigest=digest(dict(memory=source,quality=quality)),evidenceFormat=evidence_format,

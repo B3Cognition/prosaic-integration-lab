@@ -60,8 +60,8 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary_and_archives():
         'reports/conversation-distribution-pg${{ matrix.postgres }}.json'}
     archives=next(step for step in uploads if step['with']['name']=='lab-release-bytes')
     assert set(archives['with']['path'].splitlines()) == {
-        'dist/prosaic_integration_lab-0.5.0-py3-none-any.whl',
-        'dist/prosaic_integration_lab-0.5.0.tar.gz'}
+        'dist/prosaic_integration_lab-*-py3-none-any.whl',
+        'dist/prosaic_integration_lab-*.tar.gz'}
     assert all(term in archives['if'] for term in (
         'success()', '!inputs.candidate', "matrix.runner == 'ubuntu-24.04-arm'", 'matrix.postgres == 16'))
     candidates=[step for step in steps if '--candidate' in step.get('run','')]

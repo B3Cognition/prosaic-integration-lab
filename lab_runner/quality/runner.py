@@ -8,6 +8,7 @@ from .contracts import decode,digest,integer,sha
 from .allowance import BenchmarkAllowance,private_directory,private_write
 from .execution import CASE_LIMITS,workflow_definition,workflow_policy
 from .checks import checks_digest
+from .sdk_provenance import qualified_sdk
 from .suite import load_suite,resource,agent_prose,AGENT_NAMES
 from .reporting import public_result,summarize,estimate_cost,unknown_result
 
@@ -18,10 +19,8 @@ def provenance():
 
 
 def identity(suite,limits):
-    qualified=decode(resource('sdk-provenance.json'))
     installed=provenance()
-    expected={a['distribution']:a['version'] for a in qualified['artifacts']}
-    if any(expected.get(k)!=v for k,v in installed.items()):raise ValueError('unqualified benchmark SDK versions')
+    qualified=qualified_sdk(installed)
     return dict(suiteId=suite['suiteId'],scorerVersion='evidence-score-v1',suiteDigest=digest(suite),
         proseDigest=digest({k:agent_prose(k) for k in AGENT_NAMES}),
         toolDigest=digest({'version':'lookup-v1','maximumRecords':4}),policyDigest=digest(limits),

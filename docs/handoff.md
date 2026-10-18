@@ -1,5 +1,17 @@
 # Codex handoff
 
+## PR18 CI repair on the public SDK train — 2026-10-18
+
+[Qualification](verification/pr18-ci-2026-10-18.md): active manifest advances to
+already published Runtime0.9.7/Harness0.9.4. Benchmark identity admits only the
+exact public or preserved private candidate profile. Packaging qualification
+derives the current source version; all required platform/database lanes remain.
+Memory/correction stay experimental, with no live calls or allowance changes.
+Unpublished response diagnostics retain separate candidate-only qualification.
+Keep the PR draft until its exact head is green and reviewed. No SDK release is
+required merely to merge public-compatible consumer examples; a stable Lab
+release and diagnostics promotion have their own acceptance gates.
+
 ## Usage guard fixed offline; experimental review PR — 2026-10-18
 
 [Qualification](verification/usage-guard-2026-10-18.md): complete numeric usage
