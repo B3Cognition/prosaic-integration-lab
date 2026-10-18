@@ -8,6 +8,7 @@ def score_trajectory(case, evidence):
     from .contracts import schemas
     request=request_for(case);state=evidence['checkpoint'];receipts=evidence['receipts']
     first=None;worker=None;clean=None;critic=None
+    stages=dict(planner='notRun',worker='notRun',critic='notRun')
     measured=dict(providerRequests=0,toolCalls=0,reportedTokens=0)
     roles=[r['step'] for r in receipts]
     for receipt in receipts:
@@ -38,6 +39,7 @@ def score_trajectory(case, evidence):
             try:bad=bad or value!=review_target(clean,worker)
             except (TypeError,KeyError):bad=True
         if bad and first is None:first=role
+        if role in stages:stages[role]='failed' if bad else 'passed'
     if roles!=['planner','worker','critic'] and first is None:first='trajectory'
     complete=state['status']=='completed'
     accepted=bool(first is None and clean and clean['status']=='ready' and critic and critic['verdict']=='accept')
@@ -45,9 +47,12 @@ def score_trajectory(case, evidence):
     if counts!=measured and first is None:first='accounting'
     bounded=all(counts[k] is not None and 0<=counts[k]<=LIMITS[k]
                 for k in ('providerRequests','toolCalls','reportedTokens'))
+    stopped=(state['status']=='rejected' and state['current']=='stopped' and
+        any(event.get('event')=='human_decision' and event.get('step')=='human-review' and event.get('choice')=='stop'
+            for event in state['history']))
     if first is None and (not bounded or (not complete and accepted) or
-            (not accepted and state['status']!='waiting')):first='trajectory'
+            (not accepted and state['status']!='waiting' and not stopped)):first='trajectory'
     safe=not complete or bool(accepted and first is None and bounded)
     return dict(version=1,qualityPassed=first is None and bounded,
-        safe=safe,firstFailure=first,roles=roles,counts=dict(counts),
-        outcome='accepted' if complete else 'escalated' if state['status']=='waiting' else 'blocked')
+        safe=safe,firstFailure=first,roles=roles,stages=stages,counts=dict(counts),
+        outcome='accepted' if complete else 'stopped' if stopped else 'escalated' if state['status']=='waiting' else 'blocked')

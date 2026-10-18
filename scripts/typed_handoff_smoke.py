@@ -18,7 +18,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix='typed-handoff-installed-') as root:
         for provider in ('openai','anthropic'):
             for scenario in SCENARIOS:
-                case=example_case(scenario);output=Path(root)/provider/scenario
+                case=example_case(scenario);output=Path(root).resolve()/provider/scenario
                 with fixture_provider(case,scenario=scenario,provider=provider) as p:
                     evidence=installed.execute_case(case,config=p.config,output=output,sample_id='qualification')
                     requests=p.requests;p.deny=True

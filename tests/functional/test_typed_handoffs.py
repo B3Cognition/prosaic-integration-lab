@@ -153,3 +153,40 @@ def test_interrupted_critic_recovery_never_dispatches(tmp_path,saved):
         assert p.requests==4
     assert e['checkpoint']['status']==('completed' if saved else 'blocked')
     assert e['counts']['reportedTokens']==(600 if saved else None)
+
+
+@pytest.mark.parametrize('scenario,critic',[('wrong_worker','passed'),('missed_flaw','failed')])
+def test_later_critic_correctness_survives_earlier_worker_failure(tmp_path,scenario,critic):
+    from lab_runner.handoffs.fixture import example_case,fixture_provider
+    from lab_runner.handoffs.execution import execute_case
+    from lab_runner.handoffs.scoring import score_trajectory
+    case=example_case(scenario)
+    with fixture_provider(case,scenario=scenario) as p:
+        e=execute_case(case,config=p.config,output=tmp_path,sample_id='stages')
+    score=score_trajectory(case,e)
+    assert score['firstFailure']=='worker'
+    assert score['stages']==dict(planner='passed',worker='failed',critic=critic)
+
+
+def test_human_stop_preserves_correct_escalation_quality(tmp_path):
+    from prosaic_harness import Harness,FileRunStore
+    from lab_runner.handoffs.fixture import example_case,fixture_provider
+    from lab_runner.handoffs.execution import execute_case,recover_case,materials
+    from lab_runner.handoffs.scoring import score_trajectory
+    from lab_runner.quality.contracts import digest
+    case=example_case('missing')
+    with fixture_provider(case,scenario='missing') as p:
+        e=execute_case(case,config=p.config,output=tmp_path,sample_id='stop')
+        assert score_trajectory(case,e)['qualityPassed']
+        workflow,_,_=materials(case,p.config,tmp_path,'stop')
+        store=FileRunStore(tmp_path/'store',namespace='typed-handoffs');store.initialize()
+        try:
+            h=Harness(workflow,store=store,run_id=digest(dict(sampleId='stop'))[:32])
+            snapshot=h.status();p.deny=True
+            h.resume(choice='stop',expected_revision=snapshot.revision)
+        finally:store.close()
+        final=recover_case(case,config=p.config,output=tmp_path,sample_id='stop')
+        assert p.requests==4
+    score=score_trajectory(case,final)
+    assert score['firstFailure'] is None and score['qualityPassed'] and score['safe']
+    assert score['outcome']=='stopped'

@@ -25,8 +25,10 @@ worker lookup/final and critic already use four requests. Shared caps stay at
 
 `score_trajectory` separates task quality from safe stopping. A missed worker
 flaw still fails quality even when a host gate prevents approval. Reports include
-the earliest failing role, role order, receipt-derived request/tool/token counts
-and accepted/escalated/blocked outcome. Unknown usage is never zero. Reported
+the earliest failing role, separate planner/worker/critic verdicts, role order,
+receipt-derived request/tool/token counts and accepted/escalated/stopped/blocked
+outcome. A correct human stop preserves the preceding escalation's quality.
+Unknown usage is never zero. Reported
 overruns remain visible; they stop continuation and fail qualification instead
 of raising the cap. Counts for a missing receipt describe observed receipts only;
 the interrupted operation remains uncertain, not a zero-cost call.
