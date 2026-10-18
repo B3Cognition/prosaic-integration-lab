@@ -1,0 +1,72 @@
+{
+  "counterQualification": {
+    "byProfile": {
+      "local": {
+        "maximumQuotedTokens": 4991,
+        "minimumQuotedTokens": 1492,
+        "samples": 15
+      },
+      "local-strong": {
+        "maximumQuotedTokens": 5240,
+        "minimumQuotedTokens": 1530,
+        "samples": 15
+      }
+    },
+    "networkDeniedRecovery": true,
+    "samples": 30,
+    "unchangedGuardDigest": "a864988530c5e9805cd5244eb521525e8d649129ef9b6fe2edafa74e360b670c"
+  },
+  "cumulativeCeilings": {
+    "providerRequests": 1500,
+    "reportedTokens": 1976623,
+    "toolCalls": 617
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1476,
+    "reportedTokens": 1776439,
+    "toolCalls": 601
+  },
+  "existingWarnings": 1,
+  "focusedTests": 68,
+  "installed": {
+    "byMode": {
+      "critic": 28,
+      "handoff": 32,
+      "worker": 10
+    },
+    "contractChecks": 132,
+    "controls": 28,
+    "providers": [
+      "openai-compatible",
+      "anthropic"
+    ],
+    "qualityPassed": 36,
+    "receiptOnlyRecoveryAdditionalRequests": 0,
+    "safe": 70,
+    "scenarios": 70
+  },
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "liveRequests": 0,
+  "origin": "synthetic",
+  "payloadAudit": {
+    "historicalLedgerCount": 37,
+    "installedFiles": 129,
+    "liveRequests": 0,
+    "priorEvidenceFilesVerified": 2596,
+    "sdistSha256": "a967d14cf35abbb7d673cd8a04160cbb826db13fc15847fad12e9fa28bf9067c",
+    "sourceCommit": "628b66fe93cc750075f79f4642088c46484752bb",
+    "sourceFiles": 125,
+    "unknownReservationsRetained": 8,
+    "version": "0.5.1+direct.1",
+    "wheelSha256": "9f946a2b782f4fa367b632cc98df8ce6f71800d30306a18a02cd1c4ec062cc13"
+  },
+  "sdkManifestSha256": "0d204d48743b456f82571cb85f8027d0e8589bd1ab7e777307395e5510d4396f",
+  "sourceTests": 1456,
+  "version": 1
+}

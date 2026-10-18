@@ -54,8 +54,8 @@ private counter/payload/preservation operators under a fresh temporary root.
 must prove import isolation and all adversarial both-wire outcomes. Counter
 qualification reuses unchanged descriptors/assets on synthetic HTTP only.
 
-- [ ] Build private candidate, install separately, audit exact payloads and SDKs.
-- [ ] Run installed smoke plus controlled request-frame quotation for both existing
+- [x] Build private candidate, install separately, audit exact payloads and SDKs.
+- [x] Run installed smoke plus controlled request-frame quotation for both existing
   model counters in worker/critic/full modes; preserve result and source identities.
 - [ ] One fresh whole-change review. Fix Important/Critical findings with RED/GREEN
   regressions and full suite; defer minors explicitly.
