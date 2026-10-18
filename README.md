@@ -390,6 +390,6 @@ See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval
 
 The [typed handoff example](docs/typed-handoffs.md) adds offline planner/worker/critic contracts, independent evidence gates and full-trajectory scoring under the same limits. It remains experimental and makes no live reasoning claim.
 
-The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner, before any critic ran. Critic benefit remains unmeasured; explicit model-facing output contracts are the next generic gap.
+The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner, before any critic ran. The opt-in [direct worker/critic example](docs/direct-handoffs.md) adds explicit model-facing output contracts and host-prepared assignments for independent role qualification. Critic benefit remains unmeasured in real models.
 
 The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.
