@@ -19,6 +19,8 @@ claims and retained model-study evidence.
 The experimental [durable failure isolation blueprint](docs/failure-isolation.md)
 adds conservative host admission and explicit receipt-only recovery around public
 SDK operations. It preserves reservations and never automatically replays work.
+The experimental [tool approval blueprint](docs/tool-approval.md) binds exact
+actions to trusted host review and one-shot consent through public Runtime APIs.
 
 The next experimental milestone adds an opt-in
 [typed evidence consumer pattern](docs/verification/typed-evidence.md). It
