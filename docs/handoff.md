@@ -1,5 +1,20 @@
 # Codex handoff
 
+## PR20 merged; trajectory evaluation milestone — 2026-10-19
+
+PR20 merged at5bd896a after its exact head passed all four CI lanes:1729source
+tests and334real-stack checks per cell, public wheel/sdist adoption and demos.
+The next experimental [trajectory blueprint](trajectory-evaluation.md) composes
+public SDK observations and independent host assessment, with a second-domain
+parcel example. Fixed trajectory.2 passes1769source/40focused tests,12installed
+both-wire lanes/replays,139payload matches and clean wheel/rebuilt-sdist adoption.
+One fresh review found no defects;40focused tests/130malformed probes/12replays
+passed independently. Scope rulings are in the qualification. Keep
+codex/trajectory-evaluation local for later PR/platform CI;
+no live requests, allowance changes or SDK changes. Memory/correction remain
+experimental; preserve all nine unknown reservations. Earlier checkpoints below
+retain their original state.
+
 ## PR19 merged; tool approval qualified offline — 2026-10-18
 
 PR19 merged at216941a after rechecking its exact reviewed head and four green

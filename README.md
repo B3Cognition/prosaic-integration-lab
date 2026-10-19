@@ -1,5 +1,9 @@
 # Prosaic integration lab
 
+The experimental [trajectory evaluation blueprint](docs/trajectory-evaluation.md)
+joins safe public SDK observations to host-verified outcomes, with a second-domain
+parcel example and offline report inspection. It makes no live model efficacy claim.
+
 Reference service for consuming Prosaic's validated workflow factory, private
 host bindings, durable multiuser execution and owner-scoped usage accounting.
 The native demo discovers approved specialists, admits a proposed graph, runs
