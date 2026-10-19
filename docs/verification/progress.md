@@ -394,5 +394,6 @@ PR20 merged5bd896a with four green platform/database lanes. New experimental
 consumer collector and parcel-domain example use public SDK observers and
 independent host verification.1769source/40focused tests pass, plus12installed
 both-wire scenarios/replays,139payload matches and clean wheel/rebuilt-sdist
-adoption. Final review pending. No live allowance, SDK changes or model tuning.
+adoption. One fresh review found no defects; scope rulings are explicit in the
+qualification. Later PR/platform CI remains. No live allowance, SDK changes or model tuning.
 Memory/correction remain experimental. [Qualification](trajectory-evaluation-2026-10-19.md).

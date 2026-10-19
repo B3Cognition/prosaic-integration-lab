@@ -8,7 +8,9 @@ The next experimental [trajectory blueprint](trajectory-evaluation.md) composes
 public SDK observations and independent host assessment, with a second-domain
 parcel example. Fixed trajectory.2 passes1769source/40focused tests,12installed
 both-wire lanes/replays,139payload matches and clean wheel/rebuilt-sdist adoption.
-Independent review is pending on codex/trajectory-evaluation;
+One fresh review found no defects;40focused tests/130malformed probes/12replays
+passed independently. Scope rulings are in the qualification. Keep
+codex/trajectory-evaluation local for later PR/platform CI;
 no live requests, allowance changes or SDK changes. Memory/correction remain
 experimental; preserve all nine unknown reservations. Earlier checkpoints below
 retain their original state.
