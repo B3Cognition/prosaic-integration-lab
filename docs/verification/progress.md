@@ -387,3 +387,12 @@ Explicit scope rulings retain authentication/UI, model efficacy, domain effects,
 distributed/storage guarantees and fresh platform CI as separate responsibilities.
 Limits and historical reservations unchanged; no live calls/SDK change/release.
 [Detailed qualification](tool-approval-2026-10-18.md).
+
+# Trajectory evaluation (2026-10-19)
+
+PR20 merged5bd896a with four green platform/database lanes. New experimental
+consumer collector and parcel-domain example use public SDK observers and
+independent host verification.1769source/40focused tests pass, plus12installed
+both-wire scenarios/replays,139payload matches and clean wheel/rebuilt-sdist
+adoption. Final review pending. No live allowance, SDK changes or model tuning.
+Memory/correction remain experimental. [Qualification](trajectory-evaluation-2026-10-19.md).
