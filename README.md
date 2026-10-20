@@ -19,7 +19,8 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
-For Lab 0.5.0 packages and final verification, use the
+This branch prepares Lab **0.6.0**. The latest published Lab release is **0.5.0**;
+for its packages and final verification, use the
 [release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0).
 The experimental [agent-quality](docs/agent-quality.md) and
 [retrieval-memory](docs/retrieval-memory.md) examples have separate capability
