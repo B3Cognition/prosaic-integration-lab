@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+import json
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,16 @@ def test_partial_and_unknown_are_not_success_or_free():
     assert join(plan(),[report(),report('beta',None,status='failed')])['status']=='failed'
     result=join(plan(),[report(),report('beta',usage=dict(providerRequests=3,toolCalls=1,reportedTokens=300))])
     assert result['status']=='budget' and result['usage']['providerRequests']==5
+
+
+def test_verified_failure_remains_failure_when_peer_is_unfinished():
+    result=protocol()[2](plan(),[report(fact=None,status='failed')])
+    assert result['status']=='failed' and result['usage'] is None
+
+
+def test_safe_join_omits_assignment_identifiers():
+    result=protocol()[2](plan(),[report(),report('beta')])
+    assert not any(value in json.dumps(result) for value in ('alpha','beta','source-'))
 
 
 @pytest.mark.parametrize('change',[dict(workerId='foreign'),dict(assignmentDigest='f'*64),

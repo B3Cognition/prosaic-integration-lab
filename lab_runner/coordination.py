@@ -67,13 +67,13 @@ def join_reports(plan,reports):
     usage={k:sum(r['usage'][k] for r in rows) for k in MAXIMUM} if complete else None
     if any(r['usage'] is not None and any(r['usage'][k]>CHILD[k] for k in CHILD) for r in rows):status='budget'
     elif usage and any(usage[k]>MAXIMUM[k] for k in MAXIMUM):status='budget'
-    elif not complete:status='incomplete'
     elif any(r['status']=='failed' for r in rows):status='failed'
+    elif not complete:status='incomplete'
     elif any(r['fact'] is None for r in rows):status='missing'
     elif rows[0]['fact']!=rows[1]['fact']:status='conflict'
     else:status='ready' if rows[0]['fact'] else 'hold'
-    statuses={a['workerId']:next((r['status'] for r in rows if r['workerId']==a['workerId']),'unfinished')
-              for a in plan['assignments']}
+    statuses=[next((r['status'] for r in rows if r['workerId']==a['workerId']),'unfinished')
+              for a in plan['assignments']]
     return dict(version=1,status=status,usage=usage,workerStatuses=statuses)
 
 
