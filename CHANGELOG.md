@@ -1,6 +1,17 @@
 # Changelog
 
-## Unreleased experimental consumer blueprints
+## 0.6.0 — unreleased
+
+- Adopt the verified public Runtime 0.9.7 / Harness 0.9.4 train with Core 0.4.1
+  and unchanged PostgreSQL adapter pins. Historical manifests/evidence retain
+  their original versions.
+- Add durable failure isolation and explicit receipt recovery, one-shot trusted
+  host approval, and trajectory evaluation separating SDK observations from
+  independently verified host outcomes.
+
+- Add provider-neutral sandboxed CLI admission and actual OS canaries, bounded
+  same-group cleanup witnesses, private receipt inspection and required Linux
+  backend qualification. Explicitly refuse unsupported hard resource controls.
 
 - Add provider-neutral typed evidence, bounded context/continuation, scoped
   memory, tool-error diagnostics, role qualification and bounded correction
@@ -11,14 +22,11 @@
   known counts independently of pricing support. Policy v2 keeps historical
   evidence separate. Offline qualification does not establish model benefit.
 
-## Unreleased experimental continuation candidate
-
-- Adopt verified public Runtime 0.9.7 and Harness 0.9.4 in the experimental
-  benchmark manifest; keep the active release manifest and historic evidence.
 - Add opt-in version-2 continuation planning: quoted slots guide context
   selection while shared Runtime admission enforces actual remaining allowance.
 - Preserve fixed case/cumulative limits, version-1 defaults and no-inference
-  receipt recovery. Memory efficacy remains unproven; no Lab release or live run.
+  receipt recovery. Memory efficacy remains unproven; offline qualification
+  does not establish live model benefit.
 
 ## 0.5.0 — 2026-10-17
 

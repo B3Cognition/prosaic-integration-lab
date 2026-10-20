@@ -1,5 +1,26 @@
 # Current delivery status
 
+## Lab 0.6.0 version and PR preparation — 2026-10-20
+
+The maintainer authorized the version bump and push of the reviewed sandbox
+blueprint. Lab advances to0.6.0 for the additive consumer blueprints; public SDK
+pins stay unchanged. Memory/correction remain experimental, all limits and
+historical charges are preserved, and no live run or package publication is
+included. Exact-head Linux/platform CI remains a merge/release gate.
+The [version qualification](verification/sandbox-version-0.6.0-2026-10-20.md)
+passes1824source tests and clean public wheel/rebuilt-sdist consumption, with
+142matching package payloads and all five verified SDK payloads.
+
+## Trajectory merged; sandboxed CLI blueprint — 2026-10-20
+
+PR21 merged at5a966ae with four green CI cells. The next experimental
+[sandboxed CLI consumer blueprint](sandboxed-tools.md) reuses public Runtime
+confinement, explicit unsupported-control admission and independent OS witnesses.
+[Offline qualification](verification/sandboxed-tools-2026-10-20.md) distinguishes
+native macOS enforcement from the mandatory Linux CI gate. The branch is now
+authorized for a review PR; memory/correction remain experimental, no SDK release/live calls
+or changes to current limits/charges.
+
 ## Approval merged; next consumer milestone — 2026-10-19
 
 PR20 merged at5bd896a with four green exact-head CI lanes. Tool authorization and

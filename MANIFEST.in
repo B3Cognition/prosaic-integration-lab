@@ -1,5 +1,6 @@
 include .dockerignore .gitignore AGENTS.md CHANGELOG.md
 recursive-include .github/workflows *.yml
+recursive-include .github/ci *.apparmor
 recursive-include assets *.yml *.json *.md
 include configs/README.md
 include configs/qualification.synthetic.json

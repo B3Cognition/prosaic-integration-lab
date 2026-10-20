@@ -90,6 +90,19 @@ jobs:
           .venv/bin/python -m pip check
       - name: Select installed CLI bindings
         run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Linux CLI sandbox backend
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc
+          git clone https://github.com/containers/bubblewrap.git "$RUNNER_TEMP/bubblewrap"
+          git -C "$RUNNER_TEMP/bubblewrap" checkout --detach 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$RUNNER_TEMP/bubblewrap/_build" "$RUNNER_TEMP/bubblewrap" --prefix=/usr -Dman=disabled -Dtests=false
+          meson compile -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo meson install -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo install -m 0644 .github/ci/bwrap.apparmor /etc/apparmor.d/prosaic-lab-ci-bwrap
+          sudo apparmor_parser -r /etc/apparmor.d/prosaic-lab-ci-bwrap
+      - name: Require actual CLI confinement without fallback or skipped gates
+        run: .venv/bin/python scripts/sandboxed_tools_smoke.py --source-root . --output "$RUNNER_TEMP/sandbox-qualification"
       - name: Select exact conversation SDK capability
         id: conversation-sdk
         env:
