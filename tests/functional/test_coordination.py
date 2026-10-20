@@ -82,3 +82,17 @@ def test_saved_pair_refuses_damaged_or_aliased_evidence(tmp_path,saved_pair,targ
     else:path.rename(path.with_suffix('.original'));path.symlink_to(path.with_suffix('.original'))
     with pytest.raises((ValueError,OSError,KeyError)):
         inspect_pair(root,provider='openai',scenario='ready',mode='parallel')
+
+
+@pytest.mark.parametrize('change',[dict(qualified=False),dict(version=True),dict(providerRequests=999),
+    dict(providerRequests=3),dict(toolCalls=True),dict(reportedTokens=-1),dict(reportedTokens=599),
+    dict(wireRequests=5),dict(wireRequests=3),dict(usageComplete=False),dict(observedOverlap=False),
+    dict(workerCleanup=False),dict(parentDeadlinePreserved=False),dict(networkDeniedRecovery=False),
+    dict(liveRequests=10),dict(extra='unexpected')])
+def test_replay_refuses_corrupt_qualification_claims_with_unchanged_join(tmp_path,saved_pair,change):
+    from lab_runner.coordination_fixture import replay
+    lane=tmp_path/'openai-parallel-ready';shutil.copytree(saved_pair,lane)
+    path=lane/'proof.json';proof=json.loads(path.read_bytes());proof.update(change)
+    path.write_text(json.dumps(proof))
+    # The first lane itself must be refused, before replay looks for later lanes.
+    with pytest.raises(ValueError):replay(tmp_path)

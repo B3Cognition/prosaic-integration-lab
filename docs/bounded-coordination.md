@@ -84,8 +84,13 @@ allowance. A launch with no terminal host report stays incomplete, including a
 saved SDK receipt before journal settlement. There is no automatic replacement
 worker. Explicit host reconciliation remains a separate decision.
 
-Private reads reject symlinks, public/non-regular files and data above64KiB;
-FIFO opening cannot block inspection. Hashes detect accidental corruption, not
+Lab sidecar reads reject symlinks, public/non-regular files and data above64KiB;
+FIFO opening cannot block inspection. Public SDK receipt validation remains
+owned by Harness; protect the enclosing worker directories. Hard links are
+not independently rejected when intact evidence still validates. Saved-proof
+replay also checks closed fields, types, limits, fixed assertions and reconciled
+worker usage; a matching join alone cannot qualify contradictory claims.
+Hashes detect accidental corruption, not
 a malicious trusted host rewriting all state. Protect storage, source snapshots,
 configuration and operator identities in your application. Existing local
 FailureIsolation fences journal writes, not arbitrary running processes.

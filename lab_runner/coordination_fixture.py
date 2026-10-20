@@ -11,7 +11,7 @@ import time
 
 from .coordination import CHILD,MAXIMUM,CoordinationJournal,join_reports,make_plan,read_private
 from .failure_isolation import FailureIsolation
-from .quality.allowance import private_directory,private_write
+from .quality.allowance import counts,private_directory,private_write
 from .quality.contracts import digest
 
 SCENARIOS=('ready','hold','conflict','missing','wrong','malformed','tool-error',
@@ -278,5 +278,42 @@ def replay(root):
             for scenario in SCENARIOS:
                 lane=Path(root)/(provider+'-'+mode+'-'+scenario)
                 proof=read_private(lane/'proof.json')
-                _require(inspect_pair(lane,provider=provider,scenario=scenario,mode=mode)==proof['join'])
+                joined=inspect_pair(lane,provider=provider,scenario=scenario,mode=mode)
+                _validate_qualification(lane,proof,joined,provider=provider,scenario=scenario,mode=mode)
     return len(PROVIDERS)*len(MODES)*len(SCENARIOS)
+
+
+def _validate_qualification(root,proof,joined,*,provider,scenario,mode):
+    """Validate every saved claim; a matching join alone is insufficient."""
+    keys={'version','qualified','join',*MAXIMUM,'usageComplete','wireRequests','observedOverlap',
+          'workerCleanup','parentDeadlinePreserved','networkDeniedRecovery','liveRequests'}
+    _require(type(proof) is dict and set(proof)==keys,'closed qualification proof required')
+    _require(type(proof['version']) is int and proof['version']==1)
+    _require(type(proof['liveRequests']) is int and proof['liveRequests']==0)
+    _require(all(proof[k] is True for k in ('qualified','workerCleanup','parentDeadlinePreserved','networkDeniedRecovery')))
+    _require(type(proof['usageComplete']) is bool and type(proof['observedOverlap']) is bool)
+    actual=counts({k:proof[k] for k in MAXIMUM})
+    caps=dict(MAXIMUM)
+    if scenario=='request-cap':caps['providerRequests']=3
+    if scenario=='tool-cap':caps['toolCalls']=1
+    if scenario=='token-cap':caps['reportedTokens']=612
+    _require(all(actual[k]<=caps[k] for k in caps),'qualification exceeds supported limits')
+    _require(type(proof['wireRequests']) is int and 0<=proof['wireRequests']<=actual['providerRequests'])
+    _require(proof['join']==joined,'saved join mismatch')
+    case=read_private(root/'case.json')
+    _require(case==_case(provider,scenario,mode,case['url']))
+    state=CoordinationJournal(root/'coordination.json',plan=case['plan'],create=False).inspect()
+    _require(all(row['status']!='active' for row in state['workers'].values()),'unfinished qualification claim')
+    aggregate={k:0 for k in MAXIMUM};complete=True
+    for name,row in state['workers'].items():
+        if row['status']=='unclaimed':continue
+        accounting=read_private(root/name/'accounting.json')
+        usage=counts(accounting['usage'])
+        for key in MAXIMUM:aggregate[key]+=usage[key]
+        complete=complete and accounting['usageComplete'] is True and accounting['reservedTokens']==0 and row['status']!='unknown'
+    _require(actual==aggregate,'saved usage disagrees with worker evidence')
+    _require(proof['usageComplete'] is complete,'saved usage completeness mismatch')
+    if joined['usage'] is not None:_require(joined['usage']==actual)
+    if scenario in ('ready','hold','conflict','missing'):
+        _require(proof['wireRequests']==actual['providerRequests']==4 and actual['toolCalls']==2)
+    _require(proof['observedOverlap'] is (mode=='parallel' and scenario not in ('cancel','token-cap')))
