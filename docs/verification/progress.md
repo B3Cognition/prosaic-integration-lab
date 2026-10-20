@@ -2,6 +2,13 @@
 
 ## Sandboxed CLI consumer blueprint — 2026-10-20
 
+Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes
+and12network-denied replays. All142payloads match; public wheel/rebuilt-sdist
+and optimized absent-backend gates pass. Both Important review findings and
+cleanup/timing proof gaps are fixed; no deferred minors. Keep branch local
+for required later Linux/platform CI. Qualification ledger updates follow
+builds; the audited package payloads remain identical.
+
 PR21 merged at5a966ae with four green CI cells. New experimental admission,
 whole-turn approval and actual OS canaries use public Runtime0.9.7, refusing
 unsupported hard resource controls. Focused47tests and12installed both-wire

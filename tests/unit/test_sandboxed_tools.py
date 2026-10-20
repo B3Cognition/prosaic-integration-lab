@@ -74,3 +74,38 @@ def test_unbounded_invocation_and_extra_tool_grants_are_refused(tmp_path):
     root,config,policy,manifest=setup(tmp_path)
     assert not admit(root,config,replace(policy,max_provider_requests=None),manifest)['admitted']
     assert not admit(root,replace(config,allowed_tools=frozenset({'probe','other'})),policy,manifest)['admitted']
+
+
+@pytest.mark.parametrize('nested',[False,True])
+def test_incomplete_directory_scan_refuses_reachable_socket(nested):
+    with tempfile.TemporaryDirectory(prefix='sbx-',dir=Path('/tmp').resolve()) as short:
+        root,config,policy,manifest=setup(Path(short))
+        directory=root/'evidence'
+        if nested:directory=directory/'search-only';directory.mkdir()
+        with socket.socket(socket.AF_UNIX) as listener:
+            listener.bind(str(directory/'host.sock'));listener.listen(1)
+            directory.chmod(0o111)
+            try:
+                with socket.socket(socket.AF_UNIX) as client:
+                    client.connect(str(directory/'host.sock'))
+                assert not admit(root,config,policy,manifest)['admitted']
+            finally:directory.chmod(0o700)
+
+
+def test_process_inventory_distinguishes_child_from_broker_and_parent():
+    from lab_runner.sandbox_fixture import _parse_process_inventory
+    rows='\n'.join(['41 41 /usr/bin/bwrap /owned/canary --nonce nonce',
+        '42 41 /python /owned/canary --nonce nonce',
+        '43 41 /python /owned/canary --linger nonce',
+        '44 44 /python /owned/canary --linger foreign'])
+    found=_parse_process_inventory(rows,'nonce','/owned/canary')
+    assert found=={41:dict(group=41,child=False),42:dict(group=41,child=False),43:dict(group=41,child=True)}
+    parents=_parse_process_inventory(rows.splitlines()[0]+'\n'+rows.splitlines()[1],'nonce','/owned/canary')
+    assert len(parents)==2 and not any(row['child'] for row in parents.values())
+
+
+@pytest.mark.parametrize('completed',[4.0,4.35,5.0])
+def test_natural_canary_exit_cannot_certify_early_termination(completed):
+    from lab_runner.sandbox_fixture import _early_failure_seconds
+    with pytest.raises(ValueError):
+        _early_failure_seconds([('tool_started',0.0),('tool_completed',completed)])

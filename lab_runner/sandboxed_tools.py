@@ -58,11 +58,13 @@ def admit_sandbox(config, policy, *, workspace, manifest, required_controls):
                 or not resolved.is_relative_to(root) or not resolved.exists()):
                 return result('evidence_grant')
         visited=0
+        def scan_error(error):
+            raise error
         for relative in policy.read_roots:
             path=root/relative
             candidates=[path]
             if path.is_dir():
-                for base,directories,files in os.walk(path,followlinks=False):
+                for base,directories,files in os.walk(path,followlinks=False,onerror=scan_error):
                     candidates.extend(Path(base)/name for name in directories+files)
                     if len(candidates)>256:return result('evidence_grant')
             for entry in candidates:

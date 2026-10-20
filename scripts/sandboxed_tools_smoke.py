@@ -22,9 +22,9 @@ def main():
     for provider in ('openai','anthropic'):
         for scenario in SCENARIOS:
             proof=qualify(root/(provider+'-'+scenario),provider=provider,scenario=scenario)
-            assert proof['qualified'],proof
+            if proof['qualified'] is not True:raise RuntimeError('required sandbox qualification blocked')
             reports.append(proof)
-    assert replay(root)==12
+    if replay(root)!=12:raise RuntimeError('saved sandbox inspection incomplete')
     private_write(root/'result.json',dict(version=1,lanes=12,networkDeniedReplays=12,
         syntheticRequests=sum(p['providerRequests'] for p in reports),liveRequests=0,experimental=True))
     print('12 sandbox lanes/replays qualified; actual OS enforcement; zero live requests')

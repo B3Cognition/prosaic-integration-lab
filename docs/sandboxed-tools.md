@@ -25,6 +25,8 @@ The manifest is trusted host configuration, never model-supplied. The SDK still
 validates it. Trusted interpreter/library roots remain readable dependencies.
 Freeze the manifest, executable and evidence before approval; prevent concurrent
 writes or untrusted owners. Hash checks alone do not eliminate filesystem races.
+Incomplete directory enumeration refuses admission, including search-only trees
+that could hide a reachable host socket.
 
 CPU, memory, process-count and detached-process cleanup requirements return
 `unsupported_controls` and refuse dispatch. Runtime exposes no such hard caps
@@ -46,6 +48,8 @@ This permission covers one frozen bounded turn: up to4requests,2tools,
 start action, not a CLI authorizer callback or per-effect consent. Models cannot
 approve themselves. Authenticate operators in your application. A spent start
 permission does not prove effect completion or permit automatic retries.
+Authorization, binding and qualification checks use explicit exceptions and
+remain active under optimized Python (`-O`, `-OO`, `PYTHONOPTIMIZE`).
 
 Required mode uses native Seatbelt on macOS and Bubblewrap>=0.12.0 on Linux.
 Failed operational preflight blocks execution, even after permission is spent;
@@ -77,6 +81,12 @@ files, listeners and a fake credential. They are diagnostic controls, never a
 production fallback. Host TCP/UDP/Unix witnesses verify no sandbox delivery;
 two calls verify distinct removed scratch directories. Bounded same-group
 children are observed before failure and checked absent afterward.
+The process witness distinguishes actual `--linger` children from a sandbox
+broker and checks their process-group association before claiming cleanup.
+For failure probes, a host monotonic clock brackets public tool events and must
+show termination within3.5seconds, before the owned child's four-second natural
+exit. Missing or delayed boundaries fail qualification; this conservative
+witness does not infer an exact CLI subtype or change any per-case limit.
 
 Saved receipt inspection denies sockets, reads private bounded regular files,
 verifies corruption checksums and uses public receipt validation. It performs

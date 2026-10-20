@@ -34,14 +34,35 @@ def _network_guard(event,arguments):
 sys.addaudithook(_network_guard)
 
 
+def _require(condition,message='sandbox qualification failed'):
+    # Qualification and effect gates must survive Python -O/PYTHONOPTIMIZE.
+    if not condition:raise ValueError(message)
+
+
+def _early_failure_seconds(phases):
+    # Owned canary children naturally live four seconds; output occurs at .35s.
+    # A later absence alone cannot prove interruption. Missing/delayed observer
+    # boundaries refuse qualification rather than certify an unmeasured limit.
+    _require(len(phases)==2 and [p[0] for p in phases]==['tool_started','tool_completed'],
+        'complete tool clock boundaries required')
+    elapsed=phases[1][1]-phases[0][1]
+    _require(0<=elapsed<3.5,'early termination before natural canary exit not witnessed')
+    return elapsed
+
+
 def _owned_processes(nonce,executable):
     # Read-only inventory; never persist or print unrelated command lines.
     completed=subprocess.run(['ps','-axo','pid=,pgid=,command='],capture_output=True,text=True,timeout=3,check=True)
+    return _parse_process_inventory(completed.stdout,nonce,executable)
+
+
+def _parse_process_inventory(output,nonce,executable):
     found={}
-    for line in completed.stdout.splitlines():
+    for line in output.splitlines():
         fields=line.strip().split(None,2)
         if len(fields)==3 and executable in fields[2] and nonce in fields[2].split():
-            found[int(fields[0])]=int(fields[1])
+            tokens=fields[2].split()
+            found[int(fields[0])]=dict(group=int(fields[1]),child=tokens[-2:]==['--linger',nonce])
     return found
 
 
@@ -108,12 +129,12 @@ def _qualify(output, *, provider, scenario, owned):
         def log_message(self,*args):pass
         def do_POST(self):
             try:
-                size=int(self.headers.get('Content-Length','0'));assert 0<size<=262144
+                size=int(self.headers.get('Content-Length','0'));_require(0<size<=262144)
                 native=json.loads(self.rfile.read(size));requests.append(1)
-                assert native['model']=='sandbox-fixture' and len(requests)<=4
-                assert native.get('max_tokens',native.get('max_completion_tokens'))==512
-                offered=native['tools'];assert len(offered)==1
-                assert (offered[0]['name'] if provider=='anthropic' else offered[0]['function']['name'])=='sandbox_probe'
+                _require(native['model']=='sandbox-fixture' and len(requests)<=4)
+                _require(native.get('max_tokens',native.get('max_completion_tokens'))==512)
+                offered=native['tools'];_require(len(offered)==1)
+                _require((offered[0]['name'] if provider=='anthropic' else offered[0]['function']['name'])=='sandbox_probe')
                 call=len(requests)<=(2 if scenario=='contained' else 1)
                 params=dict(document='evidence/input.txt',slot='one' if len(requests)==1 else 'two')
                 if provider=='anthropic':
@@ -156,7 +177,13 @@ def _qualify(output, *, provider, scenario, owned):
     start_args=dict(preparedIdentity=prepared.context_identity,bindingDigest=binding)
     proposal=gate.propose('start',tool_name='start_sandboxed_turn',scope=scope,arguments=start_args,evidence_digest=frozen)
     gate.decide('start',actor='operator',proposal_digest=proposal['proposalDigest'],approved=scenario!='denied',decision_digest='a'*64)
-    positive=False;actual=None;operational=False;seen={};survivors={};scratch=[];tool_error=None
+    positive=False;actual=None;operational=False;seen={};survivors={};scratch=[];tool_error=None;phases=[];early_seconds=None
+    def observe(record):
+        trace.observe(record)
+        if (record.get('source')=='runtime' and record.get('run_id')==scope.run_id
+            and record.get('invocation_id')==scope.invocation_id
+            and record.get('event') in ('tool_started','tool_completed')):
+            phases.append((record['event'],time.monotonic()))
     began=time.monotonic();deadline=began+600
     proof=dict(version=1,qualified=False,providerRequests=0,toolCalls=0,probeExecuted=False,
         operationalBackend=False,positiveControl=False,hostNetworkDeliveries=0,outsideWrites=0,
@@ -182,10 +209,11 @@ def _qualify(output, *, provider, scenario, owned):
         positive=(control.returncode==0 and all(n==1 for n in delivered)
             and (root/'control-write').exists() and not control_result['checks']['outsideReadDenied']
             and not control_result['checks']['forbiddenReadDenied'] and not control_result['checks']['credentialAbsent'])
-        assert positive,'owned positive control failed'
-        assert files_binding()==frozen
+        _require(positive,'owned positive control failed')
+        _require(files_binding()==frozen,'host binding changed')
         context=ToolExecutionContext(scope,'start_sandboxed_turn','v1',1,digest(start_args),deadline,lambda:False)
-        assert gate.authorizer('start')(start_args,context),'host start permission not available'
+        if gate.authorizer('start')(start_args,context) is not True:
+            raise PermissionError('host start permission not available')
         preflight=runtime.preflight(agent,cwd=workspace,policy=policy,env={'PROSAIC_SANDBOX_CANARY_KEY':'SYNTHETIC-CREDENTIAL'})
         private_write(root/'preflight.json',preflight)
         operational=preflight['ok'] is True
@@ -193,7 +221,7 @@ def _qualify(output, *, provider, scenario, owned):
             proof.update(blocked=True,reason='sandbox_unavailable',approvalState='spent')
             private_write(root/'proof.json',proof)
             return proof
-        assert files_binding()==frozen
+        _require(files_binding()==frozen,'host binding changed')
         stop=Event()
         def inventory():
             while not stop.wait(0.08):
@@ -202,35 +230,43 @@ def _qualify(output, *, provider, scenario, owned):
         thread=Thread(target=server.serve_forever,daemon=True);thread.start()
         try:
             with budget.activate():
-                actual=runtime.turn(prepared,operation_context=scope,observer=trace.observe,
+                actual=runtime.turn(prepared,operation_context=scope,observer=observe,
                     env={'PROSAIC_SANDBOX_CANARY_KEY':'SYNTHETIC-CREDENTIAL'})
         finally:
             stop.set();watcher.join(timeout=4);server.shutdown();thread.join(timeout=3)
-            assert not watcher.is_alive() and not thread.is_alive()
+            _require(not watcher.is_alive() and not thread.is_alive())
         survivors=_owned_processes(nonce,str(executable))
         raw=actual.evidence.to_dict()
         private_write(root/'turn-evidence.json',raw)
         outcomes=raw['toolOutcomes']
         if scenario=='contained':
-            assert actual.result.exit_code==0 and len(outcomes)==2
+            _require(actual.result.exit_code==0 and len(outcomes)==2)
             for item in outcomes:
-                value=item['outcome'];assert value['status']=='ok'
-                result=value['result'];assert result['nonce']==nonce and all(result['checks'].values())
+                value=item['outcome'];_require(value['status']=='ok')
+                result=value['result'];_require(result['nonce']==nonce and all(result['checks'].values()))
                 scratch.append(Path(result['scratch']))
-            assert len(set(scratch))==2 and all(not p.exists() for p in scratch)
+            _require(len(set(scratch))==2 and all(not p.exists() for p in scratch))
         else:
             # Bounded recovery stops before converting uncertain CLI effects
             # into a completed tool receipt. Do not invent a precise subtype.
-            assert raw['toolAttempts']==1 and outcomes==[]
-            assert raw['failureCode']=='toolEffectUncertain' and actual.result.exit_code!=0
+            _require(raw['toolAttempts']==1 and outcomes==[])
+            _require(raw['failureCode']=='toolEffectUncertain' and actual.result.exit_code!=0)
             tool_error=raw['failureCode']
-            assert len(seen)>=2 and not survivors
-        assert files_binding()==frozen and not wire_errors
+            children=[row for row in seen.values() if row['child']]
+            parent_groups={row['group'] for row in seen.values() if not row['child']}
+            _require(children and all(row['group'] in parent_groups for row in children) and not survivors,
+                'actual owned same-group child cleanup not witnessed')
+            early_seconds=_early_failure_seconds(phases)
+        _require(files_binding()==frozen and not wire_errors)
         proof.update(providerRequests=budget.provider_requests,toolCalls=budget.tool_calls,probeExecuted=True,
             scratchRemoved=all(not p.exists() for p in scratch),scratchDistinct=len(set(scratch))==2,
-            observedOwnedProcesses=len(seen),survivingOwnedProcesses=len(survivors),toolError=tool_error)
+            observedOwnedProcesses=len(seen),survivingOwnedProcesses=len(survivors),toolError=tool_error,
+            toolFailureSeconds=early_seconds,stoppedBeforeNaturalExit=early_seconds is not None,
+            observedOwnedChildren=sum(row['child'] for row in seen.values()),
+            observedSameGroupChild=any(row['child'] and any(not p['child'] and p['group']==row['group']
+                for p in seen.values()) for row in seen.values()))
     deliveries=sum(_deliveries(listeners))
-    assert deliveries==0 and not outside.exists()
+    _require(deliveries==0 and not outside.exists())
     usage=dict(providerRequests=budget.provider_requests,toolCalls=budget.tool_calls,
                reportedTokens=budget.reported_tokens)
     state=gate.inspect('start')['state']
@@ -245,9 +281,9 @@ def _qualify(output, *, provider, scenario, owned):
         evidenceDigest=digest(actual.evidence.to_dict()) if actual else None))
     token=_INSPECTING.set(True)
     try:
-        assert inspect_lane(root,scenario=scenario)==state
+        _require(inspect_lane(root,scenario=scenario)==state)
     finally:_INSPECTING.reset(token)
-    assert len(requests)==budget.provider_requests and time.monotonic()<deadline
+    _require(len(requests)==budget.provider_requests and time.monotonic()<deadline)
     proof.update(qualified=True,operationalBackend=operational,positiveControl=positive,approvalState=state,
         hostNetworkDeliveries=deliveries,outsideWrites=int(outside.exists()),networkDeniedRecovery=True)
     private_write(root/'proof.json',proof)

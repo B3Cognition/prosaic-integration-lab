@@ -31,6 +31,8 @@ def test_required_sandbox_qualifies_actual_effects_and_read_only_recovery(tmp_pa
             assert proof['toolCalls']==1
             assert proof['toolError']=='toolEffectUncertain'
             assert proof['observedOwnedProcesses']>=2 and proof['survivingOwnedProcesses']==0
+            assert proof['observedOwnedChildren']>=1 and proof['observedSameGroupChild'] is True
+            assert proof['stoppedBeforeNaturalExit'] is True and 0<=proof['toolFailureSeconds']<3.5
     assert not any(s in json.dumps(proof) for s in ('SYNTHETIC-CREDENTIAL','HOST-CANARY','private-run'))
 
 
@@ -67,3 +69,21 @@ def test_saved_inspection_refuses_missing_corrupt_or_aliased_receipts(tmp_path,s
         path.rename(root/'aliased');path.symlink_to(root/'aliased')
     with pytest.raises((ValueError,OSError)):
         inspect_lane(root,scenario='contained')
+
+
+@pytest.mark.parametrize('optimization',['-O','-OO'])
+def test_optimized_python_preserves_approval_and_qualification(tmp_path,optimization):
+    root=Path(__file__).resolve().parents[2]
+    env={k:v for k,v in os.environ.items() if not k.startswith('PYTHON')}
+    env['PYTHONPATH']=os.pathsep.join([str(root),str(root/'src')])
+    command=[sys.executable,optimization,str(root/'scripts/sandboxed_tools_smoke.py'),'--output',str(tmp_path/'proof')]
+    result=subprocess.run(command,cwd=tmp_path,env=env,capture_output=True,text=True,timeout=180)
+    assert result.returncode==0,result.stderr[-3000:]
+    for provider in ('openai','anthropic'):
+        for scenario in ('contained','timeout','output'):
+            lane=tmp_path/'proof'/(provider+'-'+scenario)
+            proof=json.loads((lane/'proof.json').read_text())
+            assert proof['approvalState']=='spent'
+            assert json.loads((lane/'approval.json').read_text())['proposals']['start']['state']=='spent'
+            assert proof['qualified'] and proof['networkDeniedRecovery']
+    assert json.loads((tmp_path/'proof/result.json').read_text())['networkDeniedReplays']==12
