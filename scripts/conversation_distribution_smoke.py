@@ -199,6 +199,10 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/coordination_smoke.py','--output',directory/'coordination-proof'],
+            directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/coordination_smoke.py','--output',directory/'coordination-proof','--replay'],
+            directory=directory,environment=environment)
     audit()
     return python
 

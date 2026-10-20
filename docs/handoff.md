@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Bounded multi-agent coordination — 2026-10-20
+
+The maintainer approved the complete two-worker milestone with current limits.
+Native implementation on codex/bounded-coordination builds on5c888bf without
+changing PR22. The [blueprint](bounded-coordination.md) uses public shared
+ExecutionBudget activation and independent Harness stores/recorders.48actual
+scripted lanes cover both formats and sequential/parallel modes; restart
+inspection performs no execution. [Qualification](verification/bounded-coordination-2026-10-20.md)
+records focused/source evidence and remaining full-suite/package/review gates.
+Keep this milestone local; no live/push/merge/release or SDK changes. All caps,
+pins,39ledgers/nine unknowns persist; memory/correction remain experimental.
+
 ## PR22 Linux regression repair — 2026-10-20
 
 The first four Linux CI cells passed mandatory actual confinement, then each

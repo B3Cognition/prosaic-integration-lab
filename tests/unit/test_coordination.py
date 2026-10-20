@@ -1,5 +1,8 @@
 from concurrent.futures import ThreadPoolExecutor
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -92,3 +95,17 @@ def test_read_only_inspection_refuses_unsafe_saved_state(tmp_path,fault):
     elif fault=='oversize':path.write_text(' '*65537)
     elif fault=='public':path.chmod(0o644)
     with pytest.raises((ValueError,OSError)):cls(path,plan=plan(),create=False).inspect()
+
+
+def test_saved_fifo_is_rejected_without_waiting_for_a_writer(tmp_path):
+    path=tmp_path/'unexpected-fifo';os.mkfifo(path,0o600)
+    code='''
+import sys
+from lab_runner.coordination import read_private
+try:read_private(sys.argv[1])
+except (ValueError,OSError):sys.exit(23)
+sys.exit(0)
+'''
+    environment=dict(os.environ,PYTHONPATH=str(Path(__file__).resolve().parents[2]))
+    result=subprocess.run([sys.executable,'-c',code,str(path)],env=environment,capture_output=True,timeout=2)
+    assert result.returncode==23,result.stderr.decode()

@@ -82,7 +82,8 @@ def read_private(path):
     path=Path(path)
     if not path.is_absolute() or any(p.is_symlink() for p in (path,*path.parents)):
         raise ValueError('private physical path required')
-    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
+    # Reject FIFOs/devices before reading; opening a FIFO must not wait for a writer.
+    fd=os.open(path,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK)
     try:
         if _private(fd).st_size>65536:raise ValueError('coordination data limit')
         return decode(os.read(fd,65537),maximum=65536)

@@ -1,5 +1,10 @@
 # Prosaic integration lab
 
+The experimental [bounded coordination blueprint](docs/bounded-coordination.md)
+composes two independent public Harness runs with one shared Runtime budget,
+typed assignments, deterministic evidence checks and receipt-only recovery.
+It includes a sequential baseline and makes no live model-benefit claim.
+
 The experimental [sandboxed CLI blueprint](docs/sandboxed-tools.md) composes
 host admission/approval with Runtime's native confinement and independently
 witnessed cleanup. Unsupported hard resource controls refuse admission; memory
