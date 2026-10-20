@@ -1,5 +1,19 @@
 # Codex handoff
 
+## PR21 merged; sandboxed CLI consumer milestone — 2026-10-20
+
+PR21 merged at5a966ae after all four exact-head CI lanes passed. The experimental
+[sandboxed CLI blueprint](sandboxed-tools.md) adds conservative admission,
+whole-invocation host permission, actual OS canaries and receipt-only inspection
+using public Runtime0.9.7. Hard CPU/memory/process-count/detached-cleanup
+requirements refuse admission. Timeout/output failures preserve Runtime's
+toolEffectUncertain stop; no precise CLI subtype is invented. See
+[offline proof](verification/sandboxed-tools-2026-10-20.md). Keep
+codex/sandboxed-tools local for later PR/CI. Linux operational enforcement is
+a required later platform gate. No live calls, SDK changes, allowance changes
+or release; memory/correction remain experimental. Older checkpoints retain
+their original state.
+
 ## PR20 merged; trajectory evaluation milestone — 2026-10-19
 
 PR20 merged at5bd896a after its exact head passed all four CI lanes:1729source

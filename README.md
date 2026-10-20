@@ -1,5 +1,10 @@
 # Prosaic integration lab
 
+The experimental [sandboxed CLI blueprint](docs/sandboxed-tools.md) composes
+host admission/approval with Runtime's native confinement and independently
+witnessed cleanup. Unsupported hard resource controls refuse admission; memory
+and correction remain experimental. Linux platform qualification remains a CI gate.
+
 The experimental [trajectory evaluation blueprint](docs/trajectory-evaluation.md)
 joins safe public SDK observations to host-verified outcomes, with a second-domain
 parcel example and offline report inspection. It makes no live model efficacy claim.

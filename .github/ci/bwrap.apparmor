@@ -1,0 +1,8 @@
+# Disposable Ubuntu CI runner only. Grant namespace creation to this broker;
+# retain host-wide AppArmor restrictions and the child confinement policy.
+abi <abi/4.0>,
+include <tunables/global>
+
+profile prosaic-lab-ci-bwrap /usr/bin/bwrap flags=(unconfined) {
+  userns,
+}

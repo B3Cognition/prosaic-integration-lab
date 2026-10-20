@@ -195,6 +195,10 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
                 directory=directory, environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof'],
+            directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
+            directory=directory,environment=environment)
     audit()
     return python
 

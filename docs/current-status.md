@@ -1,5 +1,15 @@
 # Current delivery status
 
+## Trajectory merged; sandboxed CLI blueprint — 2026-10-20
+
+PR21 merged at5a966ae with four green CI cells. The next experimental
+[sandboxed CLI consumer blueprint](sandboxed-tools.md) reuses public Runtime
+confinement, explicit unsupported-control admission and independent OS witnesses.
+[Offline qualification](verification/sandboxed-tools-2026-10-20.md) distinguishes
+native macOS enforcement from the later mandatory Linux CI gate. Keep the
+branch local; memory/correction remain experimental, no SDK release/live calls
+or changes to current limits/charges.
+
 ## Approval merged; next consumer milestone — 2026-10-19
 
 PR20 merged at5bd896a with four green exact-head CI lanes. Tool authorization and

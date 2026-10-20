@@ -2,6 +2,10 @@
 
 ## Unreleased experimental consumer blueprints
 
+- Add provider-neutral sandboxed CLI admission and actual OS canaries, bounded
+  same-group cleanup witnesses, private receipt inspection and required Linux
+  backend qualification. Explicitly refuse unsupported hard resource controls.
+
 - Add provider-neutral typed evidence, bounded context/continuation, scoped
   memory, tool-error diagnostics, role qualification and bounded correction
   examples with a no-critic baseline. Consumers own evidence policy and model

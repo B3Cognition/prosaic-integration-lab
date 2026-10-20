@@ -1,5 +1,15 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Sandboxed CLI consumer blueprint — 2026-10-20
+
+PR21 merged at5a966ae with four green CI cells. New experimental admission,
+whole-turn approval and actual OS canaries use public Runtime0.9.7, refusing
+unsupported hard resource controls. Focused47tests and12installed both-wire
+scenarios/replays pass; all142payloads match. Public wheel/rebuilt-sdist adoption
+and missing-backend fail-closed proof pass. Local enforcement is macOS; Linux
+operational qualification remains a mandatory PR/CI gate. Memory/correction and
+current limits/charges stay unchanged. [Qualification](sandboxed-tools-2026-10-20.md).
+
 ## PR18 public CI repair — 2026-10-18
 
 [Report](pr18-ci-2026-10-18.md): update published dependency pins and closed
