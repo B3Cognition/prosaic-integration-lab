@@ -63,17 +63,17 @@ unknown use null. Unknown usage is null and requires unknown status; completed
 needs known counts. Report usage numeric fields providerRequests/toolCalls/
 reportedTokens reject booleans. Failed known counts are retained. No raw output.
 
-- [ ] Write tests for closed plans/reports, reversed result order, ready/hold/
+- [x] Write tests for closed plans/reports, reversed result order, ready/hold/
   missing/conflict, partial/unknown/failed/over-cap counts, binding changes,
   concurrent duplicate claims, immutable/idempotent settlement, restart after
   claim, strict existing-file inspection and private/corrupt/symlink files.
-- [ ] Run focused tests; watch missing protocol fail before implementation.
-- [ ] Implement interfaces using existing Lab canonical/private-write helpers,
+- [x] Run focused tests; watch missing protocol fail before implementation.
+- [x] Implement interfaces using existing Lab canonical/private-write helpers,
   bounded owner-only reads and fcntl lock; cap journal to64KiB. Unknown remains
   null; report success requires both assignments and sums within parent/child
   ceilings. Persist no retry API and never refund reservations.
-- [ ] Run `PY tests/unit/test_coordination.py -q`; require all pass and diff check.
-- [ ] Commit protocol, tests and task ledger evidence.
+- [x] Run `PY tests/unit/test_coordination.py -q`; require all pass and diff check.
+- [x] Commit protocol, tests and task ledger evidence.
 
 ### Task 2: Actual public-SDK pair and sequential baseline
 
@@ -91,27 +91,27 @@ Smoke runs48lanes and saved inspections, emits a safe summary with all outcomes,
 costs and unknown denominators. Process-loss tests use separate bounded
 subprocesses at launch/receipt boundaries rather than add more study lanes.
 
-- [ ] Write functional tests for48actual both-wire/mode lanes and safe replay,
+- [x] Write functional tests for48actual both-wire/mode lanes and safe replay,
   asserting real overlap for parallel ready with a provider-side event barrier,
   no overlap for sequential, pair counts<=4/2/8192 and original deadline.
   Tests check correct domain categories, honest unknown costs, zero requests
   for pre-cancel, actual counter exhaustion, no post-stop continuation and
   drained owned resources. Add before/after-receipt process-loss inspections.
-- [ ] Watch the fixture/recipe tests fail before implementation.
-- [ ] Implement independent per-worker resources and one shared public
+- [x] Watch the fixture/recipe tests fail before implementation.
+- [x] Implement independent per-worker resources and one shared public
   ExecutionBudget activated explicitly in each worker, plus child budget.
   Use one FailureIsolation full-pair reservation. Bind expected source/facts
   to actual scoped lookup and public recovery evidence. Typed outputs include
   assignment/source fields; host checks the observed lookup, not model claims.
   Use strict exceptions so checks survive Python optimization. Set cancellation
   on failure/unknown and join all worker threads before final assessment.
-- [ ] Save private source/lookup/public receipt evidence, journal and safe proof.
+- [x] Save private source/lookup/public receipt evidence, journal and safe proof.
   Fresh inspection rebuilds only public objects, compares receipts and saved
   terminal reports, and refuses launch gaps; it calls no run/resume/turn.
   The safe summary has no raw IDs/prompts/source contents/exception messages.
-- [ ] Run focused unit+functional tests; require all pass. Verify recipe in
+- [x] Run focused unit+functional tests; require all pass. Verify recipe in
   source mode and separate network-denied replay; retain commands/results.
-- [ ] Commit the fixture/recipe/tests and ledger results.
+- [x] Commit the fixture/recipe/tests and ledger results.
 
 ### Task 3: Consumer documentation, package adoption and final qualification
 
@@ -124,18 +124,18 @@ docs/handoff.md, docs/current-status.md and
 `--source-root PATH` for source-only imports. Installed commands use -I and
 omit source-root. Existing manifest/version/pins stay unchanged.
 
-- [ ] Add an adoption regression demonstrating the new installed gate is
+- [x] Add an adoption regression demonstrating the new installed gate is
   required, then run it RED. Integrate the recipe in both wheel/sdist consumers
   without skipping or weakening any existing gate; run GREEN.
-- [ ] Document exact copy/adaptation points, trust boundaries, caps and known
+- [x] Document exact copy/adaptation points, trust boundaries, caps and known
   limits. Describe unsupported distributed scheduling/forced preemption and
   evidence-based model efficacy separately from protocol qualification.
-- [ ] Run the full source suite once after implementation. Build fresh wheel
+- [x] Run the full source suite once after implementation. Build fresh wheel
   and sdist, run clean public-consumer distribution smoke and verify installed
   source payload equality, import isolation, dependencies and owned cleanup.
-- [ ] Freeze verification evidence and request one fresh whole-branch review.
+- [x] Freeze verification evidence and request one fresh whole-branch review.
   Regrade findings by user effect; fix Important/Critical with watched RED to
   GREEN and a green full suite. Record all decisions/deferred minors, no repeat
   review. Preserve private evidence and keep this branch local.
-- [ ] Commit final qualification/docs. Record exact branch/base, tests, artifacts,
+- [x] Commit final qualification/docs. Record exact branch/base, tests, artifacts,
   unchanged limits and any remaining platform/live gates in the final handoff.

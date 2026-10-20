@@ -71,6 +71,8 @@ executes, and agreement between models never substitutes for source validation.
 
 For another domain, replace sources, schemas, workflow, tool adapter and host
 evaluator. Keep the binding, launch, budget, settlement and inspection protocol.
+Allocate fresh worker run IDs and namespaces from authenticated host scope;
+the fixture's fixed IDs are only for isolated synthetic stores.
 The join's status list follows frozen plan order without exporting worker IDs.
 Private receipts retain detailed correlation; summaries omit prompts, source
 contents, raw assignment identifiers and exception messages.
