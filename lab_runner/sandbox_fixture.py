@@ -51,8 +51,10 @@ def _early_failure_seconds(phases):
 
 
 def _owned_processes(nonce,executable):
+    # Width is independent of inherited COLUMNS/terminal geometry on GNU/BSD
+    # ps. Truncation can hide the trailing nonce or --linger child marker.
     # Read-only inventory; never persist or print unrelated command lines.
-    completed=subprocess.run(['ps','-axo','pid=,pgid=,command='],capture_output=True,text=True,timeout=3,check=True)
+    completed=subprocess.run(['ps','-ww','-axo','pid=,pgid=,command='],capture_output=True,text=True,timeout=3,check=True)
     return _parse_process_inventory(completed.stdout,nonce,executable)
 
 
@@ -255,7 +257,8 @@ def _qualify(output, *, provider, scenario, owned):
             children=[row for row in seen.values() if row['child']]
             parent_groups={row['group'] for row in seen.values() if not row['child']}
             _require(children and all(row['group'] in parent_groups for row in children) and not survivors,
-                'actual owned same-group child cleanup not witnessed')
+                'actual owned same-group child cleanup not witnessed '
+                f'(owned={len(seen)}, children={len(children)}, parentGroups={len(parent_groups)}, survivors={len(survivors)})')
             early_seconds=_early_failure_seconds(phases)
         _require(files_binding()==frozen and not wire_errors)
         proof.update(providerRequests=budget.provider_requests,toolCalls=budget.tool_calls,probeExecuted=True,

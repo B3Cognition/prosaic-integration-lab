@@ -7,6 +7,23 @@ import sys
 import pytest
 
 
+@pytest.mark.parametrize('columns',['80','120','200'])
+def test_process_inventory_keeps_long_owned_child_arguments(tmp_path,monkeypatch,columns):
+    from lab_runner.sandbox_fixture import _owned_processes
+    # Exercise real ps, including GNU ps's inherited display-width handling.
+    monkeypatch.setenv('COLUMNS',columns)
+    script=tmp_path/('owned-child-'+('x'*100)+'.py')
+    script.write_text('import time; time.sleep(4)\n')
+    nonce='prosaic-sbx-owned-inventory-regression'
+    child=subprocess.Popen([sys.executable,str(script),'--linger',nonce])
+    try:
+        found=_owned_processes(nonce,str(script))
+        assert child.pid in found
+        assert found[child.pid]['child'] is True
+    finally:
+        child.wait(timeout=6)
+
+
 @pytest.mark.parametrize('provider',['openai','anthropic'])
 @pytest.mark.parametrize('scenario',['contained','timeout','output','denied','unsupported','off'])
 def test_required_sandbox_qualifies_actual_effects_and_read_only_recovery(tmp_path,provider,scenario):

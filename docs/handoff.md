@@ -1,5 +1,14 @@
 # Codex handoff
 
+## PR22 Linux regression repair — 2026-10-20
+
+The first four Linux CI cells passed mandatory actual confinement, then each
+failed four direct child-witness regressions. The [observer repair](verification/sandbox-ci-observer-2026-10-20.md)
+addresses reproduced GNU ps truncation, adds three real-process regressions
+and safe count diagnostics, preserving every confinement/early-stop gate.
+58focused tests pass locally; full regressions/adoption and new exact-head CI
+are still required. Do not merge or publish until the four cells qualify.
+
 ## Lab 0.6.0 version and authorized push — 2026-10-20
 
 Prepare the reviewed codex/sandboxed-tools branch as a PR against main. The
