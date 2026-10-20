@@ -54,6 +54,11 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
         assert len(selected) == int(native_tools)
         if native_tools:
             assert '-I' in selected[0] and '--source-root' in selected[0]
+    coordination=[call for call in calls if any(str(arg).endswith('coordination_smoke.py') for arg in call)]
+    assert len(coordination)==2*int(native_tools)
+    if native_tools:
+        assert all('-I' in call and '--source-root' not in call for call in coordination)
+        assert sum('--replay' in call for call in coordination)==1
 
 
 @pytest.mark.parametrize('complete_context_evidence',[False,True])

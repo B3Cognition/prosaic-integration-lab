@@ -1,5 +1,17 @@
 # Current delivery status
 
+## Bounded coordination local milestone — 2026-10-20
+
+The experimental [two-worker blueprint](bounded-coordination.md) composes
+public SDKs with shared limits, typed host assignments and durable inspection.
+Its48scripted lanes include a sequential baseline and independently witnessed
+parallel overlap. No live model-benefit or production claim is made. The
+[qualification ledger](verification/bounded-coordination-2026-10-20.md) records
+1930passing source tests, installed wheel/rebuilt-sdist consumers,144payload
+matches and one Important review fix with16RED→GREEN cases. Local gates pass;
+later new-branch PR/platform CI remains. No push/release/SDK change; all caps
+and historic charges persist; memory/correction remain experimental.
+
 ## Lab 0.6.0 version and PR preparation — 2026-10-20
 
 The maintainer authorized the version bump and push of the reviewed sandbox
