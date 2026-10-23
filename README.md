@@ -59,6 +59,13 @@ for that exact candidate's results; fresh public adoption is recorded in the
 The [timeout patch ledger](docs/verification/conversation-timeout-patch-2026-10-14.md)
 records the latest package update and its additional no-redispatch regressions.
 
+For Castle, start with the [step-by-step memory guide](docs/castle-quickstart.md):
+use cases, exact package setup, a runnable local walkthrough, and how to enable,
+review, resume or disable memory. Castle stays **off by default**. The
+[host/operator reference](docs/optional-memory.md) explains the boundaries and
+qualification commands; [verification evidence](docs/verification/castle-integration-2026-10-23.md)
+records actual tested platforms and limits.
+
 ## Install packages for an embedding service
 
 All five packages are published on PyPI. Their actual public downloads

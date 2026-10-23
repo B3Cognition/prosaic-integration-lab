@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "kind": "targeted-conversation-approval-worker-loss",
+  "postgres_major": 16,
+  "image": "sha256:cb2572102c42ed7801724a084a5318fd2f48049e87ff022330b91b435b654b63",
+  "synthetic_only": true,
+  "owner": "dd8936b1f14541078caf051704659a5a",
+  "test_count": 2,
+  "skipped": 0,
+  "failed_tests": [],
+  "cleanup": "verified",
+  "payload_audit": "verified",
+  "sdk_manifest_sha256": "0fc61674c12666166bab61363eaa4b51f12ec57ffac5f427d63cc41e63dcee13",
+  "images": {
+    "consumer": "sha256:cb2572102c42ed7801724a084a5318fd2f48049e87ff022330b91b435b654b63",
+    "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+  }
+}

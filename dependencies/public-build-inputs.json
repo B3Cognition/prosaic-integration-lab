@@ -113,6 +113,8 @@
     "src/prosaic_integration_lab/dependencies.py",
     "src/prosaic_integration_lab/diagnostics.py",
     "src/prosaic_integration_lab/execution.py",
+    "src/prosaic_integration_lab/memory_provider.py",
+    "src/prosaic_integration_lab/memory_workflow.py",
     "src/prosaic_integration_lab/http_guard.py",
     "src/prosaic_integration_lab/identity.py",
     "src/prosaic_integration_lab/metadata.py",

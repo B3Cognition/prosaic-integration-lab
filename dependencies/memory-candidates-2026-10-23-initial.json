@@ -1,0 +1,12 @@
+{
+  "qualification": "local-unpublished-memory-candidate; not the released SDK manifest",
+  "artifacts": [
+    {"distribution":"b3-prosaic","version":"0.4.1","filename":"b3_prosaic-0.4.1-py3-none-any.whl","sha256":"07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51","source_commit":"6ac6cfdfd47dc70ecf68e441aa004f07c3be3822"},
+    {"distribution":"b3-prosaic-runtime","version":"0.9.3","filename":"b3_prosaic_runtime-0.9.3-py3-none-any.whl","sha256":"a0970de47ce8e064168e1143d7cc8133d35c0be867fd790166271c4da2cdacb5","source_commit":"e63983a257f9a67f369fbf48c3a95f8a9db9b65a","candidate":true},
+    {"distribution":"b3-prosaic-runtime-postgres","version":"0.3.0","filename":"b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl","sha256":"5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca","source_commit":"a59621c5f30d766d1217b37df777d3876075dc34"},
+    {"distribution":"b3-prosaic-harness","version":"0.8.2","filename":"b3_prosaic_harness-0.8.2-py3-none-any.whl","sha256":"e70147171d8227c99fd537d248cec3a53c979efcc7e80c8129f2bb5f96790d76","source_commit":"fc1f0cf69204f24329e8d8cfc3b0e226642fa9e8"},
+    {"distribution":"b3-prosaic-harness-postgres","version":"0.3.0","filename":"b3_prosaic_harness_postgres-0.3.0-py3-none-any.whl","sha256":"6d602a1df0a4aba808a693a277a83b54d3b10491030e7e4b505519415f11ec45","source_commit":"f913fa18820554ffc5eb30a7bc4a8a6e302ed0ce"},
+    {"distribution":"b3-prosaic-memory-castle","version":"0.1.0","filename":"b3_prosaic_memory_castle-0.1.0-py3-none-any.whl","sha256":"7cb839563436c8105fad08deee128bbe108d44ac40eb09dd00d53285315d11fd","source_commit":"b9e2314a136ad3268f10d4a2fef2c496029b6249","candidate":true},
+    {"distribution":"cognitive-castle","version":"3.4.1","filename":"cognitive_castle-3.4.1-py3-none-any.whl","sha256":"565b2a13d6dc45dd56a4b3aaaed4ece9282218c92297a36643fd59a554f025ac","source_commit":"b9e2314a136ad3268f10d4a2fef2c496029b6249","candidate":true,"environment":"worker-only"}
+  ]
+}
