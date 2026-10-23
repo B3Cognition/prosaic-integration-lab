@@ -4,6 +4,10 @@ This qualification integrates the unified pool with current upstream main. It
 does not replace the immutable historical live measurements or claim a new live
 benchmark against the updated SDK train.
 
+The initial candidate below is retained as pre-review evidence. The
+[review correction](#review-correction-and-current-main-requalification) at the
+end records the superseding replay-safety fix and its exact candidate.
+
 ## Scope and provenance
 
 - Runtime base: `d046bb73327674123d0bdfc1121d35acc74b931a`.
@@ -86,3 +90,48 @@ OpenAI walkthrough work, private profiles, reports and caches are excluded.
 No new live model measurement, package publication, release or credential change was
 performed for this finalization. Candidate acceptance remains explicit; ordinary
 released-SDK tests do not require unpublished native/unified exports.
+
+## Review correction and current-main requalification
+
+Fresh review reproduced three gaps in positive native pre-work proof: partial
+Codex text/reasoning could replay inside a native-only pool; Claude redacted
+thinking could be treated as no work by a unified pool; and unknown nested stream
+activity could authorize fallback. Thirteen new regressions failed before the
+fix. The native proof now excludes all observed model work, including redacted
+thinking and started streams. Both native and unified physical dispatch tests
+verify that subsequent profiles are not launched. A later zero-turn quota error
+cannot undo earlier work evidence. Successful native execution is unchanged.
+
+Independent follow-up review found no remaining code issues. Documentation now
+uses the same rule for native/unified pools and includes a complete clean-checkout
+candidate build, checksum, curate, install and audit recipe.
+
+- Superseding Runtime source: `36cf08302dbbe2d58a2dba6b32ed2b2f1660a5d2`.
+- Runtime wheel SHA-256:
+  `695bb7ba551a0e5e0753e6790ee26215f2a90279b44bdcf01aeb6928ee49c2e5`.
+- Candidate manifest SHA-256:
+  `b0c7752ca5c1f7945cd1248ac195f74f7cafa5b401dc6001b4746f44a2bfd9db`.
+- Lab now integrates main at `ae77cba066d14944eb1fca1c860f01da60a64b93`,
+  preserving the independently merged Castle changes and all public build inputs.
+- Superseding offline Linux ARM64 image:
+  `sha256:66064d3fcb14005706d4660f054dec626314ff43dc2df1f10557ce50bf5fb9f4`.
+- Runtime full suite: **1,428 passed, 2 skipped**, 456.11 seconds.
+- Combined Lab full suite with released SDK pins: **1,884 passed**, one existing
+  Starlette deprecation warning, 493.37 seconds.
+- Watched replay regressions: **13 failed before the fix**; the selected group
+  then passed **15 tests**, including two existing safety cases.
+- Installed-candidate acceptance: **14 passed**, 29.05 seconds.
+- All four isolated Runtime installed-wheel smoke programs passed.
+- Complete five-wheel payload audit and dependency check passed. Two stale
+  optimized caches for the changed module in the reused environment were
+  regenerated from verified installed source before repeating the strict audit;
+  SDK source bytes and audit policy were not modified.
+- The exact image passed all **51 offline checks** again: 18 provider rejection,
+  13 CLI, 11 unified API and 9 native cases, with no live invocations and verified
+  fixture cleanup. The additional reasoning/stream edge cases are covered by the
+  new Runtime regressions above; the historical fixture suite is unchanged.
+
+No historical live task, Markdown, input, model, deadline or result was altered,
+and no new model measurement was performed during review. Published dependency
+pins remain unchanged. The candidate wheel is an unpublished extension of the
+compatible 0.9.7 identity, not the published artifact.

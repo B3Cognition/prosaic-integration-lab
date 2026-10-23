@@ -97,26 +97,58 @@ The following historical ledgers identify the exact 0.9.3 candidate measured;
 the [PR finalization ledger](verification/unified-pool-pr-finalization-2026-10-23.md)
 separately qualifies integration with current main.
 
-Use a separate SDK-only environment and candidate manifest, preserving published
-pins and prior experiment environments. Build the exact owning Runtime commit,
-curate its wheel with the unchanged four SDKs using the existing native candidate
-recipe, install/audit the five-wheel payloads, then run:
+Use a new SDK-only environment and candidate manifest, preserving published pins
+and prior experiment environments. The following clean-checkout recipe builds
+the exact reviewed Runtime commit, retains the other four released wheels and
+audits the complete installed payload. It performs no model calls. Choose an
+unused environment name and keep the temporary source/build directory for audit.
 
 ```sh
-.venv-unified/bin/python -m pytest -q tests/native_acceptance
-.venv-unified/bin/python -m lab_runner.native_eval unified-test \
-  --manifest .cache/unified-runtime/manifest.json \
-  --wheel-dir <exact-candidate-wheel-directory> \
-  --output /absolute/new-private-unified-fixture-report.json
+set -e
+python3.12 -m venv .venv-unified-review
+LAB_PY=.venv-unified-review/bin/python
+"$LAB_PY" -m pip install --require-hashes -r dependencies/requirements.lock
+"$LAB_PY" scripts/prepare_dependencies.py --manifest dependencies/releases.json
+RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases.json", "rb").read()).hexdigest())')
+RELEASED_WHEELS="$PWD/.cache/wheels/$RELEASED_SHA"
+
+RUNTIME_SOURCE=36cf08302dbbe2d58a2dba6b32ed2b2f1660a5d2
+RUNTIME_TREE=$(mktemp -d)
+git clone https://github.com/B3Cognition/prosaic-runtime.git "$RUNTIME_TREE/source"
+git -C "$RUNTIME_TREE/source" checkout --detach "$RUNTIME_SOURCE"
+test "$(git -C "$RUNTIME_TREE/source" rev-parse HEAD)" = "$RUNTIME_SOURCE"
+python3.12 -m venv "$RUNTIME_TREE/build-env"
+"$RUNTIME_TREE/build-env/bin/python" -m pip install build
+"$RUNTIME_TREE/build-env/bin/python" -m build \
+  --outdir "$RUNTIME_TREE/dist" "$RUNTIME_TREE/source"
+RUNTIME_WHEEL="$RUNTIME_TREE/dist/b3_prosaic_runtime-0.9.7-py3-none-any.whl"
+RUNTIME_SHA=$("$LAB_PY" -c 'import hashlib, sys; print(hashlib.sha256(open(sys.argv[1], "rb").read()).hexdigest())' "$RUNTIME_WHEEL")
+
+CANDIDATE_ROOT=$(mktemp -d "$PWD/.cache/unified-review-XXXXXX")
+"$LAB_PY" -m lab_runner.native_eval prepare \
+  --runtime-wheel "$RUNTIME_WHEEL" --runtime-sha256 "$RUNTIME_SHA" \
+  --runtime-commit "$RUNTIME_SOURCE" \
+  --released-manifest dependencies/releases.json \
+  --released-wheel-dir "$RELEASED_WHEELS" \
+  --manifest "$CANDIDATE_ROOT/manifest.json" > "$CANDIDATE_ROOT/prepare.json"
+CANDIDATE_WHEELS=$("$LAB_PY" -c 'import json, sys; print(json.load(open(sys.argv[1]))["wheelDirectory"])' "$CANDIDATE_ROOT/prepare.json")
+"$LAB_PY" scripts/install_dependencies.py \
+  --manifest "$CANDIDATE_ROOT/manifest.json" --wheel-dir "$CANDIDATE_WHEELS"
+"$LAB_PY" scripts/audit_install.py \
+  --manifest "$CANDIDATE_ROOT/manifest.json" --wheel-dir "$CANDIDATE_WHEELS"
+"$LAB_PY" -m pip check
+"$LAB_PY" -m pytest -q tests/native_acceptance
+for lane in unified-test unified-cli-test unified-fallback-test; do
+  "$LAB_PY" -m lab_runner.native_eval "$lane" \
+    --manifest "$CANDIDATE_ROOT/manifest.json" --wheel-dir "$CANDIDATE_WHEELS"
+done
 ```
 
-The CLI extension uses its own immutable manifest and environment:
-
-```sh
-.venv-unified-cli/bin/python -m lab_runner.native_eval unified-cli-test \
-  --manifest .cache/unified-cli-runtime/manifest.json \
-  --wheel-dir <exact-cli-candidate-wheel-directory>
-```
+The manifest rejects a Runtime wheel whose filename/version does not match the
+compatible released SDK train. Its checksum identifies these unpublished bytes;
+do not replace the released artifact or dependency pins. Historical ledgers use
+their original `.venv-unified`/`.venv-unified-cli` environments and manifests;
+the recipe above creates independent current-review evidence.
 
 Thirteen subprocess checks cover three-backend fallback, JSONL/text output,
 graded repair, cross-process cooldowns, zero request/tool caps, all-unavailable,
