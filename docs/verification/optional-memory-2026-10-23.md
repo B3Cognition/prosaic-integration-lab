@@ -9,7 +9,7 @@ recency reordering; dense retrieval and recency are opt-in host settings.
 Work is isolated on `codex/optional-castle-memory`, from committed Lab baseline
 `dc473da`. The original Lab checkout's unrelated pending changes and the normal
 `dependencies/releases.json` remain untouched. The exact candidate family is
-[memory-candidates.json](../../dependencies/memory-candidates.json), SHA256
+[initial memory profile](../../dependencies/memory-candidates-2026-10-23-initial.json), SHA256
 `76bb942041292dcee640a314c38f185c94424ec2cdd9b54e1a81f59f8b999812`.
 Candidate Runtime/adapter/Castle packages are not published releases.
 

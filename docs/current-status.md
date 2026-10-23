@@ -1,5 +1,19 @@
 # Current delivery status
 
+## Optional Castle integration review — 2026-10-23
+
+Castle is a disabled-by-default host memory provider with scoped FTS recall and
+frozen Harness evidence across review/resume. The [beginner guide](castle-quickstart.md)
+covers installation, use cases, a synthetic local walkthrough and real-palace
+configuration. It grants no new public HTTP operation or model memory tools;
+SUE and SOAR remain separate.
+
+On the unchanged public SDK train, [local verification](verification/castle-integration-2026-10-23.md)
+passes 1847 source tests, all 97 conversation cases on each PostgreSQL 16/18
+lane, and six installed Castle cases per version, with cleanup verified.
+The adapter/worker wheels remain explicit unpublished candidates. This is
+local ARM64 synthetic qualification, with no new package release or live claim.
+
 ## Lab 0.6.0 version and PR preparation — 2026-10-20
 
 The maintainer authorized the version bump and push of the reviewed sandbox

@@ -57,7 +57,7 @@ acceptance case.
 Source baseline: `966c231`, branch `codex/optional-castle-memory`. Host Python
 3.12.15, macOS/Darwin ARM64; database and consumer containers Linux ARM64.
 The SDK/worker checksums remain in
-[memory-candidates.json](../../dependencies/memory-candidates.json), SHA256
+[initial memory profile](../../dependencies/memory-candidates-2026-10-23-initial.json), SHA256
 `76bb942041292dcee640a314c38f185c94424ec2cdd9b54e1a81f59f8b999812`.
 Host third-party versions match the unchanged repository lock, SHA256
 `022b22de1b5999ad7037fc3fe5d91981601a87bb1fd55e54a8b96a985df6064d`.
