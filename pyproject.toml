@@ -18,6 +18,7 @@ where = ["src", "."]
 include = ["prosaic_integration_lab*", "lab_runner*"]
 
 [tool.setuptools.package-data]
+"lab_runner.native_eval" = ["data/subagents/*.md"]
 "lab_runner.quality" = ["data/*.json", "data/*.md"]
 "lab_runner.memory" = ["data/*.json"]
 

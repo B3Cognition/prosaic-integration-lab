@@ -1,0 +1,15 @@
+# Secret stays in a file; this benchmark allows only a literal loopback endpoint.
+default_profile: local-strong
+allowed_tools: [read_file, write_file, edit_file]
+limits:
+  timeout_s: 60
+  max_tool_rounds: 4
+profiles:
+  local-strong:
+    base_url: http://127.0.0.1:8000/v1
+    model: ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ
+    api_key_file: ~/.omlx_token
+    max_tokens: 2048
+    temperature: 0
+    features:
+      streaming: false

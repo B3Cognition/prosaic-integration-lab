@@ -2,6 +2,9 @@
 
 ## 0.6.0 — unreleased
 
+- Add opt-in unified Runtime candidate acceptance, CLI pool benchmarking and
+  provider-shaped quota/no-replay tests, with explicit policies and private
+  bounded allowances. Preserve released SDK pins and historical measurements.
 - Add a disabled-by-default Castle memory provider with owner-bound FTS recall,
   frozen evidence across Harness review/resume, explicit unavailable-memory
   policy, installed-stack qualification and a beginner walkthrough. Castle

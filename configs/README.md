@@ -1,5 +1,14 @@
 # Optional local inference
 
+For the unreleased unified pool candidate, copy `unified-runtime.example.yml`,
+`native-runtime.example.yml` and `runtime-comparison-local.example.yml` together
+into private operator storage. Adjust the native model/login paths and local
+model/authentication reference. Relative config references resolve from the
+unified file; never commit credentials or a private capacity file. Merely loading
+these files authorizes no calls. The
+[unified CLI guide](../docs/unified-runtime-pools.md) supplies separate native/API
+permissions and explicit deadlines, attempts and request/tool limits.
+
 The new [conversation guide](../docs/conversations.md) includes
 `conversation-conformance.example.json`, a private Runtime YAML/allowance recipe.
 Its pure preflight makes zero provider requests and opens no credential files.

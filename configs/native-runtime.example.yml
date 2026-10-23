@@ -1,0 +1,22 @@
+# Copy to a private file (chmod 600). Install/login to the vendor CLIs separately.
+# Claude >=2.1.248; Codex >=0.154.0. Replace the Codex model before live execution.
+kind: native
+profiles:
+  claude-main:
+    backend: claude-code
+    model: sonnet
+    quota_key: claude-account
+    permission_mode: workspace-write
+  codex-main:
+    backend: codex-cli
+    model: your-accessible-codex-model
+    quota_key: codex-account
+    permission_mode: workspace-write
+    # Pin latency-sensitive assignments instead of inheriting desktop high effort.
+    effort: low
+pools:
+  coding:
+    profiles: [claude-main, codex-main]
+    cooldown_s: 300
+default_pool: coding
+capacity_file: capacity.json

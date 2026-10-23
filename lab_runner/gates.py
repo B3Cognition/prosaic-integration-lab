@@ -165,6 +165,35 @@ for name,parameters,code in (
      ('oversize','nonfinite','unserializable'),'invalid_effect_result')):
     FAILURE_CASES['native-persistence'].update({name+'['+parameter+']':code for parameter in parameters})
 
+# Diagnostic export is independent of the existing candidate-lineage gates.
+EXPORT_FAILURE_CASES={**FAILURE_CASES,'lago':{
+    'test_released_adapters_ready_with_restricted_credentials':'adapter_ready',
+    'test_runtime_roles_cannot_create_schema[harness_dsn]':'harness_role',
+    'test_runtime_roles_cannot_create_schema[accounting_dsn]':'accounting_role',
+    'test_runtime_roles_cannot_create_schema[app_dsn]':'app_role',
+    'test_app_schema_and_primary_durability':'primary_durability',
+    'test_receipts_and_accounting_observations_are_not_amendable':'immutable_evidence',
+    'test_multiuser_usage_replay_and_exact_charges':'billing_charges',
+    'test_lago_outage_retains_usage_and_recovers_without_model_retry':'billing_outage',
+    'test_lost_ack_replays_identical_remote_event':'billing_lost_ack',
+    'test_pagination_delayed_observation_and_exclusions':'billing_pagination',
+    'test_actual_exporter_process_crash_at_delivery_barrier[before-send]':'billing_crash_before_send',
+    'test_actual_exporter_process_crash_at_delivery_barrier[after-send]':'billing_crash_after_send',
+    'test_same_account_name_in_distinct_tenants_and_known_zero_cache':'billing_tenant_scope',
+    'test_out_of_period_evidence_is_not_sent_or_acknowledged':'billing_period',
+    'test_atomic_enqueue_and_conflict':'outbox_atomic',
+    'test_concurrent_enqueue_and_claim_fencing':'outbox_fencing',
+    'test_pending_evidence_survives_reconstruction':'outbox_reconstruction',
+    'test_role_cannot_modify_source_or_replica_billing':'outbox_role',
+    'test_readiness_rejects_missing_fencing_grant':'outbox_fencing_grant',
+    'test_readiness_rejects_missing_state_constraint':'outbox_state_constraint',
+    'test_exporter_cannot_read_application_prompt':'exporter_prompt_scope',
+    'test_exporter_cannot_change_frozen_payload':'exporter_payload_scope',
+    'test_readiness_rejects_wrong_fencing_column_type':'outbox_fencing_type',
+    'test_stale_unresolved_scan_does_not_poison_complete_evidence':'outbox_stale_scan',
+    'test_remote_conflict_blocks_all_dimensions':'outbox_remote_conflict'}}
+
+
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None,context_assembly=False):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
     if context_assembly and mode=='conversation' and item.get('context_assembly') is not True:
@@ -221,10 +250,10 @@ def export(item):
         value = item.get(key)
         result[key] = value if type(value) is int and 0 <= value <= 100000 else None
     result['failed_count'] = len(item.get('failed_tests',[])) if isinstance(item.get('failed_tests'),list) else None
-    if item.get('mode') in FAILURE_CASES and type(item.get('failed_tests')) is list:
+    if item.get('mode') in EXPORT_FAILURE_CASES and type(item.get('failed_tests')) is list:
         # Fixed public phase codes identify owned cases. Never copy a
         # testcase name, parameter, error message or captured private output.
-        cases=FAILURE_CASES[item['mode']]
+        cases=EXPORT_FAILURE_CASES[item['mode']]
         result['failed_cases']=sorted({cases.get(name,'unknown') if type(name) is str else 'unknown'
             for name in item['failed_tests']})
     if item.get('mode')=='qualification' and 'capacity_diagnostic' in item:

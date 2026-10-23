@@ -67,6 +67,26 @@ def test_conversation_effect_and_lease_failures_have_fixed_public_codes():
         'test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt'])
     assert export(item)['failed_cases']==['approval_effect_recovery','session_fence','session_race']
 
+
+def test_lago_failure_export_identifies_phases_without_private_test_names():
+    item=receipt();item.update(mode='lago',passed=False,test_returncode=1,failed_tests=[
+        'test_lost_ack_replays_identical_remote_event',
+        'test_actual_exporter_process_crash_at_delivery_barrier[before-send]',
+        'test_actual_exporter_process_crash_at_delivery_barrier[after-send]',
+        'test_actual_exporter_process_crash_at_delivery_barrier[PRIVATE_DSN]',
+        'PRIVATE_DSN',{'PRIVATE_DSN':'secret'}])
+    safe=export(item)
+    assert safe['failed_cases']==['billing_crash_after_send','billing_crash_before_send','billing_lost_ack','unknown']
+    assert safe['failed_count']==6 and safe['passed'] is False
+    assert 'PRIVATE' not in json.dumps(safe) and 'test_actual' not in json.dumps(safe)
+
+
+def test_lago_candidate_diagnostics_do_not_add_a_lineage_gate():
+    item=receipt();item.update(mode='lago',test_count=25,dependency_mode='candidate',candidate_manifest_sha256='3'*64)
+    item['images']['lago']=json.loads((Path(__file__).resolve().parents[2]/'dependencies/lago.json').read_text())['image']
+    validate(item,'lago',16,candidate=True,manifest_sha='3'*64)
+    assert 'candidate_lineage_sha256' not in item
+
 def receipt(mode='audit'):
     active = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'
     return {'mode':mode,'passed':True,'cleanup':'verified','dependency_mode':'released',
