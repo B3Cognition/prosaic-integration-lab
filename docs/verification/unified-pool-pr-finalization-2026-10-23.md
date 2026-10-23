@@ -135,3 +135,70 @@ No historical live task, Markdown, input, model, deadline or result was altered,
 and no new model measurement was performed during review. Published dependency
 pins remain unchanged. The candidate wheel is an unpublished extension of the
 compatible 0.9.7 identity, not the published artifact.
+
+## CI follow-up qualification
+
+The first combined-main CI run exposed client-side shedding in the short
+capacity acceptance fixture. It offered three requests per second but inherited
+only two client slots; each slot includes usage and isolation reads after the
+measured request. The fixture now allows eight slots: six for the existing
+two-second latency SLO and two for those reads. Arrival rate, duration, call cap,
+18 required completions, fairness, rejection, accounting and latency gates remain
+unchanged. This changes test-driver capacity, not Runtime budgets or benchmark
+deadlines.
+
+A real owned PostgreSQL comparison with 750 ms synthetic provider latency
+reproduced the defect: two slots completed 12/18 with six client sheds; eight
+completed 18/18 with none. The corrected qualification lane passed all three
+tests against PostgreSQL 16, with 18/18 completions, no sheds, 0.147 s p95,
+reconciled accounting and verified cleanup.
+
+One prior AMD64/PostgreSQL 18 Lago lane failed without an exported case label.
+The full local Lago/PostgreSQL 18 rerun passed all 25 checks in 301.37 seconds
+with verified cleanup; the original failure was not reproduced. Safe exports now
+map only the 25 known Lago case names to fixed public phase labels. Unknown
+names, parameters, messages and captured output remain redacted. Candidate
+validation and lineage requirements are unchanged. Two regression tests cover
+redaction and preservation of validation policy; all 31 release-gate tests pass.
+
+These stack runs used the unchanged released five-SDK manifest
+`fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b`
+and verified consumer image
+`sha256:7c0f01181d75baa91c87d4e05b01db63cf0f00e1de3c46c2220779decb2b7f33`.
+No live provider, external billing account or historical benchmark input was used or
+changed. Final PR CI must pass on both architectures and PostgreSQL versions
+before merge.
+
+The combined Lab full source suite after these CI corrections passed **1,886
+tests**, with the same existing Starlette deprecation warning, in 564.23 seconds.
+
+Runtime follow-up review also reproduced a Darwin process-group cleanup race:
+an exiting child could briefly reject `SIGKILL`, masking the intended output-limit
+failure as `handler_error`. Cleanup now allows at most 50 ms to reap the child,
+then requires an independent proof that the entire group is absent before
+suppressing that denial. A running child, surviving group or inaccessible group
+still fails cleanup. Four deterministic regressions failed before the fix; all
+62 CLI/HTTP boundary tests then passed. Two independent 400-process stress runs
+each returned 400 expected output-limit errors and no unexpected exceptions.
+The HTTP error-body timeout fixture separately now allows startup time while
+still requiring a partial body and timeout well before the complete drip body.
+Benchmark and pool deadlines are unchanged.
+
+The clean-checkout recipe now selects Runtime source
+`bd25346b85ba39789530d4cce35ddfe92b5ec63f`, superseding the prior review wheel:
+
+- Runtime wheel SHA-256:
+  `79ca70ccfcc282d360f173d968bc07030b5b7d0f299fb7de5afb1eed9e5f9ee0`.
+- Five-wheel candidate manifest SHA-256:
+  `22f7f1cf2c7d031aa363da8fba3f1540f2cad72a1d5dd840d750a9ef6ec170c7`.
+- Fresh SDK-only installation, complete payload audit and dependency check passed.
+- Installed-candidate acceptance: **14 passed**, 36.46 seconds.
+- All four isolated installed Runtime wheel smoke programs passed.
+- Exact offline image:
+  `sha256:12c8e8f29ab07216b8f17f1ddd9e888c9ea98c8aa9d34d5716ef7d6c6f59ac85`.
+  All **51 checks passed** again: 18 provider rejection, 13 CLI, 11 unified API
+  and 9 native, with zero live invocations and verified fixture cleanup. These
+  containers had no external network and a read-only filesystem.
+
+Prior source, manifest, image and live benchmark evidence above remains
+historical; no live measurements were repeated for these CI repairs.

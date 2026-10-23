@@ -112,7 +112,7 @@ LAB_PY=.venv-unified-review/bin/python
 RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases.json", "rb").read()).hexdigest())')
 RELEASED_WHEELS="$PWD/.cache/wheels/$RELEASED_SHA"
 
-RUNTIME_SOURCE=36cf08302dbbe2d58a2dba6b32ed2b2f1660a5d2
+RUNTIME_SOURCE=bd25346b85ba39789530d4cce35ddfe92b5ec63f
 RUNTIME_TREE=$(mktemp -d)
 git clone https://github.com/B3Cognition/prosaic-runtime.git "$RUNTIME_TREE/source"
 git -C "$RUNTIME_TREE/source" checkout --detach "$RUNTIME_SOURCE"
