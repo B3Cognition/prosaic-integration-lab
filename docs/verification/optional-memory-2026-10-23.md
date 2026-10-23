@@ -78,6 +78,10 @@ python -m pip check
 
 ## Review and limits
 
+Follow-up: the [conversation contract investigation](conversation-contracts-2026-10-23.md)
+records the resolution of the two failures below and the subsequent memory rerun.
+The original checkpoint and receipts remain historical evidence for `966c231`.
+
 The final full suite against the pinned host graph finished **963 passed,
 2 failed, 0 skipped**, with one existing Starlette/httpx deprecation warning.
 All 17 added memory unit/functional cases passed. The suite is not fully green:

@@ -13,6 +13,7 @@ recursive-include dependencies *.json *.lock
 recursive-include docs *.md
 include docs/verification/ecosystem-production-2026-10-10.json
 include docs/verification/optional-memory-2026-10-23-*.json
+include docs/verification/conversation-contracts-2026-10-23-*.json
 recursive-include scripts *.py
 recursive-include tests *.py *.json *.yml *.md
 global-exclude __pycache__ *.py[cod]

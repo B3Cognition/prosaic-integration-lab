@@ -1,5 +1,6 @@
 """Public installed controllers over the owned synthetic provider, never live evidence."""
 import json
+from contextlib import closing
 
 import httpx
 import pytest
@@ -159,7 +160,8 @@ def test_simulated_tool_text_blocks_confirmation_without_effect_or_retry(tmp_pat
     assert not result['passed'] and len(result['cases'])==6
     assert all(row['passed'] for row in result['cases'][:-1])
     assert result['cases'][-1]['purpose']=='confirmation'
-    assert result['cases'][-1]['failure']=={'phase':'evidence','failureCode':'conformanceFailed',
+    # Harness rejects the blocked workflow before it can report a completed reply.
+    assert result['cases'][-1]['failure']=={'phase':'reply','failureCode':'interrupted',
         'exceptionClass':None}
     assert result['cases'][-1]['provider_requests'] is None
     assert result['diagnostic_effects']==0
@@ -168,3 +170,64 @@ def test_simulated_tool_text_blocks_confirmation_without_effect_or_retry(tmp_pat
     encoded=json.dumps(result)
     assert 'fixture_apply_b' not in encoded and 'entity_id' not in encoded
     assert str(tmp_path) not in encoded and chat_provider not in encoded
+
+
+def test_simulated_tool_text_keeps_durable_workflow_unresolved_on_recovery(tmp_path,chat_provider):
+    """Fail if tool-shaped prose becomes an effect or recovery reexecutes the run."""
+    from prosaic_harness import Conversation,ConversationScope,FileSessionStore,Harness
+    from prosaic_runtime import EndpointConfig,ExecutionContext,RuntimeConfig
+    from prosaic_runtime.accounting import MemoryRecorder
+    from lab_runner.conversation_conformance import _materials
+
+    httpx.post(chat_provider+'/control',json={'scenario':'conversation_simulated_tool'},timeout=5).raise_for_status()
+    config=RuntimeConfig({tier:EndpointConfig(chat_provider+'/v1','qwen-'+tier,
+        features={'streaming':False}) for tier in ('balanced','strong')},
+        {tier:tier for tier in ('balanced','strong')},'balanced')
+    scope=ConversationScope('simulated-effect','diagnostic','conformance','fixture','owner','fixture-payer')
+    recorder=MemoryRecorder(namespace=scope.namespace,environment=scope.environment,provider_id='openai-compatible')
+    effects=[]
+    bindings,workflow,run_store=_materials(config,tmp_path,effects,recorder,scope)
+    sid='b'*32
+    context=ExecutionContext(application_id=scope.application,tenant_id=scope.tenant,actor_id=scope.actor,
+        billing_account_id=scope.billing_account,request_id=sid,run_id=sid)
+    with closing(FileSessionStore(tmp_path/'chat',namespace=scope.namespace)) as store:
+        store.initialize()
+        def controller():
+            return Conversation(bindings['balanced'],store=store,scope=scope,context=context)
+        try:
+            snapshot=controller().create(session_id=sid)
+            Harness(workflow,store=run_store,run_id=sid,accounting=recorder,
+                context=ExecutionContext(application_id=scope.application,tenant_id=scope.tenant,actor_id=scope.actor,
+                    billing_account_id=scope.billing_account,request_id='workflow-'+sid,run_id=sid)).run({})
+            view=controller().attach_workflow(sid,registration='diagnostic',run_id=sid,
+                expected_revision=snapshot.revision).document
+            view=controller().send(sid,message_id='select',message='the second result',
+                expected_revision=view['revision'],interaction_ref=view['pendingInteraction']['reference']).document
+            assert view['pendingInteraction']['stepId']=='confirm-b' and effects==[]
+            before=httpx.get(chat_provider+'/stats',timeout=5).json()['calls']
+            reply=controller().send(sid,message_id='approve',message='approve',
+                expected_revision=view['revision'],interaction_ref=view['pendingInteraction']['reference']).document
+            assert reply['status']=='needsResolution' and reply['failureCode']=='interrupted'
+            assert reply['recoveryStatus']=='needsResolution' and 'answer' not in reply
+            saved=run_store.load_run(sid)
+            assert saved.state['status']=='blocked' and saved.state['pending'] is None
+            assert len(saved.state['invocations'])==1 and effects==[]
+            invocation=saved.state['invocations'][0]
+            receipt=run_store.load_receipt(sid,invocation['id'])
+            assert receipt['sha256']==invocation['receipt_sha256']
+            assert receipt['result']['metadata']['invocation_budgets_v1']=={
+                'provider_requests':1,'tool_calls':0,'reported_tokens':125,'usage_complete':True}
+            assert len(recorder.intents)==1 and len(recorder.observations)==1
+            assert httpx.get(chat_provider+'/stats',timeout=5).json()['calls']-before==2
+            current_calls=httpx.get(chat_provider+'/stats',timeout=5).json()
+            recovered=None
+            for _ in range(2):
+                current=controller().recover(sid).document
+                assert current['status']=='needsResolution' and current['failureCode']=='interrupted'
+                assert current['recoveryStatus']=='needsResolution' and 'answer' not in current
+                if recovered is not None:assert current==recovered
+                recovered=current
+                assert run_store.load_run(sid)==saved and effects==[]
+                assert run_store.load_receipt(sid,invocation['id'])==receipt
+                assert httpx.get(chat_provider+'/stats',timeout=5).json()==current_calls
+        finally:run_store.close()
