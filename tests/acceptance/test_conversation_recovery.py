@@ -169,14 +169,20 @@ def test_approval_handoff_loss_preserves_effect_journal_without_resume(lab,phase
     with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
         run=store.load_run(session['sessionId'])
         assert run.state['status']==('completed' if effects else 'waiting')
+        assert run.state['pending'] is None
+    recovered=None
     for _ in range(2):
         result=recover(lab,p,session['sessionId'])
-        assert result['status'] == ('completed' if effects else 'needsResolution')
-        assert result['recoveryStatus'] == (None if effects else 'needsResolution')
+        assert result['status']==('completed' if effects else 'needsResolution')
+        assert result['recoveryStatus']==(None if effects else 'needsResolution')
+        assert result['failureCode']==(None if effects else 'interrupted')
+        if effects:assert result['answer']=='Workflow completed.' and result['pendingInteraction'] is None
+        if recovered is not None:assert result==recovered
+        recovered=result
         assert calls(lab)==accepted
         assert effect_evidence(lab,session['sessionId'])==original
         with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
-            assert store.load_run(session['sessionId']).revision==run.revision
+            assert store.load_run(session['sessionId'])==run
 
 
 def test_two_workers_admit_one_duplicate_and_one_competing_revision(lab):

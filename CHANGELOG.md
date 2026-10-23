@@ -2,6 +2,11 @@
 
 ## 0.6.0 — unreleased
 
+- Add a disabled-by-default Castle memory provider with owner-bound FTS recall,
+  frozen evidence across Harness review/resume, explicit unavailable-memory
+  policy, installed-stack qualification and a beginner walkthrough. Castle
+  remains an optional candidate; SUE and SOAR stay outside the provider path.
+
 - Adopt the verified public Runtime 0.9.7 / Harness 0.9.4 train with Core 0.4.1
   and unchanged PostgreSQL adapter pins. Historical manifests/evidence retain
   their original versions.

@@ -39,6 +39,8 @@ def retained_workflows(config):
 class Execution:
     def __init__(self, config, *, metrics=None):
         self.config = config
+        from .memory_provider import MemoryProviders
+        self.memory = MemoryProviders(config.get('memory'))
         if 'conversation' in config:
             from .conversation_execution import require_conversation_sdk,validate_settings
             validate_settings(config['conversation'])
@@ -77,9 +79,16 @@ class Execution:
     def close(self):
         self.operations.close()
         self.reads.close()
-        try:self.store.close()
+        try:self.memory.close()
         finally:
-            if self.conversation is not None:self.conversation.close()
+            try:self.store.close()
+            finally:
+                if self.conversation is not None:self.conversation.close()
+
+    def memory_session(self, principal, runtime_config):
+        from .memory_workflow import MemoryWorkflowSession
+        return MemoryWorkflowSession(providers=self.memory, store=self.store, config=runtime_config,
+            principal=principal, namespace=self.config['namespace'], accounting=self.recorder)
 
     def harness(self, reservation):
         if reservation['workflow'] == 'native':
