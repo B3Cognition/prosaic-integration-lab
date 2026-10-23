@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "properties": {
+    "decision": {
+      "enum": [
+        "approve",
+        "reject",
+        "insufficient"
+      ]
+    },
+    "facts": {
+      "description": "The factId strings of available current auditor facts selected from fetched records. Include identifiers only, without numeric values, prose statements or record IDs.",
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "maxLength": 64
+      }
+    },
+    "citations": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "factId": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "recordId": {
+            "type": "string",
+            "maxLength": 64
+          }
+        },
+        "required": [
+          "factId",
+          "recordId"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "decision",
+    "facts",
+    "citations"
+  ],
+  "additionalProperties": false
+}

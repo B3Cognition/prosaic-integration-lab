@@ -1,0 +1,21 @@
+{
+  "archiveSha256": "11ddd988e2a340b464438c84122c131b40db9ad1439c9f3b0a7f3baeb17e8b36",
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1442,
+    "reportedTokens": 1731251,
+    "toolCalls": 588
+  },
+  "evidenceFiles": 282,
+  "evidenceManifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711",
+  "historicalLedgerCount": 34,
+  "liveDispatches": 0,
+  "preserved": true,
+  "priorEvidenceFiles": 428,
+  "retainedUnknownReservations": 7,
+  "version": 1
+}

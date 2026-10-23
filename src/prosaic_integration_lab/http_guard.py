@@ -37,7 +37,8 @@ class HttpGuard:
         return tokens >= 1
 
     async def __call__(self,scope,receive,send):
-        if scope['type'] != 'http' or scope['path'] in {'/healthz','/readyz'}:
+        if (scope['type'] != 'http' or scope['path'] in {'/healthz','/readyz'} or
+                scope['path'] == '/chat' and scope['method'] == 'GET'):
             return await self.app(scope,receive,send)
         async def reject(status,detail):
             await JSONResponse({'detail':detail},status_code=status,

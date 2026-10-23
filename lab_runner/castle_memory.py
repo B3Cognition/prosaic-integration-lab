@@ -1,4 +1,4 @@
-"""Explicit optional-memory qualification. Disabled invocation starts nothing."""
+"""Explicit Castle memory qualification. Disabled invocation starts nothing."""
 
 import argparse
 import hashlib
@@ -78,7 +78,9 @@ with zipfile.ZipFile(sys.argv[1]) as z:
                         raise ValueError("installed SDK differs from selected wheel")
     from prosaic_runtime import ProsaicRuntime
 
-    if "custom_tool_errors_v1" not in ProsaicRuntime.capabilities:
+    # This host snapshot workflow grants no model tools. Require its execution
+    # budget contract; memory_tools() keeps its separate error-capability gate.
+    if "invocation_budgets_v1" not in ProsaicRuntime.capabilities:
         raise ValueError("qualified Runtime capability missing")
     return [
         {key: row[key] for key in ("distribution", "version", "sha256")}

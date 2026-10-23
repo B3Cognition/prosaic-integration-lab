@@ -1,0 +1,37 @@
+{
+  "allHistoricalLedgerCount": 36,
+  "archiveSha256": "1e914fae14214cbdfa0b0e146fb515979e10b4e96067789e581c7cd071855b3a",
+  "canonicalLedgerSha256": "17ec7b530bf04810a3911987855a9fff01f7faa535b1807aadf2910cda443a06",
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1468,
+    "reportedTokens": 1769171,
+    "toolCalls": 601
+  },
+  "evidenceFiles": 178,
+  "evidenceManifestSha256": "8ce12f1d7cb686b141638f264c5a3ea0df24c81761bdb7ebef8fb47e136e0119",
+  "preserved": true,
+  "priorEvidence": {
+    "continuation-budget-evidence-20261017": {
+      "files": 282,
+      "manifestSha256": "0c68a866e60dd72befb25bb782920e17192567a53ee9db44bca1455915d6c711"
+    },
+    "continuation-memory-evidence-20261017": {
+      "files": 338,
+      "manifestSha256": "62f2d7535eafda5f31b7c1e27ba65d98c6db709c26f4e04ed991324bd467d7a8"
+    },
+    "recovery-memory-evidence-20261017": {
+      "files": 428,
+      "manifestSha256": "32be0bff51b1fc2fb7aff3c8674eb7f3b1c55c2b750070bb3eb82658e557f96e"
+    },
+    "response-fault-evidence-20261018": {
+      "files": 676,
+      "manifestSha256": "89551e7ce6a2c6cc8e2f82e4ab8dec29f05d2771c5e9aa9cac9a6d34e9cb35b2"
+    }
+  },
+  "retainedUnknownReservations": 8
+}

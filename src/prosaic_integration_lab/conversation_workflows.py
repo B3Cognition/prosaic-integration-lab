@@ -160,7 +160,9 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
     from prosaic_runtime import CustomTool,EndpointConfig,ProsaicArtifact,RunPolicy,RuntimeConfig
     from .conversation_registry import reference
     if (type(definition) is not dict or set(definition)-{'version','model_url','model','model_tier',
-            'assets','policy','fixture_effects','operation_namespace','journal_identity','fixture_lookup_padding'} or
+            'assets','policy','fixture_effects','operation_namespace','journal_identity','fixture_lookup_padding',
+            'context_policy','interpretation_context_policy','interpretation_model',
+            'interpretation_model_tier','interpretation_model_url'} or
             not {'version','model_url'}<=set(definition) or
             type(definition.get('fixture_effects',False)) is not bool):
         raise ValueError('invalid conversation bundle')
@@ -168,6 +170,8 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
     directory=Path(definition.get('assets',Path(host.config['assets'])/'conversation'))
     tier=definition.get('model_tier','balanced')
     if tier not in {'balanced','strong'}:raise ValueError('invalid conversation tier')
+    interpretation_tier=definition.get('interpretation_model_tier',tier)
+    if interpretation_tier not in {'balanced','strong'}:raise ValueError('invalid interpretation tier')
     tools={'fixture_lookup':lookup_tool(definition.get('fixture_lookup_padding',0))}
     journal=None;workflows={}
     if definition.get('fixture_effects'):
@@ -188,15 +192,23 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
     def artifact(name,requested):
         return ProsaicArtifact.from_inspection({'id':f'conversation/agents/{name}.md','type':'subagent',
             'frontmatter':{'name':name,'description':f'Synthetic conversation {name}',
-                'model_tier':tier,'tools':requested},'body':(directory/'agents'/f'{name}.md').read_text()})
+            'model_tier':interpretation_tier if name=='interpreter' else tier,
+            'tools':requested},'body':(directory/'agents'/f'{name}.md').read_text()})
     config=RuntimeConfig({'conversation':EndpointConfig(definition['model_url'],
         definition.get('model','test-model'),features={'streaming':False})},
         {tier:'conversation'},'conversation',allowed_tools=frozenset(tools))
+    if any(key in definition for key in ('interpretation_model','interpretation_model_url')):
+        if interpretation_tier==tier:raise ValueError('separate interpretation endpoint requires distinct tier')
+        config.profiles['interpretation']=EndpointConfig(definition.get('interpretation_model_url',definition['model_url']),
+            definition.get('interpretation_model',definition.get('model','test-model')),features={'streaming':False})
+        config.routes[interpretation_tier]='interpretation'
     policy=ConversationPolicy(**definition.get('policy',{}))
     if definition.get('fixture_effects'):
         workflow,registration=registered_workflow(host,definition,config,registry,effects,journal)
         workflows[REGISTRATION]=registration
         workflow_materials[version]=(workflow,REGISTRATION)
+    from .context_counter import context_configuration
+    context_args=context_configuration(definition)
     return ConversationBindings(artifact('assistant',list(tools)),version=version,config=config,
         policy=policy,run_policy=RunPolicy(allowed_tools=frozenset(tools),timeout_s=30,
             max_tool_rounds=2,max_provider_requests=2,max_tool_calls=1,max_input_bytes=policy.max_input_bytes),
@@ -204,4 +216,4 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
         operation_namespace=definition.get('operation_namespace'),tool_journal=journal,workflows=workflows,
         interpretation_policy=RunPolicy(allowed_tools=frozenset(),timeout_s=30,max_tool_rounds=1,
             max_provider_requests=1,max_tool_calls=0,max_input_bytes=policy.max_input_bytes),
-        interpretation_schema=json.loads((directory/'schemas'/'interpretation.json').read_text()))
+        interpretation_schema=json.loads((directory/'schemas'/'interpretation.json').read_text()),**context_args)

@@ -9,6 +9,10 @@ on:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
         default: false
+      context_assembly:
+        description: Qualify context SDK candidates and retain the original Runtime PostgreSQL wheel
+        type: boolean
+        default: false
       core_run_id:
         description: Successful exact-source Core Publish SDK run
         type: string
@@ -76,29 +80,48 @@ jobs:
           RUNTIME_SOURCE: ${{ inputs.runtime_source }}
           HARNESS_RUN: ${{ inputs.harness_run_id }}
           HARNESS_SOURCE: ${{ inputs.harness_source }}
+          CONTEXT_ASSEMBLY: ${{ inputs.context_assembly }}
         run: |
-          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json
+          flags=()
+          if [ "$CONTEXT_ASSEMBLY" = "true" ]; then flags+=(--context-assembly); fi
+          .venv/bin/python scripts/prepare_sdk_candidates.py --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/sdk-hardening/manifest.json "${flags[@]}"
           .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
           .venv/bin/python -m pip check
       - name: Select installed CLI bindings
         run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Linux CLI sandbox backend
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc
+          git clone https://github.com/containers/bubblewrap.git "$RUNNER_TEMP/bubblewrap"
+          git -C "$RUNNER_TEMP/bubblewrap" checkout --detach 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$RUNNER_TEMP/bubblewrap/_build" "$RUNNER_TEMP/bubblewrap" --prefix=/usr -Dman=disabled -Dtests=false
+          meson compile -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo meson install -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo install -m 0644 .github/ci/bwrap.apparmor /etc/apparmor.d/prosaic-lab-ci-bwrap
+          sudo apparmor_parser -r /etc/apparmor.d/prosaic-lab-ci-bwrap
+      - name: Require actual CLI confinement without fallback or skipped gates
+        run: .venv/bin/python scripts/sandboxed_tools_smoke.py --source-root . --output "$RUNNER_TEMP/sandbox-qualification"
       - name: Select exact conversation SDK capability
         id: conversation-sdk
         env:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
-          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower())" >> "$GITHUB_OUTPUT"
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
       - name: Unit and functional regressions
-        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' }}
+        if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q
+      - name: Current conversation train without context capability
+        if: ${{ steps.conversation-sdk.outputs.enabled == 'true' && steps.conversation-sdk.outputs.context != 'true' }}
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
-        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py
-      - name: Qualify released Lab wheel and exact source distribution consumers
+        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
+      - name: Qualify current Lab distributions with public SDKs
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:
           RUNNER_CELL: ${{ matrix.runner }}
@@ -109,7 +132,7 @@ jobs:
           if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
             flags+=(--run-stack)
           fi
-          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-*-py3-none-any.whl --sdist dist/prosaic_integration_lab-*.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Qualify exact candidate Lab wheel and source distribution consumers
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         env:
@@ -121,7 +144,7 @@ jobs:
           if [ "$RUNNER_CELL" = "ubuntu-24.04-arm" ] && [ "$POSTGRES_CELL" = "16" ]; then
             flags+=(--run-stack)
           fi
-          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-0.5.0-py3-none-any.whl --sdist dist/prosaic_integration_lab-0.5.0.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
+          .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-*-py3-none-any.whl --sdist dist/prosaic_integration_lab-*.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Build immutable consumer
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
@@ -150,6 +173,19 @@ jobs:
       - name: Run documented conversation demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Run optional context comparison with exact candidate SDKs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.context_assembly }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --context-assembly --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
+      - name: Retain qualified Lab build bytes
+        if: ${{ success() && !inputs.candidate && matrix.runner == 'ubuntu-24.04-arm' && matrix.postgres == 16 }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lab-release-bytes
+          path: |
+            dist/prosaic_integration_lab-*-py3-none-any.whl
+            dist/prosaic_integration_lab-*.tar.gz
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload safe gate summary only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

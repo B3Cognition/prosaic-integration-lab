@@ -1,0 +1,14 @@
+{
+  "archiveSha256": "bcdd2f0e7c50fff5fb812f43cf919f757e3a5a9b9893ab24263bf161fa95bc45",
+  "cumulativeCharged": {
+    "providerRequests": 1456,
+    "reportedTokens": 1752686,
+    "toolCalls": 595
+  },
+  "evidenceFiles": 676,
+  "evidenceManifestSha256": "89551e7ce6a2c6cc8e2f82e4ab8dec29f05d2771c5e9aa9cac9a6d34e9cb35b2",
+  "historicalLedgerCount": 35,
+  "liveDispatches": 0,
+  "preserved": true,
+  "retainedUnknownReservations": 8
+}

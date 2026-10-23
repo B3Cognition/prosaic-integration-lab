@@ -10,7 +10,7 @@ import subprocess
 def main():
     from prosaic_runtime import ProsaicRuntime
 
-    assert "custom_tool_errors_v1" in ProsaicRuntime.capabilities
+    assert "invocation_budgets_v1" in ProsaicRuntime.capabilities
     assert "site-packages" in str(
         Path(__import__("prosaic_integration_lab").__file__).resolve()
     )
@@ -40,7 +40,7 @@ def main():
     subprocess.Popen = no_process
     from prosaic_integration_lab.memory_provider import MemoryProviders
     from prosaic_integration_lab.identity import Principal
-    from lab_runner.memory import main as memory_main
+    from lab_runner.castle_memory import main as memory_main
 
     provider = MemoryProviders()
     assert (

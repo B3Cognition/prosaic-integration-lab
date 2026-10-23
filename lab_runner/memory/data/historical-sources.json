@@ -1,0 +1,869 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "tenantId": "alpha",
+      "sourceId": "orchid-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "orchid-metrics",
+        "factId": "success",
+        "value": 90,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "orchid-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "orchid-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "maple-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "maple-metrics",
+        "factId": "success",
+        "value": 91,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "maple-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "maple-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cedar-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cedar-metrics",
+        "factId": "success",
+        "value": 92,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cedar-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cedar-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "iris-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "iris-metrics",
+        "factId": "success",
+        "value": 93,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "iris-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "iris-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "lotus-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "lotus-metrics",
+        "factId": "success",
+        "value": 94,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "lotus-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "lotus-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "lotus-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "lotus-metrics",
+        "factId": "success",
+        "value": 94,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "lotus-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "lotus-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "pine-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "pine-metrics",
+        "factId": "success",
+        "value": 95,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "pine-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "pine-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "pine-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "pine-metrics",
+        "factId": "success",
+        "value": 95,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "pine-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "pine-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "cobalt-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cobalt-metrics",
+        "factId": "success",
+        "value": 96,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "cobalt-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cobalt-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "juniper-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "juniper-metrics",
+        "factId": "success",
+        "value": 97,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "juniper-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "juniper-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ash-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ash-metrics",
+        "factId": "success",
+        "value": 98,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ash-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ash-incident",
+        "factId": "incidents",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "birch-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "birch-metrics",
+        "factId": "success",
+        "value": 99,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "birch-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "birch-incident",
+        "factId": "incidents",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "azalea-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "azalea-metrics",
+        "factId": "availability",
+        "value": 90,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "azalea-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "azalea-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "beech-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "beech-metrics",
+        "factId": "availability",
+        "value": 91,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "beech-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "beech-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cypress-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cypress-metrics",
+        "factId": "availability",
+        "value": 92,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cypress-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cypress-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "dahlia-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "dahlia-metrics",
+        "factId": "availability",
+        "value": 93,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "dahlia-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "dahlia-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "elm-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "elm-metrics",
+        "factId": "availability",
+        "value": 94,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "elm-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "elm-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "elm-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "elm-metrics",
+        "factId": "availability",
+        "value": 94,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "elm-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "elm-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "fir-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "fir-metrics",
+        "factId": "availability",
+        "value": 95,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "fir-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "fir-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "fir-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "fir-metrics",
+        "factId": "availability",
+        "value": 95,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "fir-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "fir-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "garnet-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "garnet-metrics",
+        "factId": "availability",
+        "value": 96,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "garnet-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "garnet-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "hazel-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "hazel-metrics",
+        "factId": "availability",
+        "value": 97,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "omega",
+      "sourceId": "hazel-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "hazel-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "indigo-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "indigo-metrics",
+        "factId": "availability",
+        "value": 98,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "indigo-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "indigo-incident",
+        "factId": "alarms",
+        "value": 0,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "jade-metrics",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "jade-metrics",
+        "factId": "availability",
+        "value": 99,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "jade-incident",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "jade-incident",
+        "factId": "alarms",
+        "value": 1,
+        "authority": "auditor",
+        "revision": 1
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "zircon-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "zircon-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "zircon-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "zircon-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "tundra-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "tundra-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "tundra-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "tundra-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "boreal-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "boreal-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "boreal-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "boreal-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "feldspar-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "feldspar-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "feldspar-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "feldspar-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "helios-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "helios-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "helios-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "helios-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "helios-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "sable-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "sable-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "sable-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "beta",
+      "sourceId": "sable-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "sable-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ember-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ember-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ember-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ember-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ripple-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ripple-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "ripple-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "ripple-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "marsh-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "marsh-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "marsh-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "marsh-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cairn-readiness-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cairn-readiness-archive",
+        "factId": "readiness",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 86
+      }
+    },
+    {
+      "tenantId": "alpha",
+      "sourceId": "cairn-alerts-archive",
+      "sourceVersion": 1,
+      "record": {
+        "recordId": "cairn-alerts-archive",
+        "factId": "alerts",
+        "authority": "inspector",
+        "revision": 1,
+        "value": 0
+      }
+    }
+  ]
+}

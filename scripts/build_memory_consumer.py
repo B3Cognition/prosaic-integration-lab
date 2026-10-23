@@ -15,7 +15,7 @@ sys.path[:0] = [str(ROOT / "src"), str(ROOT)]
 
 
 def main():
-    from lab_runner.memory import memory_artifacts
+    from lab_runner.castle_memory import memory_artifacts
     from lab_runner.stack import command
 
     parser = argparse.ArgumentParser(description=__doc__)

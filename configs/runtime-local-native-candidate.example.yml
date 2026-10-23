@@ -1,0 +1,31 @@
+# Local native-tool profile: requires published b3-prosaic-runtime 0.9.6.
+# Use the checksummed released SDK manifest. Historical candidate runs retain
+# their original 0.9.3+finalize.4 identity; the filename is kept for compatibility.
+default_profile: local
+allowed_tools: []
+limits:
+  timeout_s: 180
+  max_tool_rounds: 1
+routes:
+  fast: local
+  balanced: local
+  strong: local-strong
+profiles:
+  local:
+    base_url: http://127.0.0.1:8000/v1
+    model: mlx-community--Qwen2.5-Coder-7B-Instruct-4bit
+    api_key_file: ~/.omlx_token
+    max_tokens: 512
+    features:
+      streaming: false
+      finalize_after_tool_rounds: 1
+      omlx_tool_call_envelope: true
+      json_mode: true
+  local-strong:
+    base_url: http://127.0.0.1:8000/v1
+    model: ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ
+    api_key_file: ~/.omlx_token
+    max_tokens: 512
+    features:
+      streaming: false
+      finalize_after_tool_rounds: 1

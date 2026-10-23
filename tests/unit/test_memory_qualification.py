@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.parametrize("damage", ["missing", "identity"])
 def test_memory_artifacts_reject_incomplete_or_misidentified_family(tmp_path, damage):
-    from lab_runner.memory import memory_artifacts
+    from lab_runner.castle_memory import memory_artifacts
 
     root = Path(__file__).resolve().parents[2]
     manifest = json.loads((root / "dependencies/memory-candidates.json").read_text())
@@ -21,7 +21,7 @@ def test_memory_artifacts_reject_incomplete_or_misidentified_family(tmp_path, da
 
 
 def test_default_memory_lane_allocates_nothing(monkeypatch, capsys):
-    from lab_runner import memory
+    from lab_runner import castle_memory as memory
 
     monkeypatch.setattr(memory, "verify_installed", lambda *a: pytest.fail("allocated"))
     assert memory.main([]) == 0

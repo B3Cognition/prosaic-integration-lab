@@ -14,12 +14,15 @@ import sys
 import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT/'src'))
+sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
 from prosaic_integration_lab.dependencies import cache_directory,file_digest,sdk_manifest,verified_wheel_paths
 
 EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0'},
     'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}}
+CONTEXT_EXPECTED={**EXPECTED,
+    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0'},
+    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
@@ -40,15 +43,31 @@ def validate_run(run,commit):
         raise ValueError('candidate requires successful exact-source qualification')
 
 
-def curate(candidates,manifest,cache_root):
+def retained_runtime_postgres(cache_root):
+    """Retain the original published adapter, never a rebuilt same-version wheel."""
+    from scripts.prepare_dependencies import prepare
+    released=ROOT/'dependencies/releases.json'
+    data=sdk_manifest(released)
+    item=next(item for item in data['artifacts'] if item['distribution']=='b3-prosaic-runtime-postgres')
+    if (item['version'],item['filename'],item['sha256'],item['source_commit']) != (
+        '0.3.0','b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl',
+        '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca',
+        'a59621c5f30d766d1217b37df777d3876075dc34'):
+        raise ValueError('retained Runtime PostgreSQL release differs')
+    cache=prepare(released,cache_root)
+    return dict(item),cache/item['filename']
+
+
+def curate(candidates,manifest,cache_root,*,context_assembly=False):
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
+    expected_train=CONTEXT_EXPECTED if context_assembly else EXPECTED
     evidence=[];artifacts=[];sources={};seen=set()
     for repository,run_id,commit,directory in candidates:
         if repository not in EXPECTED or repository in seen or not re.fullmatch('[1-9][0-9]*',run_id):
             raise ValueError('invalid candidate identity')
         seen.add(repository);directory=Path(directory)
         receipt,content=read(directory/'release-receipt.json')
-        expected=EXPECTED[repository]
+        expected=expected_train[repository]
         distributions=receipt.get('distributions',[])
         if (receipt.get('version')!=1 or not re.fullmatch('[0-9a-f]{40}',commit) or
             receipt.get('source_commit')!=commit or len(distributions)!=len(expected) or
@@ -81,7 +100,15 @@ def curate(candidates,manifest,cache_root):
             artifacts.append({'distribution':name,'version':version,**item,'source_commit':commit,
                               'qualified_run_id':run_id,'release_receipt_sha256':candidate['receipt_sha256']})
             sources[filename]=directory/filename
-    data={'artifacts':artifacts,'candidate_lineage':{'version':1,'candidates':evidence}}
+    lineage={'version':1,'candidates':evidence}
+    if context_assembly:
+        retained,path=retained_runtime_postgres(cache_root)
+        if path.is_symlink() or not path.is_file() or file_digest(path)!=retained['sha256']:
+            raise ValueError('retained Runtime PostgreSQL bytes differ')
+        artifacts=[retained if item['distribution']==retained['distribution'] else item for item in artifacts]
+        sources[retained['filename']]=path
+        lineage['retained_artifacts']=[retained]
+    data={'artifacts':artifacts,'candidate_lineage':lineage}
     manifest=Path(manifest)
     if manifest.resolve() in {(ROOT/'dependencies/releases.json').resolve(),
                                (ROOT/'dependencies/releases-lab-0.2.0.json').resolve()}:
@@ -129,6 +156,7 @@ def main(argv=None):
         parser.add_argument('--'+prefix+'-source')
     parser.add_argument('--manifest',type=Path,required=True)
     parser.add_argument('--cache-root',type=Path,default=ROOT/'.cache/wheels')
+    parser.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
     args=parser.parse_args(argv)
     manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
             for field in ('run_id','source')]
@@ -153,7 +181,7 @@ def main(argv=None):
                 subprocess.run(['gh','run','download',run_id,'--repo',repository,'--name','qualified-release',
                     '--dir',str(directory)],capture_output=True,check=True,timeout=120)
                 candidates.append((repository,run_id,commit,directory))
-            data=curate(candidates,args.manifest,args.cache_root)
+            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly)
         print(json.dumps({'event':'candidate_sdk_bytes_verified','candidate_manifest_sha256':digest(args.manifest.read_bytes()),
             'candidate_lineage_sha256':digest(serialized(data['candidate_lineage'])),'wheel_count':5}))
         return 0

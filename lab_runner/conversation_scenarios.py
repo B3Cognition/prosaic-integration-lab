@@ -5,16 +5,29 @@ import hashlib
 import httpx
 
 
-def conversation_configuration(namespace):
+def conversation_configuration(namespace,*,context_assembly=False):
     if type(namespace) is not str or not re.fullmatch('[A-Za-z0-9._-]{1,128}',namespace):
         raise ValueError('invalid owned conversation namespace')
-    return {'bundles':[{'version':tier+'-v1','model_url':'http://model:8000/v1',
+    settings={'bundles':[{'version':tier+'-v1','model_url':'http://model:8000/v1',
         'model':'test-model-'+tier,'model_tier':tier,'fixture_effects':True,
         'operation_namespace':'conversation-'+hashlib.sha256(namespace.encode()).hexdigest()[:32]+'-'+tier,
         'journal_identity':'conversation-journal-v1'} for tier in ('balanced','strong')],
         'tenants':{'tenant-a':{'enabled':True,'binding_version':'balanced-v1'},
                    'tenant-b':{'enabled':True,'binding_version':'strong-v1'}},
         'max_sessions':128,'max_owner_sessions':16}
+    if context_assembly:
+        from prosaic_runtime import ContextPolicy
+        for mode,version,capacity in (('fullHistory','context-full-v1',32768),
+                                      ('omitOldestTurns','context-omit-v1',4000)):
+            definition={**settings['bundles'][0],'version':version,
+                'operation_namespace':'conversation-'+hashlib.sha256((namespace+version).encode()).hexdigest()[:32],
+                'interpretation_model':'test-model-strong','interpretation_model_tier':'strong',
+                'context_policy':ContextPolicy(mode,capacity,128,0,'lab-synthetic-byte-balanced-v1').to_dict(),
+                'interpretation_context_policy':ContextPolicy(mode,capacity,128,0,'lab-synthetic-byte-strong-v1').to_dict()}
+            settings['bundles'].append(definition)
+            tenant='context-full' if mode=='fullHistory' else 'context-omit'
+            settings['tenants'][tenant]={'enabled':True,'binding_version':version}
+    return settings
 
 
 def request(lab,principal,method,path,*,replica='a',**kwargs):

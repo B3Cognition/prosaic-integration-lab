@@ -37,6 +37,28 @@ def recover(lab,p,sid):
         time.sleep(.2)
 
 
+@pytest.mark.parametrize('interpretation', [False, True])
+def test_real_provider_timeout_is_durable_across_replica_replay_and_recovery(lab, interpretation):
+    p = principal(lab, 'user-0007')
+    session = create(lab, p, uuid.uuid4().hex)
+    if interpretation:
+        session = send(lab, p, session, 'find', 'Find players')
+    ref = session['pendingInteraction']['reference'] if interpretation else None
+    mid = uuid.uuid4().hex
+    message = 'the second result' if interpretation else 'Remember Prague'
+    before = calls(lab)
+    control(lab, scenario='conversation', fault='slow', fault_delay_s=35.0)
+    try:
+        failed = send(lab, p, session, mid, message, interaction_ref=ref)
+    finally:
+        control(lab, scenario='conversation')
+    assert failed['status'] == 'failed' and failed['failureCode'] == 'timeout'
+    assert calls(lab) == before + 1
+    assert send(lab, p, session, mid, message, replica='b', interaction_ref=ref) == failed
+    assert recover(lab, p, session['sessionId']) == failed
+    assert calls(lab) == before + 1
+
+
 def loss(lab,p,session,phase,message,*,ref=None):
     before=httpx.get(lab['model']+'/stats',timeout=5).json()['barriers'][phase]
     control(lab,scenario='conversation',effect_gate=phase)
@@ -78,11 +100,13 @@ def test_uncertain_workflow_handoff_requires_resolution_without_second_resume(la
     with psycopg.connect(lab['app_dsn']) as connection:
         effects=connection.execute('SELECT count(*) FROM lab_fixture.effects').fetchone()[0]
     result=recover(lab,p,session['sessionId'])
-    assert result['recoveryStatus']=='needsResolution' and calls(lab)==accepted
+    expected_status = 'completed' if phase == 'workflowCommandReturned' else 'needsResolution'
+    assert result['status'] == expected_status and calls(lab)==accepted
+    assert result['recoveryStatus'] == (None if expected_status == 'completed' else 'needsResolution')
     with PostgresRunStore(lab['harness_dsn'],namespace=lab['namespace']) as store:
         assert store.load_run(session['sessionId']).state['current']==step
     again=recover(lab,p,session['sessionId'])
-    assert again['recoveryStatus']=='needsResolution' and calls(lab)==accepted
+    assert again == result and calls(lab)==accepted
     with psycopg.connect(lab['app_dsn']) as connection:
         assert connection.execute('SELECT count(*) FROM lab_fixture.effects').fetchone()==(effects,)
 

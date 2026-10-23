@@ -1,0 +1,565 @@
+{
+  "artifacts": [
+    {
+      "distribution": "b3-prosaic-runtime",
+      "installedFiles": 57,
+      "reviewedSourceFiles": 50,
+      "sourceArchiveSha256": "51e5ede93a6a2c3c7ed99b5a249b99c41af78e0778419e33f584feb14adb6890",
+      "sourceCommit": "869192a970d52d29c605dfade43fc3dcad82f0dc",
+      "version": "0.9.7+tools.1",
+      "wheelSha256": "3aaf4bdd0694826725fe5169be331d131338e279c466bc248c08ab98c1df0eef"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "installedFiles": 35,
+      "reviewedSourceFiles": 29,
+      "sourceArchiveSha256": "6f617582fcb5adfc654be6e77673f8058cc17cd1a9dc29c0bfeb2d86e73068bf",
+      "sourceCommit": "f86e5e14551cd7aa13bd0a2ec2dd41e4e84e6abf",
+      "version": "0.9.1+tools.1",
+      "wheelSha256": "479f29031d2fb68293ca6ad17b3175f3c9b0793f7da20e803ea86475dd2ae547"
+    },
+    {
+      "distribution": "prosaic-integration-lab",
+      "installedFiles": 119,
+      "reviewedSourceFiles": 115,
+      "sourceArchiveSha256": "1af7f677e23610163d542bbaf02892b58290a16c03ed1183f4aaccc592206320",
+      "sourceCommit": "355f08cdde6d988b8fabe0a44560cb78b535b791",
+      "version": "0.5.1+tools.1",
+      "wheelSha256": "52aca1ce4971a76af1fa80165c09c36eb2524ff73e2d91e65a0334747bb6171f"
+    }
+  ],
+  "boundedRecovery": true,
+  "cases": 3,
+  "conclusion": "No reliable reasoning benefit demonstrated. Smaller raw1/3 versus0/3 is confounded by quotation-based continuation admission; larger3/3 both with only one recall-exposed pair.",
+  "continuationRefusals": [
+    {
+      "caseTokenCeiling": 8192,
+      "inputBound": 1307,
+      "inputCeiling": 1280,
+      "originalPlanRequiredTokens": 7424,
+      "overage": 27,
+      "paidPlusProposedReservation": 3029,
+      "sampleId": "changed-recovery-83-p1-enabled"
+    },
+    {
+      "caseTokenCeiling": 8192,
+      "inputBound": 1307,
+      "inputCeiling": 1280,
+      "originalPlanRequiredTokens": 7424,
+      "overage": 27,
+      "paidPlusProposedReservation": 3029,
+      "sampleId": "changed-recovery-83-p1-disabled"
+    },
+    {
+      "caseTokenCeiling": 8192,
+      "inputBound": 1211,
+      "inputCeiling": 1152,
+      "originalPlanRequiredTokens": 6912,
+      "overage": 59,
+      "paidPlusProposedReservation": 2877,
+      "sampleId": "missing-recovery-83-p1-disabled"
+    }
+  ],
+  "cumulativeCeilings": {
+    "providerRequests": 1475,
+    "reportedTokens": 1976623,
+    "toolCalls": 604
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1442,
+    "reportedTokens": 1731251,
+    "toolCalls": 588
+  },
+  "date": "2026-10-17",
+  "families": [
+    "relevant",
+    "changed",
+    "missing"
+  ],
+  "limitations": [
+    "One case per family, one stochastic trajectory per arm; descriptive only.",
+    "Current outcomes cover reject and insufficient, not approve.",
+    "Three families exclude hostile-note, large-index and broad multi-agent evaluation.",
+    "No inference-based case/prompt/settings edits or reruns; both arms use bounded recovery.",
+    "No-recall arm differences cannot be attributed to memory content."
+  ],
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "nextMilestone": "Provider-neutral adaptive continuation budgeting under unchanged outer limits, covering valid tool-response variants and avoiding memory-padding admission artifacts.",
+  "pairs": [
+    {
+      "disabledPassed": false,
+      "enabledPassed": false,
+      "family": "relevant",
+      "memoryExposed": true,
+      "model": "smaller",
+      "requestDifference": 0,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 610
+    },
+    {
+      "disabledPassed": false,
+      "enabledPassed": false,
+      "family": "changed",
+      "memoryExposed": false,
+      "model": "smaller",
+      "requestDifference": 0,
+      "requestIdentical": true,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 0
+    },
+    {
+      "disabledPassed": false,
+      "enabledPassed": true,
+      "family": "missing",
+      "memoryExposed": true,
+      "model": "smaller",
+      "requestDifference": 1,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 1557
+    },
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "relevant",
+      "memoryExposed": false,
+      "model": "larger",
+      "requestDifference": 0,
+      "requestIdentical": true,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 6
+    },
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "changed",
+      "memoryExposed": false,
+      "model": "larger",
+      "requestDifference": 0,
+      "requestIdentical": true,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": -23
+    },
+    {
+      "disabledPassed": true,
+      "enabledPassed": true,
+      "family": "missing",
+      "memoryExposed": true,
+      "model": "larger",
+      "requestDifference": 0,
+      "requestIdentical": false,
+      "requestedRecordSetsEqual": true,
+      "tokenDifference": 486
+    }
+  ],
+  "perModel": {
+    "larger": {
+      "disabled": {
+        "counts": {
+          "providerRequests": 6,
+          "reportedTokens": 8541,
+          "toolCalls": 3
+        },
+        "mandatoryRefused": 0,
+        "medianSeconds": 65.65313183297985,
+        "memoryExposed": 0,
+        "passed": 3,
+        "repairAttempts": 0,
+        "samples": 3
+      },
+      "enabled": {
+        "counts": {
+          "providerRequests": 6,
+          "reportedTokens": 9010,
+          "toolCalls": 3
+        },
+        "mandatoryRefused": 0,
+        "medianSeconds": 77.4471532079915,
+        "memoryExposed": 1,
+        "passed": 3,
+        "repairAttempts": 0,
+        "samples": 3
+      }
+    },
+    "smaller": {
+      "disabled": {
+        "counts": {
+          "providerRequests": 6,
+          "reportedTokens": 7310,
+          "toolCalls": 4
+        },
+        "mandatoryRefused": 0,
+        "medianSeconds": 4.651477375009563,
+        "memoryExposed": 0,
+        "passed": 0,
+        "repairAttempts": 1,
+        "samples": 3
+      },
+      "enabled": {
+        "counts": {
+          "providerRequests": 7,
+          "reportedTokens": 9477,
+          "toolCalls": 4
+        },
+        "mandatoryRefused": 0,
+        "medianSeconds": 7.517278000013903,
+        "memoryExposed": 2,
+        "passed": 1,
+        "repairAttempts": 1,
+        "samples": 3
+      }
+    }
+  },
+  "releaseRecommendation": "Push/release generic reviewed Runtime/Harness fixes through normal release gates; retain experimental opt-in status for Lab memory/context planning.",
+  "remaining": {
+    "providerRequests": 33,
+    "reportedTokens": 245372,
+    "toolCalls": 16
+  },
+  "results": [
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "exitCode": 0
+        },
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 4946,
+        "toolCalls": 2
+      },
+      "family": "relevant",
+      "inputTokens": 4694,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 252,
+      "sampleId": "relevant-recovery-83-p1-disabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 2
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "decision"
+          ],
+          "exitCode": 0
+        },
+        {
+          "answerFieldIssues": [
+            "decision",
+            "facts",
+            "citations"
+          ],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 5556,
+        "toolCalls": 2
+      },
+      "family": "relevant",
+      "inputTokens": 5334,
+      "memoryExposed": true,
+      "model": "smaller",
+      "outputTokens": 222,
+      "sampleId": "relevant-recovery-83-p1-enabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 2
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2755,
+        "toolCalls": 1
+      },
+      "family": "relevant",
+      "inputTokens": 2549,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 206,
+      "sampleId": "relevant-recovery-83-p2-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2761,
+        "toolCalls": 1
+      },
+      "family": "relevant",
+      "inputTokens": 2549,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 212,
+      "sampleId": "relevant-recovery-83-p2-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2924,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "inputTokens": 2621,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 303,
+      "sampleId": "changed-recovery-83-p2-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2947,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "inputTokens": 2621,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 326,
+      "sampleId": "changed-recovery-83-p2-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "nonzeroRuntimeExit",
+            "invalidAnswerFormat"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": 1210,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "inputTokens": 1161,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 49,
+      "sampleId": "changed-recovery-83-p1-enabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "nonzeroRuntimeExit",
+            "invalidAnswerFormat"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": 1210,
+        "toolCalls": 1
+      },
+      "family": "changed",
+      "inputTokens": 1161,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 49,
+      "sampleId": "changed-recovery-83-p1-disabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [
+            "nonzeroRuntimeExit",
+            "invalidAnswerFormat"
+          ],
+          "exitCode": 1
+        }
+      ],
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": 1154,
+        "toolCalls": 1
+      },
+      "family": "missing",
+      "inputTokens": 1113,
+      "memoryExposed": false,
+      "model": "smaller",
+      "outputTokens": 41,
+      "sampleId": "missing-recovery-83-p1-disabled",
+      "state": "failed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2711,
+        "toolCalls": 1
+      },
+      "family": "missing",
+      "inputTokens": 2618,
+      "memoryExposed": true,
+      "model": "smaller",
+      "outputTokens": 93,
+      "sampleId": "missing-recovery-83-p1-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "disabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 2839,
+        "toolCalls": 1
+      },
+      "family": "missing",
+      "inputTokens": 2477,
+      "memoryExposed": false,
+      "model": "larger",
+      "outputTokens": 362,
+      "sampleId": "missing-recovery-83-p2-disabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    },
+    {
+      "arm": "enabled",
+      "attempts": [
+        {
+          "answerFieldIssues": [],
+          "exitCode": 0
+        }
+      ],
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3325,
+        "toolCalls": 1
+      },
+      "family": "missing",
+      "inputTokens": 2791,
+      "memoryExposed": true,
+      "model": "larger",
+      "outputTokens": 534,
+      "sampleId": "missing-recovery-83-p2-enabled",
+      "state": "passed",
+      "toolOutcomes": {
+        "ok": 1
+      }
+    }
+  ],
+  "samples": 12,
+  "studyCounts": {
+    "providerRequests": 25,
+    "reportedTokens": 34338,
+    "toolCalls": 14
+  },
+  "studyId": "recovery-memory-heldout-v1",
+  "toolOutcomes": {
+    "ok": 14
+  },
+  "unknownReservationsRetained": 7,
+  "verification": {
+    "all12Known": true,
+    "allMandatoryPlansAdmitted": true,
+    "allNativeUsageReconciled": true,
+    "freshCasesFrozenBeforeQuotation": true,
+    "networkDeniedReceiptReplay": true,
+    "noPromptSettingsOrCaseEditsAfterLive": true,
+    "noUnknownOrOverrunAdded": true,
+    "traceBytesPreserved": true
+  },
+  "version": 1
+}

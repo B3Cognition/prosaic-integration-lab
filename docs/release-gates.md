@@ -6,7 +6,10 @@ on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
 dependencies are pinned. Third-party Python dependencies require hashes;
 released Prosaic wheels require exact versions/checksums and installed-payload
 audit. Jobs use read-only repository permissions, no paid provider credentials,
-and publish only a whitelisted summary. Raw `.lab` directories, JUnit capture,
+and publish whitelisted summaries plus the qualified synthetic Lab wheel/source
+archives from the successful released ARM64/PostgreSQL 16 cell. The new-train
+wheel and rebuilt-source consumers run the agent-quality and memory installed
+smokes. Raw `.lab` directories, JUnit capture,
 database backups, Docker logs, tokens and private configs are never uploaded.
 Runner labels follow [GitHub's hosted runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
 
@@ -124,8 +127,11 @@ image/manifest/source digests; the private fixture stays under its owned directo
 An unavailable engine records `not_qualified`; host checks alone prove neither
 PostgreSQL behavior nor either required Linux architecture.
 
-The active release manifest now pins published Core 0.4.1, Runtime 0.8.1/recorder
-0.2.1 and Harness 0.7.1/store 0.2.1 under the `b3-prosaic` distribution family.
+The active release manifest now pins published Core 0.4.1, Runtime 0.9.0/recorder
+0.3.0 and Harness 0.8.0/store 0.3.0 under the `b3-prosaic` distribution family.
+The former patch family is preserved in `dependencies/releases-lab-0.4.0.json`.
+The conversation lane is now required in released mode; fresh adoption results
+are recorded in the [2026-10-13 ledger](verification/published-conversation-adoption-2026-10-13.md).
 Actual PyPI and GitHub downloads match the original qualified bytes, including
 the seven reliability fixes. The original 0.6 baseline is preserved in
 `dependencies/releases-baseline-0.6.json`; previous failing receipts remain

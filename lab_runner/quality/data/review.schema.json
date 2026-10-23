@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "approved": {
+      "type": "boolean"
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "decision",
+          "facts",
+          "citations",
+          "evidence"
+        ]
+      }
+    }
+  },
+  "required": [
+    "approved",
+    "issues"
+  ],
+  "additionalProperties": false
+}

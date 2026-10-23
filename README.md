@@ -1,5 +1,14 @@
 # Prosaic integration lab
 
+The experimental [sandboxed CLI blueprint](docs/sandboxed-tools.md) composes
+host admission/approval with Runtime's native confinement and independently
+witnessed cleanup. Unsupported hard resource controls refuse admission; memory
+and correction remain experimental. Linux platform qualification remains a CI gate.
+
+The experimental [trajectory evaluation blueprint](docs/trajectory-evaluation.md)
+joins safe public SDK observations to host-verified outcomes, with a second-domain
+parcel example and offline report inspection. It makes no live model efficacy claim.
+
 Reference service for consuming Prosaic's validated workflow factory, private
 host bindings, durable multiuser execution and owner-scoped usage accounting.
 The native demo discovers approved specialists, admits a proposed graph, runs
@@ -10,14 +19,36 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
+This branch prepares Lab **0.6.0**. The latest published Lab release is **0.5.0**;
+for its packages and final verification, use the
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0).
+The experimental [agent-quality](docs/agent-quality.md) and
+[retrieval-memory](docs/retrieval-memory.md) examples have separate capability
+claims and retained model-study evidence.
+
+The experimental [durable failure isolation blueprint](docs/failure-isolation.md)
+adds conservative host admission and explicit receipt-only recovery around public
+SDK operations. It preserves reservations and never automatically replays work.
+The experimental [tool approval blueprint](docs/tool-approval.md) binds exact
+actions to trusted host review and one-shot consent through public Runtime APIs.
+
+The next experimental milestone adds an opt-in
+[typed evidence consumer pattern](docs/verification/typed-evidence.md). It
+classifies verified, absent and unread facts without supplying a model decision.
+Its fresh live comparison stopped on a token-budget overrun; the verification
+note records the incomplete results. Released Lab 0.5.0 remains unchanged.
+
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
-replies and bounded full history. Lab 0.5.0's candidate passed installed Linux
-AMD64/ARM64 × PostgreSQL 16/18 qualification. Its new SDK train remains
-unpublished; current published pins below do not supply the conversation API.
-See the separate
+replies and bounded full history. The active manifest now uses published Runtime
+0.9.7/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
+Lab 0.5.0's earlier candidate passed installed Linux
+AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
-before selecting a candidate.
+for that exact candidate's results; fresh public adoption is recorded in the
+[published SDK adoption ledger](docs/verification/published-conversation-adoption-2026-10-13.md).
+The [timeout patch ledger](docs/verification/conversation-timeout-patch-2026-10-14.md)
+records the latest package update and its additional no-redispatch regressions.
 
 The [optional Castle memory guide](docs/optional-memory.md) adds a separate,
 disabled-by-default candidate lane. It freezes scoped evidence before a Harness
@@ -27,7 +58,7 @@ records the tested platforms, artifacts and limits.
 
 ## Install packages for an embedding service
 
-All five patch packages are published on PyPI. Their actual public downloads
+All five packages are published on PyPI. Their actual public downloads
 match the original qualified wheels and GitHub release assets. Create a fresh
 Python environment or container image and install the coherent five-package
 family:
@@ -36,8 +67,8 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.8.1' 'b3-prosaic-runtime-postgres==0.2.1' \
-  'b3-prosaic-harness==0.7.1' 'b3-prosaic-harness-postgres==0.2.1'
+  'b3-prosaic-runtime==0.9.7' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.9.4' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -60,8 +91,8 @@ owned PostgreSQL and measured synthetic inference.
 ## Try the native workflow
 
 The [Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
-consumes the five published `b3-prosaic`
-patch wheels through the exact-version [active manifest](dependencies/releases.json).
+consumed the five published `b3-prosaic`
+patch wheels preserved in the [Lab 0.4.0 manifest](dependencies/releases-lab-0.4.0.json).
 The patch train contains seven upstream reliability fixes. Use a new environment;
 historical manifests, candidate caches and verification receipts are preserved.
 The [release closure](docs/verification/production-readiness-m1-m2-2026-10-11.md#lab-040-release-closure)
@@ -82,7 +113,8 @@ cells, 864 required cases, zero failures/errors/skips and all 32 lane plus four
 demo cleanups verified. The earlier
 [hardening checkpoint](docs/verification/hardening-2026-10-10.md#native-hardening-closure)
 retains its original candidate source and receipts. The recipe below uses the
-stable released tag and actual verified public SDK downloads. Python imports
+current `main` checkout and actual verified public SDK downloads. Lab 0.5.0
+publication is separate from this SDK adoption. Python imports
 and CLI names remain unchanged.
 
 You need Python 3.12 and a running Docker daemon. Use a fresh environment: legacy and `b3-prosaic`
@@ -90,7 +122,7 @@ distributions share import paths and must not be installed together. Podman is
 accepted by the runner but is not a verified path here.
 
 ```sh
-git clone --branch v0.4.0 https://github.com/B3Cognition/prosaic-integration-lab.git
+git clone --branch main https://github.com/B3Cognition/prosaic-integration-lab.git
 cd prosaic-integration-lab
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
@@ -110,10 +142,10 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.8.1 |
-| `b3-prosaic-runtime-postgres` | 0.2.1 |
-| `b3-prosaic-harness` | 0.7.1 |
-| `b3-prosaic-harness-postgres` | 0.2.1 |
+| `b3-prosaic-runtime` | 0.9.7 |
+| `b3-prosaic-runtime-postgres` | 0.3.0 |
+| `b3-prosaic-harness` | 0.9.4 |
+| `b3-prosaic-harness-postgres` | 0.4.0 |
 
 Preparation downloads the actual pinned public URLs and verifies the original
 wheel hashes. Installation uses only those five wheels after the locked
@@ -134,6 +166,72 @@ records the SDK and Lab release evidence. The earlier documentation-only
 checkpoint `e283752` records the qualified Lab 0.3.0 source `59ea44b`; its tag
 and original assets remain unchanged. The current documentation records the
 separate Lab 0.4.0 source and original builds.
+
+## Try a conversation and an approved workflow
+
+### Converse in the browser
+
+After the fresh installation and released consumer build above, keep an owned
+local chat service running with:
+
+```sh
+.venv-public/bin/python -m lab_runner.chat --live-local --max-calls 32
+```
+
+The launcher opens a simple browser chat backed by the approved local Qwen
+profile in `configs/runtime-local.example.yml` (`local-strong` by default).
+It reads the provider key from that profile's private secret file, uses an owned
+PostgreSQL database and binds service ports to loopback. You can type messages,
+read retained history, start a new conversation and select or approve the
+displayed workflow interaction. The shared provider allowance covers all sessions
+in that launch; exhaustion stops dispatch rather than silently extending it.
+Workflow tools still operate on synthetic Lab players, even with a real model.
+
+Use `--runtime-config /absolute/private/runtime.yml --profile approved-profile`
+to select another approved local Qwen profile. Omit `--live-local` for scripted,
+credential-free fixture responses. The model mode is labeled in the page.
+Press Ctrl+C in the launcher terminal to stop and verify owned-stack cleanup.
+The browser launch code is single-use and expires after ten minutes. API tokens
+stay in browser memory; reloading requires a fresh launch or manual token
+connection. No token is embedded in the page or saved in browser storage.
+The ordinary service also serves the chat shell at `/chat`; its API calls still
+require authentication. **Refresh** only reads current state. **Retry same
+request** replays an uncertain HTTP request with the original message ID/body;
+**Inspect recovery** does not authorize repeating an uncertain effect.
+
+After the installation and released consumer build above, run:
+
+```sh
+.venv-public/bin/python -m lab_runner demo --mode conversation --postgres-version 16
+.venv-public/bin/python -m lab_runner test --mode conversation --postgres-version 18
+```
+
+The demo uses the published packages, two HTTP replicas, durable PostgreSQL
+sessions and synthetic inference. It creates an authenticated conversation,
+remembers a user correction, starts the host-approved player lookup workflow,
+selects the displayed second result and approves its exact current interaction.
+The fixture performs one effect; duplicate approval replays add no model call or
+effect. Conversation and workflow usage are reported separately. The test lane
+also exercises authorization, worker loss, recovery and capacity limits.
+
+Choose the API that matches your application:
+
+- **A small assistant:** use `Conversation` with `MemorySessionStore` for a
+  prototype, `FileSessionStore` for a private single-host service, or
+  `PostgresSessionStore` for replicas. Follow the
+  [public SDK example](docs/conversations.md#build-a-small-assistant).
+- **A generated workflow:** admit a proposal with `WorkflowFactory` and trusted
+  `WorkflowCatalog`/`WorkflowBindings`; then execute the admitted graph. Follow
+  the [construction example](docs/consume-native-workflows.md#construct-a-workflow-in-memory)
+  and the native HTTP demo above.
+- **A conversation that needs approval:** let trusted host code attach an
+  approved workflow and require the displayed `interactionRef` and current
+  revision. Follow the [HTTP contract](docs/conversations.md#authenticated-http-contract).
+
+The host owns identity, grants, endpoints, tools and billing attribution. Clients
+send messages or graph proposals, and receive filtered public replies. Recovery
+does not authorize repeating an uncertain effect. These demos need Docker but no
+real-model credentials; live conformance is a separate opt-in operation.
 
 ### Retained candidate recipe
 
@@ -246,14 +344,15 @@ and runs CLI, `pip check` and public workflow construction checks. Released CI
 requires it. Native transport/SQL fault tests and populated native logical restore
 are described in [release gates](docs/release-gates.md) and
 [qualification](docs/qualification.md). Their new collection contract is 230
-cases per platform/database cell; the Lab 0.3.0 release retains its original
+historical cases per platform/database cell; the Lab 0.3.0 release retains its original
 864-case evidence. Current milestone evidence and remaining limits are in the
 [production readiness ledger](docs/verification/production-readiness-m1-m2-2026-10-11.md).
 The original milestone checks passed all 920 cases on Linux AMD64/ARM64 ×
 PostgreSQL 16/18 at source `8f60c587ce36a9bb5d9b65c3ca1876f1de93b9bc`; the
 ledger retains that source's pinned checkout instructions. Lab 0.4.0 passed its
 own exact-source matrix at `f47328d` as recorded above. Actual local routing passed
-default/balanced Qwen 7B and strong Qwen 27B. SDK release pins remain unchanged.
+default/balanced Qwen 7B and strong Qwen 27B. That milestone retained its SDK pins;
+the active manifest now adopts the published conversation family above.
 The newer conversation candidate has [separate actual local Qwen evidence](docs/verification/local-conversation-2026-10-12.md):
 the complete journey passed with balanced chat/interpretation and explicit strong
 workflow execution. Quoted approval was denied and duplicate approval caused no
@@ -267,6 +366,21 @@ not qualify a live provider, deployment authentication/TLS, long soak capacity,
 HA/PITR or customer invoices.
 
 ## Historical release and operations
+
+The optional context assembly demonstration uses local synthetic byte units,
+not a production tokenizer. With the complete context-capable published SDK
+train installed and audited, run:
+
+```sh
+python -m lab_runner demo --mode conversation --context-assembly --postgres-version 16
+```
+
+The comparison includes recent and older preferences, current interaction
+authority and historical injection. It reports `lostContext` where removing
+older turns loses useful information. Stored history remains complete; the chat
+UI exposes only counts and omitted ranges. See the
+[context qualification ledger](docs/verification/context-assembly-2026-10-14.md)
+for exact evidence and release limitations.
 
 Lab **0.2.0** and its original SDK family are recorded in the
 [2026-10-09 release ledger](docs/verification/release-train-2026-10-09.md).
@@ -291,3 +405,25 @@ Implementation context lives in [AGENTS.md](AGENTS.md), the
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
+
+## Experimental agent quality and retrieval memory
+
+See [agent quality](docs/agent-quality.md) and [retrieval memory](docs/retrieval-memory.md) for opt-in local evaluation commands. These consumer examples use public SDK APIs and retain bounded live allowances, immutable evidence and offline replay.
+
+The [typed handoff example](docs/typed-handoffs.md) adds offline planner/worker/critic contracts, independent evidence gates and full-trajectory scoring under the same limits. It remains experimental and makes no live reasoning claim.
+
+The [first real-model handoff evaluation](docs/verification/real-handoffs-live-2026-10-18.md) stopped all eight samples at the planner. The opt-in [direct worker/critic example](docs/direct-handoffs.md) removes host-owned assignment generation from the model. Its [frozen live study](docs/verification/direct-handoffs-live-2026-10-18.md) found partial critic warnings, without complete verification or demonstrated answer improvement.
+
+The [provider-neutral role qualification blueprint](docs/role-qualification.md) gives consumers reusable policy checks, configuration-bound qualification and evidence-grounded diagnostics. Consumers supply their own roles, evidence policies, suites and model settings. [Offline proof](docs/verification/role-qualification-2026-10-18.md) uses scripted responses; it does not certify either local model or admit synthetic qualifications for live use.
+
+The opt-in [bounded correction blueprint](docs/bounded-correction.md) adds one
+host-verified correction and a matched no-critic baseline under the same per-arm
+limits. Consumers adapt the evidence policy and qualify their own roles; scripted
+offline proof does not establish model or critic benefit.
+The [fresh live comparison](docs/verification/correction-live-2026-10-18.md)
+stopped on unknown usage with no eligible matched pairs. A separate offline
+unsupported-usage guard defect is fixed in the experimental candidate and
+[qualified offline](docs/verification/usage-guard-2026-10-18.md). This does not
+establish critic benefit or production readiness.
+
+The [latest four-sample memory comparison](docs/verification/missing-evidence-memory-live-2026-10-18.md) found no benefit on its one missing-evidence case: the smaller model failed both arms and the larger model passed both. Recall added tokens without saving requests or tools. Memory remains experimental and disabled unless explicitly selected; general efficacy is unproven.

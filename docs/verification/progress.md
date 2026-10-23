@@ -1,5 +1,191 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Sandboxed CLI consumer blueprint — 2026-10-20
+
+Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes
+and12network-denied replays. All142payloads match; public wheel/rebuilt-sdist
+and optimized absent-backend gates pass. Both Important review findings and
+cleanup/timing proof gaps are fixed; no deferred minors. Keep branch local
+for required later Linux/platform CI. Qualification ledger updates follow
+builds; the audited package payloads remain identical.
+
+PR21 merged at5a966ae with four green CI cells. New experimental admission,
+whole-turn approval and actual OS canaries use public Runtime0.9.7, refusing
+unsupported hard resource controls. Focused47tests and12installed both-wire
+scenarios/replays pass; all142payloads match. Public wheel/rebuilt-sdist adoption
+and missing-backend fail-closed proof pass. Local enforcement is macOS; Linux
+operational qualification remains a mandatory PR/CI gate. Memory/correction and
+current limits/charges stay unchanged. [Qualification](sandboxed-tools-2026-10-20.md).
+
+## PR18 public CI repair — 2026-10-18
+
+[Report](pr18-ci-2026-10-18.md): update published dependency pins and closed
+provenance selection, recognize the exact new SDK train and verify current
+distribution versions instead of 0.5.0. All required gates retained; experimental
+memory/correction and candidate diagnostics claims remain separate.
+
+## Provider-neutral usage guard — 2026-10-18
+
+[Qualification](usage-guard-2026-10-18.md): policy v2 enforces complete numeric
+counts for reported/unsupported usage and stops on unavailable counts. Role
+costs use the same completeness rule. Both-wire installed guard and baseline
+checks pass, with zero live calls; limits, 39 ledgers and nine unknown
+reservations remain unchanged. Memory/correction remain experimental. The
+current review PR is distinct from stable SDK/Lab release acceptance.
+
+## Provider-neutral consumer role blueprint — 2026-10-18
+
+[Guide](../role-qualification.md), [qualification](role-qualification-2026-10-18.md).
+Generic role checks/qualification are independent of the rollout example and
+provider/model choice. Scope/accounting diagnostics use saved public evidence;
+consumers own domain policies, suites, authorization and held-out model tuning.
+Final roles.2 candidate:1524source/46focused tests pass,24installed synthetic
+both-wire lanes,4synthetic qualification records denied live use;127installed
+files verified and SDK packages unchanged. One fresh review,2Important fixes
+verified9RED→GREEN, no minors. Zero live calls and unchanged per-case/cumulative
+budgets,38ledgers and8old unknown reservations. No SDK changes or release.
+
+## Frozen direct worker/critic live result — 2026-10-18
+
+[Evaluation](direct-handoffs-live-2026-10-18.md):12fresh samples,41host checks,
+12actual-counter offline lanes, reviewed/frozen before approved dispatch.
+Smaller critic correctly escalated all four flawed drafts it reviewed but
+identified only5/14required issue fields; clean control accepted. Larger's three
+critic controls truncated at512output, and neither full-handoff worker reached
+critic. Both models passed the worker-only case;0/2full-handoff workers passed
+per model. Detection warnings do not establish complete verification or repair.
+All usage known:18/4/28754; cumulative1494/605/1805193 against1524/625/1976623.
+No new unknown/timeout/overrun/counter violation; old8unknown reservations remain
+fully charged. Network-denied copied-state recovery made zero additional calls.
+Preserved795files and ledger38; all37old ledger hashes unchanged. Models, SDKs,
+package contracts and per-case caps unchanged. No source fix/push/release or
+memory rollout. Next: role capability qualification and source-grounded diagnostics
+before a bounded repair/ablation study; autonomous readiness remains open.
+
+## Direct-role output contracts qualified offline — 2026-10-18
+
+[Qualification](direct-handoffs-2026-10-18.md): Lab 0.5.1+direct.2, executable
+source 7c77df8; explicit closed output schemas and host assignment, compact worker
+result, host-projected actual evidence for critic. Independent worker, critic
+controls and full handoffs; no metadata-copy planner call. Final 1,478 source
+tests, 90 focused tests, 76 installed both-wire cases, 36 unchanged-counter frame
+trajectories. Review found unread-decision mismatch, semantic-wire coverage gap
+and stop-quality misgrading; all fixed after 15 failing regressions, then green
+suite. 156 wire mutations rejected. Quotes 1,506–5,287 under 8,192. Zero live
+requests, unchanged current caps/charged usage and all historical reservations.
+Prior 2,596 evidence files / 37 ledgers / eight unknown reservations verified.
+No release, push, SDK changes or memory rollout; real critic benefit unmeasured.
+
+## Eight-sample real-model handoff result — 2026-10-18
+
+[Live evaluation](real-handoffs-live-2026-10-18.md):8/8samples ran,0/8workflows
+passed planner. Smaller returns schema descriptions; larger exhausts512output
+tokens with incomplete JSON. No downstream worker/critic opportunity, so critic
+efficacy remains unmeasured. All usage known;8requests/0tools/7268tokens, eight
+copied-store recoveries without network. Current1476/601/1776439 versus ceilings
+1500/617/1976623, all8old unknowns retained. Fix the provider-neutral role/schema
+boundary and avoid unnecessary model generation of host-owned assignments before
+testing more complex collaboration. Study stayed frozen; no publication.
+
+## Frozen real-model handoff preparation — 2026-10-18
+
+[Prepared](real-handoffs-2026-10-18.md):1388source tests,15installed regressions,
+eight actual-counter fixture trajectories and four reporting/interruption phases
+pass; exact source/wheel/SDK checks pass. Four fresh cases per model, unchanged
+graph/prose/caps and no memory. Three Important review issues fixed; audit repeat
+path minor deferred. User approval requested for25requests/13tools; no dispatch
+or new live efficacy finding. Preserve eight old unknown charges and36ledgers.
+
+## Offline typed handoffs — 2026-10-18
+
+[Qualification](typed-handoffs-2026-10-18.md) records1373source tests,40new
+regressions,30installed both-wire scenarios plus3review regressions, exact payload
+audits and closed review findings. Lab-only local0.5.1+handoffs.2: typed assignment,
+worker evidence/result and critic review, independent gates, explicit escalation,
+stage-by-stage quality/safety and no-call receipt recovery. Current caps and live
+usage unchanged; memory remains experimental. No SDK release or live reasoning,
+database/platform or production-autonomy qualification is implied.
+
+## Fresh four-sample missing-evidence memory comparison — 2026-10-18
+
+All4samples completed with known usage in the
+[new audited study](missing-evidence-memory-live-2026-10-18.md). Both models had
+recall exposure: smaller failed both arms (wrong decision after feedback), larger
+passed both immediately. Memory added tokens and saved no request/tool/correction;
+one case does not establish general efficacy. Shared continuation budgeting
+admitted one over-quotation bound safely; all6tools succeeded. Usage quantities
+reconcile despite unsupported extended usage details. Study12requests/6tools/
+16485tokens; cumulative1468/601/1769171, remaining7/3/207452. All eight historical
+unknown reservations retained;36canonical ledgers and178new evidence files
+preserved. No product change/publication; next recommended work is offline
+provider-neutral typed multi-agent handoff and trajectory evaluation.
+
+## Response/usage fault qualification complete — 2026-10-18
+
+The [ledger](response-faults-2026-10-18.md) records private Runtime/Lab diagnostic
+candidates with1333passing Lab tests and1345passing Runtime tests (two documented
+source skips, installed gate passed separately). Installed57checks plus36native
+fault/replay,14continuation and10legacy scenarios pass. Both JSON/SSE wire formats
+are exercised; unknown usage blocks redispatch and contradictory errors cannot
+release tools. New diagnostic metadata is bounded and sanitized; complete operator
+Results retain their existing privacy contract. No live calls or publication.
+All35ledgers/eight unknown reservations and1048prior evidence files preserved.
+Memory remains experimental; readiness is for a budget-fitting live comparison.
+
+## Strict validation and partial fresh comparison — 2026-10-17
+
+The [new checkpoint](continuation-memory-live-2026-10-17.md) closes the derived
+integer-field minor with four regressions and1333passing source tests. Installed
+Lab0.5.1+continuation.2 passes14both-wire and10legacy scenarios. The frozen
+eight-sample comparison stopped after four known successes and one unknown
+larger-model response; three were not dispatched. Limits held, unknown charged,
+receipts replayed without network, historical evidence preserved. Memory has
+one smaller-model efficiency observation and no established efficacy benefit.
+Next recommended gap: provider-neutral failure diagnostics and usage fault
+qualification, keeping unknown-usage fencing. No publication or model tuning.
+
+## Public SDK releases and continuation budgeting — 2026-10-17
+
+The [complete ledger](continuation-budgeting-2026-10-17.md) records published
+Runtime0.9.7/Harness0.9.4, exact public byte verification and experimental Lab
+continuation budgeting. Version2 admits actual counted requests under one shared
+Runtime scope; version1 defaults, historical evidence and all limits remain.
+Full Lab1329passed; final focused35; both provider formats pass14installed and
+Linux ARM64 network-none scenarios, plus10legacy replay scenarios per platform.
+No live inference or Lab publication. One non-blocking derived-count numeric
+typing minor is deferred. Ready for fresh held-out validation, not a memory
+accuracy claim; remaining allowance33requests/16tools/245372tokens.
+
+## Fresh balanced live memory comparison — 2026-10-17
+
+The [12-sample comparison](balanced-memory-live-2026-10-17.md) completed with
+25requests/14tools/34338tokens, no new unknown or overrun, and independent
+receipt/recorder/counter reconciliation plus network-denied replay. Both models,
+both arms and three fresh families were frozen before dispatch. Memory efficacy
+remains unproven: smaller0/3→1/3 is admission-confounded; larger3/3→3/3 with only
+one exposed pair. The next generic gap is continuation planning under unchanged
+outer caps. Prior ledgers/history preserved; no model tuning or publication.
+
+## Tool outcomes and bounded recovery candidate — 2026-10-17
+
+Runtime classifies portable tool outcomes; Harness validates complete call
+identity before bounded recovery; Lab consumes the installed public contracts.
+The [separate qualification ledger](tool-outcomes-recovery-2026-10-17.md) records
+exact local candidates, source and installed/container checks, independent
+review, limits and readiness. Released manifests and historical live evidence
+are preserved. No provider-specific tuning or live inference is included.
+
+## Published SDK adoption checkpoint — 2026-10-13
+
+The active manifest now selects actual published Core 0.4.1, Runtime 0.9.0/
+recorder 0.3.0 and Harness 0.8.0/store 0.3.0 wheels. The previous manifest is
+preserved as `dependencies/releases-lab-0.4.0.json`. Fresh ordinary-index
+adoption, unit/functional tests and released-mode stack evidence are recorded
+in [the separate adoption ledger](published-conversation-adoption-2026-10-13.md).
+The checkpoints below retain their original candidate and release evidence.
+
+## Historical conversation candidate checkpoint
+
 Conversation adoption is tracked separately in
 [conversation-adoption-2026-10-11.md](conversation-adoption-2026-10-11.md).
 Lab 0.5.0 candidate source `34f291e8c7f7dd3809767c2fbf518b55e50204d6`
@@ -191,3 +377,40 @@ owned engine resources. The original failure remains preserved. A fresh demo
 not counted as product bugs. The full evidence, fix ownership/acceptance and
 conditional deferrals are in
 `production-readiness-2026-10-09.md`.
+
+# Durable failure isolation and explicit recovery (2026-10-18)
+
+PR18 merged at1c52747 after all four required exact-head CI lanes passed.
+New experimental consumer journal qualified offline on a separate local branch:
+1678source/25focused tests, four installed both-wire lanes, four network-denied
+recoveries, three process-loss boundaries, six queued-overrun gates. One fresh
+review's Important finding fixed with six RED→GREEN regressions; no deferred
+minors/rulings. Clean public wheel/rebuilt-sdist adoption and135payload checks
+passed. Memory/correction remain experimental. No SDK change or live allowance
+spent; all current limits and historical reservations preserved. New candidate
+still needs review-PR CI before integration or any release.
+[Detailed qualification](failure-isolation-2026-10-18.md).
+
+# Provider-neutral tool authorization and human approval (2026-10-18)
+
+PR19 merged216941a after its exact reviewed head passed all four CI cells.
+New experimental host approval registry qualifies exact action/scope/version
+bindings, separate trusted decisions, durable one-shot consent and read-only
+recovery. Finalapproval.2:1729source/51focused tests;24installed both-wire lanes,
+25network-denied recoveries, subprocess-loss proof and idempotent revoked/spent
+decision recovery.137payloads and clean public wheel/rebuilt-sdist adoption pass.
+One Important review finding fixed test-first in one pass; zero deferred minors.
+Explicit scope rulings retain authentication/UI, model efficacy, domain effects,
+distributed/storage guarantees and fresh platform CI as separate responsibilities.
+Limits and historical reservations unchanged; no live calls/SDK change/release.
+[Detailed qualification](tool-approval-2026-10-18.md).
+
+# Trajectory evaluation (2026-10-19)
+
+PR20 merged5bd896a with four green platform/database lanes. New experimental
+consumer collector and parcel-domain example use public SDK observers and
+independent host verification.1769source/40focused tests pass, plus12installed
+both-wire scenarios/replays,139payload matches and clean wheel/rebuilt-sdist
+adoption. One fresh review found no defects; scope rulings are explicit in the
+qualification. Later PR/platform CI remains. No live allowance, SDK changes or model tuning.
+Memory/correction remain experimental. [Qualification](trajectory-evaluation-2026-10-19.md).

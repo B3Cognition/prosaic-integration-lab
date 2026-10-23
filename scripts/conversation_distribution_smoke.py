@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tomllib
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -123,7 +124,8 @@ def wheel_identity(path):
         metadata=[name for name in names if name.endswith('.dist-info/METADATA')]
         if len(metadata)!=1:raise ValueError('invalid Lab wheel metadata')
         info=BytesParser().parsebytes(wheel.read(metadata[0]))
-        if info.get('Name')!='prosaic-integration-lab' or info.get('Version')!='0.5.0':
+        expected=tomllib.loads((ROOT/'pyproject.toml').read_text())['project']['version']
+        if info.get('Name')!='prosaic-integration-lab' or info.get('Version')!=expected:
             raise ValueError('unexpected Lab distribution')
         files={name:hashlib.sha256(wheel.read(name)).hexdigest() for name in names
                if not name.endswith(('/','/RECORD'))}
@@ -144,7 +146,6 @@ assert controller.history(session.session_id)==()
 from importlib.metadata import distribution, packages_distributions
 import prosaic_integration_lab, lab_runner
 lab=distribution('prosaic-integration-lab')
-assert lab.version=='0.5.0'
 for module in (prosaic_integration_lab,lab_runner):
     assert set(packages_distributions()[module.__name__])=={'prosaic-integration-lab'}
     assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())
@@ -189,6 +190,15 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
     verify_cli_versions(version,json.loads(manifest.read_bytes()))
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
+    from lab_runner.gates import supports_consumer_blueprints
+    if supports_consumer_blueprints(json.loads(manifest.read_bytes())):
+        for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
+            run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
+                directory=directory, environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof'],
+            directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
+            directory=directory,environment=environment)
     audit()
     return python
 
@@ -200,6 +210,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
     try:
         wheel=Path(wheel).resolve();sdist=Path(sdist).resolve();manifest=Path(manifest).resolve()
         data=sdk_manifest(manifest);validate_mode(data,candidate=candidate)
+        from lab_runner.gates import supports_context_assembly
+        context_enabled=supports_context_assembly(data)
         before=manifest_digest(manifest);identity=wheel_identity(wheel)
         wheel_dir=Path(wheel_dir) if wheel_dir else cache_directory(manifest,ROOT/'.cache/wheels')
         selected=verified_wheel_paths(manifest,wheel_dir)
@@ -239,6 +251,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             lines=image.decode().splitlines();image_id=next((line for line in reversed(lines) if line.startswith('sha256:')),None)
             if image_id is None:raise ValueError('source consumer did not return immutable image')
             flags=['--candidate','--candidate-manifest',snapshot] if candidate else []
+            if context_enabled:flags+=['--context-assembly']
             for command in ('demo','test'):
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=None
@@ -253,7 +266,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                     lineage_sha=(hashlib.sha256((json.dumps(lineage,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()).hexdigest()
                                  if lineage is not None else None)
                     validate(receipt,'conversation',postgres_version,candidate=candidate,
-                             manifest_sha=before if candidate else None,lineage_sha=lineage_sha)
+                             manifest_sha=before if candidate else None,lineage_sha=lineage_sha,
+                             context_assembly=context_enabled)
             result['stack_executed']=True
         stage='final_inputs'
         if manifest_digest(manifest)!=before or manifest_digest(snapshot)!=before:raise ValueError('manifest changed')

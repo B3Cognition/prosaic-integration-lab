@@ -7,4 +7,4 @@ COPY memory_smoke.py /srv/memory_smoke.py
 ENV PYTHONPATH=""
 USER 10001:10001
 RUN python -I /srv/memory_smoke.py
-CMD ["python", "-I", "-m", "lab_runner.memory"]
+CMD ["python", "-I", "-m", "lab_runner.castle_memory"]

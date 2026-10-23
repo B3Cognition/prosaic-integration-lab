@@ -1,0 +1,738 @@
+{
+  "SDKCodeChanged": false,
+  "binding": "c6eb88f5bc6128992ebec81bcc4de92bada8c9c9674edac2ffd6effdfa8b08dd",
+  "causalCriticBenefitEstablished": false,
+  "ceilings": {
+    "providerRequests": 1558,
+    "reportedTokens": 1976623,
+    "toolCalls": 637
+  },
+  "charged": {
+    "providerRequests": 15,
+    "reportedTokens": 29975,
+    "toolCalls": 5
+  },
+  "claimedSamples": 6,
+  "complete": false,
+  "cumulativeCharged": {
+    "providerRequests": 1509,
+    "reportedTokens": 1835168,
+    "toolCalls": 610
+  },
+  "executedArmPairs": 3,
+  "frozenGuards": 9853,
+  "historicalUnknowns": 8,
+  "knownReportedTokens": 21783,
+  "limits": {
+    "outputTokens": 512,
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "timeoutSeconds": 600,
+    "toolCalls": 2
+  },
+  "liveCodeChanged": false,
+  "matchedPairs": 0,
+  "modelSummary": {
+    "local": {
+      "accepted": 0,
+      "claimed": 2,
+      "correctorCalls": 2,
+      "criticCalls": 1,
+      "finalCorrect": 0,
+      "initialCorrect": 0,
+      "known": 2,
+      "repaired": 0,
+      "unknown": 0,
+      "usableWorkers": 2
+    },
+    "local-strong": {
+      "accepted": 1,
+      "claimed": 4,
+      "correctorCalls": 0,
+      "criticCalls": 0,
+      "finalCorrect": 1,
+      "initialCorrect": 1,
+      "known": 3,
+      "repaired": 0,
+      "unknown": 1,
+      "usableWorkers": 1
+    }
+  },
+  "newUnknowns": 1,
+  "observedProviderCalls": 12,
+  "offlineActualCounterLanes": 16,
+  "offlineHostTests": 26,
+  "pairs": [
+    {
+      "alias": "local",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "comparison": {
+        "accountingKnown": false,
+        "answerGain": null,
+        "artifactGain": null,
+        "causalModelBenefitEstablished": false,
+        "marginalCounts": null,
+        "matched": false
+      },
+      "complete": true
+    },
+    {
+      "alias": "local-strong",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "comparison": {
+        "accountingKnown": false,
+        "answerGain": null,
+        "artifactGain": null,
+        "causalModelBenefitEstablished": false,
+        "marginalCounts": null,
+        "matched": false,
+        "unavailableReason": "unusableInitialArtifact"
+      },
+      "complete": true
+    },
+    {
+      "alias": "local-strong",
+      "caseId": "case-581c6aa46837ab8837568d24",
+      "comparison": {
+        "accountingKnown": false,
+        "answerGain": null,
+        "artifactGain": null,
+        "causalModelBenefitEstablished": false,
+        "marginalCounts": null,
+        "matched": false,
+        "unavailableReason": "unusableInitialArtifact"
+      },
+      "complete": true
+    }
+  ],
+  "plannedSamples": 16,
+  "postLiveOfflineFault": {
+    "checkpointStatus": "completed",
+    "fixed": false,
+    "latchedBreaches": [],
+    "liveRequests": 0,
+    "normalizedStatuses": [
+      "unsupported",
+      "unsupported"
+    ],
+    "observedInputTokens": [
+      101,
+      100
+    ],
+    "origin": "synthetic",
+    "quotedInputBounds": [
+      100,
+      100
+    ],
+    "releaseBlocker": true,
+    "reportedCounts": {
+      "providerRequests": 2,
+      "reportedTokens": 301,
+      "toolCalls": 1
+    },
+    "scoringError": "changed component accounting",
+    "syntheticRequests": 2
+  },
+  "preservation": {
+    "archive": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/prosaic-correction-live-evidence-20261018.tar.gz",
+    "archiveSha256": "433dad09da08f53c5717a15245b93d7a4141ead392b0c0374fb1ea96a4bcfe89",
+    "directory": "/Users/michalbachorik/work/prosaics/prosaic-integration-lab/.superpowers/worktrees/agent-quality/reports/bounded-correction-live-20261018",
+    "files": 942,
+    "manifestSha256": "d07fba44c0121e87a64a32b2fe9dc0864dd5917a700270e5aae41c5f8dadb9cb"
+  },
+  "providerFailure": {
+    "bodyBytes": 221,
+    "bodySha256": "0b90c449e8bcb12a33a4169c34f362a1348e3f4371f9e971a7246c5805e7b67c",
+    "httpStatus": 200,
+    "requestIndex": 1,
+    "responseKind": "providerError",
+    "sampleId": "case-581c6aa46837ab8837568d24-p2-a",
+    "usageState": "missing"
+  },
+  "receiptedRoleUsage": {
+    "case-581c6aa46837ab8837568d24-p2-a": {
+      "worker": {
+        "providerRequests": 1,
+        "reportedTokens": null,
+        "toolCalls": 0
+      }
+    },
+    "case-581c6aa46837ab8837568d24-p2-b": {
+      "worker": {
+        "providerRequests": 2,
+        "reportedTokens": 3799,
+        "toolCalls": 1
+      }
+    },
+    "case-78906913a21a8cf288d05b03-p1-a": {
+      "corrector": {
+        "providerRequests": 1,
+        "reportedTokens": 2581,
+        "toolCalls": 0
+      },
+      "worker": {
+        "providerRequests": 2,
+        "reportedTokens": 3405,
+        "toolCalls": 1
+      }
+    },
+    "case-78906913a21a8cf288d05b03-p1-b": {
+      "corrector": {
+        "providerRequests": 1,
+        "reportedTokens": 2585,
+        "toolCalls": 0
+      },
+      "critic": {
+        "providerRequests": 1,
+        "reportedTokens": 1704,
+        "toolCalls": 0
+      },
+      "worker": {
+        "providerRequests": 2,
+        "reportedTokens": 3407,
+        "toolCalls": 1
+      }
+    },
+    "case-78906913a21a8cf288d05b03-p2-a": {
+      "worker": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      }
+    },
+    "case-78906913a21a8cf288d05b03-p2-b": {
+      "worker": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      }
+    }
+  },
+  "releaseStatus": {
+    "checkedAt": "2026-10-18",
+    "evaluationChangesSDK": false,
+    "harness": {
+      "evaluated": "0.9.4",
+      "latest": "v0.9.4",
+      "url": "https://github.com/B3Cognition/prosaic-harness/releases/tag/v0.9.4"
+    },
+    "integrationLab": {
+      "branchPublished": false,
+      "latest": "v0.5.0",
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0"
+    },
+    "runtime": {
+      "evaluated": "0.9.8+diagnostics.1",
+      "latest": "v0.9.7",
+      "url": "https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.9.7"
+    }
+  },
+  "remaining": {
+    "providerRequests": 49,
+    "reportedTokens": 141455,
+    "toolCalls": 27
+  },
+  "samples": [
+    {
+      "accountingComplete": true,
+      "actualCounts": {
+        "providerRequests": 3,
+        "reportedTokens": 5986,
+        "toolCalls": 1
+      },
+      "alias": "local",
+      "arm": "no-critic",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "claim": "known",
+      "correctionCalled": true,
+      "correctionEffect": "unchanged",
+      "correctionReached": true,
+      "counts": {
+        "providerRequests": 3,
+        "reportedTokens": 5986,
+        "toolCalls": 1
+      },
+      "criticCalled": false,
+      "criticExact": false,
+      "criticOutput": null,
+      "criticReached": false,
+      "diagnostics": [
+        {
+          "bodyBytes": 784,
+          "bodySha256": "b1e0d5d9c0ecf872d8c43ba98f54e7b380ffc835a914d9eed51f2741f21ff445",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 902,
+          "bodySha256": "f75629b501aa13805f2fa2ca199ce11615c90485f7788a63320e258f305ab257",
+          "httpStatus": 200,
+          "requestIndex": 2,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 902,
+          "bodySha256": "febee83e79c2160a16235225b95a3c67e842eb9ea64ee855b9a233ba0bc8d5f9",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        }
+      ],
+      "family": "approve",
+      "finalArtifactCorrect": false,
+      "finalIssueFields": [
+        "facts",
+        "citations"
+      ],
+      "initialArtifactCorrect": false,
+      "initialIssueFields": [
+        "facts",
+        "citations"
+      ],
+      "newIssueFields": [],
+      "observedRequests": 3,
+      "receiptCounts": {
+        "providerRequests": 3,
+        "reportedTokens": 5986,
+        "toolCalls": 1
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": [],
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 2,
+          "observedTokens": null,
+          "providerRequests": 2,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-78906913a21a8cf288d05b03-p1-a",
+      "sourceStatus": "ready",
+      "taskAccepted": false,
+      "withinLimits": true
+    },
+    {
+      "accountingComplete": true,
+      "actualCounts": {
+        "providerRequests": 4,
+        "reportedTokens": 7696,
+        "toolCalls": 1
+      },
+      "alias": "local",
+      "arm": "critic",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "claim": "known",
+      "correctionCalled": true,
+      "correctionEffect": "changed_unrepaired",
+      "correctionReached": true,
+      "counts": {
+        "providerRequests": 4,
+        "reportedTokens": 7696,
+        "toolCalls": 1
+      },
+      "criticCalled": true,
+      "criticExact": false,
+      "criticOutput": {
+        "assignmentId": "a68f5f0d28b4b9e7a428f1b9e2f317a42c3898f3e6bfd4b7310ae7049374dc8a",
+        "issues": [
+          "facts"
+        ],
+        "verdict": "escalate"
+      },
+      "criticReached": true,
+      "diagnostics": [
+        {
+          "bodyBytes": 787,
+          "bodySha256": "320d7af5dd60d8f8d7f95689dd2bba922c8529a1f7dc76c642ff4670838d77c1",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 903,
+          "bodySha256": "c42c60aa9084fbe69fee574147588c9d5ec39a74025db9cd87d51caaf73c1072",
+          "httpStatus": 200,
+          "requestIndex": 2,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 692,
+          "bodySha256": "7f5ba3d0ae4f3ffb5f72dd6b13ad9196ace503c4f6287027eb74993c921ff755",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 903,
+          "bodySha256": "45eb32178562c79df57f94c216966b36a4c506fc64fd2cb76e7c73a9fc5af5ad",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        }
+      ],
+      "family": "approve",
+      "finalArtifactCorrect": false,
+      "finalIssueFields": [
+        "facts",
+        "citations"
+      ],
+      "initialArtifactCorrect": false,
+      "initialIssueFields": [
+        "facts",
+        "citations"
+      ],
+      "newIssueFields": [],
+      "observedRequests": 4,
+      "receiptCounts": {
+        "providerRequests": 4,
+        "reportedTokens": 7696,
+        "toolCalls": 1
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": [],
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "critic": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 2,
+          "observedTokens": null,
+          "providerRequests": 2,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-78906913a21a8cf288d05b03-p1-b",
+      "sourceStatus": "ready",
+      "taskAccepted": false,
+      "withinLimits": true
+    },
+    {
+      "accountingComplete": true,
+      "actualCounts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "alias": "local-strong",
+      "arm": "critic",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "claim": "known",
+      "correctionCalled": false,
+      "correctionEffect": "not_run",
+      "correctionReached": false,
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "criticCalled": false,
+      "criticExact": false,
+      "criticOutput": null,
+      "criticReached": false,
+      "diagnostics": [
+        {
+          "bodyBytes": 1744,
+          "bodySha256": "a147bfbf76bc97dd249784083de89ce9d31c6af5165ec50529eff6d34c72fdb2",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        }
+      ],
+      "family": "approve",
+      "finalArtifactCorrect": false,
+      "finalIssueFields": null,
+      "initialArtifactCorrect": false,
+      "initialIssueFields": null,
+      "newIssueFields": null,
+      "observedRequests": 1,
+      "receiptCounts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": null,
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "critic": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-78906913a21a8cf288d05b03-p2-b",
+      "sourceStatus": "unread",
+      "taskAccepted": false,
+      "withinLimits": true
+    },
+    {
+      "accountingComplete": true,
+      "actualCounts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "alias": "local-strong",
+      "arm": "no-critic",
+      "caseId": "case-78906913a21a8cf288d05b03",
+      "claim": "known",
+      "correctionCalled": false,
+      "correctionEffect": "not_run",
+      "correctionReached": false,
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "criticCalled": false,
+      "criticExact": false,
+      "criticOutput": null,
+      "criticReached": false,
+      "diagnostics": [
+        {
+          "bodyBytes": 1826,
+          "bodySha256": "e4f1fc09cca8a40f9dcafabf17b6b16a3c235bd5d09b92fa635f4c9f122e24a0",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        }
+      ],
+      "family": "approve",
+      "finalArtifactCorrect": false,
+      "finalIssueFields": null,
+      "initialArtifactCorrect": false,
+      "initialIssueFields": null,
+      "newIssueFields": null,
+      "observedRequests": 1,
+      "receiptCounts": {
+        "providerRequests": 1,
+        "reportedTokens": 2151,
+        "toolCalls": 0
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": null,
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-78906913a21a8cf288d05b03-p2-a",
+      "sourceStatus": "unread",
+      "taskAccepted": false,
+      "withinLimits": true
+    },
+    {
+      "accountingComplete": true,
+      "actualCounts": {
+        "providerRequests": 2,
+        "reportedTokens": 3799,
+        "toolCalls": 1
+      },
+      "alias": "local-strong",
+      "arm": "critic",
+      "caseId": "case-581c6aa46837ab8837568d24",
+      "claim": "known",
+      "correctionCalled": false,
+      "correctionEffect": "not_run",
+      "correctionReached": false,
+      "counts": {
+        "providerRequests": 2,
+        "reportedTokens": 3799,
+        "toolCalls": 1
+      },
+      "criticCalled": false,
+      "criticExact": false,
+      "criticOutput": null,
+      "criticReached": false,
+      "diagnostics": [
+        {
+          "bodyBytes": 1535,
+          "bodySha256": "db11167a07f2cb12f0b8ce4ab21b188940a6d642fa482b27cc72b06c5f8817dc",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        },
+        {
+          "bodyBytes": 1294,
+          "bodySha256": "c4c7834961c359fbf7eff720be7467f3bef168d6e3490f1befeeeeb76a5af752",
+          "httpStatus": 200,
+          "requestIndex": 2,
+          "responseKind": "message",
+          "usageState": "unsupported"
+        }
+      ],
+      "family": "reject",
+      "finalArtifactCorrect": true,
+      "finalIssueFields": [],
+      "initialArtifactCorrect": true,
+      "initialIssueFields": [],
+      "newIssueFields": [],
+      "observedRequests": 2,
+      "receiptCounts": {
+        "providerRequests": 2,
+        "reportedTokens": 3799,
+        "toolCalls": 1
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": [],
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "critic": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 2,
+          "observedTokens": null,
+          "providerRequests": 2,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-581c6aa46837ab8837568d24-p2-b",
+      "sourceStatus": "ready",
+      "taskAccepted": true,
+      "withinLimits": true
+    },
+    {
+      "accountingComplete": false,
+      "actualCounts": null,
+      "alias": "local-strong",
+      "arm": "no-critic",
+      "caseId": "case-581c6aa46837ab8837568d24",
+      "claim": "unknown",
+      "correctionCalled": false,
+      "correctionEffect": "not_run",
+      "correctionReached": false,
+      "counts": {
+        "providerRequests": 1,
+        "reportedTokens": null,
+        "toolCalls": 0
+      },
+      "criticCalled": false,
+      "criticExact": false,
+      "criticOutput": null,
+      "criticReached": false,
+      "diagnostics": [
+        {
+          "bodyBytes": 221,
+          "bodySha256": "0b90c449e8bcb12a33a4169c34f362a1348e3f4371f9e971a7246c5805e7b67c",
+          "httpStatus": 200,
+          "requestIndex": 1,
+          "responseKind": "providerError",
+          "usageState": "missing"
+        }
+      ],
+      "family": "reject",
+      "finalArtifactCorrect": false,
+      "finalIssueFields": null,
+      "initialArtifactCorrect": false,
+      "initialIssueFields": null,
+      "newIssueFields": null,
+      "observedRequests": 1,
+      "receiptCounts": {
+        "providerRequests": 1,
+        "reportedTokens": null,
+        "toolCalls": 0
+      },
+      "recoveryAdditionalRequests": 0,
+      "resolvedIssueFields": null,
+      "roleCosts": {
+        "corrector": {
+          "observedRequests": 0,
+          "observedTokens": 0,
+          "providerRequests": 0,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        },
+        "worker": {
+          "observedRequests": 1,
+          "observedTokens": null,
+          "providerRequests": 1,
+          "unreceiptedObservations": 0,
+          "unresolvedIntents": 0
+        }
+      },
+      "sampleId": "case-581c6aa46837ab8837568d24-p2-a",
+      "sourceStatus": "unread",
+      "taskAccepted": false,
+      "withinLimits": false
+    }
+  ],
+  "smallerPairBindingDifferences": [
+    "initialDraftDigest"
+  ],
+  "totalUnknowns": 9,
+  "unknownReservation": {
+    "providerRequests": 4,
+    "reportedTokens": 8192,
+    "toolCalls": 2
+  },
+  "unrunSamples": 10
+}

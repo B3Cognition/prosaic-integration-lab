@@ -1,5 +1,410 @@
 # Codex handoff
 
+## PR22 Linux regression repair — 2026-10-20
+
+The first four Linux CI cells passed mandatory actual confinement, then each
+failed four direct child-witness regressions. The [observer repair](verification/sandbox-ci-observer-2026-10-20.md)
+addresses reproduced GNU ps truncation, adds three real-process regressions
+and safe count diagnostics, preserving every confinement/early-stop gate.
+58focused tests pass locally; full regressions/adoption and new exact-head CI
+are still required. Do not merge or publish until the four cells qualify.
+
+## Lab 0.6.0 version and authorized push — 2026-10-20
+
+Prepare the reviewed codex/sandboxed-tools branch as a PR against main. The
+additive consumer blueprints warrant Lab0.6.0; Core/Runtime/Harness/adapter pins
+remain unchanged. Requalify the versioned wheel/sdist and exact source, then
+push. The four Linux/platform CI cells remain required before merging/releasing.
+Memory/correction and all live allowances/charges remain unchanged. No package
+publication or live inference is included in this authorization.
+The fresh [0.6.0 qualification](verification/sandbox-version-0.6.0-2026-10-20.md)
+passes1824source tests, clean wheel/rebuilt-sdist consumers and142payload checks.
+
+## PR21 merged; sandboxed CLI consumer milestone — 2026-10-20
+
+PR21 merged at5a966ae after all four exact-head CI lanes passed. The experimental
+[sandboxed CLI blueprint](sandboxed-tools.md) adds conservative admission,
+whole-invocation host permission, actual OS canaries and receipt-only inspection
+using public Runtime0.9.7. Hard CPU/memory/process-count/detached-cleanup
+requirements refuse admission. Timeout/output failures preserve Runtime's
+toolEffectUncertain stop; no precise CLI subtype is invented. See
+[offline proof](verification/sandboxed-tools-2026-10-20.md). The newer authorization
+above supersedes this checkpoint's local-only handoff. Linux operational enforcement is
+a required later platform gate. No live calls, SDK changes, allowance changes
+or release; memory/correction remain experimental. Older checkpoints retain
+their original state.
+
+## PR20 merged; trajectory evaluation milestone — 2026-10-19
+
+PR20 merged at5bd896a after its exact head passed all four CI lanes:1729source
+tests and334real-stack checks per cell, public wheel/sdist adoption and demos.
+The next experimental [trajectory blueprint](trajectory-evaluation.md) composes
+public SDK observations and independent host assessment, with a second-domain
+parcel example. Fixed trajectory.2 passes1769source/40focused tests,12installed
+both-wire lanes/replays,139payload matches and clean wheel/rebuilt-sdist adoption.
+One fresh review found no defects;40focused tests/130malformed probes/12replays
+passed independently. Scope rulings are in the qualification. Keep
+codex/trajectory-evaluation local for later PR/platform CI;
+no live requests, allowance changes or SDK changes. Memory/correction remain
+experimental; preserve all nine unknown reservations. Earlier checkpoints below
+retain their original state.
+
+## PR19 merged; tool approval qualified offline — 2026-10-18
+
+PR19 merged at216941a after rechecking its exact reviewed head and four green
+CI lanes. New experimental [tool approval blueprint](tool-approval.md) binds
+exact actions to trusted host decisions and consumes consent durably once.
+It uses public Runtime APIs; it neither authenticates actor strings nor records
+effect completion. [Offline proof](verification/tool-approval-2026-10-18.md):
+Finalapproval.2:1729source/51focused tests;24installed both-wire scenarios,
+25network-denied recoveries and a subprocess-loss check.137payloads and clean
+public wheel/rebuilt-sdist adoption pass. One fresh review's Important replay
+defect fixed with watched regressions, including immutable audit identities;
+zero deferred minors. Six scope rulings are explicit in the qualification. Memory/correction
+stay experimental, limits and nine unknown reservations unchanged, no live run
+or SDK change. Keep new branch local pending review and later PR/CI.
+
+## PR18 merged; durable failure isolation qualified offline — 2026-10-18
+
+PR18 was marked ready and merged at `1c52747` after all four exact-head required
+CI lanes passed. The next [consumer blueprint](failure-isolation.md) adds local
+durable admission, isolated uncertainty, revoked journal writers and explicit
+receipt-only recovery. It creates no allowance and makes no retry decisions.
+Memory/correction remain experimental; no live run or SDK change is authorized.
+[Qualification](verification/failure-isolation-2026-10-18.md): final
+Lab0.5.1+isolation.2,1678source tests,25focused tests, four both-wire installed
+lanes/16synthetic requests/four network-denied recoveries/three process-loss
+boundaries/six queued-overrun gates. One Important review finding fixed with
+six RED→GREEN regressions; zero minors/rulings.135installed payloads match;
+clean public wheel/rebuilt-sdist checks pass. Limits,39canonical ledgers and
+nine unknown reservations unchanged. Keep the local branch/worktree for a
+review PR and CI; no new milestone push, merge, release or live run performed.
+
+## PR18 CI repair on the public SDK train — 2026-10-18
+
+[Qualification](verification/pr18-ci-2026-10-18.md): active manifest advances to
+already published Runtime0.9.7/Harness0.9.4. Benchmark identity admits only the
+exact public or preserved private candidate profile. Packaging qualification
+derives the current source version; all required platform/database lanes remain.
+Memory/correction stay experimental, with no live calls or allowance changes.
+Unpublished response diagnostics retain separate candidate-only qualification.
+Keep the PR draft until its exact head is green and reviewed. No SDK release is
+required merely to merge public-compatible consumer examples; a stable Lab
+release and diagnostics promotion have their own acceptance gates.
+
+## Usage guard fixed offline; experimental review PR — 2026-10-18
+
+[Qualification](verification/usage-guard-2026-10-18.md): complete numeric usage
+now enforces input/output bounds independently of pricing support. Missing or
+untrusted component counts latch a stop; role costs retain known unsupported
+counts. Policy v2 keeps the frozen v1 study separate. Both-wire installed fault
+and baseline matrices pass, with network-denied recovery. Source-suite, artifact
+and review results are in the qualification data. No live calls or SDK changes;
+limits and all nine unknown reservations remain charged unchanged.
+
+The reviewed branch is published in [draft PR #18](https://github.com/B3Cognition/prosaic-integration-lab/pull/18), without a release. Memory and
+correction remain opt-in; no critic/model benefit is established. Public SDK
+train and clean-consumer/platform/database acceptance remain release gates.
+Next broad milestone: durable failure isolation and explicit recovery; any new
+live evaluation needs fresh frozen operators and an audited accounting baseline.
+The historical checkpoints below describe their state at the time.
+
+## Frozen correction comparison safely stopped; promotion blocked — 2026-10-18
+
+[Audited partial findings](verification/correction-live-2026-10-18.md):6of16
+samples claimed,5known/1unknown; remaining10unrun, no retries.0matchedpairs,
+so causal critic benefit unmeasured. Smaller critic named1of2flawed fields and
+neither correction repaired the draft; larger critic/corrector never called.
+One correct larger worker passed directly, two workers hit512tokenlength;
+HTTP200providererror with missing usage stopped the full frozen schedule.
+
+Charged15requests/5tools/29975tokens including unknownfull4/2/8192reservation;
+cumulative1509/610/1835168 versus1558/637/1976623.9unknowns now fully retained.
+Per-arm limits unchanged.6network-denied state recoveries,9853frozen guards and
+38old ledgers verified; no SDK/Core/executableLabchanges, push or release.
+
+Separate synthetic test confirms a generic Lab bug: `unsupported` numeric usage
+can bypass the component-bound latch, allowing continuation until scoring fails.
+No such breach was observed live. Fix/qualify this offline before promotion or
+another live run. Push for review recommended; stable Lab release blocked on
+that fix, public SDK train and clean-consumer release acceptance. Next broad
+milestone: durable failure isolation/explicit recovery, preserving unknown
+reservations and avoiding automatic retries. Keep models/prompts frozen; no
+local-model tuning proposed. Frozen operators are closed after canonical live
+ledger preservation; future work needs a fresh root/accounting baseline.
+
+## Bounded correction blueprint — 2026-10-18
+
+Opt-in Lab0.5.1+correction.2 adds provider-neutral sanitized feedback and matched
+no-critic comparison helpers, plus a separate one-shot rollout consumer through
+public SDKs. [Adoption guide](bounded-correction.md),
+[qualification](verification/bounded-correction-2026-10-18.md). Both arms receive
+the same verified diagnostics/evidence; critic hints cannot bypass host gates.
+Unusable/interrupted corrections keep honest field diagnostics and observed or
+unresolved costs. Each arm retains4requests/2tools/8192tokens/600s/output512.
+
+Installed offline proof:48scripted arms/24matched pairs,54network-denied
+recoveries,2malformed-output checks,131installed payloads verified. One fresh
+review's2Important findings reproduced RED and fixed in one pass; no deferred
+minors. Final source counts and preservation hashes are in the qualification.
+No live calls, new allowance, SDK/Core change, model tuning, push or release.
+38ledgers/8unknowns and charges1494/605/1805193 remain unchanged. Keep branch and
+worktree. Consumers qualify their own roles/counters and reserve both arms
+before future live use; synthetic proof establishes no model/critic benefit.
+
+## Consumer role qualification blueprint qualified offline — 2026-10-18
+
+The maintainer clarified the goal: reusable framework/consumer adoption, not
+hardening specific local models. [Adoption guide](role-qualification.md),
+[proof](verification/role-qualification-2026-10-18.md). Generic role assessment,
+configuration-bound qualification and host-pinned admission helpers live in Lab;
+a separate rollout adapter verifies scoped evidence and reports all field errors,
+missed/unsupported critique issues and partial warning coverage. Consumers supply
+their own roles, policies, evidence grants, suites, models and requalification.
+No SDK/Core changes, model-specific branching, prompt tuning, repair or live run.
+Final Lab0.5.1+roles.2:1524source tests,46focused tests,24installed both-wire
+synthetic lanes; four synthetic qualifications explicitly rejected for live use.
+127installed files match source/wheel; five SDK payloads unchanged. One fresh
+review found2Important accounting/scope gaps, fixed with9RED→GREEN regressions;
+no minors. Existing Starlette deprecation warning only. Current per-case and
+cumulative limits unchanged; charged1494/605/1805193 versus1524/625/1976623,
+38canonical ledgers/eight unknown reservations untouched. Read-only historical
+verification passed. No inference allowance spent, push or release. Existing
+frozen model evidence/environments retained. Keep this branch/worktree; any
+future live study requires separate frozen consumer-owned cases and authorization.
+Preserved410offline evidence files; archive
+`prosaic-role-evidence-20261018.tar.gz`, SHA256
+`558d53effc722f728814fe3c0ea38fb71ee955a16fffce3666c032efb6a55159`.
+Final installed environment `/private/tmp/prosaic-role-final-env`; metadata
+`/private/tmp/prosaic-role-study-20261018`; closing verifier
+`/private/tmp/prosaic-role-verify.py` is read-only and makes no provider calls.
+
+## Frozen direct worker/critic live evaluation complete — 2026-10-18
+
+[Result](verification/direct-handoffs-live-2026-10-18.md):12/12fresh samples ran
+under unchanged caps. Each model passed1/3workers. Smaller critic accepted the
+clean control and correctly escalated2/2actual flaws plus2/2seeded flaws, but
+all four issue lists were incomplete (5/14required fields; zero invented fields).
+Larger controls3/3unusable at512output; full-handoff workers also truncated, so
+natural critic benefit remains unmeasured. No answer repair was tested.
+Independent host gates prevented acceptance of wrong full-handoff results.
+Study18requests/4tools/28754tokens; cumulative1494/605/1805193 versus approved
+ceilings1524/625/1976623, remaining30/20/171430. All usage known, no new unknown,
+timeout, overrun or counter violation;8old unknown reservations remain charged.
+All receipts/accounting reconcile; copied-state recovery denies sockets and
+makes zero additional calls. Prepared host41tests/12offline lanes; one fresh
+review with3Important fixes before approval. Package/SDK/models stay frozen.
+Preserved795new files, canonical ledger38; prior37ledger hashes unchanged.
+Archive `prosaic-direct-live-evidence-final-20261018.tar.gz`, SHA256
+`cbccd6bd9f717b6983186b53365a045218110c4ef4452f0a8cc5c81ca4e8990b`.
+Private study `/private/tmp/prosaic-direct-live-study-20261018`; preserve all
+intermediate evidence, including the initial report-directory preservation
+failure. No frozen dispatch/audit/analysis code changed after live observation.
+Closed operators expect37historical ledgers and cannot dispatch again after
+canonical publication. Use a fresh root/baseline for future work.
+Next recommended development milestone: provider-neutral role qualification,
+source-grounded review diagnostics and separately qualified bounded correction
+with a no-critic baseline. No new milestone implementation/live allowance is
+authorized by this recommendation. Memory stays experimental; no push/release.
+
+## Direct worker/critic offline qualification — 2026-10-18
+
+Opt-in Lab 0.5.1+direct.2 adds explicit model-visible JSON contracts, host-prepared
+assignments and invocation-scoped host evidence for the critic. Worker-only,
+critic-only controls and full handoffs skip the model planner.
+[Guide](direct-handoffs.md), [qualification](verification/direct-handoffs-2026-10-18.md).
+Final: 1,478 source tests, 76 installed both-wire scenarios, 36 unchanged-counter
+offline trajectories. One fresh review; three material findings fixed with
+RED→GREEN regressions. Largest quoted path: 5,287 tokens. Zero live requests.
+Prior 2,596 files / 37 ledgers / eight unknown reservations verified unchanged.
+Ceilings 1,500 requests / 617 tools / 1,976,623 tokens; charged usage
+1,476 / 601 / 1,776,439. Per-case four / two / 8,192 / 600 seconds / output 512.
+No push, release, SDK source change or memory rollout. Real-model contract
+compliance and critic benefit remain unmeasured. Next: a small frozen direct-role
+live study with full reservations under current limits.
+Executable source 7c77df8; candidate environment
+`/private/tmp/prosaic-direct-final-env/bin/python`; results
+`/private/tmp/prosaic-direct-final-study-20261018`. Previous live environment and
+initial candidate/evidence remain intact.
+Preserved 1,996 new files in `/private/tmp/prosaic-direct-evidence-20261018.tar.gz`;
+hashes are in the qualification's preservation proof. Keep this branch/worktree.
+
+## Eight-sample real-model handoff evaluation complete — 2026-10-18
+
+The [live result](verification/real-handoffs-live-2026-10-18.md) ran all8frozen
+samples, four per model, under unchanged caps. All stopped at planner: smaller
+4/4schema descriptions instead of values; larger4/4incomplete JSON at512output
+tokens. Worker/tool/critic reached0; critic benefit unmeasurable, not negative
+efficacy evidence. No new unknown, overrun, timeout or counter violation.
+Study8requests/0tools/7268tokens; cumulative1476/601/1776439 versus approved
+1500/617/1976623, remaining24/16/200184;8old unknown reservations retained.
+Auditor reconciles all receipts/observations and copied-state recovery with
+network denied. No model/prompt/graph changes or extra probes during the study.
+Next: provider-neutral model-visible output contracts, deterministic host-owned
+assignment preparation, and direct worker/critic qualification before another
+fresh live evaluation. Memory remains experimental; no push/release.
+Preserved450new files;37canonical ledgers,36prior hashes unchanged. Latest ledger
+SHA256b87e25f97d522d3a89fb2dd953cc64ee09813d26dcbfc53f3ded9606f31aa17e.
+Closed operators expect their original36-ledger baseline and cannot be reused
+for a new run; create a fresh study root using the current37-ledger baseline.
+
+## Real-model handoff evaluation frozen; allowance pending — 2026-10-18
+
+[Prepared study](verification/real-handoffs-2026-10-18.md) uses local experimental
+Lab0.5.1+handoffs.4, exact sourcefef4182. Full1388tests and15installed regressions
+pass;8fixture trajectories use actual qualified counters,4reporting/interruption
+phases pass. All3Important review findings fixed; one one-use-audit-path minor
+deferred. No live requests. Graph/prose/models/per-case caps unchanged; memory off.
+Bindingcd6988b2f6f89197ed25a4a0f731dc657a257c96a4caee2692137374df78eb5d
+freezes4fresh cases×2models and3155guard files. Full reservation32requests/16tools/
+65536tokens needs25requests/13tools beyond current headroom; token ceiling stays.
+Question sent to user; no approval yet. Do not create allowance-approval.json or
+dispatch until explicit approval arrives. Cumulative charge1468/601/1769171,
+ceilings1475/604/1976623,8unknown retained. Requested new ceilings1500/617/1976623.
+Private host operators `/private/tmp/prosaic-real-handoff-{common,live,audit,analyze}.py`,
+installed environment `/private/tmp/prosaic-handoff-real-env/bin/python`, root
+`/private/tmp/prosaic-real-handoff-study-20261018`. Preserve all prior evidence.
+
+## Offline typed handoffs qualified — 2026-10-18
+
+Lab0.5.1+handoffs.2 adds experimental request-bound planner/worker/critic
+contracts and full-trajectory scoring using the same installed SDK candidate
+family. [Qualification](verification/typed-handoffs-2026-10-18.md):1373source tests,
+40focused regressions,30installed both-wire scenarios and3review regressions pass.
+Both independent Important reporting findings closed with RED/GREEN tests;
+no deferred minors. Missing/unread/conflicting evidence and disagreement cannot
+approve; human review offers stop only. Four-request cap permits no extra repair.
+Saved final critic receipt adopts without calls; missing receipt blocks;
+earlier interruption is inspection-only. Exact source dc69d1f and wheel audited.
+No live calls, SDK changes, push or release. Memory remains experimental with no
+new efficacy claim. All1902prior evidence files and36ledgers verify; charge still
+1468/601/1769171 versus1475/604/1976623,8unknown retained. Next: frozen real-model
+handoff evaluation once its full reservation fits authorized remaining allowance;
+full four-sample comparison cannot fit7requests/3tools. Prior checkpoints retained.
+
+## Fresh four-sample missing-evidence comparison complete — 2026-10-18
+
+The [audited held-out comparison](verification/missing-evidence-memory-live-2026-10-18.md)
+completed all four samples with known usage under unchanged limits. Both enabled
+arms actually recalled relevant history. Smaller off/on failed both after the
+permitted correction; fact/citation fields were correct but decision remained
+approve despite missing-authority feedback. Larger off/on passed first attempt.
+No observed memory benefit; recall added608/221tokens without fewer requests or
+tools. All6tools succeeded, no continuation refused, one quote overage correctly
+admitted by shared budgeting. New diagnostics show message/unsupported usage
+details; numerical totals reconcile, no pricing/cost qualification claimed.
+Cumulative1468requests/601tools/1769171tokens; remaining7/3/207452. Eight unknown
+reservations and35previous ledgers unchanged;36thledger appended,178new evidence
+files preserved. No product/model/default changes, push or release. Ready for
+offline provider-neutral typed multi-agent handoff/trajectory qualification;
+memory remains experimental. Another full4sample study cannot fit remaining
+request/tool reservations. Prior checkpoints below retain original state.
+
+## Response diagnostics qualified offline — 2026-10-18
+
+Runtime0.9.8+diagnostics.1 and Lab0.5.1+diagnostics.1 are local unreleased
+candidates. The [qualification ledger](verification/response-faults-2026-10-18.md)
+records portable response/usage classifications, sticky contradictory-error
+fencing, strict bounded SSE UTF8 and preserved receipt diagnostics. Harness
+requires no change. Runtime1345passed/2documented skips; Lab1333passed;
+installed57checks,36fault/replay,14continuation and10legacy scenarios pass.
+All five independent review findings closed. Exact candidate payloads audited;
+active releases and prior manifests/evidence unchanged. No live inference,
+push or publication. All35live ledgers still charge1456requests/595tools/
+1752686tokens, eight unknown reservations retained; remaining19/9/223937.
+Ready for a fresh bounded live comparison that fits full reservations, not a
+memory efficacy or live-provider certification claim. Eight full samples do
+not fit the current remaining request/tool allowance. Preserve old checkpoints.
+
+## Strict validation fixed; fresh comparison stopped safely — 2026-10-17
+
+Lab0.5.1+continuation.2 fixes derived integer-field validation in both plan
+versions. Source b0072fa: full1333passed, installed four regressions,
+14both-wire continuation and10legacy scenarios; exact-source payloads audited.
+The [fresh eight-sample study](verification/continuation-memory-live-2026-10-17.md)
+completed four samples, then stopped on larger-model missing/on unknown usage.
+Three samples remain unexecuted; no retry or forgiveness. Approval pairs pass
+both arms; smaller memory/on saves one correction, larger has no recall exposure.
+Memory benefit remains unproven. Charge1456requests/595tools/1752686tokens;
+remaining19/9/223937, eight unknown reservations retained across35ledgers.
+Next: provider-neutral response/usage failure diagnostics and synthetic fault
+qualification before another live efficacy run. Lab remains experimental;
+no new push/release. Prior checkpoints below retain their original state.
+
+## SDK releases and experimental continuation budgeting complete — 2026-10-17
+
+Runtime0.9.7 and Harness0.9.4 are merged and publicly released, with downloaded
+bytes matching their exact-source qualification receipts. Core/adapters unchanged.
+Lab0.5.1+continuation.1 remains an unreleased local experimental candidate.
+Its explicit manifest pins the new public SDKs; the active release manifest and
+historic candidates/evidence remain unchanged. Opt-in version2 uses quotation for
+context planning and public Runtime shared-budget admission for actual native
+continuations; version1 stays default and current caps are unchanged.
+
+Read the [release/qualification ledger](verification/continuation-budgeting-2026-10-17.md)
+and [usage contract](continuation-budgeting.md). Full Lab1329passed; final focused35;
+installed and network-none Linux ARM6414both-wire scenarios plus10legacy replay
+scenarios per platform. Independent review: no blockers, one derived-count type
+validation minor deferred. No new live inference. Charge1442/588/1731251 versus
+ceilings1475/604/1976623, seven old unknown reservations retained;34ledger and
+428prior evidence hashes preserved. Next: frozen held-out validation that fits
+remaining33requests/16tools/245372tokens. Memory efficacy remains unproven.
+
+## Fresh balanced memory comparison complete — 2026-10-17
+
+All12 fresh held-out samples settled with known usage under unchanged limits.
+Smaller model off/on success is0/3 versus1/3; larger is3/3 versus3/3. The smaller
+gain is confounded by quotation-based continuation admission, not demonstrated
+reasoning improvement. All14 tools succeeded; three continuations were refused
+by fixed planning bounds despite available outer-budget headroom. Read the
+[audited comparison](verification/balanced-memory-live-2026-10-17.md).
+Cumulative charge1442requests/588tools/1731251tokens; remaining33/16/245372.
+Allseven historic unknown reservations remaincharged;34canonical ledgers preserved.
+Next recommended milestone: provider-neutral adaptive continuation planning
+under the same caps. Generic Runtime/Harness fixes are candidates for normal
+release qualification; Lab memory/planning remains experimental. No push/release
+was performed by this comparison.
+
+## Provider-neutral tool outcomes and bounded recovery candidate — 2026-10-17
+
+The next operational-hardening milestone is implemented in local Runtime
+`0.9.7+tools.1`, Harness `0.9.1+tools.1` and Lab `0.5.1+tools.1` candidates.
+[`dependencies/tool-outcome-candidate.json`](../dependencies/tool-outcome-candidate.json)
+pins the exact SDK family; the released manifest is unchanged. Read the
+[qualification and review record](verification/tool-outcomes-recovery-2026-10-17.md)
+before another live run. Recovery is opt-in, provider-neutral and bounded by the
+existing case limits. Historic tool errors remain unclassified. No live
+inference, merge, push or publication is included in this milestone.
+
+## Native tool and experimental memory release preparation — 2026-10-17
+
+The active train adopts published Runtime 0.9.6 with Core 0.4.1, Runtime recorder 0.3.0, Harness 0.9.0 and Harness store 0.4.0. The previous context train is preserved in `dependencies/releases-lab-context-0.5.0.json`. Agent-quality and controlled retrieval memory examples are opt-in; memory remains experimental. Historical live findings retain their original candidate identity. See [the release ledger](verification/release-0.5.0-2026-10-17.md) for final qualification and publication.
+
+## Published timeout patch adoption — 2026-10-14
+
+The active manifest now pins published Runtime 0.9.3 and Harness 0.8.2, retaining
+Core 0.4.1 and both PostgreSQL adapters at 0.3.0. Use `.venv-latest` for this
+checkout's audited installed family; `.venv-published` preserves the earlier
+demo environment. The full local suite passes 955 tests. Required conversation
+acceptance now has 97 cases, adding real provider timeouts for ordinary and
+interpretation turns with no redispatch on replica replay/recovery.
+
+Read the [patch ledger](verification/conversation-timeout-patch-2026-10-14.md)
+for exact publication, manifest hashes and acceptance results. Older checkpoints
+retain their original versions and counts.
+
+## Published SDK adoption — 2026-10-13
+
+Runtime 0.9.0/recorder 0.3.0 and Harness 0.8.0/store 0.3.0 are now published.
+The active release manifest selects their exact verified PyPI wheels alongside
+unchanged Core 0.4.1. The former patch manifest is preserved in
+`dependencies/releases-lab-0.4.0.json`. Ordinary released acceptance now selects
+the conversation lane without candidate flags. Start with the README's assistant,
+workflow and approved-conversation recipes, and read the separate
+[fresh adoption ledger](verification/published-conversation-adoption-2026-10-13.md).
+Lab release and hosted-provider qualification are separate remaining work.
+The checkpoints below preserve their original publication state and evidence.
+
 ## Conversation adoption checkpoint — 2026-10-12
 
 Lab target 0.5.0 implements authenticated bounded conversations, a fixed host-only

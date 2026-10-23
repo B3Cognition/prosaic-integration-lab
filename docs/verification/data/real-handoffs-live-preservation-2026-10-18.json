@@ -1,0 +1,21 @@
+{
+  "archiveSha256": "73c01f9efdc7874602ca64a0fcd99392e597df8b1aa01319b99ed95f8acfebaf",
+  "canonicalLedgerCount": 37,
+  "canonicalLedgerSha256": "b87e25f97d522d3a89fb2dd953cc64ee09813d26dcbfc53f3ded9606f31aa17e",
+  "cumulativeCeilings": {
+    "providerRequests": 1500,
+    "reportedTokens": 1976623,
+    "toolCalls": 617
+  },
+  "cumulativeCharged": {
+    "providerRequests": 1476,
+    "reportedTokens": 1776439,
+    "toolCalls": 601
+  },
+  "evidenceFiles": 450,
+  "evidenceManifestSha256": "cfb44a959483d732c577fe4e6c7355e8033be9097369c941ab702204fb21df34",
+  "historicalLedgersUnchanged": 36,
+  "preparedEvidenceFilesVerified": 198,
+  "preserved": true,
+  "unknownReservationsRetained": 8
+}
