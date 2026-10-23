@@ -19,6 +19,12 @@ See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
 before selecting a candidate.
 
+The [optional Castle memory guide](docs/optional-memory.md) adds a separate,
+disabled-by-default candidate lane. It freezes scoped evidence before a Harness
+review pause and verifies resume after Castle is changed or unavailable.
+Its [local verification](docs/verification/optional-memory-2026-10-23.md)
+records the tested platforms, artifacts and limits.
+
 ## Install packages for an embedding service
 
 All five patch packages are published on PyPI. Their actual public downloads
