@@ -3,6 +3,7 @@ recursive-include .github/workflows *.yml
 recursive-include .github/ci *.apparmor
 recursive-include assets *.yml *.json *.md
 include configs/README.md
+include configs/native-runtime.example.yml configs/runtime-comparison-local.example.yml configs/unified-runtime.example.yml
 include configs/qualification.synthetic.json
 include configs/native.example.json
 include configs/conversation-conformance.example.json

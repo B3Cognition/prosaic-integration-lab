@@ -2,6 +2,10 @@
 
 ## 0.6.0 — unreleased
 
+- Add opt-in unified Runtime candidate acceptance, CLI pool benchmarking and
+  provider-shaped quota/no-replay tests, with explicit policies and private
+  bounded allowances. Preserve released SDK pins and historical measurements.
+
 - Adopt the verified public Runtime 0.9.7 / Harness 0.9.4 train with Core 0.4.1
   and unchanged PostgreSQL adapter pins. Historical manifests/evidence retain
   their original versions.

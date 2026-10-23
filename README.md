@@ -1,5 +1,14 @@
 # Prosaic integration lab
 
+The opt-in [unified Runtime pool lab](docs/unified-runtime-pools.md) tests Claude
+Code, Codex CLI and local/API selection with explicit policies and pre-work-only
+fallback. It requires an unreleased Runtime candidate and leaves published SDK
+pins unchanged. Retained [27-run benchmark results](docs/verification/unified-cli-realistic-2026-10-23.md)
+and [provider-rejection/no-replay tests](docs/verification/unified-provider-fallback-2026-10-23.md)
+separate real model observations from simulated failures.
+The [PR qualification ledger](docs/verification/unified-pool-pr-finalization-2026-10-23.md)
+records fresh current-main integration checks and exact candidate provenance.
+
 The experimental [sandboxed CLI blueprint](docs/sandboxed-tools.md) composes
 host admission/approval with Runtime's native confinement and independently
 witnessed cleanup. Unsupported hard resource controls refuse admission; memory
