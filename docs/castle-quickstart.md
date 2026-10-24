@@ -29,14 +29,17 @@ to check current facts.
 Run these commands from this repository's root, using Python **3.12** on macOS
 or Linux. The worker currently requires POSIX process groups. You need a folder
 containing all seven wheels listed in
-[`dependencies/memory-release-candidates-2026-10-24.json`](../dependencies/memory-release-candidates-2026-10-24.json).
+[`dependencies/memory-release-candidates-2026-10-24-r2.json`](../dependencies/memory-release-candidates-2026-10-24-r2.json).
 The first five are the Lab's normal public SDK versions. The Castle adapter and
 worker are **unpublished candidates**: obtain the exact qualified wheel bundle
 from the maintainer. If you only have this repository, stop here and request
 that bundle; a generic `pip install cognitive-castle` is not a verified substitute.
 
-The current bundle passed [native Linux AMD64/ARM64 with PostgreSQL 16/18](verification/castle-linux-release-2026-10-24.md).
-Use its download link and checksums; the older 3.4.1 candidate remains historical.
+Get the matching **r2** bundle and its native Linux AMD64/ARM64 × PostgreSQL
+16/18 verification status from [Lab PR #26](https://github.com/B3Cognition/prosaic-integration-lab/pull/26).
+The [r2 release preparation record](verification/castle-linux-release-r2-2026-10-24.md)
+identifies its exact source and wheel hashes. Earlier candidate bundles remain
+separately archived; choose the bundle that matches this manifest exactly.
 
 Use two environments. The host runs Prosaic; the worker runs Castle. Set the
 wheel folder to its actual absolute path:
@@ -55,7 +58,7 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path('src').absolute()))
 from lab_runner.castle_memory import memory_artifacts
-memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24.json'), Path(os.environ['CASTLE_WHEELS']))
+memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24-r2.json'), Path(os.environ['CASTLE_WHEELS']))
 print('All seven wheel identities and checksums match.')
 PY
 ```
