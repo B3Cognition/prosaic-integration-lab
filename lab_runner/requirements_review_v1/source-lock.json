@@ -1,0 +1,24 @@
+{
+  "casesSha256": "8944bab00eee5a5357556d3e8b8a2de05d2ea5e9121a8ad9c8ba8e86f0f969ee",
+  "files": {
+    "__init__.py": "b51c920620cf7155cdccbb521cf81118e3643ce73a29173f6c230d3306b08210",
+    "__main__.py": "e8581d225b3b270e6830614e51f6fd9ecceceabddd6d5eedf59acf970bf8d1b2",
+    "cases.py": "5b57c0918fe2b9f6358c4c0d64c6dcf7a06bb76ace20909da9c038bfcedb2a61",
+    "contracts.py": "8aa63202cb896a4f5a75d465615fc1b92ba7c75fcac36b55fbbf332eb43ad195",
+    "evidence.py": "85df8c37968e5accfd67ef667f0bcd7b1897e643aed98aca45bbb32d468ccd8e",
+    "execution.py": "ff3b121f7baf0afa346ec0b09a5137f8ca52d2cb2c89ffba692b00c6294c5c55",
+    "fixtures.py": "ca7b0849d93eba6442722a6a6a16bdbd52da45d6510663401385745bfab5a68b",
+    "host_keys.py": "d382f71c5c9d758d5f8ad5cda5dc05a1227d5797048cb99a1c3450bb77acf6b9",
+    "runner.py": "de51fb12d7445aaa55d47efe49a28edde6c133fb41dbb87fb565d58776a5502f",
+    "scoring.py": "5182b44e1d2ffdee6b094afcbf1f5eea75574541a2f6756f9561d56196e25e8b"
+  },
+  "keysSha256": "8456b73c8865c00b3bd12331dc4cda3450289ebbdf67ccbd97267331e746381e",
+  "legacySourceLockSha256": "7c32d6ad67099a8e200644741342fe4450accaca94009f21420e98966a20c993",
+  "sdkVersions": {
+    "b3-prosaic": "0.4.1",
+    "b3-prosaic-harness": "0.9.4",
+    "b3-prosaic-runtime": "0.9.8"
+  },
+  "sueEngineIdentity": "bbde4669d1eb069dcb8c72e121cd08be4ca953b349f9243b9e650e0d1b596f0b",
+  "suiteVersion": "requirements-review-v1"
+}

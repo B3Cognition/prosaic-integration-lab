@@ -12,7 +12,8 @@ Accepted Harness outputs are the only durable dialogue history. Neither Core
 nor Runtime/Harness/Castle SDK source needs a change.
 
 **Tech Stack:** Python 3.12; public Core 0.4.1, Runtime 0.9.8, Harness 0.9.4 and
-their current PostgreSQL adapters; exact Castle 3.4.2 candidate wheel; existing
+their current PostgreSQL adapters; new lightweight cognitive-castle-sue 0.1.0 wheel;
+unchanged Castle 3.4.2 candidate for optional memory; existing
 FileRunStore/PostgresRunStore and Runtime recorder; synthetic loopback inference.
 
 **Spec:** [Optional SUE review design](../specs/2026-10-24-optional-sue-review-design.md).
@@ -30,8 +31,9 @@ missing-receipt retry and provenance-digest defects; see the linked design revie
 - Synthetic loopback qualification only; no live inference, merge or publication.
 - One selected lens; default euthyphro; 1–14 accepted turns; two attempts per turn.
 - RuntimeAdapter max_attempts=1; provider requests per invocation=1; tool calls=0.
-- Maximum 28 calls, 65,536 reported tokens, 900 wall-clock seconds from run creation
-  including approval/downtime, 60 seconds per attempt. Never reset the saved deadline.
+- Maximum 28 calls, 65,536 reported tokens, configurable wall-clock lifetime
+  (default 86400s, host cap 604800s) including approval/downtime, 60 seconds per
+  attempt. Never reset the saved deadline or claim a 900s active-time allowance.
 - Source count 1–16, total source bytes ≤65,536, seed bytes ≤2,048.
 - Frozen run input bytes ≤131,072; response bytes ≤16,384; invocation bytes ≤262,144;
   receipt bytes ≤1,048,576;
@@ -91,8 +93,9 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
   selections have record_id/text_sha256/revision. Return a complete authorized
   host capture with trusted binding context or explicit unavailable/forbidden
   error; never partially selected evidence or client-asserted scope.
-- `load_engine(expected_identity: dict)`: lazy adapter exposing the five documented
-  pure functions and verified installed policy identity; no vendor imports in Lab.
+- `load_engine(expected_identity=None)`: lazy lightweight castle_sue adapter exposing
+  the five documented pure functions and verified policy identity; no Castle/vendor
+  imports or model/storage dependencies in Lab.
 
 - [ ] Write failing tests for disabled no-import/no-call behavior, malformed settings,
   all limits and invalid counts/JSON, source hashes/CRLF/Unicode/line mappings,
@@ -192,7 +195,7 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
   conflicts, current/stale revisions, owner/tenant/payer denial, independent review
   and memory flags, and disabled status/report without inference permission.
   Include missing retained binding/engine cases with explicit unavailable output.
-- [ ] Check the 900-second wall-clock deadline with a controlled clock: approval
+- [ ] Check the configurable wall-clock deadline with a controlled clock: approval
   and downtime consume the lifetime, expired zero-call approval stays zero-call,
   resume never resets it, and read-only status/report still work after expiry.
 - [ ] Write real-process fault tests at model return before receipt save, after
@@ -264,6 +267,25 @@ branch `codex/sue-review-workflow`, followed by an independent final review.
 The tasks share source/policy/engine contracts, making sequential implementation
 the simplest way to keep those identities consistent.
 
-This plan adds no runtime behavior yet. Review the design and this concrete plan
-before implementation, as required by the writing-plans skill. No new live
-allowance or publishing authority is requested by approving implementation.
+The design and plan were reviewed before implementation. Approval added no new
+live allowance or publishing authority. The original checklist above records
+the planned scope; actual implemented coverage and remaining platform gates are
+in the dated verification note rather than inferred from a checked box.
+
+2026-10-24 execution steering: maintainer approved resolving SUE plus footprint
+and lifetime first, then adding it to the hackathon. The lightweight package is
+an independent additive Castle deliverable. After SUE tests pass, extend the
+Ready-to-Ship evaluation with a separately versioned frozen-source suite and
+direct/critic-author/SUE strategies; preserve its v10 grader/assets and old
+allowances. New evaluation cases/arms require current-SDK qualification and
+synthetic rehearsal before any separately authorized live study.
+
+2026-10-24 verified checkpoint: optional package and workflow implemented first,
+then frozen-source requirements comparison. Default profile1989 passed without
+either optional engine; complete enabled profile2063 passed; final direct and
+rebuilt installed candidates passed14 cases each on PostgreSQL16/18 (56total,
+zero skips, verified cleanup). Both installed24-cell fixture matrices and
+network-blocked replays pass. Independent review findings are fixed. See
+[verification](../../verification/sue-review-2026-10-24.md). Native Linux CI needs
+an authorized source push; live review quality remains unproven. Preserve these
+branches and all evidence without merge, publication or live calls.

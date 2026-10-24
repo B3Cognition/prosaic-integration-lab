@@ -1,5 +1,23 @@
 # Codex handoff
 
+## Optional SUE review guide and package provenance — 2026-10-24
+
+The [SUE guide](sue-review.md) describes the independently disabled advisory
+workflow, credential-free demo, frozen sources, approval-inclusive lifetime and
+owner/revision recovery. The [optional source profile](../dependencies/sue-review-source.json)
+pins the standalone engine candidate at Castle `53637196`, preserving canonical
+origin `58f4242`, normal SDK pins and r7 memory archives. It does not authorize
+publication or live inference. The [implementation plan](superpowers/plans/2026-10-24-optional-sue-review.md)
+tracks remaining integration/qualification work; documentation and standalone
+package review are not whole-feature completion or live-provider certification.
+
+The implemented optional workflow and frozen-source requirements comparison
+are recorded in the [dated verification](verification/sue-review-2026-10-24.md).
+Direct/rebuilt installed candidates pass all14 SUE cases on both PostgreSQL16/18;
+both24-cell comparison matrices and network-blocked replay pass. Native Linux CI
+and any review-quality claim remain separate gates. The original v10 scorer,
+retrieval assertions, source ZIP and historic evidence are preserved.
+
 ## Runtime 0.9.8 public adoption — 2026-10-24
 
 Runtime [v0.9.8](https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.9.8)

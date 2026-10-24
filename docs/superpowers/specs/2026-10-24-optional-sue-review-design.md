@@ -1,6 +1,6 @@
 # Optional SUE review workflow
 
-Date: 2026-10-24. Status: revised after independent design review; implementation pending.
+Date: 2026-10-24. Status: revised design approved for execution; implementation in progress.
 
 ## Intent and scope
 
@@ -32,9 +32,10 @@ live usefulness, recall and false-positive rates remain unmeasured.
 
 Do not execute `castle sue review`, Ollama, Codex or Claude subprocesses from
 this workflow. Do not copy the vendored reducer or import `cognitive_castle._vendor`.
-Reuse the documented public `cognitive_castle.brain_engine` functions
-`initial_state`, `question`, `schema`, `advance` and `coverage` from an exact
-qualified installed Castle wheel. SOAR and retrieval engines are outside review
+Reuse the documented pure Castle functions through the lightweight public
+`castle_sue` package: `initial_state`, `question`, `schema`, `advance` and
+`coverage`, from an exact qualified installed wheel. Its build copies the
+canonical Castle engine and policy bytes without editing them. SOAR and retrieval engines are outside review
 execution. Existing standalone Castle SUE commands and stored runs are unchanged.
 
 No SDK change is expected. Review verified the exact hashed public Runtime
@@ -53,20 +54,22 @@ store initialization or model call. Enabling review does not enable memory;
 enabling memory does not enable review. No SUE import is added to application
 startup or the default memory path.
 
-Use the already qualified worker wheel from r7, source
+Preserve the already qualified worker wheel from r7, source
 `58f4242080212c2bebcca0c685af0f5e1090aa94`, worker 3.4.2, SHA-256
 `4c0d6723d6f305639c14c51ae0327dcdcd75547ad8e2be89180a833df33ff027`.
 It is an unpublished candidate; installation instructions must say so. Preserve
 the selected archives and publication_authorized=false. Runtime/Harness/Core
 public pins and normal Lab dependencies do not change.
 
-The initial optional environment installs the full Castle distribution and its
-dependencies, even though importing the pure engine needs only the standard
-library. This is an explicit packaging cost, not a claim of a lightweight new
-engine package. Keep the review dependency profile independently hashed and
-qualify its complete installation with pip check. Do not use --no-deps to hide
-unsatisfied requirements. A lightweight upstream extraction is later work,
-outside Castle #107–#109 and this milestone.
+Resolve the installation footprint before eval integration with an additive
+`cognitive-castle-sue` 0.1.0 package, importing as `castle_sue`. Build it from
+Castle's canonical pure reducer and pinned policy sources without maintaining a
+second edited implementation. It has no third-party runtime dependencies and
+exports the five pure functions plus versioned capabilities/engine identity.
+Existing Castle imports, dependency declarations and behavior remain unchanged.
+Use a separate Castle branch; #107–#109 and r7 bytes are untouched. Pin the new
+wheel and source identity independently and qualify wheel/rebuilt-sdist parity,
+all nine lenses and clean pip check. No package publication is authorized.
 
 ## Host API and frozen sources
 
@@ -171,12 +174,15 @@ identity. An engine mismatch blocks resume without consuming a call.
 ## Budgets, confirmation and recovery
 
 Default proposal: one selected lens, 1–14 accepted turns, at most two validation
-attempts per turn, 28 total provider calls, 65,536 reported tokens, a 900-second
-wall-clock lifetime from run creation and 60 seconds per attempt. The deadline
+attempts per turn, 28 total provider calls, 65,536 reported tokens, a configurable
+wall-clock lifetime defaulting to 86,400 seconds (host maximum 604,800 seconds)
+from run creation and 60 seconds per attempt. The deadline
 includes the initial human pause, process downtime and resume. It is not active
 execution accounting. An expired zero-call approval requires an explicitly
 created new review; never reset or extend the saved deadline on resume.
-Long-lived approval or active-time accounting would require a separate design.
+This permits approval later in the day while preserving finite provider work.
+It does not introduce a separate 900-second active execution budget; that would
+require a generic supported Harness contract.
 Host policy may reduce these values,
 never expand them via model arguments. Keep all nine existing lenses available:
 euthyphro, meno, parmenides, cratylus, theaetetus, sophist, gorgias, republic and

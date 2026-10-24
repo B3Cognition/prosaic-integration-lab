@@ -67,6 +67,14 @@ review, resume or disable memory. Castle stays **off by default**. The
 qualification commands; [verification evidence](docs/verification/castle-integration-2026-10-23.md)
 records actual tested platforms and limits.
 
+The separately opt-in [SUE review guide](docs/sue-review.md) shows a
+credential-free requirements-review walkthrough, frozen sources, approval and
+recovery with the lightweight engine. Review stays **off by default**, independent
+of Castle memory; its reports are advisory and do not certify correctness.
+The separate [requirements comparison](docs/requirements-review-eval.md) exercises
+direct, critic-author and SUE strategies against frozen synthetic cases while
+preserving the original hackathon grader and retrieval checks.
+
 ## Install packages for an embedding service
 
 All five packages are published on PyPI. Their actual public downloads

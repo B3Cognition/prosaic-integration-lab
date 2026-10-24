@@ -1,0 +1,477 @@
+{
+  "suiteVersion": "ready-to-ship-v1",
+  "keys": {
+    "ship-01": {
+      "decision": "APPROVE",
+      "findings": {
+        "requirements_satisfied": [
+          [
+            [
+              "policy",
+              "requiredChecks"
+            ],
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "candidate",
+              "fingerprint"
+            ],
+            [
+              "verify",
+              "commit"
+            ],
+            [
+              "verify",
+              "fingerprintBefore"
+            ],
+            [
+              "verify",
+              "fingerprintAfter"
+            ],
+            [
+              "verify",
+              "results"
+            ]
+          ],
+          [
+            [
+              "policy",
+              "requiredChecks"
+            ],
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "candidate",
+              "fingerprint"
+            ],
+            [
+              "verify",
+              "commit"
+            ],
+            [
+              "verify",
+              "fingerprintBefore"
+            ],
+            [
+              "verify",
+              "fingerprintAfter"
+            ],
+            [
+              "verify",
+              "unitResult"
+            ],
+            [
+              "verify",
+              "migrationResult"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "ae5b41282d6048eaa9a7d42abfc228411465fde380388f37cd53e5925299f4e2"
+    },
+    "ship-02": {
+      "decision": "INSUFFICIENT_EVIDENCE",
+      "findings": {
+        "candidate_unverified": [
+          [
+            [
+              "policy",
+              "identityRule"
+            ],
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "verify",
+              "commit"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "150a20b26c5425a62eca15af5a37fc6d04122b0e88f47d1793fce32ae8d66c5a"
+    },
+    "ship-03": {
+      "decision": "BLOCK",
+      "findings": {
+        "required_check_skipped": [
+          [
+            [
+              "policy",
+              "skipRule"
+            ],
+            [
+              "verify",
+              "migrationResult"
+            ]
+          ],
+          [
+            [
+              "policy",
+              "skipRule"
+            ],
+            [
+              "verify",
+              "results"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "138b7d9a6c218ce7c2ddce402dedb1f687d7de866ed9c205d5f68ad76e6f235c",
+      "optionalCitations": {
+        "required_check_skipped": [
+          [
+            "candidate",
+            "commit"
+          ],
+          [
+            "candidate",
+            "fingerprint"
+          ],
+          [
+            "policy",
+            "requiredChecks"
+          ],
+          [
+            "policy",
+            "identityRule"
+          ],
+          [
+            "verify",
+            "commit"
+          ],
+          [
+            "verify",
+            "fingerprintBefore"
+          ],
+          [
+            "verify",
+            "fingerprintAfter"
+          ]
+        ]
+      }
+    },
+    "ship-04": {
+      "decision": "BLOCK",
+      "findings": {
+        "candidate_mutated": [
+          [
+            [
+              "policy",
+              "integrityRule"
+            ],
+            [
+              "verify",
+              "fingerprintBefore"
+            ],
+            [
+              "verify",
+              "fingerprintAfter"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "1f78c8fca26c1acdbb06d77f172bd7147300f3565c7fd4bd177950039ca60021",
+      "optionalCitations": {
+        "candidate_mutated": [
+          [
+            "candidate",
+            "commit"
+          ],
+          [
+            "candidate",
+            "fingerprint"
+          ],
+          [
+            "policy",
+            "requiredChecks"
+          ],
+          [
+            "policy",
+            "identityRule"
+          ],
+          [
+            "verify",
+            "commit"
+          ]
+        ]
+      }
+    },
+    "ship-05": {
+      "decision": "APPROVE",
+      "findings": {
+        "requirements_satisfied": [
+          [
+            [
+              "policy",
+              "supersessionRule"
+            ],
+            [
+              "policy",
+              "requiredChecks"
+            ],
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "candidate",
+              "fingerprint"
+            ],
+            [
+              "previous",
+              "supersededBy"
+            ],
+            [
+              "latest",
+              "attemptId"
+            ],
+            [
+              "latest",
+              "commit"
+            ],
+            [
+              "latest",
+              "fingerprintBefore"
+            ],
+            [
+              "latest",
+              "fingerprintAfter"
+            ],
+            [
+              "latest",
+              "results"
+            ]
+          ],
+          [
+            [
+              "policy",
+              "supersessionRule"
+            ],
+            [
+              "policy",
+              "requiredChecks"
+            ],
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "candidate",
+              "fingerprint"
+            ],
+            [
+              "previous",
+              "supersededBy"
+            ],
+            [
+              "latest",
+              "attemptId"
+            ],
+            [
+              "latest",
+              "commit"
+            ],
+            [
+              "latest",
+              "fingerprintBefore"
+            ],
+            [
+              "latest",
+              "fingerprintAfter"
+            ],
+            [
+              "latest",
+              "unitResult"
+            ],
+            [
+              "latest",
+              "migrationResult"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "9766eb5688ea92ae42a24648301094b957fece4b7a1c36f6595f7b03c3e475de"
+    },
+    "ship-06": {
+      "decision": "INSUFFICIENT_EVIDENCE",
+      "findings": {
+        "required_evidence_missing": [
+          [
+            [
+              "policy",
+              "requiredChecks"
+            ],
+            [
+              "index",
+              "complete"
+            ],
+            [
+              "index",
+              "entries"
+            ],
+            [
+              "verify",
+              "results"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "cfbd9d2b22fa36a8e826f789018826a3f25325e86880630a2d64a8550c726a9b"
+    },
+    "ship-07": {
+      "decision": "BLOCK",
+      "findings": {
+        "required_check_failed": [
+          [
+            [
+              "policy",
+              "failureRule"
+            ],
+            [
+              "verify",
+              "unitResult"
+            ]
+          ],
+          [
+            [
+              "policy",
+              "failureRule"
+            ],
+            [
+              "verify",
+              "results"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [],
+      "caseSha256": "51aead2d62b526f868a03af90ffca75d2629312f61c915b53142e0c8502900c8",
+      "requiredReadIds": [
+        "log"
+      ],
+      "optionalCitations": {
+        "required_check_failed": [
+          [
+            "candidate",
+            "commit"
+          ],
+          [
+            "candidate",
+            "fingerprint"
+          ],
+          [
+            "policy",
+            "requiredChecks"
+          ],
+          [
+            "policy",
+            "identityRule"
+          ],
+          [
+            "verify",
+            "commit"
+          ],
+          [
+            "verify",
+            "fingerprintBefore"
+          ],
+          [
+            "verify",
+            "fingerprintAfter"
+          ]
+        ]
+      }
+    },
+    "ship-08": {
+      "decision": "BLOCK",
+      "findings": {
+        "required_check_failed": [
+          [
+            [
+              "policy",
+              "failureRule"
+            ],
+            [
+              "latest",
+              "unitResult"
+            ]
+          ],
+          [
+            [
+              "policy",
+              "failureRule"
+            ],
+            [
+              "latest",
+              "results"
+            ]
+          ]
+        ],
+        "stale_evidence_used": [
+          [
+            [
+              "candidate",
+              "commit"
+            ],
+            [
+              "previous",
+              "commit"
+            ],
+            [
+              "review",
+              "sourceReceipt"
+            ]
+          ]
+        ]
+      },
+      "draftErrors": [
+        "stale_evidence",
+        "overlooked_failure"
+      ],
+      "caseSha256": "9291a59aa2a4019e0f0905b84fbe2b4a4f056091aa34d7e77b7c50342a6eaf1a",
+      "optionalCitations": {
+        "required_check_failed": [
+          [
+            "candidate",
+            "commit"
+          ],
+          [
+            "candidate",
+            "fingerprint"
+          ],
+          [
+            "policy",
+            "requiredChecks"
+          ],
+          [
+            "policy",
+            "identityRule"
+          ],
+          [
+            "latest",
+            "commit"
+          ],
+          [
+            "latest",
+            "fingerprintBefore"
+          ],
+          [
+            "latest",
+            "fingerprintAfter"
+          ]
+        ]
+      }
+    }
+  }
+}
