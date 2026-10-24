@@ -34,15 +34,15 @@ exported-conversation import steps below for the material you want it to recall.
 Run these commands from this repository's root, using Python **3.12** on macOS
 or Linux. The worker currently requires POSIX process groups. You need a folder
 containing all seven wheels listed in
-[`dependencies/memory-release-candidates-2026-10-24-r2.json`](../dependencies/memory-release-candidates-2026-10-24-r2.json).
+[`dependencies/memory-release-candidates-2026-10-24-r3.json`](../dependencies/memory-release-candidates-2026-10-24-r3.json).
 The first five are the Lab's normal public SDK versions. The Castle adapter and
 worker are **unpublished candidates**: obtain the exact qualified wheel bundle
 from the maintainer. If you only have this repository, stop here and request
 that bundle; a generic `pip install cognitive-castle` is not a verified substitute.
 
-Get the matching **r2** bundle and its native Linux AMD64/ARM64 × PostgreSQL
+Get the matching **r3** stack bundle and its native Linux AMD64/ARM64 × PostgreSQL
 16/18 verification status from [Lab PR #26](https://github.com/B3Cognition/prosaic-integration-lab/pull/26).
-The [r2 release preparation record](verification/castle-linux-release-r2-2026-10-24.md)
+The [r3 stack preparation record](verification/castle-linux-release-r3-2026-10-24.md)
 identifies its exact source and wheel hashes. Earlier candidate bundles remain
 separately archived; choose the bundle that matches this manifest exactly.
 
@@ -63,7 +63,7 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path('src').absolute()))
 from lab_runner.castle_memory import memory_artifacts
-memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24-r2.json'), Path(os.environ['CASTLE_WHEELS']))
+memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24-r3.json'), Path(os.environ['CASTLE_WHEELS']))
 print('All seven wheel identities and checksums match.')
 PY
 ```
@@ -102,7 +102,7 @@ be large. FTS reads load no embedding models. SUE and SOAR are not needed.
 
 This release preparation keeps older candidate manifests and receipts intact; do not mix
 same-version adapter wheels from different bundles. Host snapshots use public
-Runtime 0.9.7. The adapter's separate model-facing `memory_tools()` API requires
+Runtime 0.9.8. The adapter's separate model-facing `memory_tools()` API requires
 a future qualified Runtime with its explicit error capability.
 
 ## 2. Try the local walkthrough first
