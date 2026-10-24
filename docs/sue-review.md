@@ -12,14 +12,15 @@ disables it. Other review settings are rejected while disabled. Installing the
 engine does not enable review, record chats, retrieve sources or start a model.
 The disabled session constructor loads no SUE engine or SDK execution machinery.
 
-**Live qualification is blocked.** The [corrected Qwen comparison](verification/review-contract-fixes-2026-10-24.md)
-restored canonical SUE guidance and fixed the critic contract. The critic now
-completes, but Qwen 7B still produces invalid SUE responses in every case.
-Qwen 27B's earlier invocation-limit failure also remains unresolved. Use the
-walkthrough to inspect mechanics; keep review disabled for normal work until
-a new live comparison qualifies it. Preserve the matching candidate wheel for
-old-run inspection: the corrected adapter rejects old sealed bindings rather
-than silently changing their instructions.
+**Live review quality remains unqualified.** The
+[constrained Qwen comparison](verification/sue-constrained-json-2026-10-24.md)
+produces schema-valid SUE JSON in all16 attempts. The unchanged semantic
+validator rejects13 replies; three reviews stop after one accepted turn, and
+none passes the final review benchmark. Qwen27B's earlier invocation-limit
+failure remains unresolved. Keep review disabled for normal work. The
+[earlier failed comparison](verification/review-contract-fixes-2026-10-24.md)
+and matching candidate wheels remain available for inspection. New generation
+settings cannot silently upgrade saved runs or reinterpret old sealed bindings.
 
 ## Get the optional engine
 
@@ -211,6 +212,50 @@ engine; a missing or changed binding reports `binding_unavailable`. Disabling
 review does not rewrite a saved run or erase its evidence.
 
 ## Host integration, memory and SOAR
+
+### Experimental constrained JSON generation
+
+The unpublished Runtime `0.9.8+jsonschema.2` candidate can request the exact
+canonical JSON Schema for each SUE turn. Normal public SDK pins and the CLI
+settings format remain unchanged. Use a separate environment with the
+checksum-verified Runtime and Lab candidate wheels from the
+[constrained-generation qualification](verification/sue-constrained-json-2026-10-24.md).
+The public Runtime 0.9.8 fails closed if this option is requested.
+
+The trusted embedding host opts in explicitly:
+
+```python
+review = SueReviewSession(
+    settings={"enabled": True},
+    store=store,
+    config=runtime_config,
+    principal=trusted_principal,
+    namespace=trusted_namespace,
+    constrained_json=True,
+)
+```
+
+Omitting `constrained_json` keeps it off. It is a host API argument, not a
+field accepted by the existing review JSON/fixture CLI. Enabling it does not
+enable memory. SUE still pauses before the first model call. Its saved proposal
+shows `policy.constrained_json: true`; inspect and approve that frozen proposal
+before continuing. Later configuration changes cannot upgrade an older review:
+resume reconstructs the saved policy and binding. Choose a new review to change
+generation mode.
+
+Runtime sends `response_format` with `type: json_schema`, the exact current
+engine schema and `strict: true`. This candidate supports tool-free
+OpenAI-compatible calls. Missing capability or unsupported provider fails
+before model dispatch, and HTTP rejection never triggers a request without the
+schema. Check actual provider enforcement when qualifying a deployment: some
+servers downgrade structured-output requests to prompting.
+
+Schema-constrained generation addresses formatting and required fields. It
+does not establish truthful evidence, correct interpretations or useful review
+quality. SUE's raw JSON parser, exact quotation checks, semantic transition
+validator, provenance, owner/revision checks and finite budgets remain required.
+Invalid responses remain rejected and retain their receipts. Both memory and
+SUE remain disabled by default.
 
 The programmatic `SueReviewSession` API exposes `start`, `status`,
 revision-checked `resume` and `report`. A host supplies a public Runtime config,

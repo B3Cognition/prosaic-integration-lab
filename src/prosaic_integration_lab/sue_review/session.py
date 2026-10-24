@@ -9,7 +9,10 @@ from .sources import freeze_documents, verify_frozen
 
 
 class SueReviewSession:
-    def __init__(self, settings, store, config, principal, namespace, accounting=None, *, clock=None):
+    def __init__(self, settings, store, config, principal, namespace, accounting=None, *, clock=None, constrained_json=False):
+        if type(constrained_json) is not bool:
+            raise ReviewError('invalid_review_settings')
+        self.constrained_json = constrained_json
         self.settings = settings if type(settings) is ReviewSettings else ReviewSettings.from_mapping(settings)
         if not reference(namespace) or any(not reference(getattr(principal,n,None)) for n in ('tenant_id','actor_id','billing_account_id')):
             raise ReviewError('invalid_review_owner')
@@ -36,8 +39,11 @@ class SueReviewSession:
         from prosaic_runtime import ExecutionContext
         from .workflow import build_review_workflow
         engine = load_engine(expected_engine)
+        policy = dict(policy)
+        constrained_json = policy.pop('constrained_json', False)
         settings = ReviewSettings.from_mapping({'enabled':True,**policy})
-        workflow = build_review_workflow(config=self.config,settings=settings,engine=engine)
+        workflow = build_review_workflow(config=self.config,settings=settings,engine=engine,
+                                         constrained_json=constrained_json)
         options = {'clock':self.clock} if self.clock is not None else {}
         return Harness(workflow,store=self.store,run_id=run_id,accounting=self.accounting,
                context=ExecutionContext(application_id='integration-lab-sue-review',project_id=self.namespace,
@@ -60,6 +66,8 @@ class SueReviewSession:
         if capture is not None and any(capture.get(k) != v for k,v in {'tenant_id':self.principal.tenant_id,'actor_id':self.principal.actor_id,'billing_account_id':self.principal.billing_account_id,'namespace':self.namespace}.items()):
             raise PermissionError('source_scope_mismatch')
         policy = {k:v for k,v in asdict(self.settings).items() if k!='enabled'}
+        if self.constrained_json:
+            policy['constrained_json'] = True
         policy['engine_identity'] = caps['engineIdentity']['digest']
         request = own({'seed':seed,'lens':lens,'maxTurns':max_turns,'evidence':frozen,'engine':caps,'reviewPolicy':policy})
         request['requestSignature'] = digest(request)
