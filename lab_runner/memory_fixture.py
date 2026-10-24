@@ -38,11 +38,35 @@ backend.close()
 prepare_provider(PalacePaths.resolve(root/'palace'),namespace='owner-memory',config=cfg)
 """
 
-WORKER_PROXY = r"""
+READ_GUARD = r"""
+import importlib.abc, runpy, socket, sys
+from pathlib import Path
+marker=Path(sys.argv.pop(1))
+sys.argv[0]='castle-provider'
+def forbidden(value):
+    marker.write_text(value)
+    raise RuntimeError('qualification forbids '+value)
+class ReadGuard(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname.split('.')[0] in {'torch','sentence_transformers','spacy','sml'} or fullname.startswith((
+            'cognitive_castle.sue','cognitive_castle.soar','cognitive_castle.brain',
+            'cognitive_castle.understanding','cognitive_castle.quality',
+            'cognitive_castle.llm','cognitive_castle.judge',
+            'cognitive_castle.embedding','cognitive_castle.reranker')):
+            forbidden('import:'+fullname)
+sys.meta_path.insert(0,ReadGuard())
+def no_network(*args,**kwargs): forbidden('network')
+socket.socket.connect=no_network
+socket.create_connection=no_network
+runpy.run_module('cognitive_castle.provider_worker',run_name='__main__')
+"""
+
+
+WORKER_PROXY = "READ_GUARD=" + repr(READ_GUARD) + "\n" + r"""
 import json,os,signal,subprocess,sys
 from pathlib import Path
 trace=Path(sys.argv[1])
-child=subprocess.Popen([sys.executable,'-I','-m','cognitive_castle.provider_worker']+sys.argv[2:],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
+child=subprocess.Popen([sys.executable,'-I','-c',READ_GUARD,str(trace.with_suffix('.forbidden'))]+sys.argv[2:],stdin=subprocess.PIPE,stdout=subprocess.PIPE)
 trace.with_suffix('.pid').write_text(str(child.pid))
 def stop(*args):
     if child.poll() is None:
