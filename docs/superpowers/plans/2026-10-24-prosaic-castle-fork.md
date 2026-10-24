@@ -34,38 +34,38 @@ PostgreSQL 16/18, pytest, wheel/sdist.
 Files: fork pyproject.toml, README, provenance, packaging tests.
 Produces: installed prosaic-castle worker plus unchanged thin adapter/SUE.
 
-- [ ] Add failing metadata/import/actual-worker checks in lean environment.
-- [ ] Implement fork metadata, optional dependency groups and provenance.
-- [ ] Build/rebuild wheel/sdist; verify installed payload and real FTS worker.
+- [x] Add failing metadata/import/actual-worker checks in lean environment.
+- [x] Implement fork metadata, optional dependency groups and provenance.
+- [x] Build/rebuild wheel/sdist; verify installed payload and real FTS worker.
 
 ### Task 2: Deterministic rules
 
 Files: fork policy module, custom-rule inventory, differential tests.
 Produces: opt-in pure policy API with explicit project/clock, no SML import.
 
-- [ ] Test all four rules, signed/tied scores, top-50, bad/future dates,
+- [x] Test all four rules, signed/tied scores, top-50, bad/future dates,
   repeated calls and custom-rule rejection; watch failures.
-- [ ] Implement policy; compare legacy bridge via rule-output oracle and
+- [x] Implement policy; compare legacy bridge via rule-output oracle and
   record real SML qualification as separate gate.
-- [ ] Run focused/legacy suites and retain custom-rule inventory.
+- [x] Run focused/legacy suites and retain custom-rule inventory.
 
 ### Task 3: Optional model jobs
 
 Files: Lab jobs module, tests and guide.
 Produces: host-opted-in ranking/refinement/origin sessions using public SDKs.
 
-- [ ] Watch failing tests for disabled zero calls, malformed fallback,
+- [x] Watch failing tests for disabled zero calls, malformed fallback,
   permutations/tail, frozen input and receipt-only resume.
-- [ ] Implement explicit jobs with immutable source binding and audit.
-- [ ] Verify fixture attribution; document retained transport compatibility.
+- [x] Implement explicit jobs with immutable source binding and audit.
+- [x] Verify fixture attribution; document retained transport compatibility.
 
 ### Task 4: Lab and hackathon adoption
 
 Files: new dependency profile, installed integration tests/runner and guides.
 Consumes: installed Task 1 artifacts and Task 2/3 public interfaces.
 
-- [ ] Add failing installed scope/snapshot/resume/unavailable composition tests.
-- [ ] Adopt new candidate hashes without changing old profiles/engine identity.
-- [ ] Run full default/enabled suites, installed PostgreSQL 16/18 lanes and
+- [x] Add failing installed scope/snapshot/resume/unavailable composition tests.
+- [x] Adopt new candidate hashes without changing old profiles/engine identity.
+- [x] Run full default/enabled suites, installed PostgreSQL 16/18 lanes and
   requirements matrix/replay; preserve historical scorer and evidence.
-- [ ] Record evidence, independent review, local commits and remaining gates.
+- [x] Record evidence, independent review, local commits and remaining gates.

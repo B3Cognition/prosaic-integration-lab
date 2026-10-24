@@ -216,10 +216,13 @@ it does not run a real LLM. Use absolute paths and a new output directory:
   --tests-root "$PWD/tests" --output /absolute/new/evidence-pg16
 ```
 
-Repeat with PostgreSQL 18 and a different output directory, and repeat against
-the rebuilt-sdist wheel set. The runner's intended gate is at least 68 checks,
-zero skips/failures/errors, verified installed bytes and verified fixture
-cleanup. Inspect `qualification.json`, `pytest.log` and `result.xml`; this
+Repeat with PostgreSQL 18 and a different output directory. Verify the rebuilt
+sdist wheel set too; byte-identical wheels execute the same installed payload.
+Changed rebuilt payloads require fresh acceptance. The gate requires exactly
+76 distinct named cases, including all eight optional model-job cases, zero
+skips/failures/errors, pinned worker/adapter/engine hashes, verified installed
+bytes and verified fixture cleanup. Inherited pytest filters are removed.
+Inspect `qualification.json`, `pytest.log` and `result.xml`; this
 command is a recipe, not a claim that a platform or candidate has passed.
 Without `--enable`, it reports disabled and allocates nothing. The separate
 requirements comparison checks frozen synthetic cases; it cannot establish

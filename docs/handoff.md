@@ -1,5 +1,23 @@
 # Codex handoff
 
+## Independent Prosaic Castle fork — 2026-10-24
+
+The [new enable/use guide](prosaic-castle.md) adopts the independent local fork
+with a lean FTS provider, unchanged separately installable SUE, and optional
+[Runtime/Harness model jobs](castle-model-jobs.md). Memory/review remain
+independently disabled. Original Castle modules, custom SOAR compatibility,
+legacy model transports, old SDK/profile pins and hackathon evidence remain.
+No backport, push, release or live inference was performed.
+
+[Qualification](verification/prosaic-castle-fork-2026-10-24.md): default2,033,
+enabled2,107 Lab tests; installed76/76 on each PostgreSQL16/18; Castle2,606 tests
+and85.59% coverage;24-cell fixture comparison and zero-call network-denied replay.
+Actual worker qualification fixed a SUE snapshot wire-hash mismatch; review
+fixed judge objectives and strict candidate/test-inventory admission. Linux
+native AMD64/ARM64, real SML/live transport parity and review quality remain
+separate gates. Historical quickstarts describe their original bundles; use
+the new guide/profile for this unpublished independent candidate.
+
 ## Optional SUE review guide and package provenance — 2026-10-24
 
 The [SUE guide](sue-review.md) describes the independently disabled advisory
