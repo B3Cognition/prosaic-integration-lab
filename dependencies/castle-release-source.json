@@ -1,6 +1,6 @@
 {
   "repository": "B3Cognition/cognitive-castle",
-  "source_commit": "1a9ba04a91af26687aac77894028b887ed54d215",
+  "source_commit": "40df257ba7e97422920b83c2d787a784ae6f85fa",
   "worker_version": "3.4.2",
   "adapter_version": "0.1.0",
   "profile": "memory-fts-v1",
