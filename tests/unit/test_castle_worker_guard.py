@@ -33,3 +33,26 @@ def test_qualification_worker_records_and_blocks_forbidden_paths(tmp_path, monke
     with pytest.raises(RuntimeError, match="qualification forbids"):
         exec(READ_GUARD, {"__name__": "qualification_guard"})
     assert marker.read_text() == ("network" if attempt == "network" else "import:" + attempt)
+
+
+def test_dependency_availability_probe_is_not_a_neural_module_import(tmp_path, monkeypatch):
+    from lab_runner.memory_fixture import READ_GUARD
+
+    marker = tmp_path / "forbidden.txt"
+    monkeypatch.delitem(sys.modules, "torch", raising=False)
+    monkeypatch.setattr(sys, "argv", ["worker", str(marker)])
+    monkeypatch.setattr(sys, "meta_path", list(sys.meta_path))
+    monkeypatch.setattr(socket.socket, "connect", socket.socket.connect)
+    monkeypatch.setattr(socket, "create_connection", socket.create_connection)
+
+    def provider(*args, **kwargs):
+        # LanceDB lazily checks availability without loading the module.
+        spec = importlib.util.find_spec("torch")
+        assert spec is not None and spec.loader is not None
+        assert "torch" not in sys.modules and not marker.exists()
+        with pytest.raises(RuntimeError, match="qualification forbids"):
+            importlib.import_module("torch")
+
+    monkeypatch.setattr(runpy, "run_module", provider)
+    exec(READ_GUARD, {"__name__": "qualification_guard"})
+    assert marker.read_text() == "import:torch"

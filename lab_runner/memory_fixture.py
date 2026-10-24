@@ -39,13 +39,16 @@ prepare_provider(PalacePaths.resolve(root/'palace'),namespace='owner-memory',con
 """
 
 READ_GUARD = r"""
-import importlib.abc, runpy, socket, sys
+import importlib.abc, importlib.machinery, runpy, socket, sys
 from pathlib import Path
 marker=Path(sys.argv.pop(1))
 sys.argv[0]='castle-provider'
 def forbidden(value):
     marker.write_text(value)
     raise RuntimeError('qualification forbids '+value)
+class ForbiddenLoader(importlib.abc.Loader):
+    def create_module(self, spec): return None
+    def exec_module(self, module): forbidden('import:'+module.__name__)
 class ReadGuard(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
         if fullname.split('.')[0] in {'torch','sentence_transformers','spacy','sml'} or fullname.startswith((
@@ -53,7 +56,9 @@ class ReadGuard(importlib.abc.MetaPathFinder):
             'cognitive_castle.understanding','cognitive_castle.quality',
             'cognitive_castle.llm','cognitive_castle.judge',
             'cognitive_castle.embedding','cognitive_castle.reranker')):
-            forbidden('import:'+fullname)
+            # Availability probes (LanceDB's lazy dependencies) execute no code.
+            # Reject the actual module load, before its body can run.
+            return importlib.machinery.ModuleSpec(fullname,ForbiddenLoader())
 sys.meta_path.insert(0,ReadGuard())
 def no_network(*args,**kwargs): forbidden('network')
 socket.socket.connect=no_network
