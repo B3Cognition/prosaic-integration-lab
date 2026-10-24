@@ -2,6 +2,10 @@
 
 ## 0.6.0 — unreleased
 
+- Adopt released Runtime 0.9.8 with native/unified pools, retaining the other four
+  SDK pins. Require installed native/unified acceptance in public CI and preserve
+  the pre-unified manifest and closed provenance profile for historical replay.
+
 - Add opt-in unified Runtime candidate acceptance, CLI pool benchmarking and
   provider-shaped quota/no-replay tests, with explicit policies and private
   bounded allowances. Preserve released SDK pins and historical measurements.

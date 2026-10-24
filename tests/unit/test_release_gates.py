@@ -21,6 +21,17 @@ def test_context_train_requires_context_cases_and_preserves_archived_baseline():
     validate(item,'conversation',16,context_assembly=True)
 
 
+def test_unified_release_keeps_every_existing_consumer_and_context_gate():
+    from lab_runner.gates import supports_consumer_blueprints, supports_context_assembly, required_modes
+    train=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    next(a for a in train['artifacts'] if a['distribution']=='b3-prosaic-runtime')['version']='0.9.8'
+    assert supports_consumer_blueprints(train) and supports_context_assembly(train)
+    assert set(required_modes(candidate=False,manifest=train))=={
+        'audit','identity','ingress','lago','native-persistence','native','legacy-upgrade','qualification','conversation'}
+    next(a for a in train['artifacts'] if a['distribution']=='b3-prosaic-harness')['version']='0.9.0'
+    with pytest.raises(ValueError):supports_consumer_blueprints(train)
+
+
 def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
     from lab_runner.gates import required_modes,supports_conversation
     released=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())

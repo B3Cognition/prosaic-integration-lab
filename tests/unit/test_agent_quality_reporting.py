@@ -91,7 +91,9 @@ def test_report_does_not_echo_arbitrary_identity_or_recovery_data():
         summarize([],[],identity=benchmark_identity(),origin='fixture',recovery=[{'passed':True,'secret':'canary'}])
 
 
-@pytest.mark.parametrize('runtime,filename',[('0.9.7','releases.json'),('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
+@pytest.mark.parametrize('runtime,filename',[
+    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases.json'),
+    ('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
 def test_provenance_binds_the_selected_sdk_manifest(monkeypatch,runtime,filename):
     from lab_runner.quality import runner
     from prosaic_integration_lab.dependencies import manifest_digest

@@ -115,6 +115,9 @@ jobs:
       - name: Unit and functional regressions
         if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q
+      - name: Released native and unified pool acceptance
+        if: ${{ !inputs.candidate }}
+        run: .venv/bin/python -m pytest -q tests/native_acceptance
       - name: Current conversation train without context capability
         if: ${{ steps.conversation-sdk.outputs.enabled == 'true' && steps.conversation-sdk.outputs.context != 'true' }}
         run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py

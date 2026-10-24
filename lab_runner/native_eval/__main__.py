@@ -1,4 +1,4 @@
-"""Native Runtime candidate tests and benchmarks; live execution is opt-in."""
+"""Installed native/unified Runtime tests and benchmarks; live execution is opt-in."""
 import argparse
 import json
 import os

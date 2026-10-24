@@ -2,12 +2,13 @@
 
 The opt-in [unified Runtime pool lab](docs/unified-runtime-pools.md) tests Claude
 Code, Codex CLI and local/API selection with explicit policies and pre-work-only
-fallback. It requires an unreleased Runtime candidate and leaves published SDK
-pins unchanged. Retained [27-run benchmark results](docs/verification/unified-cli-realistic-2026-10-23.md)
+fallback using released Runtime 0.9.8. Retained [27-run benchmark results](docs/verification/unified-cli-realistic-2026-10-23.md)
 and [provider-rejection/no-replay tests](docs/verification/unified-provider-fallback-2026-10-23.md)
 separate real model observations from simulated failures.
 The [PR qualification ledger](docs/verification/unified-pool-pr-finalization-2026-10-23.md)
-records fresh current-main integration checks and exact candidate provenance.
+records the earlier candidate checks and exact provenance. The
+[released adoption ledger](docs/verification/runtime-unified-release-2026-10-24.md)
+separately records public artifact checks and fresh release validation.
 
 The experimental [sandboxed CLI blueprint](docs/sandboxed-tools.md) composes
 host admission/approval with Runtime's native confinement and independently
@@ -50,7 +51,7 @@ note records the incomplete results. Released Lab 0.5.0 remains unchanged.
 The [conversation adoption guide](docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.7/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
+0.9.8/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -77,7 +78,7 @@ family:
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
   'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.7' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-runtime==0.9.8' 'b3-prosaic-runtime-postgres==0.3.0' \
   'b3-prosaic-harness==0.9.4' 'b3-prosaic-harness-postgres==0.4.0'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
@@ -152,7 +153,7 @@ The active manifest selects these exact published artifacts:
 | Distribution | Version |
 | --- | --- |
 | `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.7 |
+| `b3-prosaic-runtime` | 0.9.8 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
 | `b3-prosaic-harness` | 0.9.4 |
 | `b3-prosaic-harness-postgres` | 0.4.0 |
