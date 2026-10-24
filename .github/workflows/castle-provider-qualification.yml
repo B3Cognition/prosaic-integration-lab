@@ -5,8 +5,17 @@ on:
     paths:
       - '.github/workflows/castle-provider-qualification.yml'
       - 'dependencies/castle-*'
-      - 'lab_runner/memory_fixture.py'
+      - 'dependencies/releases.json'
+      - 'dependencies/requirements.*'
+      - 'dependencies/images.json'
+      - 'src/**'
+      - 'lab_runner/**'
+      - 'pyproject.toml'
+      - 'configs/memory-provider.example.json'
       - 'tests/acceptance/test_memory_workflow.py'
+      - 'tests/unit/test_castle_*'
+      - 'scripts/prepare_dependencies.py'
+      - 'scripts/memory_smoke.py'
       - 'scripts/build_castle_release_bundle.py'
       - 'scripts/castle_release_qualification.py'
   workflow_dispatch:

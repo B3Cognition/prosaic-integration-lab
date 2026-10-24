@@ -34,6 +34,17 @@ def run(*command, cwd, env):
     subprocess.run(command, cwd=cwd, env=env, check=True, timeout=300)
 
 
+def export_commit(source, commit, destination):
+    """Export immutable tracked bytes, excluding working-tree and build debris."""
+    destination.mkdir(parents=True, exist_ok=False)
+    with tempfile.TemporaryFile() as stream:
+        subprocess.run(["git", "archive", "--format=tar", commit], cwd=source,
+                       stdout=stream, check=True, timeout=60)
+        stream.seek(0)
+        with tarfile.open(fileobj=stream) as archive:
+            archive.extractall(destination, filter="data")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--castle-source", type=Path, required=True)
@@ -51,6 +62,17 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     epoch = subprocess.check_output(["git", "show", "-s", "--format=%ct", commit], cwd=source, text=True).strip()
+    lab_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    with tempfile.TemporaryDirectory(prefix="castle-release-source-") as temporary:
+        exported = Path(temporary)
+        castle = exported / "castle"
+        lab = exported / "lab"
+        export_commit(source, commit, castle)
+        export_commit(ROOT, lab_commit, lab)
+        build_bundle(castle, lab, spec, output, commit, lab_commit, epoch)
+
+
+def build_bundle(source, lab, spec, output, commit, lab_commit, epoch):
     env = {**os.environ, "SOURCE_DATE_EPOCH": epoch}
     package_rows = []
     roundtrips = []
@@ -82,10 +104,10 @@ def main():
                              "source_commit": commit, "candidate": True,
                              **({"environment": "worker-only"} if distribution == "cognitive-castle" else {})})
     run(sys.executable, "-m", "twine", "check", "--strict", *[str(output / row[key]) for row in roundtrips for key in ("wheel", "sdist")],
-        cwd=ROOT, env=env)
+        cwd=lab, env=env)
     from scripts.prepare_dependencies import prepare
-    cache = prepare(ROOT / "dependencies/releases.json", ROOT / ".cache/wheels")
-    public = json.loads((ROOT / "dependencies/releases.json").read_text())
+    cache = prepare(lab / "dependencies/releases.json", ROOT / ".cache/wheels")
+    public = json.loads((lab / "dependencies/releases.json").read_text())
     for row in public["artifacts"]:
         shutil.copyfile(cache / row["filename"], output / row["filename"])
     manifest = deepcopy(public)
@@ -93,15 +115,14 @@ def main():
     # Keep the historic public family order, followed by the adapter and worker.
     manifest["artifacts"].extend(reversed(package_rows))
     (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-    run(sys.executable, "-m", "build", "--wheel", "--no-isolation", "--outdir", str(output), cwd=ROOT, env=env)
-    lab_version = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+    run(sys.executable, "-m", "build", "--wheel", "--no-isolation", "--outdir", str(output), cwd=lab, env=env)
+    lab_version = tomllib.loads((lab / "pyproject.toml").read_text())["project"]["version"]
     lab_wheel = output / ("prosaic_integration_lab-" + lab_version + "-py3-none-any.whl")
-    lab_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     build = {"built": True, "published": False, "castle_source_commit": commit,
              "lab_source_commit": lab_commit, "source_date_epoch": epoch,
              "packages": roundtrips, "lab_wheel": {"filename": lab_wheel.name, "sha256": digest(lab_wheel)},
              "manifest_sha256": digest(output / "manifest.json"),
-             "public_sdk_manifest_sha256": digest(ROOT / "dependencies/releases.json"),
+             "public_sdk_manifest_sha256": digest(lab / "dependencies/releases.json"),
              "build_tools": {name: metadata.version(name) for name in ("build", "setuptools", "hatchling", "twine")}}
     (output / "build.json").write_text(json.dumps(build, indent=2) + "\n")
     # The smoke and public SDK checks run in clean Runtime-only environments.
