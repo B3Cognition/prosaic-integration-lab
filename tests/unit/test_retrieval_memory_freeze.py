@@ -18,6 +18,51 @@ def test_ordered_freeze_binds_corpus_code_and_evaluation_without_live_calls():
     with pytest.raises(ValueError):verify(b,changed,evaluation)
 
 
+def test_archived_sdk_profile_tampering_invalidates_current_development_freeze(tmp_path,monkeypatch):
+    import shutil
+    import lab_runner.memory.freeze as freeze
+    original=freeze.files
+    quality=tmp_path/'quality'
+    shutil.copytree(original('lab_runner.quality'),quality,ignore=shutil.ignore_patterns('__pycache__'))
+    monkeypatch.setattr(freeze,'files',lambda package:quality if package=='lab_runner.quality' else original(package))
+    b=bundle();dev=freeze.development_manifest(b['corpus'],b['historicalSources'])
+    evaluation=freeze.evaluation_manifest({k:b[k] for k in ('version','suiteId','cases')},dev)
+    freeze.verify(b,dev,evaluation)
+    archived=quality/'data/sdk-provenance-pre-unified.json'
+    archived.write_bytes(archived.read_bytes()+b'\n')
+    with pytest.raises(ValueError,match='development freeze drift'):
+        freeze.verify(b,dev,evaluation)
+
+
+def test_runtime_release_preserves_archived_memory_lineage_and_all_benchmark_inputs():
+    import hashlib
+    from importlib.resources import files
+    from lab_runner.quality.contracts import decode
+    from lab_runner.memory.freeze import verify
+    root=files('lab_runner.memory').joinpath('data')
+    old_dev_bytes=root.joinpath('development-freeze-runtime-0.9.7.json').read_bytes()
+    old_eval_bytes=root.joinpath('evaluation-freeze-runtime-0.9.7.json').read_bytes()
+    assert hashlib.sha256(old_dev_bytes).hexdigest()=='eeee1f1d10f060bebd987af0d45187c89ec8af257aba478b86f3ac41bcf72868'
+    assert hashlib.sha256(old_eval_bytes).hexdigest()=='fe610c6b99e72b975a10b676284ff17f136dab11f3bb4f4f653d4639219044cd'
+    old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
+    dev=decode(root.joinpath('development-freeze.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    assert old_eval['developmentFreezeDigest']==digest(old_dev)
+    assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
+    assert evaluation['suiteDigest']==old_eval['suiteDigest']
+    assert set(dev['implementation'])==set(old_dev['implementation'])
+    assert {k for k in dev['implementation'] if dev['implementation'][k]!=old_dev['implementation'][k]}=={'freeze.py'}
+    changed={'sdk_provenance.py','suite.py','data/sdk-provenance-public.json','data/sdk-provenance-pre-unified.json'}
+    assert set(dev['qualityDependencies'])==set(old_dev['qualityDependencies'])|{'data/sdk-provenance-pre-unified.json'}
+    assert {k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old_dev['qualityDependencies'].get(k)}==changed
+    assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={
+        k:v for k,v in old_dev.items() if k not in ('implementation','qualityDependencies')}
+    frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
+    frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
+        historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))
+    verify(frozen,dev,evaluation)
+
+
 def test_packaged_historical_corpus_is_admitted_before_evaluation_freeze():
     from importlib.resources import files
     from lab_runner.memory.corpus import Corpus

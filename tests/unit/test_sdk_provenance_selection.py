@@ -7,8 +7,23 @@ import pytest
 ROOT=Path(__file__).resolve().parents[2]
 
 
+def test_archived_public_train_remains_selectable_after_active_release_advances(monkeypatch):
+    from lab_runner.quality import sdk_provenance
+    original=sdk_provenance.resource
+    active=json.loads(original('sdk-provenance-public.json'))
+    next(a for a in active['artifacts'] if a['distribution']=='b3-prosaic-runtime')['version']='0.9.8'
+    active['manifestDigest']='f'*64
+    monkeypatch.setattr(sdk_provenance,'resource',lambda name:
+        json.dumps(active).encode() if name=='sdk-provenance-public.json' else original(name))
+    installed={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.7','b3-prosaic-harness':'0.9.4'}
+    archived=sdk_provenance.qualified_sdk(installed)
+    assert archived==json.loads(original('sdk-provenance-pre-unified.json'))
+    assert archived['manifestDigest']==hashlib.sha256((ROOT/'dependencies/releases-pre-unified-2026-10-24.json').read_bytes()).hexdigest()
+
+
 @pytest.mark.parametrize('runtime,manifest',[
-    ('0.9.7','releases.json'),('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
+    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases.json'),
+    ('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
 def test_qualified_public_and_private_trains_keep_distinct_manifest_bindings(runtime,manifest):
     from lab_runner.quality.sdk_provenance import qualified_sdk
     installed={'b3-prosaic':'0.4.1','b3-prosaic-runtime':runtime,'b3-prosaic-harness':'0.9.4'}
@@ -18,7 +33,7 @@ def test_qualified_public_and_private_trains_keep_distinct_manifest_bindings(run
 
 
 @pytest.mark.parametrize('change',[{'b3-prosaic-runtime':'0.9.6'},
-    {'b3-prosaic-harness':'0.9.0'},{'b3-prosaic-runtime':'0.9.8'},
+    {'b3-prosaic-harness':'0.9.0'},{'b3-prosaic-runtime':'0.9.9'},
     {'b3-prosaic':'0.4.2'},{'unexpected':'0.1'}])
 def test_unqualified_sdk_mixtures_fail_closed(change):
     from lab_runner.quality.sdk_provenance import qualified_sdk

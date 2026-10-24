@@ -1,5 +1,22 @@
 # Codex handoff
 
+## Runtime 0.9.8 public adoption — 2026-10-24
+
+Runtime [v0.9.8](https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.9.8)
+is public. Adopt its verified PyPI wheel and preserve the other four SDK pins.
+The [qualification ledger](verification/runtime-unified-release-2026-10-24.md)
+binds source `a9433a68f60eeecf1946a398267f749c7ff89d8e`, public wheel SHA-256
+`d9d416baf9a7f4b87328532d41b281a2f6dbc9bafc744f973661a5cf6015a540`
+and active manifest `36eec99280acb8688d2496f704f4445b59c3ff269fc506a83d6e7fe83bc92698`.
+Require the exact-head four-cell real-stack CI matrix before merging adoption;
+the public path now includes installed native/unified acceptance.
+
+Old public SDK and freeze snapshots retain their original bytes and bindings.
+The active memory freeze explicitly records the new SDK qualification lineage
+and binds the archived profile too. Benchmark inputs, limits, allowances,
+historical measurements and unknown reservations are unchanged. No live model
+call or memory efficacy claim is authorized by this infrastructure qualification.
+
 ## PR22 Linux regression repair — 2026-10-20
 
 The first four Linux CI cells passed mandatory actual confinement, then each

@@ -1,5 +1,20 @@
 # Current delivery status
 
+## Released Runtime unified pools — 2026-10-24
+
+Runtime 0.9.8 is published with native Claude/Codex execution and unified
+native/API/local pools. Lab's active manifest selects the verified public wheel;
+Core 0.4.1, Harness 0.9.4 and both PostgreSQL adapter pins are unchanged.
+The [adoption ledger](verification/runtime-unified-release-2026-10-24.md)
+records public artifact verification, installed/offline acceptance and the
+mandatory exact-head Linux AMD64/ARM64 × PostgreSQL 16/18 CI gate.
+
+The previous manifest, SDK profile and memory freeze snapshots are archived
+byte-for-byte. Current memory qualification has an explicit new SDK provenance
+lineage; corpus, tasks, prose, scoring, limits and historical results are
+unchanged. Memory/correction remain experimental. No live inference or new
+model efficacy comparison is included in this release adoption.
+
 ## Optional Castle integration review — 2026-10-23
 
 Castle is a disabled-by-default host memory provider with scoped FTS recall and
