@@ -72,4 +72,3 @@ def test_generation_does_not_replace_exact_quote_and_provenance_validation():
     value['premises'][0]['statement']='administrators may export'
     assert engine.advance(state,value,SOURCE.splitlines())[1] is None
     assert Draft202012Validator(schema).is_valid(value)
-
