@@ -31,9 +31,12 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
-This branch prepares Lab **0.6.0**. The latest published Lab release is **0.5.0**;
-for its packages and final verification, use the
-[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0).
+Lab **0.6.0** includes the unified pool examples and released Runtime 0.9.8
+benchmark docs. See the [release notes](docs/release-0.6.0.md) and
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.6.0)
+for packages, checksums and exact-source verification. Earlier
+[Lab 0.5.0 artifacts](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0)
+retain their original SDK pins and qualification.
 The experimental [agent-quality](docs/agent-quality.md) and
 [retrieval-memory](docs/retrieval-memory.md) examples have separate capability
 claims and retained model-study evidence.
