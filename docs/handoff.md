@@ -1,5 +1,16 @@
 # Codex handoff
 
+## Standalone installed evaluation repair — 2026-10-24
+
+Clean 0.6.0 wheel/source installs passed pool API and Runtime CLI fixtures, but
+the standalone Lab evaluation entry point failed with missing module `scripts`.
+The 0.6.1 patch candidate packages `prosaic_integration_lab.sdk_audit`, uses it
+from evaluation provenance and keeps `scripts/audit_install.py` as a compatible
+source wrapper. It declares the auditor's `packaging` runtime dependency and
+extends both installed-distribution gates to execute all four fixture commands
+with isolated Python. Existing audit function bodies, SDK pins, freezes and
+historical artifacts are unchanged. Do not replace the published 0.6.0 files.
+
 ## Lab 0.6.0 release preparation — 2026-10-24
 
 The maintainer authorized releasing 0.6.0 with unified pools and the released

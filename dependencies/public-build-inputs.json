@@ -111,6 +111,7 @@
     "src/prosaic_integration_lab/conversation_schema.py",
     "src/prosaic_integration_lab/conversation_workflows.py",
     "src/prosaic_integration_lab/dependencies.py",
+    "src/prosaic_integration_lab/sdk_audit.py",
     "src/prosaic_integration_lab/diagnostics.py",
     "src/prosaic_integration_lab/execution.py",
     "src/prosaic_integration_lab/memory_provider.py",

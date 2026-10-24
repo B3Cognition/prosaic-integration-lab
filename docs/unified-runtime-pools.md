@@ -7,6 +7,11 @@ Two separately authorized [released-wheel live studies](verification/unified-cli
 passed 54/54 assignments. Historical candidate evidence stays separately
 identified below; offline release validation and live measurements have distinct scopes.
 
+Lab 0.6.0's wheel-only evaluation entry point has a packaging limitation: it
+requires a source-only auditor. Its Runtime API/CLI examples and commands from
+the extracted source archive work. The 0.6.1 patch packages the auditor and
+adds isolated installed-command coverage; it is not yet released.
+
 ## Configuration and invocation
 
 The original native and local configuration files stay separate. Create a

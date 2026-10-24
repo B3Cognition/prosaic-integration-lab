@@ -1,5 +1,19 @@
 # Current delivery status
 
+## Installed evaluation CLI repair — 2026-10-24
+
+The 0.6.1 patch candidate moves the SDK payload auditor into the installed Lab
+package. Lab 0.6.0's standalone evaluation command failed before dispatch because
+it imported the source-only `scripts.audit_install`; the published 0.6.0 artifacts
+and historical benchmark evidence remain unchanged.
+
+The compatibility script uses the same packaged auditor, preserving payload,
+ownership and executable-cache verification. Clean wheel and rebuilt-sdist
+qualification now invokes all four evaluation fixture commands through isolated
+Python, requiring 51 credential-free checks with verified cleanup. SDK pins
+remain unchanged. Source regressions and clean artifact verification must pass
+before the patch can be released.
+
 ## Lab 0.6.0 release — 2026-10-24
 
 The [0.6.0 release notes](release-0.6.0.md) describe the unified pool examples,
