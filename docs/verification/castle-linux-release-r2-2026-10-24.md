@@ -44,6 +44,8 @@ unchanged. The Prosaic provider continues using its explicitly prepared scoped
 FTS store; enabling it grants no ingest, remember or SUE operation. SUE and SOAR
 stay outside provider reads. Raw FTS ranking remains default; recency and dense
 retrieval remain separate opt-ins.
+Standalone sidecar-only records are not automatically included in this provider's
+search scope; the documented project/transcript imports populate its palace.
 
 CLI resolution preserves `memory`, `brain`, `sue` and `provider`, with lazy
 dispatch. The upstream two-process test split isolates resource-supervision

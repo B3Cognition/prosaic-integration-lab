@@ -24,6 +24,11 @@ those capture hooks. Memory text is evidence to inspect, never permission to
 approve an action or an instruction the agent should obey. Use current tools
 to check current facts.
 
+Castle's standalone `castle memory` fast-memory sidecar is a separate source.
+This provider reads the explicitly prepared LanceDB palace. Records held only
+in that sidecar do not automatically appear here; use the source-file or
+exported-conversation import steps below for the material you want it to recall.
+
 ## 1. Get the right packages
 
 Run these commands from this repository's root, using Python **3.12** on macOS
