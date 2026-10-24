@@ -64,4 +64,3 @@ def test_guidance_does_not_accept_the_failed_live_response_classes(tmp_path,muta
         assert result['status']=='blocked' and result['acceptedTurns']==0
         assert len(requests)==2 and store.load_run(run_id).state['outputs']=={}
         assert flow.report(run_id)['reportedTokens']==30
-

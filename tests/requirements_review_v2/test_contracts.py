@@ -65,4 +65,3 @@ def test_real_critic_wire_and_strict_feedback_acceptance(wrong_schema,tmp_path):
             assert state['status']=='blocked' and state['outputs']=={}
         else:
             assert state['status']=='completed' and state['outputs']['final']==final
-

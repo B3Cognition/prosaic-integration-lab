@@ -150,6 +150,12 @@ The small final CI-selector correction and updated documentation are retained
 in `reports/castle-sue-contract-fixes-ci-20261024/`, which references the main
 archive's manifest rather than modifying it.
 
+Final hygiene removed one redundant trailing blank line from the guidance module
+and each new test module. The addendum verifies identical Python ASTs against the
+qualified implementation and records the focused regression rerun. The benchmark
+and wheel hashes above identify the retained tested candidate before that
+whitespace-only cleanup; no benchmark evidence was rewritten.
+
 Commands used the source-test environment and a separate installed candidate:
 
 ```sh
