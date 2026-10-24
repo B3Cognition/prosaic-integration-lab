@@ -18,9 +18,9 @@
 
 ## Tasks
 
-- [ ] Add failing public-boundary tests for constrained generation context across accepted turns/retries and a distinct binding; retain rejection and raw-receipt tests for both observed failure classes, false quotes and future turns.
-- [ ] Add the explicit grounding supplement only to constrained mode, include its digest in adapter v1.4 and preserve canonical schema/validator/default v1.2 behavior.
-- [ ] Run focused and full public suites; build identical wheel/sdist candidates, qualify installed constrained PG16/18 and scripted comparison/replay.
+- [x] Add failing public-boundary tests for constrained generation context across accepted turns/retries and a distinct binding; retain rejection and raw-receipt tests for both observed failure classes, false quotes and future turns.
+- [x] Add the explicit grounding supplement only to constrained mode, include its digest in adapter v1.4 and preserve canonical schema/validator/default v1.2 behavior.
+- [x] Run focused and full public suites; build identical wheel/sdist candidates, qualify installed constrained PG16/18 and scripted comparison/replay.
 - [ ] Freeze a separate installed-candidate operator and rerun the same 24-cell Qwen benchmark. Audit/replay without network, classify results and retain all failures.
 - [ ] Fresh read-only review, fix material findings with regressions, archive verification and document limits; commit locally without push/release.
 
@@ -42,3 +42,14 @@ remain generatable, reject observed invalid combinations, compile locally and
 freeze another candidate/study before the same Qwen rerun. Exact quotations,
 premise-to-answer citation subsets and natural-language support remain subject
 to independent canonical validation and review.
+
+The v1.5 generation-schema candidate blocks all10 prior rejected replies in the
+actual installed grammar backend, while admitting all34 canonical-valid
+synthetic turns and five prior valid replies. Its same120-second live rerun
+safety-stops after12cells: case4 SUE accepts7turns, then answer08 times out.
+Two non-verbatim stated-premise failures are rejected and corrected within
+existing retries; a late provider response cannot repair Runtime's unknown
+receipt. Preserve the full unknown reservation and partial/unrun outcomes.
+Full24-cell live qualification remains blocked at the original deadline;
+changing it requires a separately identified comparison. Do not mark that
+qualification as achieved merely because mechanics/tests pass.

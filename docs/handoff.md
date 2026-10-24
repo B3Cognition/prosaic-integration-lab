@@ -1,5 +1,27 @@
 # Codex handoff
 
+## SUE generation grounding tightened; unchanged deadline stops pilot — 2026-10-24
+
+[Schema qualification](verification/sue-grounding-schema-2026-10-24.md): v1.5
+keeps canonical schema/acceptance and v1.2 behavior unchanged, adding only
+generation constraints for field relationships. Fullpublic2158passed, installed62, generation18,
+focused39, absence105; grammar23schemas/49values blocks all10 prior rejected
+replies while admitting34 canonical-valid synthetic turns and five prior valid
+replies. Fixture24/24, constrainedPG16/18 six each, legacy memory/SUE76each with
+cleanup. Guidance-only [failed study](verification/sue-grounding-2026-10-24.md)
+is separately archived604files, all six previous archives reverified.
+
+Same Qwen120s pilot stopped12/24cells: direct2/4strict, critic3/4, SUE3/4strict
+and3completed; case4 SUE accepted7turns before answer08 timed out. Two invalid
+stated premises were rejected and corrected within existing retries. All13 SUE
+wire replies match generation/canonical schemas; no invalid output accepted.
+28physical calls,44,810Runtime-known tokens plus3,894late provider tokens;
+one unknown cell retains its full reservation, total49calls/90,345tokens charged.
+Do not retry/release this reservation, reinterpret late output as accepted, or
+claim a completed/beneficial quality comparison. Memory/SUE remain disabled;
+native CI, general private-SDK adoption, longer-budget qualification and release
+remain separate gates. No push, merge, original Castle backport or publication.
+
 ## Constrained JSON fixes SUE shape; semantic/quality gate remains — 2026-10-24
 
 [Qualification](verification/sue-constrained-json-2026-10-24.md): unpublished

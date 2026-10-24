@@ -34,17 +34,20 @@ def project(artifacts, step, *, constrained=True):
 
 def test_constrained_projection_separates_source_lines_from_accepted_turn_ids():
     from prosaic_integration_lab.sue_review.contracts import digest
+    from prosaic_integration_lab.sue_review.generation import generation_schema
     data, options=project({}, 'sue/answer-01')
     assert data['groundingContext']=={'sourceLineNumbers':[1,2], 'priorTurnNumbers':[]}
     assert data['validationFeedback']=='sue_answer_invalid'
     initial=engine.initial_state(CLAIM)
-    assert data['responseSchema']==engine.schema(initial)==options['response_schema']
+    assert data['responseSchema']==engine.schema(initial)
+    assert options['response_schema']==generation_schema(initial,engine.schema(initial),2)
     value=answer('DEFINE'); state, failure=engine.advance(initial,value,SOURCE.splitlines())
     assert failure is None
     accepted={'answer-01':{'rawResponse':json.dumps(value),'terminal':state['terminal'],'stateSha256':digest(state)}}
     data, options=project(accepted, 'sue/answer-02')
     assert data['groundingContext']=={'sourceLineNumbers':[1,2], 'priorTurnNumbers':[1]}
-    assert data['responseSchema']==engine.schema(state)==options['response_schema']
+    assert data['responseSchema']==engine.schema(state)
+    assert options['response_schema']==generation_schema(state,engine.schema(state),2)
     legacy, options=project({}, 'sue/answer-01', constrained=False)
     assert 'groundingContext' not in legacy and 'response_schema' not in options
 
@@ -85,6 +88,7 @@ def test_constrained_silent_grounding_failures_keep_raw_receipts_and_bound_guida
                     uuid.uuid4().hex,seed=CLAIM,sources=[{'sourceId':'spec','text':SOURCE}])
         return
     from prosaic_integration_lab.sue_review.grounding import GROUNDING_GUIDANCE, GROUNDING_SHA256
+    from prosaic_integration_lab.sue_review.generation import GENERATION_SCHEMA_VERSION
     from prosaic_integration_lab.sue_review.guidance import GUIDANCE_SHA256
     from prosaic_integration_lab.sue_review.contracts import digest
     bad=answer('DEFINE');bad.update(verdict='SILENT',test_result='UNKNOWN',claim=None)
@@ -97,9 +101,9 @@ def test_constrained_silent_grounding_failures_keep_raw_receipts_and_bound_guida
         assert result['status']=='blocked' and result['acceptedTurns']==0 and len(requests)==2
         saved=store.load_run(run_id).state
         assert saved['outputs']=={} and len(saved['invocations'])==2
-        version='sue-review-v1.4-'+digest({'engine':engine.capabilities(),
+        version='sue-review-v1.5-'+digest({'engine':engine.capabilities(),
             'policy':saved['inputs']['reviewPolicy'],'answerGuidanceSha256':GUIDANCE_SHA256,
-            'groundingGuidanceSha256':GROUNDING_SHA256})
+            'groundingGuidanceSha256':GROUNDING_SHA256,'generationSchemaVersion':GENERATION_SCHEMA_VERSION})
         for wire,invocation in zip(requests,saved['invocations'],strict=True):
             prompt=wire['messages'][0]['content']
             assert GROUNDING_GUIDANCE in prompt.split('\n\n## Arguments\n',1)[0]

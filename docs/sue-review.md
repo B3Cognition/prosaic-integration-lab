@@ -12,12 +12,14 @@ disables it. Other review settings are rejected while disabled. Installing the
 engine does not enable review, record chats, retrieve sources or start a model.
 The disabled session constructor loads no SUE engine or SDK execution machinery.
 
-**Live review quality remains unqualified.** The
+**Live review quality remains unqualified.** The latest
+[v1.5 Qwen study](verification/sue-grounding-schema-2026-10-24.md) stopped after
+12/24 cells at the unchanged120-second deadline. Three SUE workflows completed;
+case4 accepted seven turns before timeout. Two invalid stated premises were
+rejected and corrected within existing retries. The full comparison remains
+incomplete, and its unknown request reservation remains charged. The preceding
 [constrained Qwen comparison](verification/sue-constrained-json-2026-10-24.md)
-produces schema-valid SUE JSON in all16 attempts. The unchanged semantic
-validator rejects13 replies; three reviews stop after one accepted turn, and
-none passes the final review benchmark. Qwen27B's earlier invocation-limit
-failure remains unresolved. Keep review disabled for normal work. The
+and Qwen27B invocation-limit failure remain preserved. Keep review disabled for normal work. The
 [earlier failed comparison](verification/review-contract-fixes-2026-10-24.md)
 and matching candidate wheels remain available for inspection. New generation
 settings cannot silently upgrade saved runs or reinterpret old sealed bindings.
@@ -215,11 +217,12 @@ review does not rewrite a saved run or erase its evidence.
 
 ### Experimental constrained JSON generation
 
-The unpublished Runtime `0.9.8+jsonschema.2` candidate can request the exact
-canonical JSON Schema for each SUE turn. Normal public SDK pins and the CLI
+The unpublished Runtime `0.9.8+jsonschema.2` candidate can request a bounded
+generation JSON Schema for each SUE turn, with canonical validation remaining
+independent. Normal public SDK pins and the CLI
 settings format remain unchanged. Use a separate environment with the
 checksum-verified Runtime and Lab candidate wheels from the
-[constrained-generation qualification](verification/sue-constrained-json-2026-10-24.md).
+[current grounding qualification](verification/sue-grounding-schema-2026-10-24.md).
 The public Runtime 0.9.8 fails closed if this option is requested.
 
 The trusted embedding host opts in explicitly:
@@ -243,19 +246,33 @@ before continuing. Later configuration changes cannot upgrade an older review:
 resume reconstructs the saved policy and binding. Choose a new review to change
 generation mode.
 
-Runtime sends `response_format` with `type: json_schema`, the exact current
-engine schema and `strict: true`. This candidate supports tool-free
+The current v1.5 adapter keeps the exact current engine schema in the prompt
+and sends a separate generation-only schema through Runtime's
+`response_format` (`type: json_schema`, `strict: true`). Its alternatives express
+canonical result/verdict pairs, empty SILENT evidence, premise kinds, required
+claim/witness/revision fields, operator answer types and trusted citation/turn
+bounds. All canonical-valid branches remain available; the model must choose
+from source support. This candidate supports tool-free
 OpenAI-compatible calls. Missing capability or unsupported provider fails
 before model dispatch, and HTTP rejection never triggers a request without the
 schema. Check actual provider enforcement when qualifying a deployment: some
 servers downgrade structured-output requests to prompting.
 
-Schema-constrained generation addresses formatting and required fields. It
+Schema-constrained generation addresses formatting and representable field
+relationships. It
 does not establish truthful evidence, correct interpretations or useful review
 quality. SUE's raw JSON parser, exact quotation checks, semantic transition
 validator, provenance, owner/revision checks and finite budgets remain required.
 Invalid responses remain rejected and retain their receipts. Both memory and
 SUE remain disabled by default.
+
+The [grounding qualification](verification/sue-grounding-schema-2026-10-24.md)
+separates generation success from review quality. Earlier v1.3/v1.4 constrained
+runs retain their original candidate wheels and evidence. Inspect those runs
+with their original binding; the new candidate rejects a binding mismatch and
+does not silently migrate or redispatch an old review. Start a separately
+authorized new run to try the new generation policy. Normal unconstrained v1.2
+runs retain their existing binding and behavior.
 
 The programmatic `SueReviewSession` API exposes `start`, `status`,
 revision-checked `resume` and `report`. A host supplies a public Runtime config,

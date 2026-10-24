@@ -63,7 +63,10 @@ def project_answer(artifact, arguments, *, execute, engine, constrained_json=Fal
                      'seed':request['seed'],'state':state,
                      'sourceLines':[{'line':n,'text':line} for n,line in enumerate(lines,1)],
                      'validationFeedback':data.get('validation_feedback'), **grounding},262144)
-    generation = {'response_schema': projected['responseSchema']} if constrained_json else {}
+    generation = {}
+    if constrained_json:
+        from .generation import generation_schema
+        generation['response_schema'] = generation_schema(state,projected['responseSchema'],len(lines))
     result = execute(encoded(projected).decode(), allowed_tools=frozenset(), max_tool_rounds=1, max_input_bytes=262144, **generation)
     raw = result.stdout
     meta = dict(result.metadata)
@@ -103,6 +106,7 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
     from prosaic_runtime import ProsaicArtifact, ProsaicRuntime, RuntimeAdapter
     from .guidance import CANONICAL_GUIDANCE, CANONICAL_SOURCE_SHA256, GUIDANCE_SHA256
     from .grounding import GROUNDING_GUIDANCE, GROUNDING_SHA256
+    from .generation import GENERATION_SCHEMA_VERSION
 
     if config.allowed_tools or config.tool_directories:
         raise ReviewError('review_requires_tool_free_runtime')
@@ -117,10 +121,11 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
     policy_data = {k:v for k,v in asdict(settings).items() if k != 'enabled'}
     if constrained_json:
         policy_data['constrained_json'] = True
-    prefix = 'sue-review-v1.4-' if constrained_json else 'sue-review-v1.2-'
+    prefix = 'sue-review-v1.5-' if constrained_json else 'sue-review-v1.2-'
     identity = {'engine':caps,'policy':policy_data,'answerGuidanceSha256':GUIDANCE_SHA256}
     if constrained_json:
         identity['groundingGuidanceSha256'] = GROUNDING_SHA256
+        identity['generationSchemaVersion'] = GENERATION_SCHEMA_VERSION
     version = prefix + digest(identity)
 
     def validate(output, context):

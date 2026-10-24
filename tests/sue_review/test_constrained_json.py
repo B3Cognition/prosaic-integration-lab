@@ -53,7 +53,9 @@ def test_generation_is_disabled_and_legacy_policy_is_byte_compatible(tmp_path):
         assert 'response_format' not in requests[0]
 
 
-def test_each_turn_requests_exact_canonical_dynamic_schema(tmp_path):
+def test_each_turn_preserves_canonical_schema_and_requests_grounded_generation(tmp_path):
+    from prosaic_integration_lab.sue_review.generation import generation_schema
+    from jsonschema import Draft202012Validator
     values, final_state = script()
     with fixture(values) as (url, requests), FileRunStore(tmp_path/'runs', namespace='sue-test') as store:
         flow = session(store, url); run_id = uuid.uuid4().hex
@@ -66,7 +68,11 @@ def test_each_turn_requests_exact_canonical_dynamic_schema(tmp_path):
         state = engine.initial_state(CLAIM, max_turns=14)
         for wire, value in zip(requests, values, strict=True):
             schema = engine.schema(state)
-            assert wire['response_format'] == {'type': 'json_schema', 'json_schema': {'name': 'response', 'schema': schema, 'strict': True}}
+            projected=json.loads(wire['messages'][0]['content'].split('\n\n## Arguments\n',1)[1])
+            assert projected['responseSchema']==schema
+            generated=generation_schema(state,schema,len(SOURCE.splitlines()))
+            assert Draft202012Validator(schema).is_valid(value) and Draft202012Validator(generated).is_valid(value)
+            assert wire['response_format'] == {'type': 'json_schema', 'json_schema': {'name': 'response', 'schema': generated, 'strict': True}}
             assert wire.get('tools', []) == []
             state, failure = engine.advance(state, value, SOURCE.splitlines())
             assert failure is None

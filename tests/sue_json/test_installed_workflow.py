@@ -38,6 +38,8 @@ def installed_case(request, tmp_path):
 
 @pytest.mark.parametrize('scenario', ['complete', 'false_quote', 'missing_field'])
 def test_installed_constrained_sue_freeze_resume_and_strict_acceptance(installed_case, scenario):
+    import castle_sue as engine
+    from prosaic_integration_lab.sue_review.generation import generation_schema
     store, recorder, namespace = installed_case
     source = SOURCE_LINE+'\r\nConsent must be current.\r\n'
     owner = Principal('tenant', 'alice', 'payer')
@@ -84,6 +86,8 @@ def test_installed_constrained_sue_freeze_resume_and_strict_acceptance(installed
             prompt = wire['messages'][0]['content']
             projected = json.loads(prompt.split('\n\n## Arguments\n', 1)[1])
             schema = projected['responseSchema']
-            assert wire['response_format'] == {'type': 'json_schema', 'json_schema': {'name': 'response', 'schema': schema, 'strict': True}}
-            assert receipt['result']['metadata']['response_schema_v1']['schema_sha256'] == digest(schema)
+            assert schema==engine.schema(projected['state'])
+            generated=generation_schema(projected['state'],schema,len(projected['sourceLines']))
+            assert wire['response_format'] == {'type': 'json_schema', 'json_schema': {'name': 'response', 'schema': generated, 'strict': True}}
+            assert receipt['result']['metadata']['response_schema_v1']['schema_sha256'] == digest(generated)
             assert not wire.get('tools')
