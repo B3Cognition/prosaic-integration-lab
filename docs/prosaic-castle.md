@@ -161,9 +161,10 @@ from its already frozen evidence under its existing owner/revision policy.
 
 ## 4. Enable SUE only for selected sources
 
-SUE is currently for experimental evaluation. The [live Qwen pilot](verification/sue-qwen-live-2026-10-24.md)
-found response-contract and timeout blockers; keep review disabled for normal
-work. Those findings do not change the separately qualified memory provider.
+SUE is currently for experimental evaluation. The [corrected Qwen rerun](verification/review-contract-fixes-2026-10-24.md)
+fixes the critic contract and restores canonical guidance, but SUE responses
+still fail validation. Keep review disabled for normal work. Those findings do
+not change the separately qualified memory provider.
 
 Use the [SUE walkthrough and host API](sue-review.md#try-the-credential-free-walkthrough),
 replacing `.venv-sue` in its commands with `.venv-castle-host`. Skip that guide's

@@ -1,5 +1,19 @@
 # Codex handoff
 
+## Critic contract fixed; SUE guidance restored; Qwen rerun complete — 2026-10-24
+
+[Fresh verification](verification/review-contract-fixes-2026-10-24.md): code
+`50c1b08`, full Lab2119 passed, disabled/unavailable105, installed PG16/18 76/76
+each with cleanup, fixture24/24, independent review clean. Frozen v1 stays
+unchanged; v2 projects the critic's feedback contract. Canonical SUE instructions
+are hash-pinned prompt data, sealed in adapter v1.2; validators/engine unchanged.
+Qwen7B rerun: direct8completed/5strict passes, critic8completed/2strict passes,
+SUE0completed/0passes. All40requests/43477tokens reconcile, zero new unknowns,
+zero-call offline replay. SUE still omits required fields; keep memory/review
+disabled by default. Preserve failed-run archives/unknown reservations and old
+wheels; old bindings remain inspectable with the original candidate, and fail
+closed under the new one. No push, merge, release or original Castle backport.
+
 ## Live Qwen SUE pilot found promotion blockers — 2026-10-24
 
 [Live evidence](verification/sue-qwen-live-2026-10-24.md): the 24-cell Qwen 7B

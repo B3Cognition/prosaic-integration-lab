@@ -46,3 +46,8 @@ cases, direct-review prompts, final schemas, scorer, retries and limits.
 
 The user authorized native execution and a fresh Qwen rerun. This plan records
 the implementation choices; it does not create publication authority.
+
+Verified checkpoint: implementation `50c1b08`; 2119 full source tests,
+105 disabled checks, both installed PG lanes 76/76 and 24/24 fixture cells.
+The live rerun is complete with strict validation retained; see
+[the result](../../verification/review-contract-fixes-2026-10-24.md).
