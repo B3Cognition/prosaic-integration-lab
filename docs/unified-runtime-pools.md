@@ -1,9 +1,10 @@
 # Unified Claude, Codex and local Runtime pools
 
-The opt-in installed `UnifiedRuntime` candidate selects native Claude Code,
+Released Runtime 0.9.8 includes the opt-in `UnifiedRuntime`, selecting native Claude Code,
 Codex CLI and local/API profiles through one ordered pool. Runtime owns execution,
-capacity and safe switching; Lab consumes its public installed APIs. This is an
-experimental local-source candidate, not a published or release-qualified train.
+capacity and safe switching; Lab consumes its public installed APIs.
+Historical candidate and live evidence stays separately
+identified below; release validation does not repeat live model benchmarks.
 
 ## Configuration and invocation
 
@@ -89,7 +90,35 @@ tokens. API token caps do not bound native internal loops or subscription spend.
 The facade does not claim portable sessions, API receipts/accounting across native
 members or automatic recovery of partially executed work.
 
-## Installed-candidate validation
+## Released-wheel validation
+
+The active `dependencies/releases.json` pins Runtime 0.9.8 with the unchanged
+Core 0.4.1, Harness 0.9.4 and recorder/store versions. Use a fresh environment;
+download and audit those exact public wheels before running the same fixture
+checks. No native credentials, paid models or external inference are used:
+
+```sh
+python3.12 -m venv .venv-unified-release
+LAB_PY=.venv-unified-release/bin/python
+"$LAB_PY" -m pip install --require-hashes -r dependencies/requirements.lock
+"$LAB_PY" scripts/prepare_dependencies.py
+"$LAB_PY" scripts/install_dependencies.py
+"$LAB_PY" scripts/audit_install.py
+"$LAB_PY" -m pip check
+"$LAB_PY" -m pytest -q
+"$LAB_PY" -m pytest -q tests/native_acceptance
+RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases.json", "rb").read()).hexdigest())')
+for lane in test unified-test unified-cli-test unified-fallback-test; do
+  "$LAB_PY" -m lab_runner.native_eval "$lane" \
+    --manifest dependencies/releases.json --wheel-dir "$PWD/.cache/wheels/$RELEASED_SHA"
+done
+```
+
+CI additionally requires the actual owned-stack matrix on Linux AMD64/ARM64
+with PostgreSQL 16/18. See the [release adoption ledger](verification/runtime-unified-release-2026-10-24.md)
+for exact public bytes, commands, results and platform limitations.
+
+## Historical installed-candidate validation
 
 Run Lab commands from the Lab checkout root with its `scripts/` audit tools.
 Upstream SDKs must be installed wheels, not sibling source/editable imports.
@@ -99,7 +128,8 @@ separately qualifies integration with current main.
 
 Use a new SDK-only environment and candidate manifest, preserving published pins
 and prior experiment environments. The following clean-checkout recipe builds
-the exact reviewed Runtime commit, retains the other four released wheels and
+the historical reviewed Runtime commit against the archived pre-unified manifest,
+retains the other four released wheels and
 audits the complete installed payload. It performs no model calls. Choose an
 unused environment name and keep the temporary source/build directory for audit.
 
@@ -108,8 +138,8 @@ set -e
 python3.12 -m venv .venv-unified-review
 LAB_PY=.venv-unified-review/bin/python
 "$LAB_PY" -m pip install --require-hashes -r dependencies/requirements.lock
-"$LAB_PY" scripts/prepare_dependencies.py --manifest dependencies/releases.json
-RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases.json", "rb").read()).hexdigest())')
+"$LAB_PY" scripts/prepare_dependencies.py --manifest dependencies/releases-pre-unified-2026-10-24.json
+RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases-pre-unified-2026-10-24.json", "rb").read()).hexdigest())')
 RELEASED_WHEELS="$PWD/.cache/wheels/$RELEASED_SHA"
 
 RUNTIME_SOURCE=bd25346b85ba39789530d4cce35ddfe92b5ec63f
@@ -128,7 +158,7 @@ CANDIDATE_ROOT=$(mktemp -d "$PWD/.cache/unified-review-XXXXXX")
 "$LAB_PY" -m lab_runner.native_eval prepare \
   --runtime-wheel "$RUNTIME_WHEEL" --runtime-sha256 "$RUNTIME_SHA" \
   --runtime-commit "$RUNTIME_SOURCE" \
-  --released-manifest dependencies/releases.json \
+  --released-manifest dependencies/releases-pre-unified-2026-10-24.json \
   --released-wheel-dir "$RELEASED_WHEELS" \
   --manifest "$CANDIDATE_ROOT/manifest.json" > "$CANDIDATE_ROOT/prepare.json"
 CANDIDATE_WHEELS=$("$LAB_PY" -c 'import json, sys; print(json.load(open(sys.argv[1]))["wheelDirectory"])' "$CANDIDATE_ROOT/prepare.json")

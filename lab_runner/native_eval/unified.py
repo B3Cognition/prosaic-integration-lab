@@ -18,7 +18,7 @@ from .runner import fixture_config
 def require_unified():
     sdk = require_native()
     if any(not hasattr(sdk, name) for name in ('UnifiedRuntime', 'UnifiedRuntimeConfig', 'PoolPolicy')):
-        raise ValueError('installed candidate lacks the unified pool API')
+        raise ValueError('installed Runtime lacks the unified pool API')
     return sdk
 
 

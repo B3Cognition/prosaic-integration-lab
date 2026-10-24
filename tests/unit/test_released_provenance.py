@@ -13,8 +13,8 @@ def test_active_manifest_selects_only_the_verified_conversation_sdk_family():
             for item in data['artifacts']} == {
         ('b3-prosaic', '0.4.1', '6ac6cfdfd47dc70ecf68e441aa004f07c3be3822',
          '07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51'),
-        ('b3-prosaic-runtime', '0.9.7', 'c63bd16120dbbded4b742bf94a79e16a9e47a389',
-         '3caebab8602d0a55d0a119be9cbbb2b0d24c922979d9f7ab0a5839defd4674bb'),
+        ('b3-prosaic-runtime', '0.9.8', 'a9433a68f60eeecf1946a398267f749c7ff89d8e',
+         'd9d416baf9a7f4b87328532d41b281a2f6dbc9bafc744f973661a5cf6015a540'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
         ('b3-prosaic-harness', '0.9.4', '7861459f2452f1ad66717cfb45f62be4ed5caf23',
