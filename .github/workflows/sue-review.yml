@@ -17,6 +17,7 @@ on:
       - 'tests/functional/**'
       - 'tests/sue_review/**'
       - 'tests/requirements_review/**'
+      - 'tests/requirements_review_v2/**'
       - 'tests/acceptance/test_sue_review_workflow.py'
       - 'pyproject.toml'
       - 'MANIFEST.in'
@@ -130,7 +131,7 @@ jobs:
           .venv/bin/python -m pip install --no-deps bundle/sue/*.whl
           .venv/bin/python -m pip check
           mkdir -p reports
-          .venv/bin/python -m pytest -q tests/unit tests/functional tests/sue_review tests/requirements_review --junitxml reports/sue-enabled-source.xml
+          .venv/bin/python -m pytest -q tests/unit tests/functional tests/sue_review tests/requirements_review tests/requirements_review_v2 --junitxml reports/sue-enabled-source.xml
           .venv/bin/python - <<'PY'
           from xml.etree import ElementTree
           root = ElementTree.parse('reports/sue-enabled-source.xml').getroot()

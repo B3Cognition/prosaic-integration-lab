@@ -55,6 +55,11 @@ genuinely lean worker. The consumer ran on macOS ARM64; PostgreSQL ran in Linux
 ARM64 containers. This does not establish native Linux consumer qualification.
 The full suite retains one existing Starlette deprecation warning.
 
+The optional SUE CI path trigger and source-test command now include
+`tests/requirements_review_v2`. Its existing no-skip check, installed lanes,
+architecture matrix and timeout remain intact. This matches the complete
+source-test scope executed above; remote CI still requires an authorized push.
+
 Direct and rebuilt-sdist wheels are byte-identical with
 `SOURCE_DATE_EPOCH=1792800000`. Qualified Lab wheel SHA-256:
 `efc311e12b6abb1f118fae2bcb245ddcf2b7edb1cb31377424c6a8923f2318dd`.
@@ -140,6 +145,10 @@ fixture/live stores, actual HTTP exchanges without authorization headers,
 receipts, frozen operators/plans, comparison, classifications, compatibility
 probe and SHA-256 manifest are retained separately in
 `reports/castle-sue-contract-fixes-20261024/`.
+
+The small final CI-selector correction and updated documentation are retained
+in `reports/castle-sue-contract-fixes-ci-20261024/`, which references the main
+archive's manifest rather than modifying it.
 
 Commands used the source-test environment and a separate installed candidate:
 
