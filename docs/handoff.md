@@ -1,5 +1,21 @@
 # Codex handoff
 
+## Released Runtime live measurements — 2026-10-24
+
+The separately authorized [0.9.8 live studies](verification/unified-cli-released-2026-10-24.md)
+completed 27/27 assignments twice, using the same tasks/inputs and native60s,
+local180s, pool300s deadlines. The latest Claude/Codex/local medians were
+11.37s/23.07s/60.69s; each model passed nine assignments per study. Private
+paired audits regraded all saved outputs and verified hashes, admissions and
+cleanup. Each run retained 45/243 known mixed dispatch units, zero unknowns.
+Each verified 27 controlled cooldown skips and zero provider-triggered fallback;
+no quota exhaustion was induced. Preserve original candidate/release reports.
+
+Adoption [PR27](https://github.com/B3Cognition/prosaic-integration-lab/pull/27)
+merged as `8194f6a0f6e64c6186c8aa129bc759e9e3ef3008` after all four exact-head
+CI cells passed, including 36 real-stack lanes with cleanup verified. This
+documentation follow-up does not change SDK pins, execution or benchmark code.
+
 ## Runtime 0.9.8 public adoption — 2026-10-24
 
 Runtime [v0.9.8](https://github.com/B3Cognition/prosaic-runtime/releases/tag/v0.9.8)

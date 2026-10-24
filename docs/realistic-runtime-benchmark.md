@@ -1,6 +1,6 @@
 # Repeated realistic unified CLI benchmark
 
-This optional candidate lane compares complete agent executions through one
+This optional live lane compares complete agent executions through one
 Claude Code → Codex CLI → local/API pool. It reuses canonical neutral Markdown,
 synthetic packets, initial drafts and fixed factual/workspace graders.
 
@@ -19,17 +19,19 @@ a valid output left by a timed-out process does not count as success.
 
 ## Repeated unified CLI pool study
 
-Prepare an exact installed candidate using the
-[candidate guide](unified-runtime-pools.md#installed-candidate-validation).
+Prepare and audit the pinned public Runtime 0.9.8 environment using the
+[released-wheel guide](unified-runtime-pools.md#released-wheel-validation).
 Copy the native and local [example profiles](../configs/README.md), choose
 accessible model names and authenticate outside the benchmark. The lane requires
 one Claude profile, one Codex profile and the API default profile; aliases must
 not collide. No credentials are copied into source or reports.
 
 ```sh
-python -m lab_runner.native_eval unified-benchmark \
-  --manifest /private/candidate/manifest.json \
-  --wheel-dir /private/candidate/wheels/MANIFEST_SHA256 \
+LAB_PY=.venv-unified-release/bin/python
+RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependencies/releases.json", "rb").read()).hexdigest())')
+"$LAB_PY" -m lab_runner.native_eval unified-benchmark \
+  --manifest dependencies/releases.json \
+  --wheel-dir "$PWD/.cache/wheels/$RELEASED_SHA" \
   --runtime-config /private/native.yml --local-config /private/local.yml \
   --repetitions 3 --timeout 60 --local-timeout 180 --live \
   --output /private/new-unified-benchmark-results
@@ -40,7 +42,8 @@ no host exclusion, a temporary Claude cooldown, or temporary cooldowns for both
 native profiles. One capacity file preserves real cooldowns across the study;
 restoring an owned exclusion never clears an existing provider mark. Task and
 state order rotate across trials. Every assignment starts in a fresh workspace;
-an existing output directory fails rather than resetting accounting.
+an existing output directory fails rather than resetting accounting. The output
+parent must already exist. Keep each study's private evidence and allowance.
 
 Native deadlines stay at 60 seconds, local/API at 180, and the total pool ceiling
 is 300 seconds to accommodate pre-work fallback. Explicit invocation authority is
@@ -91,7 +94,14 @@ is uncontrolled. Do not infer a p95 or general model ranking from three trials.
 Native/API tools and prompts differ, and historical candidate versions differ;
 timing differences do not isolate CLI overhead.
 
-The retained [27-run comparison](verification/unified-cli-realistic-2026-10-23.md)
+Two [released Runtime 0.9.8 studies](verification/unified-cli-released-2026-10-24.md)
+each passed 27/27 assignments, with zero timeouts and 27 controlled cooldown
+skips per study. Their comparison retains the exact release provenance,
+per-model/task medians and ranges, allowance reconciliation and cleanup.
+The latest run changed only the private local endpoint port to avoid the
+desktop server; host/cache conditions remain uncontrolled.
+
+The historical candidate [27-run comparison](verification/unified-cli-realistic-2026-10-23.md)
 records all 27 successes, medians/ranges, exact hashes, paired historical baseline
 audit and cleanup. The separate
 [provider-shaped rejection tests](verification/unified-provider-fallback-2026-10-23.md)
