@@ -20,6 +20,24 @@ Require all four six-case native cells, zero failures/skips, installed payload
 and measured architecture checks, verified cleanup, and all ordinary regression
 checks before publication. CI status is evidence only after the run completes.
 
+The completed r2 evidence is now retained in the repository:
+
+- [Enabled native qualification](castle-linux-r2-native-2026-10-24.json),
+  run `40074232401`: all four cells passed six memory cases each, with zero
+  failures/skips and verified cleanup. The exact bundle ZIP SHA-256 is
+  `1a1c1bd8cc4692285428a0a78026526ac0ac8a0d08bb99d419ae5e202592eba7`.
+- [Full Lab acceptance](castle-linux-r2-full-2026-10-24.json), run
+  `40074232372` on Lab code commit `2b8807e1914737f78a6765aadb463582992ad222`:
+  all four cells passed 1,914 unit/functional tests and nine real-stack lanes
+  totaling 334 cases each, including 103 conversation cases. Required lanes
+  had zero failures/skips and verified cleanup. ARM64/PostgreSQL 16 also ran
+  the extra installed-distribution stack check.
+
+Original ZIP digests, raw receipts, complete Lab logs and verified summaries
+are additionally preserved in `reports/castle-native-release-40074232401` and
+`reports/full-acceptance-40074232372` in the Lab checkout. This documentation-only
+follow-up does not change the qualified worker, adapter or Lab Python payloads.
+
 The [local build record](castle-linux-r2-local-build-2026-10-24.json) records
 strict Twine 7 checks and both rebuilt-sdist wheel payload comparisons. Its
 worker wheel SHA-256 is
@@ -51,12 +69,28 @@ CLI resolution preserves `memory`, `brain`, `sue` and `provider`, with lazy
 dispatch. The upstream two-process test split isolates resource-supervision
 checks from heavy imports retained by the main test process. All tests still
 run, coverage is appended and the final six-platform union retains the 85%
-gate. Unbuffered logs, JUnit and stack dumps are retained before a CI job timeout.
+gate. The workflow is configured to retain unbuffered logs, JUnit and stack
+dumps before a CI job timeout; actual availability must be checked per run.
+
+Castle full-CI run `40073959832`, attempt 1, timed out all six test jobs at the
+20-minute job limit. Its coverage gate correctly failed. GitHub supplied no
+test diagnostics artifacts and its log ZIP contained only lint/coverage logs;
+no test result or cause is inferred from missing logs. This remains a full-CI
+release-clearance blocker. PR #106 records the current single-job debug retry.
+Raw run/job metadata, timeout annotations and the original ZIP are preserved in
+`reports/castle-release-local-20261024/castle-ci-40073959832`.
 
 Local merged verification: **2,510 main + 48 fresh-process supervision tests
 passed**, 11 existing platform/SOAR skips, two benchmark deselections and
 **85.30%** combined coverage. Adapter **76 passed**, lint/format pass. These are
 separate from the required zero-skip native enabled-provider receipts.
+
+A further spawn-safe local CPU-selection diagnostic passed the same 2,510 main
+tests in 102.60 seconds and 48 fresh-process supervision tests in 10.90 seconds,
+again reaching 85.30% combined coverage with the unchanged 85% gate. Its logs,
+JUnit, coverage data and launcher are retained in the local reports directory.
+It did not reproduce or establish the CI timeout's cause and does not replace
+native full-CI clearance.
 
 The host snapshot workflow uses unchanged public Runtime 0.9.7. Model-facing
 `memory_tools()` still requires its explicit Runtime error capability, which
