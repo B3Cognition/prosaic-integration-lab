@@ -17,7 +17,9 @@ FileRunStore/PostgresRunStore and Runtime recorder; synthetic loopback inference
 
 **Spec:** [Optional SUE review design](../specs/2026-10-24-optional-sue-review-design.md).
 That document records the approved direction and proposed implementation calls.
-Fresh builder check: no important unanswered questions.
+Initial builder check found no important unanswered questions. A subsequent
+independent contract review found and corrected the dependency-growth, deadline,
+missing-receipt retry and provenance-digest defects; see the linked design review.
 
 ## Global constraints
 
@@ -28,12 +30,16 @@ Fresh builder check: no important unanswered questions.
 - Synthetic loopback qualification only; no live inference, merge or publication.
 - One selected lens; default euthyphro; 1–14 accepted turns; two attempts per turn.
 - RuntimeAdapter max_attempts=1; provider requests per invocation=1; tool calls=0.
-- Maximum 28 calls, 65,536 reported tokens, 900 active seconds, 60 seconds per attempt.
+- Maximum 28 calls, 65,536 reported tokens, 900 wall-clock seconds from run creation
+  including approval/downtime, 60 seconds per attempt. Never reset the saved deadline.
 - Source count 1–16, total source bytes ≤65,536, seed bytes ≤2,048.
-- Response bytes ≤16,384; invocation bytes ≤262,144; receipt bytes ≤1,048,576;
+- Frozen run input bytes ≤131,072; response bytes ≤16,384; invocation bytes ≤262,144;
+  receipt bytes ≤1,048,576;
   state bytes ≤4,194,304. Resource/uncertainty stops never imply completion.
-- Source/policy/engine/identity bindings are frozen across resume. No automatic retry
-  of a possibly dispatched call without a recoverable receipt or explicit consent.
+- Source/policy/engine/identity bindings are frozen across resume, including full
+  revisions, references, Castle provenance, original bundle and trusted capture identity.
+- No missing-receipt retry in version 1. A saved receipt can be adopted without
+  repeating its attempt; missing/unknown usage remains stopped even with consent.
 
 ## Review focus
 
@@ -78,17 +84,23 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
   missing settings mean disabled. Settings include limits and exact engine identity.
 - `freeze_documents(sources: list[dict]) -> dict`: each input has sourceId/text,
   optional revision/reference; output owns text, byte hash and global line mappings.
-- `freeze_castle_snapshot(snapshot: dict, *, expected_scope: dict) -> dict`: internal
-  conversion after trusted capture, preserving exact record IDs/revisions/text hashes.
+- `freeze_castle_snapshot(capture: dict, *, expected_scope: dict) -> dict`: internal
+  conversion of a trusted host capture containing bundle plus registry-derived
+  principal/namespace/binding identity. A bare bundle cannot attest ownership.
 - `MemoryProviders.capture_selected(principal, selections, *, maximum_bytes=65536)`:
-  selections have record_id/text_sha256/revision. Return complete authorized snapshot
-  or explicit unavailable/forbidden error; never partially selected evidence.
+  selections have record_id/text_sha256/revision. Return a complete authorized
+  host capture with trusted binding context or explicit unavailable/forbidden
+  error; never partially selected evidence or client-asserted scope.
 - `load_engine(expected_identity: dict)`: lazy adapter exposing the five documented
   pure functions and verified installed policy identity; no vendor imports in Lab.
 
 - [ ] Write failing tests for disabled no-import/no-call behavior, malformed settings,
   all limits and invalid counts/JSON, source hashes/CRLF/Unicode/line mappings,
   mutated input aliasing, duplicate IDs, mixed scope and missing selected sources.
+- [ ] Add digest regressions for identical text with changed document revision,
+  reference, Castle provenance/bundle or trusted scope; each must conflict on reuse.
+  Check full encoded request limits, including line maps and metadata, separately
+  from raw source-byte caps. Mutation of any frozen field must break its identity.
 - [ ] Run the new tests and record the missing implementation failures.
 - [ ] Verify public RuntimeAdapter and Harness binding availability in the exact
   installed SDK profile. Verify Castle wheel SHA and package RECORD/source identities.
@@ -112,7 +124,10 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
 - `build_review_workflow(*, config, settings, engine) -> Workflow` builds the fixed
   initial pause, numbered answer/check pairs and terminal finish/rejection paths.
 - `fold_accepted(request: dict, artifacts: dict, *, before_step: str, engine) -> dict`
-  replays only the contiguous required accepted prefix against frozen lines.
+  replays the entire contiguous accepted prefix against frozen lines. Require the
+  immediate predecessor in the graph and every earlier answer in the transported
+  prefix. Reconstruct order by numbered step IDs, not JSON map insertion order;
+  reject absent/extra or differently bound historical data.
 - `project_answer(artifact, arguments, *, execute, **options) -> Result` prepares
   one engine question/schema and calls supplied execute exactly once.
 - `validate_answer(output: dict, context) -> list[str]` independently recomputes
@@ -129,13 +144,23 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
   forged terminal/state digest, wrong previous claim, missing/foreign prefix,
   output/input caps and unknown usage. Assert rejected output never enters the
   accepted prefix; retries consume their own real Runtime/accounting attempts.
+- [ ] Pin the fourteen-turn binding-growth regression: only predecessor-required
+  plus older-optional dependencies; all fourteen minimal invocations fit 262,144
+  bytes. Missing older outputs still fail folding, and modified prior answers or
+  receipt bindings fail freshness/verification. Permuted JSON map members produce
+  the identical ordered state. Do not relax any size bound.
 - [ ] Run the new tests and record failures before implementation.
 - [ ] Implement pure folding and versioned RuntimeAdapter(max_attempts=1). Preserve
-  original Result failure, raw output and evidence. Pass engine question/schema
+  original Result failure and evidence. Keep within-limit failure stdout in bounded
+  private metadata because RuntimeAdapter clears failed stdout; store hash/length
+  rather than unbounded oversized output. Pass engine question/schema
   as prompt data, not a dynamically executed schema/callback selected by the model.
 - [ ] Register an independent validator and build up to fourteen static agent/gate
-  pairs, with required dependencies on every previous accepted answer. Gate only
-  on validated host terminal. Seal engine, policy, artifact and adapter versions.
+  pairs, requiring only each immediate predecessor and passing older accepted
+  answers through optional_inputs. Validate the complete prefix independently;
+  preserve transitive receipt dependencies. Enable host-approved composition and
+  set max_run_input_bytes=131072 explicitly. Gate only on validated host terminal.
+  Seal engine, policy, artifact and adapter versions.
 - [ ] Test early terminal and fourteen-turn bounded stop, max attempts/calls/tokens,
   source injection, cancellation and prompt expansion at its exact boundary.
 - [ ] Run focused and existing runtime-adapter consumer regressions, retain actual
@@ -153,20 +178,30 @@ new `tests/unit/test_sue_review_sources.py`, `test_sue_review_engine.py` and
   implements the exact start/status/resume/report signatures in the design.
 - Freeze attribution as application `integration-lab-sue-review`, project namespace,
   original tenant/actor/billing account and run/request IDs via ExecutionContext.
+- Retain approved workflow/configuration bindings independently of enablement for
+  read-only saved-run access. Missing retained material yields binding_unavailable;
+  do not rebuild a saved fingerprint from new defaults or dispatch for inspection.
 - `render_review(request, accepted_state, attempt_summary) -> dict` returns advisory
   report data; `render_markdown(report: dict) -> str` escapes source content.
 - CLI actions start/status/resume/report use --config and --run-id; start takes
-  --request, resume takes --expected-revision/--choice and explicit interrupted
-  retry consent. Report supports JSON or Markdown, never drives a workflow.
+  --request, resume requires --expected-revision and takes --choice only at the
+  initial pause. Recovery uses choice=None and never offers a missing-receipt
+  retry flag. Report supports JSON or Markdown, never drives a workflow.
 
 - [ ] Write failing tests for identical start idempotency, changed seed/source/lens
   conflicts, current/stale revisions, owner/tenant/payer denial, independent review
   and memory flags, and disabled status/report without inference permission.
+  Include missing retained binding/engine cases with explicit unavailable output.
+- [ ] Check the 900-second wall-clock deadline with a controlled clock: approval
+  and downtime consume the lifetime, expired zero-call approval stays zero-call,
+  resume never resets it, and read-only status/report still work after expiry.
 - [ ] Write real-process fault tests at model return before receipt save, after
   receipt save before acceptance, and after acceptance. Use SDK/public store
   wrappers or fixture boundaries; do not patch installed engines. Assert saved
-  receipt recovery causes zero redispatch and missing receipt blocks until explicit
-  consent; preserve original attempts and unknown usage across retries.
+  receipt recovery never repeats that invocation (later steps may dispatch only
+  within approved remaining limits). Missing receipts stay stopped, including
+  attempts to override via retry consent. Preserve original unknown usage and
+  reservations; do not invent a reconciliation API or disable token accounting.
 - [ ] Run tests to observe failures; implement the host API with existing public
   Harness stores and recovery. Do not add a second dialogue state machine or store.
 - [ ] Implement strict private-file CLI configuration, bounded regular-file UTF-8
