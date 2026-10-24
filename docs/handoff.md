@@ -1,5 +1,19 @@
 # Codex handoff
 
+## Live Qwen SUE pilot found promotion blockers — 2026-10-24
+
+[Live evidence](verification/sue-qwen-live-2026-10-24.md): the 24-cell Qwen 7B
+pilot completed 8/8 direct workflows (4/8 strict passes), but 0/8 critic and
+0/8 SUE workflows. All 40 requests/40,817 reported tokens reconcile; offline
+replay added zero calls. The critic receives a conflicting final-output schema;
+all 16 SUE attempts omitted required `addresses`, and canonical semantic
+response guidance is missing from the adapter prompt. Preserve these failures
+before a separately identified corrected study. Qwen 27B exceeded the hard
+60-second invocation policy; two unknown reservations remain retained.
+Memory/review stay disabled by default. No production changes, weakened
+assertions, push or release. Prior [fresh tests and retrieval benchmarks](verification/prosaic-castle-retest-2026-10-24.md)
+remain unchanged; scripted passes do not qualify live review quality.
+
 ## Independent Prosaic Castle fork — 2026-10-24
 
 The [new enable/use guide](prosaic-castle.md) adopts the independent local fork

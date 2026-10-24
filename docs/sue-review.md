@@ -12,6 +12,12 @@ disables it. Other review settings are rejected while disabled. Installing the
 engine does not enable review, record chats, retrieve sources or start a model.
 The disabled session constructor loads no SUE engine or SDK execution machinery.
 
+**Live qualification is blocked.** The [Qwen pilot](verification/sue-qwen-live-2026-10-24.md)
+found response-contract failures in every SUE case and a conflicting output
+contract in the critic comparison. Qwen 27B also exceeded the current invocation
+limit. Use the walkthrough to inspect mechanics; keep review disabled for normal
+work until these issues are fixed and a new live comparison qualifies them.
+
 ## Get the optional engine
 
 Use the Lab's normal [public SDK setup](../README.md#install-packages-for-an-embedding-service)
