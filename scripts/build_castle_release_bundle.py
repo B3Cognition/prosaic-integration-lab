@@ -81,7 +81,7 @@ def main():
                              "filename": wheel.name, "sha256": digest(wheel),
                              "source_commit": commit, "candidate": True,
                              **({"environment": "worker-only"} if distribution == "cognitive-castle" else {})})
-    run(sys.executable, "-m", "twine", "check", *[str(output / row[key]) for row in roundtrips for key in ("wheel", "sdist")],
+    run(sys.executable, "-m", "twine", "check", "--strict", *[str(output / row[key]) for row in roundtrips for key in ("wheel", "sdist")],
         cwd=ROOT, env=env)
     from scripts.prepare_dependencies import prepare
     cache = prepare(ROOT / "dependencies/releases.json", ROOT / ".cache/wheels")
