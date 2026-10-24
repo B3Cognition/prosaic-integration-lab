@@ -1,5 +1,21 @@
 # Current delivery status
 
+## Released Runtime live benchmarks — 2026-10-24
+
+Two authorized [live unified CLI studies](verification/unified-cli-released-2026-10-24.md)
+used the verified public Runtime 0.9.8 wheel and unchanged neutral Markdown,
+synthetic inputs, graders and deadlines: native 60s, local 180s, pool 300s.
+Each study passed 27/27 assignments (nine per model). Latest medians were
+Claude Sonnet 11.37s, Codex gpt-6.1-sol/low 23.07s and local ThinkingCap Qwen
+27B 60.69s; the preceding released study measured 10.38s, 23.61s and 66.21s.
+
+Each study verified 27 controlled cooldown skips, zero provider-triggered
+fallbacks, zero timeouts and known allowance accounting. Output regrading and
+owned-resource cleanup passed. These are small factual/workspace studies;
+timings do not isolate Runtime effects or establish a general model ranking.
+The latest run used port 8001 because the desktop local server occupied 8000;
+only the private endpoint URL changed. Raw evidence remains private.
+
 ## Released Runtime unified pools — 2026-10-24
 
 Runtime 0.9.8 is published with native Claude/Codex execution and unified

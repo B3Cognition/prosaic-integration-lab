@@ -2,6 +2,10 @@
 
 ## 0.6.0 — unreleased
 
+- Record two released Runtime 0.9.8 live CLI studies: 54/54 successful assignments
+  across Claude, Codex and local, with success/latency comparisons, controlled
+  cooldown evidence and unchanged Markdown, inputs and 180s local deadlines.
+
 - Adopt released Runtime 0.9.8 with native/unified pools, retaining the other four
   SDK pins. Require installed native/unified acceptance in public CI and preserve
   the pre-unified manifest and closed provenance profile for historical replay.

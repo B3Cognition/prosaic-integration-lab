@@ -2,9 +2,11 @@
 
 The opt-in [unified Runtime pool lab](docs/unified-runtime-pools.md) tests Claude
 Code, Codex CLI and local/API selection with explicit policies and pre-work-only
-fallback using released Runtime 0.9.8. Retained [27-run benchmark results](docs/verification/unified-cli-realistic-2026-10-23.md)
+fallback using released Runtime 0.9.8. Two fresh [released-wheel live studies](docs/verification/unified-cli-released-2026-10-24.md)
+passed 54/54 assignments with unchanged Markdown/inputs and a 180s local deadline.
+The retained [candidate benchmark](docs/verification/unified-cli-realistic-2026-10-23.md)
 and [provider-rejection/no-replay tests](docs/verification/unified-provider-fallback-2026-10-23.md)
-separate real model observations from simulated failures.
+keep historical model observations separate from simulated failures.
 The [PR qualification ledger](docs/verification/unified-pool-pr-finalization-2026-10-23.md)
 records the earlier candidate checks and exact provenance. The
 [released adoption ledger](docs/verification/runtime-unified-release-2026-10-24.md)

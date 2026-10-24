@@ -3,8 +3,9 @@
 Released Runtime 0.9.8 includes the opt-in `UnifiedRuntime`, selecting native Claude Code,
 Codex CLI and local/API profiles through one ordered pool. Runtime owns execution,
 capacity and safe switching; Lab consumes its public installed APIs.
-Historical candidate and live evidence stays separately
-identified below; release validation does not repeat live model benchmarks.
+Two separately authorized [released-wheel live studies](verification/unified-cli-released-2026-10-24.md)
+passed 54/54 assignments. Historical candidate evidence stays separately
+identified below; offline release validation and live measurements have distinct scopes.
 
 ## Configuration and invocation
 
