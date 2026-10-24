@@ -1,6 +1,7 @@
 from copy import deepcopy
 import importlib
 import json
+import hashlib
 import sys
 
 import pytest
@@ -59,6 +60,34 @@ def test_selected_capture_has_trusted_scope_and_full_provenance_digest():
     altered = deepcopy(payload);altered['sources'][0]['revision'] = 'v2'
     new = s.freeze_castle_snapshot({'bundle':{**altered,'digest':c.digest(altered)},'scope':scope}, expected_scope=scope)
     assert new['sourcesSha256'] != frozen['sourcesSha256']
+
+
+def test_actual_castle_v1_snapshot_hash_survives_json_key_reordering():
+    c, s = api()
+    text = 'Exact 🙂\r\nSecond line\r\n'
+    source = {'record_id':'r1','text_sha256':c.text_digest(text),'revision':'v1',
+              'representation':'original','wing':'project','captured_at':None,'source_id':'s1'}
+    # Castle protocol v1 hashes this exact field order, independently of the
+    # outer response dataclass's order. JSON dictionaries may reorder in storage.
+    payload = {'schema_version':1,'sources':[source],'texts':[text]}
+    wire_hash = hashlib.sha256(json.dumps(payload,ensure_ascii=False,
+        separators=(',',':'),allow_nan=False).encode()).hexdigest()
+    assert wire_hash != c.digest(payload)
+    bundle = json.loads(json.dumps({**payload,'digest':wire_hash},sort_keys=True))
+    scope = {'tenant_id':'tenant','actor_id':'alice','billing_account_id':'payer',
+             'namespace':'memory','binding_sha256':'a'*64,'allowed_wings':['project']}
+    frozen = s.freeze_castle_snapshot({'bundle':bundle,'scope':scope},expected_scope=scope)
+    assert frozen['snapshotDigest'] == wire_hash
+    assert frozen['sources'][0]['text'].encode() == text.encode()
+    assert s.verify_frozen(frozen) == frozen
+    for section in ('revision','wing','source_id'):
+        forged = deepcopy(bundle)
+        forged['sources'][0][section] = 'tampered'
+        with pytest.raises(c.ReviewError):
+            s.freeze_castle_snapshot({'bundle':forged,'scope':scope},expected_scope=scope)
+    forged = deepcopy(bundle);forged['texts'][0] = text.replace('\r\n','\n')
+    with pytest.raises(c.ReviewError):
+        s.freeze_castle_snapshot({'bundle':forged,'scope':scope},expected_scope=scope)
 
 
 @pytest.mark.parametrize('change', [

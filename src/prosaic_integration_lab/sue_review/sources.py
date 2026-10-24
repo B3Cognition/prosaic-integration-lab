@@ -1,6 +1,7 @@
 """Owned verbatim evidence and source-local line mappings; no retrieval here."""
 
 import hashlib
+import json
 import re
 
 from .contracts import ReviewError, digest, own, reference, text_digest
@@ -84,13 +85,25 @@ def freeze_castle_snapshot(capture, *, expected_scope):
     if type(bundle) is not dict or set(bundle) != {'sources','texts','schema_version','digest'} or type(bundle['schema_version']) is not int or bundle['schema_version'] != 1:
         raise ReviewError('invalid_snapshot')
     payload = {k:v for k,v in bundle.items() if k != 'digest'}
-    if bundle['digest'] != digest(payload) or type(bundle['sources']) is not list or type(bundle['texts']) is not list or len(bundle['sources']) != len(bundle['texts']):
+    if type(bundle['sources']) is not list or type(bundle['texts']) is not list or len(bundle['sources']) != len(bundle['texts']):
         raise ReviewError('snapshot_identity_mismatch')
     records = []
-    source_keys = {'record_id','text_sha256','revision','representation','wing','captured_at','source_id'}
+    source_order = ('record_id','text_sha256','revision','representation','wing','captured_at','source_id')
+    source_keys = set(source_order)
     for source,text in zip(bundle['sources'],bundle['texts'],strict=True):
         if type(source) is not dict or set(source) != source_keys or type(source['record_id']) is not str or not source['record_id'] or source['wing'] not in scope['allowed_wings'] or source['text_sha256'] != text_digest(text):
             raise ReviewError('invalid_snapshot_source')
         records.append({'sourceId':'castle:'+hashlib.sha256(source['record_id'].encode()).hexdigest()[:32],
                         'text':text,'revision':source['revision'],'reference':None,'provenance':source})
+    # Castle protocol v1 hashes MemorySource fields in dataclass order and the
+    # envelope as schema_version/sources/texts. Restore that defined encoding
+    # after own()/JSON storage sorts dictionaries. The earlier Lab-only sorted
+    # encoding remains valid for retained snapshots; both bind every exact field.
+    wire_payload = {'schema_version':1,
+        'sources':[{key:source[key] for key in source_order} for source in bundle['sources']],
+        'texts':bundle['texts']}
+    wire_digest = hashlib.sha256(json.dumps(wire_payload,ensure_ascii=False,
+        allow_nan=False,separators=(',',':')).encode('utf-8')).hexdigest()
+    if bundle['digest'] not in (wire_digest,digest(payload)):
+        raise ReviewError('snapshot_identity_mismatch')
     return _freeze(records, scope, bundle['digest'])

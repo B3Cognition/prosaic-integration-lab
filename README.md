@@ -1,5 +1,11 @@
 # Prosaic integration lab
 
+For the independent, unpublished **Prosaic Castle** fork, start with the
+[enable/use guide](docs/prosaic-castle.md): lean worker setup, separately opt-in
+memory and SUE, selected-source review, and qualification limits. Both features
+remain disabled by default. The older [Castle quickstart](docs/castle-quickstart.md)
+retains its historical r7 package profile and evidence.
+
 The opt-in [unified Runtime pool lab](docs/unified-runtime-pools.md) tests Claude
 Code, Codex CLI and local/API selection with explicit policies and pre-work-only
 fallback using released Runtime 0.9.8. Retained [27-run benchmark results](docs/verification/unified-cli-realistic-2026-10-23.md)
