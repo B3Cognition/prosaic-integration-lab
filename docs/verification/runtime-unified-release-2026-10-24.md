@@ -132,7 +132,8 @@ local distribution check did not execute the real stack.
 
 Real-stack acceptance on Linux AMD64/ARM64 with PostgreSQL 16/18 remains required
 on the exact adoption PR head before merge. CI runs all nine acceptance modes,
-released native acceptance and distribution stack checks in every required cell.
+released native acceptance and distribution adoption in every required cell;
+the clean-distribution real-stack check additionally runs on ARM64/PostgreSQL 16.
 
 ## Boundaries
 
