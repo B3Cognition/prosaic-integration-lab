@@ -22,7 +22,7 @@
 - [x] Add the explicit grounding supplement only to constrained mode, include its digest in adapter v1.4 and preserve canonical schema/validator/default v1.2 behavior.
 - [x] Run focused and full public suites; build identical wheel/sdist candidates, qualify installed constrained PG16/18 and scripted comparison/replay.
 - [ ] Freeze a separate installed-candidate operator and rerun the same 24-cell Qwen benchmark. Audit/replay without network, classify results and retain all failures.
-- [ ] Fresh read-only review, fix material findings with regressions, archive verification and document limits; commit locally without push/release.
+- [x] Fresh read-only review, fix material findings with regressions, archive verification and document limits; commit locally without push/release.
 
 ## Investigation update
 
@@ -53,3 +53,11 @@ receipt. Preserve the full unknown reservation and partial/unrun outcomes.
 Full24-cell live qualification remains blocked at the original deadline;
 changing it requires a separately identified comparison. Do not mark that
 qualification as achieved merely because mechanics/tests pass.
+
+Final source `e9ae33e` passes full2158/installed62/absence105 and exact PG16/18
+inventories. Schema-stage archive539files, manifest
+`157d9ca70a0052078cb63941cfdbd3185dbfde6055d5fa70ee40938ab41ed61e`;
+all3090files in seven previous archives reverified. The live-comparison task
+above remains incomplete at its original deadline, with one full unknown
+reservation retained and twelve cells unrun. No automatic retry or deadline
+increase was performed.

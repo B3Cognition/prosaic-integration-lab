@@ -123,3 +123,13 @@ supplement are unchanged from v1.4; only generation transport constraints and
 the explicit v1.5 binding change. Provider warnings stop the study rather than
 silently accepting downgraded schema enforcement. Prior failed evidence and
 charged unknown reservations remain unchanged. No push, merge or publication.
+
+Final source is `e9ae33e` (the final hygiene change removes only a test-file
+blank line). Frozen archive `reports/castle-sue-grounding-schema-20261024` has
+539files; manifest SHA256
+`157d9ca70a0052078cb63941cfdbd3185dbfde6055d5fa70ee40938ab41ed61e`.
+All3,090files across seven previous archives verify unchanged. The final source
+wheel matches the frozen study wheel byte for byte. The unmodified diff check
+initially caught the trailing test-file blank line; its failed export log is
+retained alongside the successful export. This archive records a failed partial
+live qualification, not a successful full benchmark.
