@@ -20,13 +20,17 @@ independently disabled by default. No live model-service calls were made.
 | Normal and network-denied hackathon replay | Zero additional provider requests |
 
 Both owned database fixtures used separate migration/runtime roles and verified
-cleanup. The actual lean worker had no Torch, sentence-transformers, spaCy or
+cleanup. The consumer and benchmarks ran on macOS ARM64; the PostgreSQL servers
+ran in Linux ARM64 containers. The actual lean worker had no Torch, sentence-transformers, spaCy or
 SML installed. All four supplied wheel hashes matched the candidate profile;
 installed payload verification remained mandatory.
 
-Castle's 12 optional SML skips and 108 slow/stress/benchmark deselections remain
-explicit; real SML equivalence is unqualified. Existing Starlette/LanceDB
-deprecation warnings remain. The initial standalone SUE invocation from its
+Castle's 12 skips comprise 11 unavailable SML checks and one fixture-path guard
+for testing home-relative paths from a temporary directory outside the home.
+The 108 slow/stress/benchmark deselections remain explicit; real SML equivalence
+is unqualified. Two targeted fixture-path invocations also skipped; they provide
+no additional passing evidence. Existing Starlette/LanceDB deprecation warnings
+remain. The initial standalone SUE invocation from its
 package directory failed 63 comparisons because its legacy reference was absent
 from the test import path. Supplying the required repository reference resolved
 all 75 tests without source or assertion changes. Both logs are retained.
