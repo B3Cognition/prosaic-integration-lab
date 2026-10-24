@@ -91,7 +91,7 @@ recover a model call or unknown usage outcome.
 ## Explicit qualification
 
 The unchanged `dependencies/releases.json` remains the normal release lane.
-`dependencies/memory-release-candidates-2026-10-24-r3.json` adds the exact-checksummed candidate
+`dependencies/memory-release-candidates-2026-10-24-r4.json` adds the exact-checksummed candidate
 adapter and worker to the current five public SDKs, including Runtime 0.9.8. Those two Castle packages
 are not published releases. Obtain exactly the listed wheel bytes; a rebuilt
 wheel with a different digest must not silently pass. The earlier
@@ -100,11 +100,12 @@ profile is retained in `memory-candidates-2026-10-23-initial.json` for historica
 receipts. This host-only workflow uses Runtime's invocation budget contract and
 grants no model tools. The adapter's separate `memory_tools()` API still requires
 its own compatible Runtime error capability; this Lab path does not call it.
-See the [current r3 stack/artifact record and release checklist](verification/castle-linux-release-r3-2026-10-24.md).
+See the [current r4 stack/artifact record and release checklist](verification/castle-linux-release-r4-2026-10-24.md).
 The earlier [native Linux AMD64/ARM64, PostgreSQL 16/18 evidence](verification/castle-linux-release-2026-10-24.md)
-and its original manifest remain unchanged. Current r3 stack receipts and its
-bundle are linked from the release PR. The r2 Runtime 0.9.7 profile and original
-selected worker/adapter publication archives remain separately preserved;
+and its original manifest remain unchanged. The r4 bundle binds the split Castle
+source and its Windows compatibility corrections; its native receipts are linked
+from the release PR. The r2/r3 profiles, receipts and original archives remain
+separately preserved as historical candidates;
 a different same-version wheel is a different candidate.
 
 From this checkout or an extracted sdist, with its built Lab wheel installed
@@ -112,8 +113,8 @@ and all six host SDK wheels installed from the selected wheel directory:
 
 ```sh
 python -m lab_runner.castle_memory
-python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24-r3.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 16 --output /private/memory-pg16.json
-python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24-r3.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 18 --output /private/memory-pg18.json
+python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24-r4.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 16 --output /private/memory-pg16.json
+python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24-r4.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 18 --output /private/memory-pg18.json
 ```
 
 The first command starts nothing. Explicit qualification verifies wheel hashes
@@ -131,7 +132,7 @@ Build the offline installed consumer overlay using an explicit cached base
 image ID, the same wheel directory and the built Lab wheel:
 
 ```sh
-python scripts/build_memory_consumer.py --base-image sha256:FULL_LOCAL_IMAGE_ID --manifest dependencies/memory-release-candidates-2026-10-24-r3.json --artifacts /absolute/wheels --lab-wheel dist/prosaic_integration_lab-0.6.0-py3-none-any.whl --output /private/memory-image.json
+python scripts/build_memory_consumer.py --base-image sha256:FULL_LOCAL_IMAGE_ID --manifest dependencies/memory-release-candidates-2026-10-24-r4.json --artifacts /absolute/wheels --lab-wheel dist/prosaic_integration_lab-0.6.0-py3-none-any.whl --output /private/memory-image.json
 ```
 
 The overlay uses no index/network and runs the installed disabled smoke as a

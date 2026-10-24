@@ -34,15 +34,15 @@ exported-conversation import steps below for the material you want it to recall.
 Run these commands from this repository's root, using Python **3.12** on macOS
 or Linux. The worker currently requires POSIX process groups. You need a folder
 containing all seven wheels listed in
-[`dependencies/memory-release-candidates-2026-10-24-r3.json`](../dependencies/memory-release-candidates-2026-10-24-r3.json).
+[`dependencies/memory-release-candidates-2026-10-24-r4.json`](../dependencies/memory-release-candidates-2026-10-24-r4.json).
 The first five are the Lab's normal public SDK versions. The Castle adapter and
 worker are **unpublished candidates**: obtain the exact qualified wheel bundle
 from the maintainer. If you only have this repository, stop here and request
 that bundle; a generic `pip install cognitive-castle` is not a verified substitute.
 
-Get the matching **r3** stack bundle and its native Linux AMD64/ARM64 × PostgreSQL
+Get the matching **r4** stack bundle and its native Linux AMD64/ARM64 × PostgreSQL
 16/18 verification status from [Lab PR #26](https://github.com/B3Cognition/prosaic-integration-lab/pull/26).
-The [r3 stack preparation record](verification/castle-linux-release-r3-2026-10-24.md)
+The [r4 stack preparation record](verification/castle-linux-release-r4-2026-10-24.md)
 identifies its exact source and wheel hashes. Earlier candidate bundles remain
 separately archived; choose the bundle that matches this manifest exactly.
 
@@ -63,7 +63,7 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path('src').absolute()))
 from lab_runner.castle_memory import memory_artifacts
-memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24-r3.json'), Path(os.environ['CASTLE_WHEELS']))
+memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24-r4.json'), Path(os.environ['CASTLE_WHEELS']))
 print('All seven wheel identities and checksums match.')
 PY
 ```
