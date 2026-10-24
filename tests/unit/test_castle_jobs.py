@@ -258,3 +258,28 @@ def test_report_links_failure_receipt_and_rejects_changed_runtime(tmp_path):
         with pytest.raises(CastleJobError,match='binding_unavailable'):
             flow.resume(run,expected_revision=done['revision'])
         assert len(calls)==1
+
+
+@pytest.mark.parametrize('kind,expected_instructions', [
+    ('judge', ('rank candidate snippets by relevance to the query', 'most to least relevant')),
+    ('corpus_origin', ('conversations between a human user and an ai agent',
+                       'personal narrative, stories, research notes, journals or code',
+                       'conversational turns and interaction with an ai platform')),
+])
+def test_model_wire_receives_substantive_job_objective(tmp_path,kind,expected_instructions):
+    # A successful fixture response proves wire delivery, not ranking quality.
+    raw = '{"ranked_indices":[1,0]}' if kind == 'judge' else json.dumps({
+        'is_ai_dialogue_corpus':False,'confidence':0.8,'primary_platform':None,
+        'user_name':None,'agent_persona_names':[],'evidence':['Ordinary notes.']})
+    with responder(raw) as (url,calls):
+        flow,_=session(tmp_path,url)
+        run=uuid.uuid4().hex
+        options = request() if kind == 'judge' else {'kind':kind,'candidates':candidates()}
+        waiting=flow.start(run,**options)
+        done=flow.resume(run,expected_revision=waiting['revision'],choice='continue')
+        assert done['status']=='completed' and len(calls)==1
+        # Inspect actual provider messages, not just a module-level constant.
+        instruction_text=' '.join(message['content'] for message in calls[0]['messages']).lower()
+        assert 'perform the requested advisory castle job' in instruction_text
+        for instruction in expected_instructions:
+            assert instruction in instruction_text

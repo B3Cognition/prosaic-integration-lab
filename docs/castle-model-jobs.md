@@ -63,7 +63,8 @@ allowance produces a blocked run rather than usable advice.
 and `min(50, candidate_count)`. Only the first `top_n` candidates are sent to
 the model, with their first 600 characters, mirroring the legacy judge bound.
 The response must be exactly `{"ranked_indices": [...]}` with a complete
-permutation of `range(top_n)`. Booleans, floats, partial lists, duplicates,
+permutation of `range(top_n)`. The model is instructed to rank snippets by
+relevance to the query, from most to least relevant. Booleans, floats, partial lists, duplicates,
 extra indices, negative indices and extra fields fail validation. A valid
 permutation reorders only that prefix; the untouched tail retains its original
 order. `rankedSourceIds` identifies the frozen candidates; the host decides
@@ -106,7 +107,10 @@ legacy classifier's sampling bound. The strict output fields are
 `is_ai_dialogue_corpus` (boolean), `confidence` (finite number in [0,1]),
 `primary_platform` and `user_name` (nullable strings), `agent_persona_names`
 and `evidence` (bounded string lists). The prompt retains the legacy tentative
-AI-dialogue hypothesis for thin evidence. The returned human name is removed
+AI-dialogue hypothesis for thin evidence. It asks whether the samples record
+human–AI conversations or ordinary narrative, stories, research notes, journals
+or code, using conversational turns, interaction with known AI platforms and
+corpus-specific evidence; a platform name alone is not proof. The returned human name is removed
 case-insensitively from persona names, preserving the legacy distinction.
 Failure yields no classification, with explicit audit evidence; it never
 manufactures a confident corpus label or writes origin metadata.
