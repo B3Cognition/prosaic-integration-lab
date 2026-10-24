@@ -34,10 +34,13 @@ published package-index releases. The source profile is
 | Separate pure SUE engine | `cognitive-castle-sue==0.1.0` / `cognitive_castle_sue-0.1.0-py3-none-any.whl` | Host environment, for review |
 
 The independent fork source is
-`971dd4fe280667e7b61ea2e4b6e262ab77eaad43`, based on Cognitive Castle
+`e810a016abab7b96b4c905b04314562065d5fed3`, based on Cognitive Castle
 `53637196cc215e9bd5b85b9253b3430b2781b884`. It retains the legacy engine version
 3.4.2; its distribution name identifies the fork. SUE still imports as
 `castle_sue`, and the host adapter still imports as `prosaic_memory_castle`.
+Runtime payloads are unchanged from fork commit `971dd4fe`; the final source
+archive also makes legacy CI dependencies explicit and archives the inherited
+upstream publishing workflow. The new repository requires its own release setup.
 
 Create fresh environments. **Never coinstall `prosaic-castle` and
 `cognitive-castle`: both own `cognitive_castle` and legacy `castle*` commands.**

@@ -1,7 +1,8 @@
 {
   "schema_version": 1,
   "profile": "prosaic-castle-v1",
-  "source_commit": "971dd4fe280667e7b61ea2e4b6e262ab77eaad43",
+  "source_commit": "e810a016abab7b96b4c905b04314562065d5fed3",
+  "runtime_source_commit": "971dd4fe280667e7b61ea2e4b6e262ab77eaad43",
   "source_repository": "independent-local-prosaic-castle",
   "upstream_repository": "B3Cognition/cognitive-castle",
   "upstream_commit": "53637196cc215e9bd5b85b9253b3430b2781b884",
@@ -13,7 +14,7 @@
     "version": "3.4.2",
     "wheel": "prosaic_castle-3.4.2-py3-none-any.whl",
     "wheel_sha256": "3d8b1d9da57b9374ca8cdd6260c793cc105788ae242dc44116d294781eee1915",
-    "sdist_sha256": "fd890d61fd99f62e624b2ea6008d8ac5e26562d1fab0a0455b34541196ce9a5c",
+    "sdist_sha256": "51deb4b7d95aa1e624b01ffb4a963e0b0c34b6d44acb90d36f93ab10c7089d99",
     "command": "prosaic-castle-provider",
     "profile": "memory-fts-v1",
     "recency_boost": false,
