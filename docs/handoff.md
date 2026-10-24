@@ -1,5 +1,15 @@
 # Codex handoff
 
+## Lab 0.6.0 release preparation — 2026-10-24
+
+The maintainer authorized releasing 0.6.0 with unified pools and the released
+Runtime benchmark docs. The [release notes](release-0.6.0.md) summarize the
+release. SDK pins, benchmark code/inputs/deadlines and historical evidence
+remain unchanged. Build and review the final source, require all four native
+Linux/PostgreSQL CI cells, then retain the original CI wheel/sdist and attach
+checksums plus exact-source verification. Verify downloaded public assets
+against those same bytes; do not substitute a later local rebuild.
+
 ## Released Runtime live measurements — 2026-10-24
 
 The separately authorized [0.9.8 live studies](verification/unified-cli-released-2026-10-24.md)

@@ -1,5 +1,16 @@
 # Current delivery status
 
+## Lab 0.6.0 release — 2026-10-24
+
+The [0.6.0 release notes](release-0.6.0.md) describe the unified pool examples,
+public Runtime 0.9.8 train, two successful live CLI studies and accumulated
+consumer blueprints. Publication requires the final source's four-cell
+Linux AMD64/ARM64 × PostgreSQL 16/18 acceptance matrix, including installed
+distributions and verified cleanup. The release assets' `VERIFICATION-0.6.0.json`
+and `SHA256SUMS-0.6.0.txt` bind the exact qualified CI wheel/source archive,
+SDK manifest and source. Earlier study reports and experimental boundaries
+remain unchanged; release preparation makes no new live model calls.
+
 ## Released Runtime live benchmarks — 2026-10-24
 
 Two authorized [live unified CLI studies](verification/unified-cli-released-2026-10-24.md)

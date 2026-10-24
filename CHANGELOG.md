@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 — unreleased
+## 0.6.0 — 2026-10-24
 
 - Record two released Runtime 0.9.8 live CLI studies: 54/54 successful assignments
   across Claude, Codex and local, with success/latency comparisons, controlled
