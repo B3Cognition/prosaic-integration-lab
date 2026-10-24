@@ -29,11 +29,14 @@ to check current facts.
 Run these commands from this repository's root, using Python **3.12** on macOS
 or Linux. The worker currently requires POSIX process groups. You need a folder
 containing all seven wheels listed in
-[`dependencies/memory-candidates.json`](../dependencies/memory-candidates.json).
+[`dependencies/memory-release-candidates-2026-10-24.json`](../dependencies/memory-release-candidates-2026-10-24.json).
 The first five are the Lab's normal public SDK versions. The Castle adapter and
 worker are **unpublished candidates**: obtain the exact qualified wheel bundle
 from the maintainer. If you only have this repository, stop here and request
 that bundle; a generic `pip install cognitive-castle` is not a verified substitute.
+
+The current bundle passed [native Linux AMD64/ARM64 with PostgreSQL 16/18](verification/castle-linux-release-2026-10-24.md).
+Use its download link and checksums; the older 3.4.1 candidate remains historical.
 
 Use two environments. The host runs Prosaic; the worker runs Castle. Set the
 wheel folder to its actual absolute path:
@@ -52,7 +55,7 @@ import os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path('src').absolute()))
 from lab_runner.castle_memory import memory_artifacts
-memory_artifacts(Path('dependencies/memory-candidates.json'), Path(os.environ['CASTLE_WHEELS']))
+memory_artifacts(Path('dependencies/memory-release-candidates-2026-10-24.json'), Path(os.environ['CASTLE_WHEELS']))
 print('All seven wheel identities and checksums match.')
 PY
 ```
@@ -66,16 +69,33 @@ Install the five public SDKs, the adapter and this Lab checkout into the host:
 .venv-castle-host/bin/python -m pip check
 ```
 
-Install Castle separately:
+Create the separate worker environment:
 
 ```sh
 python3.12 -m venv .venv-castle-worker
-.venv-castle-worker/bin/python -m pip install "$CASTLE_WHEELS/cognitive_castle-3.4.1-py3-none-any.whl"
 ```
 
-Castle's package currently includes neural dependencies, so that installation
-can be large. The default FTS provider does not load embedding models for its
-reads. SUE and SOAR are not needed for this provider workflow.
+For Linux CPU hosts, installing Torch from its CPU index before Castle avoids
+unneeded CUDA packages:
+
+```sh
+.venv-castle-worker/bin/python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
+Then install Castle and check its dependencies:
+
+```sh
+.venv-castle-worker/bin/python -m pip install "$CASTLE_WHEELS/cognitive_castle-3.4.2-py3-none-any.whl"
+.venv-castle-worker/bin/python -m pip check
+```
+
+Castle's package currently includes neural dependencies, so installation can
+be large. FTS reads load no embedding models. SUE and SOAR are not needed.
+
+This release preparation keeps older candidate manifests and receipts intact; do not mix
+same-version adapter wheels from different bundles. Host snapshots use public
+Runtime 0.9.7. The adapter's separate model-facing `memory_tools()` API requires
+a future qualified Runtime with its explicit error capability.
 
 ## 2. Try the local walkthrough first
 
@@ -117,6 +137,16 @@ A **palace** is Castle's local database directory. A **wing** is a named source
 group within it. A **namespace** binds that palace to the host's chosen owner
 scope. Start with the existing palace your colleague uses, or initialize one
 with Castle's standard project setup:
+
+For legacy NLP import features, provision the compatible spaCy model first:
+
+```sh
+.venv-castle-worker/bin/python -m spacy download en_core_web_sm
+```
+
+Use an approved compatible model wheel for offline setup. Standard Castle
+import can also require its configured embedding weights. FTS reads require
+no model weights and never download them during a query.
 
 ```sh
 export CASTLE_PALACE=/absolute/path/to/your-palace

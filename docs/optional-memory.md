@@ -91,22 +91,24 @@ recover a model call or unknown usage outcome.
 ## Explicit qualification
 
 The unchanged `dependencies/releases.json` remains the normal release lane.
-`dependencies/memory-candidates.json` adds the exact-checksummed candidate
+`dependencies/memory-release-candidates-2026-10-24.json` adds the exact-checksummed candidate
 adapter and worker to the unchanged five public SDKs. Those two Castle packages
 are not published releases. Obtain exactly the listed wheel bytes; a rebuilt
-wheel with a different digest must not silently pass. The initial older SDK
+wheel with a different digest must not silently pass. The earlier
+`memory-candidates.json` and initial older SDK
 profile is retained in `memory-candidates-2026-10-23-initial.json` for historical
 receipts. This host-only workflow uses Runtime's invocation budget contract and
 grants no model tools. The adapter's separate `memory_tools()` API still requires
 its own compatible Runtime error capability; this Lab path does not call it.
+See the [native Linux AMD64/ARM64, PostgreSQL 16/18 evidence and release checklist](verification/castle-linux-release-2026-10-24.md).
 
 From this checkout or an extracted sdist, with its built Lab wheel installed
 and all six host SDK wheels installed from the selected wheel directory:
 
 ```sh
 python -m lab_runner.castle_memory
-python -m lab_runner.castle_memory --enable --manifest dependencies/memory-candidates.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 16 --output /private/memory-pg16.json
-python -m lab_runner.castle_memory --enable --manifest dependencies/memory-candidates.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 18 --output /private/memory-pg18.json
+python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 16 --output /private/memory-pg16.json
+python -m lab_runner.castle_memory --enable --manifest dependencies/memory-release-candidates-2026-10-24.json --artifacts /absolute/wheels --worker-python /absolute/worker-env/bin/python --postgres-version 18 --output /private/memory-pg18.json
 ```
 
 The first command starts nothing. Explicit qualification verifies wheel hashes
@@ -124,7 +126,7 @@ Build the offline installed consumer overlay using an explicit cached base
 image ID, the same wheel directory and the built Lab wheel:
 
 ```sh
-python scripts/build_memory_consumer.py --base-image sha256:FULL_LOCAL_IMAGE_ID --manifest dependencies/memory-candidates.json --artifacts /absolute/wheels --lab-wheel dist/prosaic_integration_lab-0.6.0-py3-none-any.whl --output /private/memory-image.json
+python scripts/build_memory_consumer.py --base-image sha256:FULL_LOCAL_IMAGE_ID --manifest dependencies/memory-release-candidates-2026-10-24.json --artifacts /absolute/wheels --lab-wheel dist/prosaic_integration_lab-0.6.0-py3-none-any.whl --output /private/memory-image.json
 ```
 
 The overlay uses no index/network and runs the installed disabled smoke as a
