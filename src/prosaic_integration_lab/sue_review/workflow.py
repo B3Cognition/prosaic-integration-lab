@@ -57,10 +57,12 @@ def project_answer(artifact, arguments, *, execute, engine, constrained_json=Fal
     if state['terminal']:
         raise ReviewError('engine_terminal')
     lines = source_lines(request['evidence'])
+    grounding = {'groundingContext': {'sourceLineNumbers':list(range(1,len(lines)+1)),
+                 'priorTurnNumbers':[turn['turn_no'] for turn in state['turns']]}} if constrained_json else {}
     projected = own({'question':engine.question(state),'responseSchema':engine.schema(state),
                      'seed':request['seed'],'state':state,
                      'sourceLines':[{'line':n,'text':line} for n,line in enumerate(lines,1)],
-                     'validationFeedback':data.get('validation_feedback')},262144)
+                     'validationFeedback':data.get('validation_feedback'), **grounding},262144)
     generation = {'response_schema': projected['responseSchema']} if constrained_json else {}
     result = execute(encoded(projected).decode(), allowed_tools=frozenset(), max_tool_rounds=1, max_input_bytes=262144, **generation)
     raw = result.stdout
@@ -100,6 +102,7 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
     from prosaic_harness import Validator, WorkflowBindings, WorkflowCatalog, WorkflowFactory, WorkflowPolicy
     from prosaic_runtime import ProsaicArtifact, ProsaicRuntime, RuntimeAdapter
     from .guidance import CANONICAL_GUIDANCE, CANONICAL_SOURCE_SHA256, GUIDANCE_SHA256
+    from .grounding import GROUNDING_GUIDANCE, GROUNDING_SHA256
 
     if config.allowed_tools or config.tool_directories:
         raise ReviewError('review_requires_tool_free_runtime')
@@ -114,8 +117,11 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
     policy_data = {k:v for k,v in asdict(settings).items() if k != 'enabled'}
     if constrained_json:
         policy_data['constrained_json'] = True
-    prefix = 'sue-review-v1.3-' if constrained_json else 'sue-review-v1.2-'
-    version = prefix + digest({'engine':caps,'policy':policy_data,'answerGuidanceSha256':GUIDANCE_SHA256})
+    prefix = 'sue-review-v1.4-' if constrained_json else 'sue-review-v1.2-'
+    identity = {'engine':caps,'policy':policy_data,'answerGuidanceSha256':GUIDANCE_SHA256}
+    if constrained_json:
+        identity['groundingGuidanceSha256'] = GROUNDING_SHA256
+    version = prefix + digest(identity)
 
     def validate(output, context):
         try:
@@ -135,6 +141,8 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
             'Distinguish stated, inferred and assumed premises; disclose missing support. '
             'Do not select another question, policy, identity or tool. No Markdown fences.'
             '\n\n' + CANONICAL_GUIDANCE)
+    if constrained_json:
+        body += '\n\n' + GROUNDING_GUIDANCE
     agents = {f'answer-{n:02}':ProsaicArtifact(f'sue/answer-{n:02}','subagent',
                 {'name':f'sue-answer-{n:02}','description':'Advisory source interpretation','tools':[]},body)
               for n in range(1,settings.max_turns+1)}
