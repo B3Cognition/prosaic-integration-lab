@@ -56,7 +56,7 @@ def _sources():
 
 
 def _exercise(case, kind, *, malformed_judge=False):
-    from prosaic_harness import RevisionConflict
+    from prosaic_harness import RevisionConflict, RunNotFound
     from prosaic_runtime import EndpointConfig, RuntimeConfig
     from lab_runner.requirements_review_v1.fixtures import provider
     from prosaic_integration_lab.castle_jobs import CastleJobError, CastleJobSession
@@ -86,13 +86,22 @@ def _exercise(case, kind, *, malformed_judge=False):
         config = RuntimeConfig({'fixture':EndpointConfig(url, 'requirements-fixture-v1',
             features={'streaming':False})}, {}, 'fixture', allowed_tools=frozenset())
         jobs = CastleJobSession({'enabled':True}, store, config, owner, namespace, accounting=recorder)
+        if kind == 'entity_refinement':
+            invalid_id = uuid.uuid4().hex
+            invalid_options = deepcopy(options)
+            invalid_options['entities'][0]['contexts'][0]['quote'] = 'Invented context absent from the frozen source.'
+            with pytest.raises(CastleJobError, match='entity_context_mismatch'):
+                jobs.start(invalid_id, **invalid_options)
+            with pytest.raises(RunNotFound):
+                store.load_run(invalid_id)
+            assert calls == [] and recorder.calls(run_id=invalid_id) == []
         waiting = jobs.start(run_id, **options)
         assert waiting['status'] == 'waiting' and waiting['attempts'] == 0
         assert calls == [] and recorder.calls(run_id=run_id) == []
         frozen = deepcopy(store.load_run(run_id).state['inputs']['candidates'])
         assert [s['text'].encode() for s in frozen] == [s['text'].encode() for s in retained]
         assert [s['provenance'] for s in frozen] == [s['provenance'] for s in retained]
-        sources[0]['text'] = 'Changed caller-owned object after admission.'
+        sources[0]['text'] += 'Changed caller-owned object after admission.'
         sources[0]['revision'] = 'changed'
         sources[0]['provenance']['record_id'] = 'changed'
         with pytest.raises(CastleJobError, match='job_request_conflict'):
