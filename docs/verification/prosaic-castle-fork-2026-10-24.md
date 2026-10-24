@@ -89,7 +89,7 @@ python -m pytest -q tests/unit tests/functional tests/sue_review tests/requireme
 python -I -m lab_runner.prosaic_castle_fixture --enable --postgres-version 16 ...
 python -I -m lab_runner.prosaic_castle_fixture --enable --postgres-version 18 ...
 python -I -m lab_runner.requirements_review_v1 --fixture --output NEW_DIRECTORY
-python -I -m lab_runner.requirements_review_v1 --replay SAME_DIRECTORY
+python -I -m lab_runner.requirements_review_v1 --replay --output SAME_DIRECTORY
 ```
 
 The [user guide](../prosaic-castle.md#maintainer-qualification-command) gives the
