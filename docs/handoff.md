@@ -11,7 +11,8 @@ conversation/production checks; public Lab2132passed, absent-package105,
 installed constrained PG16/18 six cases each and unchanged memory76each;
 fixture24/24 and zero-call offline replay. Qwen7B24cells: direct4/8 strict,
 critic3/8, SUE0/8 (3completed). All16 SUE replies are plain schema-valid JSON;
-13fail because SILENT still cites evidence,3stop at one-turn APORIA_UNDEFINED.
+13fail grounding (11SILENT answer citations,2premise citations outside an empty
+answer-evidence set);3stop at one-turn APORIA_UNDEFINED.
 All43requests/49467tokens reconcile, zero new unknowns. Closed general SDK
 profiles reject the unpublished candidate; they were not weakened. Memory/SUE
 remain disabled. Preserve all failed archives and charged reservations; no

@@ -147,8 +147,9 @@ Warning header; source file hashes and observed headers are retained. This is
 endpoint evidence for this pilot, not a universal guarantee of logit enforcement
 or provider correctness. Client-side validation remains mandatory.
 
-All16 replies choose `UNKNOWN` with `SILENT`. Thirteen nevertheless cite answer
+All16 replies choose `UNKNOWN` with `SILENT`. Eleven nevertheless cite answer
 evidence, violating the unchanged requirement that `SILENT` has empty evidence.
+Two others cite stated premises outside their empty answer-evidence set.
 All13 are rejected; no citations are discarded to make them pass. Three retries
 produce acceptable empty-evidence responses and stop at **one DEFINE turn** with
 `APORIA_UNDEFINED`. They demonstrate no sustained multi-turn examination and
