@@ -19,6 +19,12 @@ a valid output left by a timed-out process does not count as success.
 
 ## Repeated unified CLI pool study
 
+The configurable `unified-benchmark --local-timeout` described here is an
+unreleased change after Lab 0.6.1. Published 0.6.1 accepts only 180s; the
+[240s study](verification/unified-cli-lab061-local240-2026-10-25.md) used a
+private deadline-only driver with unmodified installed packages. Use this
+checkout or a build containing this change for the configurable command.
+
 Prepare and audit the pinned public Runtime 0.9.8 environment using the
 [released-wheel guide](unified-runtime-pools.md#released-wheel-validation).
 Copy the native and local [example profiles](../configs/README.md), choose
@@ -33,7 +39,7 @@ RELEASED_SHA=$("$LAB_PY" -c 'import hashlib; print(hashlib.sha256(open("dependen
   --manifest dependencies/releases.json \
   --wheel-dir "$PWD/.cache/wheels/$RELEASED_SHA" \
   --runtime-config /private/native.yml --local-config /private/local.yml \
-  --repetitions 3 --timeout 60 --local-timeout 180 --live \
+  --repetitions 3 --timeout 60 --live \
   --output /private/new-unified-benchmark-results
 ```
 
@@ -45,8 +51,16 @@ state order rotate across trials. Every assignment starts in a fresh workspace;
 an existing output directory fails rather than resetting accounting. The output
 parent must already exist. Keep each study's private evidence and allowance.
 
-Native deadlines stay at 60 seconds, local/API at 180, and the total pool ceiling
-is 300 seconds to accommodate pre-work fallback. Explicit invocation authority is
+Omitting `--local-timeout` keeps the local/API deadline at **180 seconds**.
+Set `--local-timeout 240` for a 240s local deadline. Finite values from 1 through
+300 seconds are accepted; invalid values fail before readiness, report creation
+or allowance reservation. The selected deadline is retained in the plan,
+individual samples and report limitations. The separate `realistic` command
+still requires 180s.
+
+Native deadlines stay at 60 seconds and the total pool ceiling remains 300
+seconds. The local deadline cannot extend that total, including time spent on
+pre-work fallback. Explicit invocation authority is
 native workspace-write plus API read/write/edit with a workspace read root and
 exact output write path. Caps are three profile attempts, two native attempts,
 eight API requests, seven API tools, eight rounds and 65,536 API reported tokens.
@@ -62,7 +76,7 @@ without automatically retrying an uncertain assignment. Native Codex effort is
 an explicit operator profile choice; the recorded study used `low`.
 
 For ThinkingCap/oMLX, the recorded profile disables extended thinking to allow
-normal tool use and final-response completion within 180 seconds. Prepare a new
+normal tool use and final-response completion within the selected deadline. Prepare a new
 private base without modifying shared settings:
 
 ```sh
@@ -94,7 +108,13 @@ is uncontrolled. Do not infer a p95 or general model ranking from three trials.
 Native/API tools and prompts differ, and historical candidate versions differ;
 timing differences do not isolate CLI overhead.
 
-Two [released Runtime 0.9.8 studies](verification/unified-cli-released-2026-10-24.md)
+The [Lab 0.6.1 / Runtime 0.9.8 240s study](verification/unified-cli-lab061-local240-2026-10-25.md)
+passed all 27 assignments, with medians of Claude 10.86s, Codex 21.73s and local
+62.37s. All local runs completed within 180s, so the extra timeout did not rescue
+any timeout. Its private driver delta is separate from this configurable CLI
+implementation; no new model calls were made to validate this code change.
+
+Two earlier [released Runtime 0.9.8 studies](verification/unified-cli-released-2026-10-24.md)
 each passed 27/27 assignments, with zero timeouts and 27 controlled cooldown
 skips per study. Their comparison retains the exact release provenance,
 per-model/task medians and ranges, allowance reconciliation and cleanup.

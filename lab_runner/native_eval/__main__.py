@@ -31,17 +31,21 @@ def main(argv=None):
     parser.add_argument('--max-native-attempts', type=int)
     parser.add_argument('--timeout', type=float, default=60)
     parser.add_argument('--local-timeout', type=float,
-                        help='local API deadline: compare 1..300 seconds; realistic requires 180')
+                        help='local API deadline: compare and unified-benchmark accept 1..300 seconds; '
+                             'unified-benchmark defaults to 180; realistic requires 180')
     args = parser.parse_args(argv)
     if args.repetitions is None:
         args.repetitions = 1 if args.command == 'compare' else 3
     try:
         if args.local_timeout is not None and args.command not in ('compare','realistic','unified-benchmark'):
-            raise ValueError('--local-timeout applies only to compare or realistic')
+            raise ValueError('--local-timeout applies only to compare, realistic or unified-benchmark')
         if args.command in ('live', 'compare', 'realistic', 'unified-benchmark') and not args.live:
             raise ValueError('live execution requires explicit --live and a native-attempt allowance')
         if args.command == 'unified-benchmark' and (args.max_native_attempts is not None or args.selector):
             raise ValueError('unified benchmark uses fixed profile selection and attempt budgets; pilot flags are unsupported')
+        if args.command == 'unified-benchmark':
+            from .compare import resolve_local_timeout
+            args.local_timeout = resolve_local_timeout(args.local_timeout, default=180)
         if args.command == 'prepare':
             from .candidate import curate
             if not all((args.runtime_wheel, args.runtime_sha256, args.runtime_commit,

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Make the unified benchmark's `--local-timeout` configurable within 1–300
+  seconds, retaining the 180s default, fixed native/pool deadlines and existing
+  grants/budgets. Record the selected deadline in plans, samples and reports.
+- Document the audited Lab 0.6.1 / Runtime 0.9.8 240s study: 27/27 successes,
+  unchanged Markdown/inputs, 27 controlled skips and zero provider-triggered
+  fallbacks. The study used a disclosed private deadline-only driver because
+  published Lab 0.6.1 fixes the local deadline at 180s.
+
 ## 0.6.1 — 2026-10-25
 
 - Package the SDK payload auditor so the installed native/unified evaluation CLI

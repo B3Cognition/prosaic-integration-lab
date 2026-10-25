@@ -15,6 +15,11 @@ cooldowns and no partial-work replay, with verified cleanup and zero live calls.
 The 0.6.0 Runtime API/CLI examples and extracted-source commands retain their
 original qualification; historical model measurements are unchanged.
 
+The later [240s local-deadline live study](verification/unified-cli-lab061-local240-2026-10-25.md)
+passed 27/27 assignments with the same Markdown and inputs. Its private driver
+override is disclosed separately from the unreleased configurable benchmark CLI
+in the [current recipe](realistic-runtime-benchmark.md).
+
 ## Configuration and invocation
 
 The original native and local configuration files stay separate. Create a

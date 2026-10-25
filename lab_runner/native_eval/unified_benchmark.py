@@ -13,7 +13,7 @@ import time
 
 from lab_runner.live_allowance import SharedLiveAllowance
 from .cases import SOURCE
-from .compare import validate_local_config
+from .compare import resolve_local_timeout, validate_local_config
 from .live import preflight
 from .realistic import summary, _private_json, check_local_readiness
 from .realistic_cases import CASE_IDS, OUTPUTS, prepare, grade
@@ -24,12 +24,13 @@ EXCLUDED = {'all-eligible': (), 'claude-cooling': ('claude',),
             'native-cooling': ('claude', 'codex')}
 
 
-def plan(repetitions):
+def plan(repetitions, *, local_timeout_s=180):
     if type(repetitions) is not int or not 1 <= repetitions <= 3:
         raise ValueError('repetitions must be 1..3')
+    local_timeout_s = resolve_local_timeout(local_timeout_s, default=180)
     return {'assignments': 9 * repetitions, 'maximumDispatchUnits': 81 * repetitions,
             'repetitions': repetitions, 'nativeTimeoutSeconds': 60,
-            'localTimeoutSeconds': 180, 'poolTimeoutSeconds': 300}
+            'localTimeoutSeconds': local_timeout_s, 'poolTimeoutSeconds': 300}
 
 
 def schedule(repetitions):
@@ -94,12 +95,13 @@ def summarize(rows):
     return r
 
 
-def cli_command(config, case, workspace):
+def cli_command(config, case, workspace, *, local_timeout_s=180):
+    local_timeout_s = resolve_local_timeout(local_timeout_s, default=180)
     return [sys.executable, '-I', '-m', 'prosaic_runtime.cli', f'subagents/{case}.md',
         '--source', str(SOURCE), '--config', str(config), '--cwd', str(workspace), '--events', '--quiet',
         '--timeout', '300', '--max-attempts', '3', '--max-native-attempts', '2',
         '--native-permissions', 'workspace-write', '--native-timeout', '60',
-        '--enable-api', '--api-timeout', '180', '--max-api-requests', '8',
+        '--enable-api', '--api-timeout', str(local_timeout_s), '--max-api-requests', '8',
         '--max-api-tool-calls', '7', '--max-tool-rounds', '8', '--max-api-reported-tokens', '65536',
         '--allow-tool', 'read_file', '--allow-tool', 'write_file', '--allow-tool', 'edit_file',
         '--read-root', str(workspace), '--write-path', str(workspace / OUTPUTS[case])]
@@ -143,9 +145,8 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
                           live=False, repetitions=3, local_timeout_s=180):
     if live is not True:
         raise ValueError('explicit live opt-in required')
-    experiment = plan(repetitions)
-    if local_timeout_s != 180:
-        raise ValueError('local deadline must remain 180 seconds')
+    experiment = plan(repetitions, local_timeout_s=local_timeout_s)
+    local_timeout_s = experiment['localTimeoutSeconds']
     if output is None or native_config is None or local_config is None:
         raise ValueError('explicit output, native and local configuration paths required')
     sdk = require_unified()
@@ -208,7 +209,7 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
                 'passed': False, 'completed': False, 'attempts': [], 'events': [],
                 'durationMs': 0,
                 'artifactSha256': _sha(SOURCE / f'subagents/{case}.md'), 'selectedProfile': None,
-                'localTimeoutSeconds': 180, 'nativeTimeoutSeconds': 60, 'poolTimeoutSeconds': 300}
+                'localTimeoutSeconds': local_timeout_s, 'nativeTimeoutSeconds': 60, 'poolTimeoutSeconds': 300}
             try:
                 with controlled_capacity(capacity, quotas, EXCLUDED[state]) as control:
                     row['capacityControl'] = control
@@ -218,7 +219,8 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
                         inputs = {p.name: _sha(p) for p in workspace.iterdir()}
                         row['inputSha256'] = hashlib.sha256(json.dumps({'body': artifact.body, 'inputs': inputs}, sort_keys=True).encode()).hexdigest()
                         with assignment_latency(row):
-                            result, events = _invoke(cli_command(config_path, case, workspace))
+                            result, events = _invoke(cli_command(config_path, case, workspace,
+                                local_timeout_s=local_timeout_s))
                         info = result['metadata']['unified_execution_v1']
                         native_count, api_count = info['native_attempts'], info['api_provider_requests']
                         if native_count is not None and api_count is not None:
@@ -253,6 +255,7 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
                 interrupted = True
                 break
     finally:
+        timeout_label = int(local_timeout_s) if local_timeout_s == int(local_timeout_s) else local_timeout_s
         same = all(len({(r['artifactSha256'], r.get('inputSha256')) for r in rows if r['case'] == case}) <= 1 for case in CASE_IDS)
         stable = all(_sha(path) == digest for path, digest in frozen.items())
         report = {'suiteVersion': 'unified-cli-realistic-v1', 'origin': 'live_repeated_unified_cli',
@@ -263,7 +266,7 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
             'allowance': allowance.status(), 'allowanceUnit': 'native_cli_attempt_or_api_request',
             'providerQuotaExhaustionInduced': False, 'cleanup': 'verified' if not list(root.glob('workspace-*')) else 'failed',
             'provenance': provenance, 'limitations': ['Three trials per task and availability state.',
-                'Native 60s, local 180s, pool total 300s.', 'Controlled skips differ from provider-triggered fallback.',
+                f'Native 60s, local {timeout_label}s, pool total 300s.', 'Controlled skips differ from provider-triggered fallback.',
                 'No concurrent test load or deliberate warmup; cache and host state uncontrolled.',
                 'Native provider loops opaque; factual contracts graded, prose quality ungraded.']}
         _private_json(root / 'report.json', report)

@@ -30,6 +30,38 @@ def test_explicit_live_opt_in_precedes_files_or_dispatch(tmp_path):
     assert not (tmp_path/'run').exists()
 
 
+@pytest.mark.parametrize('value,expected', [(None, 180), (1, 1), (180, 180),
+    (240, 240), (240.5, 240.5), (300, 300)])
+def test_plan_records_bounded_local_timeout_without_expanding_authority(value, expected):
+    from lab_runner.native_eval.unified_benchmark import plan
+    result = plan(3, local_timeout_s=value)
+    assert result == {'assignments': 27, 'maximumDispatchUnits': 243, 'repetitions': 3,
+        'nativeTimeoutSeconds': 60, 'localTimeoutSeconds': expected, 'poolTimeoutSeconds': 300}
+
+
+@pytest.mark.parametrize('value', [True, False, 0, -1, 300.1,
+    float('nan'), float('inf'), float('-inf'), '240'])
+def test_invalid_local_timeout_refuses_before_readiness_files_or_allowance(value, tmp_path, monkeypatch):
+    from lab_runner.native_eval import unified_benchmark as benchmark
+    def forbidden_sdk():
+        raise AssertionError('invalid timeout reached SDK readiness')
+    monkeypatch.setattr(benchmark, 'require_unified', forbidden_sdk)
+    with pytest.raises(ValueError, match='local timeout'):
+        benchmark.run_unified_benchmark(native_config=None, local_config=None,
+            output=tmp_path / 'run', provenance={}, live=True, local_timeout_s=value)
+    assert not (tmp_path / 'run').exists()
+
+
+def test_cli_command_applies_selected_local_timeout_with_fixed_native_pool_and_budgets(tmp_path):
+    from lab_runner.native_eval.unified_benchmark import cli_command
+    command = cli_command(tmp_path / 'unified.json', 'invoice-sql', tmp_path, local_timeout_s=240)
+    expected = {'--api-timeout': '240', '--native-timeout': '60', '--timeout': '300',
+        '--max-attempts': '3', '--max-native-attempts': '2', '--max-api-requests': '8',
+        '--max-api-tool-calls': '7', '--max-tool-rounds': '8', '--max-api-reported-tokens': '65536',
+        '--native-permissions': 'workspace-write', '--write-path': str(tmp_path / 'report.sql')}
+    assert {flag: command[command.index(flag) + 1] for flag in expected} == expected
+
+
 @pytest.mark.parametrize('flags',[['--max-native-attempts','0'],['--selector','claude']])
 def test_benchmark_cli_rejects_pilot_flags_instead_of_ignoring_authority(flags,capsys,monkeypatch):
     from lab_runner.native_eval.__main__ import main
@@ -38,6 +70,18 @@ def test_benchmark_cli_rejects_pilot_flags_instead_of_ignoring_authority(flags,c
     monkeypatch.setattr(provenance,'audit_candidate',forbidden_audit)
     assert main(['unified-benchmark','--live','--manifest','unused','--wheel-dir','unused']+flags)==2
     assert json.loads(capsys.readouterr().err)=={'error':'native_eval_setup_failed'}
+
+
+@pytest.mark.parametrize('value', ['0', '301', 'nan', 'inf'])
+def test_cli_rejects_invalid_local_timeout_before_sdk_audit(value, capsys, monkeypatch):
+    from lab_runner.native_eval.__main__ import main
+    from lab_runner.native_eval import provenance
+    def forbidden_audit(*args):
+        raise AssertionError('invalid local timeout reached SDK audit')
+    monkeypatch.setattr(provenance, 'audit_candidate', forbidden_audit)
+    assert main(['unified-benchmark', '--live', '--manifest', 'unused', '--wheel-dir', 'unused',
+                 '--local-timeout', value]) == 2
+    assert json.loads(capsys.readouterr().err) == {'error': 'native_eval_setup_failed'}
 
 
 def test_summary_counts_fallback_attempts_and_skips_separately():

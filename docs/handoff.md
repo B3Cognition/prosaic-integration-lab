@@ -1,5 +1,21 @@
 # Codex handoff
 
+## Configurable local benchmark deadline — 2026-10-25
+
+The maintainer authorized configurable unified benchmark local timeouts, tests,
+documentation, commit and PR preparation. `--local-timeout` now accepts finite
+1–300s values with a 180s default, retained in command arguments and receipts.
+Native60s/pool300s, all grants/budgets, tasks and inputs remain unchanged. This
+feature is not in the immutable 0.6.1 archives; no patch release is published here.
+
+The [240s study ledger](verification/unified-cli-lab061-local240-2026-10-25.md)
+records 27/27 successes using released Lab 0.6.1 / Runtime 0.9.8 and a private
+deadline-only driver. Audits paired all 27 input/Markdown hashes, regraded 54
+current/prior outputs and reconciled 45 known mixed units. Cleanup restored
+native marks, preserved the local bucket's original unknown state and stopped
+only the owned server. That absent capacity record is separate from the zero
+unknown dispatch reservations. Preserve all private and historical evidence.
+
 ## Lab 0.6.1 released and verified — 2026-10-25
 
 [PR #30](https://github.com/B3Cognition/prosaic-integration-lab/pull/30) merged as
