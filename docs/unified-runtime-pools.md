@@ -17,7 +17,7 @@ original qualification; historical model measurements are unchanged.
 
 The later [240s local-deadline live study](verification/unified-cli-lab061-local240-2026-10-25.md)
 passed 27/27 assignments with the same Markdown and inputs. Its private driver
-override is disclosed separately from the unreleased configurable benchmark CLI
+override is disclosed separately from the Lab 0.6.2 configurable benchmark CLI
 in the [current recipe](realistic-runtime-benchmark.md).
 
 ## Configuration and invocation

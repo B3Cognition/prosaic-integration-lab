@@ -19,11 +19,11 @@ a valid output left by a timed-out process does not count as success.
 
 ## Repeated unified CLI pool study
 
-The configurable `unified-benchmark --local-timeout` described here is an
-unreleased change after Lab 0.6.1. Published 0.6.1 accepts only 180s; the
+The configurable `unified-benchmark --local-timeout` described here requires
+[Lab 0.6.2](release-0.6.2.md) or later. Published 0.6.1 accepts only 180s; the
 [240s study](verification/unified-cli-lab061-local240-2026-10-25.md) used a
 private deadline-only driver with unmodified installed packages. Use this
-checkout or a build containing this change for the configurable command.
+release's wheel or source archive for the configurable command.
 
 Prepare and audit the pinned public Runtime 0.9.8 environment using the
 [released-wheel guide](unified-runtime-pools.md#released-wheel-validation).
