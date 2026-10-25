@@ -31,31 +31,31 @@ Consumes publicTask and existing v3 artifacts/schemas; produces
 build_canonical_workflow(config,limits=None), project_canonical, source_lines,
 candidate_messages and IndependentReview.from_critic_harness(task,harness).
 
-- [ ] Write/watch failing tests for critic→final binding/capture, no-advice scopes,
+- [x] Write/watch failing tests for critic→final binding/capture, no-advice scopes,
   strict schema/provenance, numbered CRLF/multiple sources and candidate isolation.
-- [ ] Implement v5 preserving v3 topology, unchanged schemas and bounded retries.
+- [x] Implement v5 preserving v3 topology, unchanged schemas and bounded retries.
   Add only case-neutral evidence guidance, source addresses and public grammar.
-- [ ] Verify real public SDK fixture calls, invalid attempts, durable recovery and
+- [x] Verify real public SDK fixture calls, invalid attempts, durable recovery and
   zero-call resume; reject forged binding/output/input and changed source identity.
-- [ ] Run old/new focused tests and full default pytest suite; commit locally.
+- [x] Run old/new focused tests and full default pytest suite; commit locally.
 
 ## Task 2 — Frozen installed comparison
 
 Scratch: /private/tmp/prosaic-sue-canonical-critic-20261025.
 
-- [ ] Build/rebuild wheel/sdist, prove source and installed payload identity in a
+- [x] Build/rebuild wheel/sdist, prove source and installed payload identity in a
   new environment without modifying any previous wheel/environment.
-- [ ] Adapt prior schedule to new canonical critic vs unchanged v3 control; test
+- [x] Adapt prior schedule to new canonical critic vs unchanged v3 control; test
   fixtures, dependency reuse, grammar/wire joins, unknown and aggregate limits.
-- [ ] Review before live dispatch, freeze all measured inputs/scripts and prior
+- [x] Review before live dispatch, freeze all measured inputs/scripts and prior
   evidence, then run exactly the same Qwen/scorer conditions serially.
-- [ ] Offline audit receipts, scopes, raw attempts, immutable finals and usage;
+- [x] Offline audit receipts, scopes, raw attempts, immutable finals and usage;
   report failed outcomes without retrying/tuning after seeing live results.
 
 ## Task 3 — Evidence and disposition
 
-- [ ] Seal a new archive and reverify all historic evidence and unknown reservation.
-- [ ] Record tests, actual quality/cost, clean/citation results, remaining failures
+- [x] Seal a new archive and reverify all historic evidence and unknown reservation.
+- [x] Record tests, actual quality/cost, clean/citation results, remaining failures
   and controlled-comparison limitations; update handoff and commit locally.
 
 User explicitly requested implementation and rerun; native execution continues
@@ -63,9 +63,9 @@ without another design approval. Any measured semantic failure stays evidence,
 not a reason to relax assertions or silently change the frozen run.
 
 Execution status: Tasks1–3 and the necessary second frozen qualification below
-are mechanically complete. Their original checkboxes describe the pre-execution
-plan; measured semantic acceptance remains FAILED, not waived. Both runs and all
-failed outcomes are sealed. See verification/sue-canonical-critic-2026-10-25.md.
+are mechanically complete. Completed checkboxes record implementation and measurement;
+measured semantic acceptance remains FAILED, not waived. Both runs and all
+failed outcomes are sealed. See ../../verification/sue-canonical-critic-2026-10-25.md.
 
 ## Necessary second frozen qualification
 
@@ -75,13 +75,13 @@ and spurious contradictions/ordinary-connective findings. Preserve this run and
 its original audit failure; reconcile preparation failures with separate offline
 auditors rather than editing the frozen scripts.
 
-- [ ] Watch a >16 KB, <256 KB raw-handoff regression fail, then fix decoding to
+- [x] Watch a >16 KB, <256 KB raw-handoff regression fail, then fix decoding to
   the existing input ceiling and retain rejection above 256 KB after composition.
-- [ ] Version the opt-in profile separately; clarify the existing public rules:
+- [x] Version the opt-in profile separately; clarify the existing public rules:
   absence of enforcement is not negation, absence findings cite trigger plus
   supplied gap, logical connectives are not business terms, subjective acceptance
   criteria differ from missing failure behavior. No fixture IDs/answer imports.
-- [ ] Rerun source/installed checks, full default suite and same frozen 138-cell
+- [x] Rerun source/installed checks, full default suite and same frozen 138-cell
   comparison in a fresh directory/environment. Preserve the first profile/wheel,
   all failed outcomes and every prior reservation. Do not tune during either run.
 
@@ -97,5 +97,5 @@ auditors rather than editing the frozen scripts.
   additional provenance rejections. Replay is network-denied and makes no calls.
 - [x] Verify43 installed review tests,4 released-SDK protection tests and2033
   full default tests; direct/sdist-rebuilt payloads and installed sources match.
-- [ ] Seal final mechanics evidence and update handoff; keep defaults off and
+- [x] Seal final mechanics evidence and update handoff; keep defaults off and
   semantic quality changes experimental. No push or release.

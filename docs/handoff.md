@@ -1,5 +1,35 @@
 # Codex handoff
 
+## Existing critic protected; generation quality still unqualified — 2026-10-25
+
+[Verification](verification/sue-canonical-critic-2026-10-25.md): use explicit
+`build_protected_critic_workflow` for the existing critic's unchanged native
+generation, then public-Harness sealed canonical capture. SUE candidates remain
+separate and cannot replace it. Memory/SUE defaults remain off. Protection-only
+code commit02a8007 is local. The separately named `build_canonical_workflow` is
+the experimental generation profile; do not adopt it on current evidence.
+
+Full default2033, installed review43 and released-SDK protection4 tests pass.
+Network-denied replay matches103 native requests and55 final validations, zero
+extra provenance rejections; no fresh live protection-only quality claim.
+Direct/sdist-rebuilt223 member payloads and191 Python sources match.
+
+Two frozen138-cell Qwen comparisons are preserved. Latest:189requests/363492
+tokens, experimental13/24 vs unchanged critic11/24, no new unknowns/overruns.
+Raw-handoff16KB/256KB mismatch is fixed, all six affected handoffs complete.
+Clean07 remains1/3; case02 citation completeness and03/05 categories still fail.
+Case08 exact citation now3/3. Semantic fix request remains incomplete. All90
+canonical invariants hold; advisory63/90 vs matched canonical70/90, with no
+incremental saved-advice quality benefit. No fresh SUE generation or general
+inferiority/significance claim. Next: isolate grammar on/off before further
+generation changes, preserving prompts and saved critic context.
+
+Final mechanics archive:castle-sue-protected-existing-20261025,190files, manifest
+SHA256 e4320e6945220ee1115f3a188347b2ac3801841fd91087ab69647f999a9b23e5.
+Both failed-generation archives, all14 prior archives/8842files and the original
+unknown30request/65536token reservation reverify unchanged. No SDK changes,
+push, merge, release, default enablement or new PostgreSQL/native qualification.
+
 ## Protected review and paired handoffs completed — 2026-10-25
 
 [Verification](verification/sue-protected-2026-10-25.md): explicit v4 source-only
