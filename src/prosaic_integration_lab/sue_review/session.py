@@ -9,10 +9,11 @@ from .sources import freeze_documents, verify_frozen
 
 
 class SueReviewSession:
-    def __init__(self, settings, store, config, principal, namespace, accounting=None, *, clock=None, constrained_json=False):
-        if type(constrained_json) is not bool:
+    def __init__(self, settings, store, config, principal, namespace, accounting=None, *, clock=None, constrained_json=False, cycle_guard=False):
+        if type(constrained_json) is not bool or type(cycle_guard) is not bool:
             raise ReviewError('invalid_review_settings')
         self.constrained_json = constrained_json
+        self.cycle_guard = cycle_guard
         self.settings = settings if type(settings) is ReviewSettings else ReviewSettings.from_mapping(settings)
         if not reference(namespace) or any(not reference(getattr(principal,n,None)) for n in ('tenant_id','actor_id','billing_account_id')):
             raise ReviewError('invalid_review_owner')
@@ -41,16 +42,19 @@ class SueReviewSession:
         engine = load_engine(expected_engine)
         policy = dict(policy)
         constrained_json = policy.pop('constrained_json', False)
+        cycle_guard = policy.pop('cycle_guard', False)
+        task_context = policy.pop('task_context', False)
         settings = ReviewSettings.from_mapping({'enabled':True,**policy})
         workflow = build_review_workflow(config=self.config,settings=settings,engine=engine,
-                                         constrained_json=constrained_json)
+                                         constrained_json=constrained_json,cycle_guard=cycle_guard,
+                                         task_context=task_context)
         options = {'clock':self.clock} if self.clock is not None else {}
         return Harness(workflow,store=self.store,run_id=run_id,accounting=self.accounting,
                context=ExecutionContext(application_id='integration-lab-sue-review',project_id=self.namespace,
                     tenant_id=self.principal.tenant_id,actor_id=self.principal.actor_id,
                     billing_account_id=self.principal.billing_account_id,request_id=run_id),**options)
 
-    def start(self, run_id, *, seed, sources, lens='euthyphro', max_turns=14):
+    def start(self, run_id, *, seed, sources, lens='euthyphro', max_turns=14, review_context=None):
         if not self.settings.enabled:
             raise ReviewError('review_disabled')
         from prosaic_harness import RunNotFound
@@ -68,8 +72,15 @@ class SueReviewSession:
         policy = {k:v for k,v in asdict(self.settings).items() if k!='enabled'}
         if self.constrained_json:
             policy['constrained_json'] = True
+        if self.cycle_guard:
+            policy['cycle_guard'] = True
+        context = {}
+        if review_context is not None:
+            from .context import freeze_context
+            context['reviewContext'] = freeze_context(review_context)
+            policy['task_context'] = True
         policy['engine_identity'] = caps['engineIdentity']['digest']
-        request = own({'seed':seed,'lens':lens,'maxTurns':max_turns,'evidence':frozen,'engine':caps,'reviewPolicy':policy})
+        request = own({'seed':seed,'lens':lens,'maxTurns':max_turns,'evidence':frozen,'engine':caps,'reviewPolicy':policy,**context})
         request['requestSignature'] = digest(request)
         try:
             saved = self._owned(run_id)
@@ -118,7 +129,8 @@ class SueReviewSession:
                     'sourcesSha256':request['evidence']['sourcesSha256'],
                     'sources':[{'sourceId':s['sourceId'],'textSha256':s['textSha256'],
                                 'revision':s['revision'],'reference':s['reference']} for s in request['evidence']['sources']],
-                    'policy':request['reviewPolicy']})
+                    'policy':request['reviewPolicy'],
+                    **({'reviewContextSha256':digest(request['reviewContext'])} if 'reviewContext' in request else {})})
 
     def resume(self, run_id, *, expected_revision, choice=None):
         if not self.settings.enabled:

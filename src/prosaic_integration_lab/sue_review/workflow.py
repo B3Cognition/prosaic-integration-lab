@@ -21,7 +21,8 @@ def initial(request, engine):
     verify_frozen(request['evidence'])
     if request['engine'] != engine.capabilities():
         raise ReviewError('engine_identity_mismatch')
-    return engine.initial_state(request['seed'], lens=request['lens'], max_turns=request['maxTurns'])
+    return engine.initial_state(request['seed'], lens=request['lens'], max_turns=request['maxTurns'],
+        **({'cycle_guard':True} if request.get('reviewPolicy',{}).get('cycle_guard') else {}))
 
 
 def fold_accepted(request, artifacts, *, before_step=None, engine):
@@ -59,6 +60,9 @@ def project_answer(artifact, arguments, *, execute, engine, constrained_json=Fal
     lines = source_lines(request['evidence'])
     grounding = {'groundingContext': {'sourceLineNumbers':list(range(1,len(lines)+1)),
                  'priorTurnNumbers':[turn['turn_no'] for turn in state['turns']]}} if constrained_json else {}
+    if request.get('reviewPolicy',{}).get('task_context'):
+        from .context import freeze_context
+        grounding['reviewContext'] = freeze_context(request['reviewContext'])
     projected = own({'question':engine.question(state),'responseSchema':engine.schema(state),
                      'seed':request['seed'],'state':state,
                      'sourceLines':[{'line':n,'text':line} for n,line in enumerate(lines,1)],
@@ -101,7 +105,7 @@ def project_answer(artifact, arguments, *, execute, engine, constrained_json=Fal
 
 
 
-def build_review_workflow(*, config, settings, engine, constrained_json=False):
+def build_review_workflow(*, config, settings, engine, constrained_json=False, cycle_guard=False, task_context=False):
     from prosaic_harness import Validator, WorkflowBindings, WorkflowCatalog, WorkflowFactory, WorkflowPolicy
     from prosaic_runtime import ProsaicArtifact, ProsaicRuntime, RuntimeAdapter
     from .guidance import CANONICAL_GUIDANCE, CANONICAL_SOURCE_SHA256, GUIDANCE_SHA256
@@ -110,7 +114,7 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
 
     if config.allowed_tools or config.tool_directories:
         raise ReviewError('review_requires_tool_free_runtime')
-    if type(constrained_json) is not bool:
+    if any(type(v) is not bool for v in (constrained_json,cycle_guard,task_context)):
         raise ReviewError('invalid_review_settings')
     if constrained_json and ('json_schema_v1' not in ProsaicRuntime.capabilities or
             config.profiles[config.default_profile].provider != 'openai-compatible'):
@@ -121,11 +125,20 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
     policy_data = {k:v for k,v in asdict(settings).items() if k != 'enabled'}
     if constrained_json:
         policy_data['constrained_json'] = True
+    if cycle_guard:
+        policy_data['cycle_guard'] = True
+    if task_context:
+        policy_data['task_context'] = True
     prefix = 'sue-review-v1.5-' if constrained_json else 'sue-review-v1.2-'
     identity = {'engine':caps,'policy':policy_data,'answerGuidanceSha256':GUIDANCE_SHA256}
     if constrained_json:
         identity['groundingGuidanceSha256'] = GROUNDING_SHA256
         identity['generationSchemaVersion'] = GENERATION_SCHEMA_VERSION
+    if cycle_guard or task_context:
+        prefix = 'sue-review-v1.6-'
+        from .context import CONTEXT_VERSION, CONTEXT_GUIDANCE
+        identity['contextVersion'] = CONTEXT_VERSION
+        identity['contextGuidanceSha256'] = text_digest(CONTEXT_GUIDANCE)
     version = prefix + digest(identity)
 
     def validate(output, context):
@@ -148,6 +161,8 @@ def build_review_workflow(*, config, settings, engine, constrained_json=False):
             '\n\n' + CANONICAL_GUIDANCE)
     if constrained_json:
         body += '\n\n' + GROUNDING_GUIDANCE
+    if task_context:
+        body += '\n\n' + CONTEXT_GUIDANCE
     agents = {f'answer-{n:02}':ProsaicArtifact(f'sue/answer-{n:02}','subagent',
                 {'name':f'sue-answer-{n:02}','description':'Advisory source interpretation','tools':[]},body)
               for n in range(1,settings.max_turns+1)}
