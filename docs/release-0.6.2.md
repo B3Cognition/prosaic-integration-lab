@@ -1,5 +1,13 @@
 # Integration Lab 0.6.2
 
+The [release is published](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.6.2).
+[Post-publication verification](verification/release-0.6.2-2026-10-25.md)
+records original qualified CI artifacts, checked public downloads and clean
+wheel/rebuilt-source installs using Runtime 0.9.8. Each passed 51 standalone
+fixtures and 3 deadline checks with cleanup verified and zero live model calls.
+This paragraph is a documentation follow-up; the immutable source archive
+preserves the release-preparation text below.
+
 Lab 0.6.2 makes `unified-benchmark --local-timeout` configurable within finite
 1–300 seconds, retaining the default of 180 seconds. Plans, per-sample receipts
 and report limitations preserve the selected deadline, including fractional

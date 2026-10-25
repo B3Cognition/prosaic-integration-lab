@@ -1,5 +1,15 @@
 # Current delivery status
 
+## Lab 0.6.2 published and verified — 2026-10-25
+
+The [0.6.2 release verification](verification/release-0.6.2-2026-10-25.md)
+records four green exact-source CI cells, original CI archives and verified
+public downloads. Clean public-wheel/rebuilt-source installs with Runtime 0.9.8
+each passed 51 standalone checks plus 3 deadline checks, including default 180s and
+explicit 240s, with cleanup verified and zero live model calls. The
+[guided quickstart](quickstart.md) and standalone first-workflow example are
+post-release onboarding additions in this checkout, not changes to released bytes.
+
 ## Configurable benchmark deadline and 240s study — 2026-10-25
 
 The unified benchmark now accepts a finite `--local-timeout` from 1–300s,

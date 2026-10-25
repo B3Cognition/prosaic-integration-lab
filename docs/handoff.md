@@ -1,5 +1,24 @@
 # Codex handoff
 
+## Guided ecosystem onboarding — 2026-10-25
+
+The maintainer approved a newcomer-oriented README, credential-free first run,
+fallback walkthrough, optional service/browser demo, real-model setup, benchmark
+and developer integration map. The [quickstart](quickstart.md) reuses released
+SDKs; `examples/first_workflow.py` only parses, admits and prepares, never executes.
+Unified browser pooling remains separate. The old README's operator/history
+material is retained in `reference-guide.md`, with original section anchors
+linked from the new README. [Local verification](verification/guided-onboarding-2026-10-25.md)
+passed 1,923 source tests, fresh setup, installed consumers and both service demos
+with cleanup verified; independent review is clean after fixing setup. Keep this
+follow-up local; no new release or live benchmark is authorized by onboarding work.
+
+Lab 0.6.2 is published at qualified source
+`b5773c33ba7305b92667c9874e4a8526c4394dd9`, with PR33 merged as 46a2d80.
+The [release ledger](verification/release-0.6.2-2026-10-25.md) records exact
+artifacts and both clean consumers' 54 checks. Preserve immutable release bytes,
+private receipts and all earlier benchmark/model evidence.
+
 ## Lab 0.6.2 release preparation — 2026-10-25
 
 The maintainer authorized releasing 0.6.2 with configurable local timeout and

@@ -1,4 +1,4 @@
-# Unreleased Runtime candidate. Copy all three example configs together privately.
+# Released Runtime 0.9.8. Copy all three example configs together privately.
 # Aliases and quota identities must be distinct unless they share a real quota.
 kind: unified
 native_config: native-runtime.example.yml
@@ -10,4 +10,4 @@ pools:
     profiles: [claude-main, codex-main, local-strong]
     cooldown_s: 300
 default_pool: agents
-capacity_file: ../runs/unified-capacity.json
+capacity_file: unified-capacity.json

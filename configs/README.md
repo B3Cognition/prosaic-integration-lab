@@ -1,6 +1,8 @@
 # Optional local inference
 
-For the unreleased unified pool candidate, copy `unified-runtime.example.yml`,
+For released Runtime 0.9.8 unified pools, start with the
+[guided model setup](../docs/quickstart.md#4-connect-real-models-explicit-opt-in).
+Copy `unified-runtime.example.yml`,
 `native-runtime.example.yml` and `runtime-comparison-local.example.yml` together
 into private operator storage. Adjust the native model/login paths and local
 model/authentication reference. Relative config references resolve from the
