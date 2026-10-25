@@ -32,7 +32,14 @@ The new engine candidate has a distinct content identity. Resume older reviews
 with their original pinned engine; a different installation must fail binding
 checks. Start a fresh review ID to opt into the new profile.
 
-**Live review quality remains unqualified.** A separate
+**Live review quality remains unqualified.** The latest
+[review-fix comparison](verification/sue-review-fixes-2026-10-25.md) measures all
+24 cells: direct passes 4/8, critic/author 5/8 and SUE 3/8. SUE uses 43% fewer
+tokens than the preceding run but loses one strict pass. Case 4 uses only 3,480
+tokens and still misses the failure-behavior issue. Strict validators retain
+all rejected outcomes and usage. Keep the new profile disabled for routine use.
+
+The preceding separate
 [360-second Qwen comparison](verification/sue-qwen360-2026-10-25.md) completed
 all24workflows: SUE passes4/8strict reviews, direct3/8, critic2/8. SUE uses about
 11.7times direct tokens; the14-turn case still fails the scorer. This one small

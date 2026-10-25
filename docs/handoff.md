@@ -1,5 +1,25 @@
 # Codex handoff
 
+## Optional SUE review fixes and rerun — 2026-10-25
+
+[Verification](verification/sue-review-fixes-2026-10-25.md): opt-in cycle guard,
+signed frozen review context, compact final advice, strict final consistency
+with bounded retries, and separate diagnostics are implemented and separately
+verified. Existing modes/defaults and canonical rules remain unchanged.
+Full default Lab 2033, installed 116, matrix 24/24 and PG16/18 six each pass.
+Legacy Castle has the same 131 failing/error IDs as its pre-change snapshot;
+it is not a green release gate. Independent review gap closed by three real
+held-out scripted session-to-final integrations; no model-quality claim.
+
+Fresh 360s Qwen comparison measures all24 cells:18 completed,5 final-blocked,
+1 SUE-blocked. Strict direct4/8, critic5/8, SUE3/8;54 requests/87,113tokens
+reconcile with zero new unknowns/overruns/tools. SUE tokens fall43% but lose
+case8's prior pass. Case4 uses3480tokens/22.483s and still misses failure
+behavior; case3 guard stops8turns at26822tokens. Keep SUE/memory disabled.
+All9prior archives/4078files and original unknown30/65536 reservation remain
+unchanged (old total49requests/90,345tokens). New evidence is separate; no push,
+publication, public candidate adoption or release qualification.
+
 ## Separate 360-second Qwen comparison completed — 2026-10-25
 
 [Qualification](verification/sue-qwen360-2026-10-25.md): same v1.5 candidate,
