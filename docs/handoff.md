@@ -1,5 +1,28 @@
 # Codex handoff
 
+## Controlled SUE comparisons completed — 2026-10-25
+
+[Diagnostic report](verification/sue-controlled-2026-10-25.md):108 samples,
+three repeats across saved-advice/guidance, source-derived focus/context and
+matched final-review instruction-role conditions.177requests/315,765tokens,
+zero new unknowns/tools/overruns;92 workflows complete,15 strict SUE-blocked
+and1 final schema-blocked remain failures.13 credential-free preflight checks
+pass; both network-denied audits reconcile all usage/frozen inputs/receipts.
+
+Case4 new reviewer without advice passes3/3, latest SUE advice0/3. Focused seeds
+pass0/18 with6/18 completed; they are not an adopted fix. Case8 injection removal
+passes3/3 in each role arm; canonical no-advice strict results remain0/3 each.
+Previous advice identifies contradiction6/6 in the handoff but every output
+fails the exact citation representation; no scorer relaxation or output repair.
+Original-engine replay revalidates44 accepted replies; original live runner
+untested. Keep SUE experimental and memory/SUE disabled by default.
+
+Evidence: `reports/castle-sue-controlled-20261025`,849 files, manifest SHA256
+`bbf249b270bd950d6e63e7bc28d09743ed7c952a6ba6e6fb04c7b803ea89d6c4`.
+All10 prior archives/4,577 files and original unknown30request/65,536token
+reservation remain unchanged. No product/SDK/pin/default changes, release,
+push or publication. Next recommendations are in the report; none implemented.
+
 ## Optional SUE review fixes and rerun — 2026-10-25
 
 [Verification](verification/sue-review-fixes-2026-10-25.md): opt-in cycle guard,
