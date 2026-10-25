@@ -1,5 +1,14 @@
 # Current delivery status
 
+## Lab 0.7.0 release preparation — 2026-10-25
+
+[Lab 0.7.0](release-0.7.0.md) packages Explorer and the guided onboarding merged
+in PR #34 (`0d22306`) after all four final-head CI cells passed. Runtime remains
+0.9.8 and the other SDK pins are unchanged. Qualify the versioned source again,
+publish its original CI artifacts, and verify public wheel/rebuilt-source clean
+installs, visual documentation, playback and bounded synthetic live controls.
+This checkpoint records preparation, not publication or a new model benchmark.
+
 ## Visual Explorer in this checkout — 2026-10-25
 
 [Explorer](explorer.md) adds bundled React Flow documentation, user/developer

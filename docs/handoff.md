@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Lab 0.7.0 release authorized — 2026-10-25
+
+The maintainer authorized releasing 0.7.0 with Explorer and verifying downloaded
+artifacts in clean installs using Runtime 0.9.8. PR #34 merged as `0d22306` after
+all four final-head CI cells passed. Qualify the versioned release source, retain
+and audit original CI wheel/source bytes, publish with checksums/provenance, and
+verify clean wheel and rebuilt-source consumers. Exercise the installed visual
+docs/playback, explicit live confirmation, fixed grants/budgets, actual installed
+Runtime CLI with owned synthetic responses, idempotency, cancellation and retained
+uncertainty. No real vendor inference or new benchmark is included. Preserve
+older releases, SDK pins and historical evidence.
+
 ## Explorer PR #34 CI review and merge gate — 2026-10-25
 
 The maintainer authorized fixing PR #34 and merging once all required checks

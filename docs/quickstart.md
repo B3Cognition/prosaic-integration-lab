@@ -6,10 +6,9 @@ model account, API key or local LLM. Step 3 adds Docker. Steps 4–5 explicitly
 invoke real models and can consume provider quota.
 
 Use a terminal on macOS or Linux; commands below use a POSIX shell. Windows
-shell and Docker host setup are not covered by this walkthrough. This guide and
-`examples/first_workflow.py` are post-0.6.2 additions in this checkout; the SDKs
-remain released packages. The published 0.6.2 archive has the standalone fixture
-and benchmark commands, but not this new first-workflow example.
+shell and Docker host setup are not covered by this walkthrough. Lab 0.7.0
+includes this guide, `examples/first_workflow.py` and Explorer; the SDKs remain
+released packages. Earlier 0.6.2 artifacts retain their original contents.
 
 ## Setup once
 
@@ -47,8 +46,8 @@ Prefer a visual walkthrough? Run `"$LAB_PY" -m lab_runner.explore` after setup.
 Start in **Documentation**, select a component, and switch between **User** and
 **Developer** explanations. **Simulation** plays eight illustrative scenarios
 without contacting models. The [Explorer guide](explorer.md) covers dedicated
-live controls, permissions and retained evidence. This is another post-0.6.2
-addition; it does not replace the separate chat/workflow service below.
+live controls, permissions and retained evidence. Explorer is included in 0.7.0;
+the chat/workflow service below remains separate.
 
 ## 1. Build your first workflow
 
