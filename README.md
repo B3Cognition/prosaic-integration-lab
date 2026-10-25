@@ -31,9 +31,12 @@ Start with [the consumer guide](docs/consume-native-workflows.md) for the API an
 host integration patterns. [Current delivery status](docs/current-status.md)
 records the exact qualified SDKs and release evidence.
 
-Lab **0.6.0** includes the unified pool examples and released Runtime 0.9.8
-benchmark docs. See the [release notes](docs/release-0.6.0.md) and
-[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.6.0)
+Lab **0.6.1** fixes the installed standalone evaluation CLI and retains the
+unified pool examples and released Runtime 0.9.8 benchmark docs. Clean public
+wheel and rebuilt-source installs each passed all 51 standalone checks. See the
+[release notes](docs/release-0.6.1.md),
+[clean-install verification](docs/verification/release-0.6.1-2026-10-25.md) and
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.6.1)
 for packages, checksums and exact-source verification. Earlier
 [Lab 0.5.0 artifacts](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.5.0)
 retain their original SDK pins and qualification.

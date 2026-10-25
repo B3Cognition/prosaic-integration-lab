@@ -1,11 +1,15 @@
 # Changelog
 
-## 0.6.1 — unreleased
+## 0.6.1 — 2026-10-25
 
 - Package the SDK payload auditor so the installed native/unified evaluation CLI
   works without repository scripts. Preserve the source audit command and strict
   tamper checks, and require all four installed fixture lanes in clean wheel and
   rebuilt-sdist qualification. SDK pins and historical release bytes are unchanged.
+- Verify the published wheel and rebuilt public source archive in clean installs
+  with Runtime 0.9.8: 51 standalone checks each, quota fallback/cooldowns and no
+  partial-work replay, verified cleanup and zero live provider calls. See the
+  [release verification](docs/verification/release-0.6.1-2026-10-25.md).
 
 ## 0.6.0 — 2026-10-24
 

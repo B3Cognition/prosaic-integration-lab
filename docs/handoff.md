@@ -1,15 +1,23 @@
 # Codex handoff
 
-## Standalone installed evaluation repair — 2026-10-24
+## Lab 0.6.1 released and verified — 2026-10-25
 
-Clean 0.6.0 wheel/source installs passed pool API and Runtime CLI fixtures, but
-the standalone Lab evaluation entry point failed with missing module `scripts`.
-The 0.6.1 patch candidate packages `prosaic_integration_lab.sdk_audit`, uses it
-from evaluation provenance and keeps `scripts/audit_install.py` as a compatible
-source wrapper. It declares the auditor's `packaging` runtime dependency and
-extends both installed-distribution gates to execute all four fixture commands
-with isolated Python. Existing audit function bodies, SDK pins, freezes and
-historical artifacts are unchanged. Do not replace the published 0.6.0 files.
+[PR #30](https://github.com/B3Cognition/prosaic-integration-lab/pull/30) merged as
+`4b0258f306b8fde91ef22aaf347d7113a1ed630c` after review and four green CI cells.
+The [0.6.1 release](release-0.6.1.md) publishes the original qualified wheel and
+source archive from run `40133039899`. Tag `v0.6.1` selects qualified source
+`73a071480f4399ddea52839f6836ccaa742e9a03`, whose tree matches the merge.
+
+The [verification ledger](verification/release-0.6.1-2026-10-25.md) records exact
+artifact hashes, 1,899 source tests per CI cell, 1,336 real-stack checks and
+post-publication clean installs. Public wheel and rebuilt-source consumers each
+passed all four standalone CLI lanes (51 checks each) using Runtime 0.9.8,
+without repository `scripts`. Quota fallback, persisted cooldowns, no partial
+replay, import ownership, installed payloads and cleanup passed; zero live calls.
+
+This documentation follow-up marks publication after the immutable source
+snapshot's pre-release changelog. Keep the released archives, tag, SDK pins,
+freezes, 0.6.0 artifacts and historical benchmark evidence unchanged.
 
 ## Lab 0.6.0 release preparation — 2026-10-24
 
