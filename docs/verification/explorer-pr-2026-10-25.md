@@ -94,3 +94,33 @@ Independent review of the repair found no weakening of the depth/history guard
 and no further Explorer blocker. No production code, frontend asset, SDK pin or
 execution allowance changed in this CI repair. A fresh four-cell exact-head CI
 run is required before merge; no release is authorized.
+
+### Root cause: Playwright CI metadata truncates checkout history
+
+The explicit-refspec hypothesis did not resolve the AMD64/PG16 browser lane.
+Early diagnostic run `40228589459` established that the baseline tree existed
+in the original and full fixture clone, but all three repositories reported
+shallow history after deepening. A separate initial-state guard then isolated
+the original checkout's inherited boundary rather than treating the child fetch
+as sufficient evidence of full history.
+
+The pinned Playwright 1.58.2 implementation in
+`playwright/lib/plugins/gitCommitInfoPlugin.js` automatically captures Git diffs
+in a GitHub PR environment. Its `gitDiff()` function fetches the PR base using
+`git fetch origin <base> --depth=1`; that operation makes the previously full
+checkout shallow. Only AMD64/PG16 runs Chromium, explaining the lane-specific
+failure. This was a test-runner metadata side effect, not a Git-version defect.
+
+Watched local reproduction used an owned full clone, a local Git remote and a
+synthetic GitHub pull-request event. Before the fix a browser test passed, but
+the full-history assertion failed: shallow status changed `false` → `true`.
+With supported `captureGitInfo: { commit: false, diff: false }`, all 10 Chromium
+tests passed in 19.5s and shallow status remained `false`. No provider was
+configured. Independent review checked the plugin's conditional and confirmed
+that the opt-out prevents its metadata fetch without skipping browser tests.
+
+The early history gate and original-checkout full-history guard remain required;
+branch/detached fixture cases, depth-one rejection and exact archived baseline
+bytes are retained. The final four-cell CI matrix must qualify this repair before
+merge. SDKs, execution budgets, released artifacts and frontend runtime assets
+remain unchanged.

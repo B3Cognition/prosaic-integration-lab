@@ -22,3 +22,8 @@ responses using synthetic receipts after the real bootstrap. No model is
 configured and no real execution is authorized. Python HTTP/coordinator tests
 remain the authority-boundary coverage. Playwright tests live in `browser-tests/`;
 Vitest's explicit `src` filter keeps the suites separate.
+
+Git metadata capture is explicitly disabled in Playwright. Its automatic GitHub
+PR diff capture fetches the base with `--depth=1`, which makes even a full checkout
+shallow and breaks released-baseline qualification. The early CI history gate
+requires the original checkout to remain full after browser tests.

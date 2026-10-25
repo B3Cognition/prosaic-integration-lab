@@ -3,10 +3,11 @@
 ## Explorer PR #34 CI review and merge gate — 2026-10-25
 
 The maintainer authorized fixing PR #34 and merging once all required checks
-pass. Independent review found no new Explorer blocker. The first CI run exposed
-an implicit detached-clone fetch in a repository-history regression; the repair
-explicitly fetches the candidate commit and tests branch/detached-only origins,
-preserving shallow-depth rejection and exact released-baseline bytes. See the
+pass. Independent review found no new Explorer blocker. CI exposed Playwright's
+automatic GitHub PR diff capture fetching the base with depth one, making the
+browser lane's original checkout shallow. Disable optional Git metadata capture
+and retain an early full-history gate; candidate-only fetch and branch/detached
+fixtures preserve depth-one rejection and exact released-baseline bytes. See the
 [review/CI ledger](verification/explorer-pr-2026-10-25.md). Merge only the exact
 head passing all four Linux/database cells. No release or real inference is
 included in this authorization.
