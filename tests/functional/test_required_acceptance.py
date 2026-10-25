@@ -148,7 +148,16 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
     def contains_baseline(directory):
         return subprocess.run(['git','cat-file','-e',baseline+'^{tree}'],
             cwd=directory,capture_output=True,timeout=10).returncode==0
+    def require_full_origin(stage):
+        import os
+        shallow=subprocess.check_output(['git','rev-parse','--is-shallow-repository'],
+            cwd=root,text=True).strip()
+        assert shallow=='false', (stage, shallow,
+            subprocess.check_output(['git','rev-parse','--absolute-git-dir'],cwd=root,text=True).strip(),
+            subprocess.check_output(['git','rev-parse','--git-path','shallow'],cwd=root,text=True).strip(),
+            sorted(key for key in os.environ if key.startswith('GIT_')))
     assert contains_baseline(root), 'workflow checkout lacks released baseline tree'
+    require_full_origin('before full clone')
     # Actions checks out a detached exact commit. Exercise that state too,
     # without touching the caller's branch or assuming a named current branch.
     detached=tmp_path/'detached-origin'
@@ -157,6 +166,7 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         check=True,capture_output=True,timeout=30)
     subprocess.run(['git','checkout','--detach',commit],cwd=detached,
         check=True,capture_output=True,timeout=30)
+    require_full_origin('after full clone')
     assert contains_baseline(detached), 'full detached fixture clone lost baseline tree'
     if not advertise_branch:
         # Actions initializes/fetches a detached checkout without local branches.
@@ -168,6 +178,7 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
                 check=True,capture_output=True,timeout=10)
     subprocess.run(['git','clone','--depth=1','--single-branch','--no-tags',
         detached.as_uri(),str(source)],check=True,capture_output=True,timeout=30)
+    require_full_origin('after shallow clone')
     missing=subprocess.run(['git','cat-file','-e',baseline+'^{commit}'],cwd=source,capture_output=True)
     assert missing.returncode!=0,'regression must start with the historical object absent'
     if depth==0:
