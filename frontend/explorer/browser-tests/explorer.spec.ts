@@ -80,6 +80,58 @@ async function connect(page: Page, url: string) {
   ).toEqual([0, 0]);
 }
 
+test("appearance follows the system, persists only preferences and preserves playback without dispatch", async ({ page, launcher }) => {
+  const mutations: string[] = [];
+  page.on("request", request => { if (request.method() !== "GET") mutations.push(request.method()); });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto(launcher.origin);
+  const appearance = page.getByRole("combobox", { name: "Appearance", exact: true });
+  await expect(appearance).toBeVisible();
+  await expect(appearance).toHaveValue("system");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await appearance.selectOption("light");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.getByRole("button", { name: "Simulation", exact: true }).click();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  const progress = page.locator(".step-title > span:last-child");
+  await expect(progress).toHaveText("2 / 5");
+  await appearance.selectOption("dark");
+  await expect(progress).toHaveText("2 / 5");
+  await page.reload();
+  await expect(appearance).toHaveValue("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await appearance.selectOption("system");
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  for (const width of [1440, 768, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(appearance).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+  expect(await page.evaluate(() => ({ ...localStorage }))).toEqual({ "prosaic.explorer.appearance": "system" });
+  expect(mutations).toEqual([]);
+});
+
+for (const storage of ["invalid", "unavailable"]) {
+  test(`appearance remains usable when storage is ${storage}`, async ({ page, launcher }) => {
+    const errors: string[] = [];
+    page.on("pageerror", error => errors.push(error.message));
+    await page.addInitScript(mode => {
+      if (mode === "invalid") localStorage.setItem("prosaic.explorer.appearance", "not-a-theme");
+      else Object.defineProperty(window, "localStorage", { get() { throw new DOMException("Storage disabled", "SecurityError"); } });
+    }, storage);
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto(launcher.origin);
+    const appearance = page.getByRole("combobox", { name: "Appearance", exact: true });
+    await expect(appearance).toHaveValue("system");
+    await appearance.selectOption("dark");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(errors).toEqual([]);
+  });
+}
+
 test("all eight scenarios, playback and keyboard selection stay mounted without dispatch", async ({
   page,
   launcher,
@@ -243,6 +295,9 @@ test("real bootstrap enables only explicitly reviewed synthetic execution, escap
     localTimeoutSeconds: 240,
     confirmed: true,
   });
+  await page.getByRole("combobox", { name: "Appearance", exact: true }).selectOption("dark");
+  await expect(page.getByRole("button", { name: "Cancel owned run", exact: true })).toBeVisible();
+  expect(bodies).toHaveLength(1);
   await expect(page.locator(".output")).toHaveText(host.runs[0].output);
   expect(await page.locator(".output img").count()).toBe(0);
   expect(await page.evaluate(() => (window as any).injected)).toBeUndefined();

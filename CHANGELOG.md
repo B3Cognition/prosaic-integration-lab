@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Refine Explorer typography, graph selection and reading panels; add a
+  persistent System/Light/Dark appearance switcher with system-change support
+  and a working fallback when browser storage is restricted.
+
 - Add Prosaic Explorer: bundled visual ecosystem documentation, eight safe
   playback scenarios and explicitly authorized single-agent unified-pool runs.
   Retain durable allowance, request identity, cancellation evidence and offline

@@ -22,6 +22,12 @@ import "@fontsource/ibm-plex-sans/latin-600.css";
 import "@fontsource/ibm-plex-mono/latin-400.css";
 import "./style.css";
 import {
+  readAppearance,
+  applyAppearance,
+  saveAppearance,
+  type Appearance,
+} from "./appearance";
+import {
   chapters,
   scenarios,
   tasks,
@@ -46,6 +52,9 @@ let launchSecret = takeBootstrap(
   window.history.replaceState.bind(window.history),
 );
 const api = new ExplorerApi();
+const systemAppearance = window.matchMedia("(prefers-color-scheme: dark)");
+const initialAppearance = readAppearance();
+applyAppearance(initialAppearance, systemAppearance.matches);
 type HandoffNode = Node<
   { lesson: LessonNode; active: boolean; stepLabel: string },
   "handoff"
@@ -87,6 +96,13 @@ function Code({ value }: { value: string }) {
   );
 }
 function App() {
+  const [appearance, setAppearance] = useState<Appearance>(initialAppearance);
+  useEffect(() => {
+    const sync = () => applyAppearance(appearance, systemAppearance.matches);
+    sync();
+    systemAppearance.addEventListener("change", sync);
+    return () => systemAppearance.removeEventListener("change", sync);
+  }, [appearance]);
   const [chapterId, setChapterId] = useState("ecosystem"),
     [mode, setMode] = useState("Documentation"),
     [selected, setSelected] = useState("markdown"),
@@ -283,8 +299,8 @@ function App() {
               ? current.node === target
               : lesson.id === target || lesson.id === source
           )
-            ? "#1b6c80"
-            : "#bcc1c4",
+            ? "var(--accent)"
+            : "var(--connector)",
           strokeWidth: (
             mode === "Simulation"
               ? current.node === target
@@ -371,6 +387,26 @@ function App() {
                 ? "Host session connected"
                 : "Documentation available offline"}
           </span>
+          <label className="appearance-control">
+            <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true">
+              <circle cx="10" cy="10" r="6.5" fill="none"
+                stroke="currentColor" strokeWidth="1.5" />
+              <path d="M10 3.5a6.5 6.5 0 0 0 0 13z" fill="currentColor" />
+            </svg>
+            <select
+              aria-label="Appearance"
+              value={appearance}
+              onChange={event => {
+                const preference = event.target.value as Appearance;
+                saveAppearance(preference);
+                setAppearance(preference);
+              }}
+            >
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
         </header>
         <main className="sheet" id="workspace">
           <div className="title-row">
@@ -826,6 +862,7 @@ function App() {
                       aria-label={`${chapter.title} read-only graph. Tab through nodes, press Enter to inspect, or use List view.`}
                     >
                       <ReactFlow
+                        colorMode={appearance}
                         key={chapter.id}
                         nodes={nodes}
                         edges={edges}

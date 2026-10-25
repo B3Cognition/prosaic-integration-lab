@@ -31,6 +31,18 @@ On phones the list opens first; **Graph view** switches to the overview. Graph
 nodes are keyboard selectable and the list offers ordinary buttons. Motion
 respects reduced-motion preferences.
 
+Use **Appearance** at the top right to choose **System**, **Light** or **Dark**.
+System follows your device, including changes while the page is open. Light
+uses the Taste v2 Framed sheet direction; Dark uses neutral black surfaces and
+teal graph highlights inspired by its True-black flat direction. Both retain
+the same content, navigation and execution controls.
+
+Only this appearance preference is saved in local storage for the current
+browser origin; using a new launcher port starts a fresh preference. Credentials
+remain in memory. If storage is restricted, switching still works for the current
+page. Switching appearance preserves the selected component and playback
+position, and never connects to a model or starts a run.
+
 ## Enable one bounded live task
 
 Live execution is a separate opt-in. Configure authenticated profiles using
