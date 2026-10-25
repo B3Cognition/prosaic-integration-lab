@@ -1,5 +1,35 @@
 # Codex handoff
 
+## Protected review and paired handoffs completed — 2026-10-25
+
+[Verification](verification/sue-protected-2026-10-25.md): explicit v4 source-only
+review, immutable public-Harness capture and separate advisory candidate prompts
+are implemented. Existing v1/v2/v3, SDKs, canonical SUE, scorer, pins and defaults
+are unchanged. Memory/SUE remain disabled. Full default: 2,033, candidate v4/v3 25,
+installed protection14 and study10 tests pass; wheel/sdist221 payloads match.
+
+Same Qwen/strict scorer,138 accounted cells/three repeats:96 complete,12 blocked,
+30 dependency-failed.145requests/219,943tokens, zero unknowns/tools/overruns;
+both network-denied audits reconcile usage, source identity and canonical state.
+All 60 executed candidates preserve their matched independent final;30 clean-
+control handoffs issue no calls because the source-only baseline fails schema.
+
+The new source-only profile scores7/24 versus existing critic 14/24; do not adopt
+it as a replacement. Case 04 strong/no-advice passes3/3 at lower token cost than
+successful SUE handoffs. Compact gains 9 matched passes over raw with39.3% fewer
+candidate-stage tokens; this excludes SUE generation. Case 08 identifies the
+contradiction30/30 but fails exact citation spans30/30. No new end-to-end SUE
+dialogues, general quality claim, default enablement or release qualification.
+Recommend qualifying immutable capture of the exact existing critic workflow,
+then addressing clean-output feedback/citation generation separately; no tuning
+or citation repair after seeing these results.
+
+Evidence: `reports/castle-sue-protected-20261025`,1040 files, manifest SHA256
+`d15198cf33cb8467f842e707fd4991a23cf3f62690bf3f883acd52bd0f350d87`.
+All 11 prior archives/5426 files and original unknown30request/65536token
+reservation remain unchanged. Implementation commitdb8d780 is local/unpublished.
+No push, merge, public candidate adoption, release or new PG/native matrix.
+
 ## Controlled SUE comparisons completed — 2026-10-25
 
 [Diagnostic report](verification/sue-controlled-2026-10-25.md):108 samples,
