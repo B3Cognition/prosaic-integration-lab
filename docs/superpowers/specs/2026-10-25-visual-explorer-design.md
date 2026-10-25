@@ -59,22 +59,93 @@ below the canvas. A list/text rendition exposes the same educational material
 without requiring graph interaction. Keyboard selection, focus visibility,
 screen-reader announcements and reduced-motion support are required.
 
-## Visual direction (design choice)
+## Visual direction — Taste v2
 
-Use a technical field-guide aesthetic: a pale blue-gray drafting surface,
-deep navy typography, precise connections and restrained colored state markers.
-The signature interaction is a clearly visible handoff of control between
-Markdown, host policy and execution—not a decorative animated background.
+The maintainer selected Leonxlnx/taste-skill v2. Use `design-taste-frontend`
+from stable v2.1.5, pinned upstream commit
+`12af471f627f866411b4bd785b19646d3672784c`. It is installed locally at
+`~/.codex/skills/design-taste-frontend`; it is design tooling, not a Lab runtime
+dependency. Its app-screen workflow and `inspect.mjs --app` apply to this
+interactive explorer. The page/marketing workflow does not apply.
 
-Tokens: paper #F3F6FA, surface #FFFFFF, ink #142D4E, muted #51647A,
-action #215DCE, boundary #A75B12. Success/failure use labels/icons as well as
-color. Typography: restrained Georgia display titles, system sans body text and
-system monospace for contracts/receipts. No network font dependency.
+Before choosing the direction, inventory the real product data and jobs:
 
-Custom React Flow nodes should look like useful parts of this ecosystem:
-Markdown document, host permission boundary, provider profile, review gate and
-receipt. Information density stays modest; reveal detail through selection.
-Use short transitions for actual step changes, with manual Next always available.
+- Objects: canonical Markdown agents, inputs, admitted workflows, provider
+  profiles, execution policies, review interactions and execution receipts.
+- Ecosystem scope: Core0.4.1, Runtime0.9.8, Harness0.9.4 and their existing stores.
+- Providers: Claude Code, Codex CLI and one configured local/API profile.
+- Live tasks: release brief, incident handoff and invoice SQL; their real seed
+  packets and graders already exist in the Lab.
+- Limits: native60s, local180/240s, pool300s; attempts3/native2/API requests8,
+  tools7/rounds8/reported tokens65,536; mixed units remain distinct from tokens.
+- Evidence: actual attempt/skip/fallback observations and known/unknown usage;
+  simulated state is never presented as a live measurement.
+- People: a newcomer learning the system and an integrator testing host policies,
+  on desktop or a narrow screen.
+- Jobs: inspect a component, step a scenario, review execution authority, run one
+  allowed task, inspect its output and reconcile uncertainty deliberately.
+- Product identity: Markdown instructions travel through host-controlled
+  execution and end in an inspectable receipt. The handoff is the main visual.
+- First-run state: real docs/scenarios are available, live results are absent;
+  show setup actions rather than invented successful runs or metrics.
+
+The first screen's question is: "How does this Markdown task become a permitted
+execution, and where is control now?" Its biggest element is the graph answering
+that question, beside its selected artifact/policy/receipt. The signature element
+is the Markdown-to-receipt handoff, with genuine provider transitions in live
+mode and clearly labelled transitions in simulation.
+
+Taste dealt two suitable light builder styles: Achromatic ledger and Framed
+sheet. Select **Framed sheet**, seed `1548770335`: the graph and its inspector
+need a coherent work surface across documentation, simulation and live receipts.
+No redraw was needed. The local generated sheet is
+`.taste-skill/explorer/direction.json` (ignored design scratch).
+
+Keep its defining move: a quiet tinted L-frame, a white sheet inset8px with
+16px corners and a faint edge, no resting shadows. Sidebar228px, top bar48px,
+content padding/gap24px; narrow layouts collapse navigation into a48px bar.
+The selected chapter and mode use neutral selection/ink underlines rather than
+colored navigation blocks. The same shell names Prosaic and its current scope.
+
+Core tokens from the sheet: ground `#f9fbfc`, surface `#ffffff`, raised `#f4f6f8`,
+active `#ebedee`, edge `#e8eaec`, ink `#131416`, secondary `#5d5f60`, accent
+`#1b6c80`. Primary buttons are near-black. Spend color on the active handoff,
+meaningful status and evidence, with text/icons as well as color; no rainbow
+per provider and no decorative dot-grid behind the graph.
+
+Load the dealt IBM Plex Sans at400/500/600, plus IBM Plex Mono for IDs and code.
+Package the licensed font files locally so the installed explorer needs no
+Google Fonts/CDN connection. Use22px view titles,16px section titles/graph
+content,14px body/control text,12px secondary labels and tabular figures.
+Use font licenses alongside packaged assets. This replaces the earlier Georgia
+display-type and navy/blue sketch.
+
+The product-specific face is the **Markdown-to-receipt handoff**: readable
+Markdown, an explicit permission boundary, the eligible provider, a review gate
+where relevant and the resulting evidence. Custom React Flow nodes represent
+these objects. The graph takes the visual lead; real code, task packets and
+receipts fill its inspector rather than generic metric cards or filler photos.
+
+The library's builder pattern informs the graph canvas, not an editable workflow
+palette: this product needs five labelled chapters, selection and a read-only
+flow, so no insert/drag-to-create controls, search, account switcher or Save
+button are added merely because a reference screen has them. This is a required
+content adaptation, not a style redraw. Each view answers one question:
+
+| View | First question | Main action |
+| --- | --- | --- |
+| Ecosystem | Which component owns this part of the task? | Inspect a component |
+| Agent execution | What may this agent do with this input? | Review its contract |
+| Workflow review | What decision is needed before execution can continue? | Step the review scenario / open existing demo |
+| Provider pool | Why was this profile selected, skipped or stopped? | Play the fallback scenario |
+| Results/live run | Did this task complete, and what evidence supports it? | Review authority and run / inspect the receipt |
+
+No ornamental motion, fake results or decorative KPI row. Show honest missing,
+zero, disabled, loading, blocked and failed states. Preserve manual playback
+stepping and reduced motion. Use Taste's app lint/inspector on the final production
+build at1440/768/390px, inspect every screenshot, and record the app-screen
+critique/fixes. No browser inspection or visual-quality pass is claimed for
+this design-only checkpoint.
 
 ## Scenario playback
 
@@ -215,8 +286,9 @@ looks complete. A later version/release is separate from design approval.
 - React Flow custom nodes: https://reactflow.dev/learn/customization/custom-nodes
 - React Flow accessibility: https://reactflow.dev/learn/advanced-use/accessibility
 
-Taste was suggested as an optional skill; no installed Taste skill was found.
-The available local frontend-design skill supplies the visual design guidance.
+Taste is now explicitly selected and installed. Its v2 app-screen workflow
+replaces the generic frontend-design skill as the visual design authority for
+this work; project behavior, safety boundaries and user requirements take precedence.
 
 ## Builder review
 

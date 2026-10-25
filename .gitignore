@@ -2,6 +2,7 @@
 .venv-*/
 .cache/
 .superpowers/
+.taste-skill/
 __pycache__/
 *.py[cod]
 .pytest_cache/
