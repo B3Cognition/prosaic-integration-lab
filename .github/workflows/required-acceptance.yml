@@ -127,6 +127,8 @@ jobs:
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
+      - name: Verify exact checkout history before full regressions
+        run: .venv/bin/python -m pytest -q tests/functional/test_required_acceptance.py -k candidate_checkout_history
       - name: Unit and functional regressions
         if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q

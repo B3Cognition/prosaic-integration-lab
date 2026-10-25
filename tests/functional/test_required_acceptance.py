@@ -144,6 +144,11 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         # requires the original repository, supplied explicitly by the caller.
         import os
         root=Path(os.environ['LAB_HISTORY_TEST_REPOSITORY'])
+    baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
+    def contains_baseline(directory):
+        return subprocess.run(['git','cat-file','-e',baseline+'^{tree}'],
+            cwd=directory,capture_output=True,timeout=10).returncode==0
+    assert contains_baseline(root), 'workflow checkout lacks released baseline tree'
     # Actions checks out a detached exact commit. Exercise that state too,
     # without touching the caller's branch or assuming a named current branch.
     detached=tmp_path/'detached-origin'
@@ -152,6 +157,7 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         check=True,capture_output=True,timeout=30)
     subprocess.run(['git','checkout','--detach',commit],cwd=detached,
         check=True,capture_output=True,timeout=30)
+    assert contains_baseline(detached), 'full detached fixture clone lost baseline tree'
     if not advertise_branch:
         # Actions initializes/fetches a detached checkout without local branches.
         # Remove only refs in this owned fixture, never in the caller's checkout.
@@ -162,7 +168,6 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
                 check=True,capture_output=True,timeout=10)
     subprocess.run(['git','clone','--depth=1','--single-branch','--no-tags',
         detached.as_uri(),str(source)],check=True,capture_output=True,timeout=30)
-    baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
     missing=subprocess.run(['git','cat-file','-e',baseline+'^{commit}'],cwd=source,capture_output=True)
     assert missing.returncode!=0,'regression must start with the historical object absent'
     if depth==0:
@@ -175,7 +180,12 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin',commit],cwd=source,
             check=True,capture_output=True,timeout=30)
     result=subprocess.run(['git','archive',baseline],cwd=source,capture_output=True,timeout=30)
-    assert result.returncode==0,result.stderr.decode()
+    state={name:subprocess.check_output(['git','rev-parse','--is-shallow-repository'],
+        cwd=directory,text=True).strip() for name,directory in (
+            ('root',root),('detached',detached),('source',source))}
+    assert result.returncode==0, (result.stderr.decode(), depth, state,
+        subprocess.check_output(['git','--version'],text=True).strip(),
+        contains_baseline(source))
     with tarfile.open(fileobj=io.BytesIO(result.stdout)) as archive:
         manifest=archive.extractfile('dependencies/releases.json').read()
         assert hashlib.sha256(manifest).hexdigest()=='f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472'
