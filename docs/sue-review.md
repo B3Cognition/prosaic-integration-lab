@@ -12,6 +12,23 @@ disables it. Other review settings are rejected while disabled. Installing the
 engine does not enable review, record chats, retrieve sources or start a model.
 The disabled session constructor loads no SUE engine or SDK execution machinery.
 
+An experimental requirements-review profile also supports an explicit
+`SueReviewSession(..., cycle_guard=True)` and a start-time `review_context`
+mapping with `purpose`, `issueDefinitions` and `instructions`. The trusted host
+supplies these bounded criteria; they are signed and frozen with the source
+snapshot and reused on resume. They cannot provide identity, tools or new source
+evidence. The default session retains its existing examination policy.
+
+The opt-in guard stops exact repeated examination cycles without gaining
+coverage or resolving an earlier issue. Its result is `BOUNDED_STOP`, with
+reason `repeated_cycle_no_progress`; missing dimensions remain missing. It does
+not make repetitive or unsupported answers valid. The raw turn evidence stays
+available. New comparison workflow v3 deduplicates only the model-facing final
+handoff and checks final assessment/issue consistency with bounded retries.
+Older comparison versions, canonical guidance and the strict scorer remain
+available unchanged. These features do not establish semantic entailment or
+make an advisory terminal a quality certificate.
+
 **Live review quality remains unqualified.** A separate
 [360-second Qwen comparison](verification/sue-qwen360-2026-10-25.md) completed
 all24workflows: SUE passes4/8strict reviews, direct3/8, critic2/8. SUE uses about

@@ -109,3 +109,23 @@ Castle/Lab worktrees are reused. Task 1 -> 2 consumes the opt-in engine keyword;
 2 -> 5 consumes frozen context/policy; 3 -> 4 -> 5 consumes comparison v3.
 Old versioned workflows and environments remain available as controls.
 Evidence root: `/private/tmp/prosaic-sue-review-fixes-20261025`.
+
+Task 1 complete: Castle aef05c5; watched 3 RED -> 49 engine GREEN,
+75 standalone distribution checks. Actual archived case 4 stops at six accepted
+turns under the opt-in guard (the first repeated answers differ in type).
+Task 2 complete: Lab 836bf15; 5 RED -> 5 context GREEN, compatibility 12 GREEN,
+full focused SUE 101 GREEN. Legacy requests without optional reviewPolicy retain
+their old projection; all failed verification logs are preserved.
+Task 3 complete: Lab 81ac3b2; missing compact projection RED -> 8 GREEN including
+v2 compatibility; raw report untouched, distinct provenance and turn refs kept.
+Task 4 complete: Lab f5bf54f; 2 RED -> 21 GREEN, receipts and incurred usage kept.
+Task 5 diagnostics: e06af64 and f20cefb; 4 RED -> 8 GREEN, then reviewer-requested
+three held-out real session/projection/final integrations GREEN. These are
+scripted mechanics, not held-out model reasoning qualification. Installed suite
+116 GREEN, synthetic matrix 24/24 with zero-call replay, PG16/18 six GREEN each
+with cleanup. Native Linux and release qualification remain separate.
+
+Ruling: the full legacy Castle suite is not green in this dependency environment.
+Candidate 93 failures/38 errors/2478 passes has exactly the same 131 failing node
+IDs as the pre-change snapshot (2475 passes). No assertions or skips changed;
+this is differential non-regression evidence, not release qualification.
