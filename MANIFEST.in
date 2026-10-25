@@ -20,5 +20,10 @@ include docs/verification/conversation-contracts-2026-10-23-*.json
 include docs/verification/castle-integration-2026-10-23-*.json
 recursive-include scripts *.py
 recursive-include examples *.py
+recursive-include frontend/explorer *.json *.ts *.tsx *.js *.css *.html *.mjs *.md *.txt *.svg
+prune frontend/explorer/node_modules
+prune frontend/explorer/test-results
+prune frontend/explorer/playwright-report
+recursive-include lab_runner/explore/web *
 recursive-include tests *.py *.json *.yml *.md
 global-exclude __pycache__ *.py[cod]

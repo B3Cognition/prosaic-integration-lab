@@ -12,6 +12,7 @@ account, API key, local model or Docker.
 
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
+| Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
 | See a workflow execute, pause and resume | [Service demo](docs/quickstart.md#3-run-the-service-or-open-the-browser) | Docker, owned PostgreSQL and synthetic model responses |
@@ -20,9 +21,10 @@ account, API key, local model or Docker.
 | Compare providers on the same work | [Benchmark](docs/quickstart.md#5-compare-your-models) | Explicit live opt-in; same tasks/inputs; default 180s or explicit 240s local deadline |
 | Embed this in my application | [Integration map](docs/quickstart.md#6-integrate-the-pieces-in-your-application) | Minimal example, public SDK APIs and host responsibilities |
 
-The browser demo currently uses scripted or local/API responses. Unified
+The chat browser demo currently uses scripted or local/API responses. Unified
 Claude/Codex/local pools are available through the Runtime Python API and CLI,
-with separate Lab tests and benchmarks; they are not wired into the browser UI.
+with separate Lab tests and benchmarks. Explorer adds dedicated single-agent
+pool controls; the chat/workflow browser remains a separate service.
 
 ## Which package does what?
 
@@ -40,9 +42,14 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 ## Current releases and what is new
 
 **Lab [0.6.2](docs/release-0.6.2.md)** consumes **Runtime 0.9.8**, Core 0.4.1,
-Harness 0.9.4, Runtime recorder 0.3.0 and Harness store 0.4.0. The guided onboarding
-and first-workflow example on this branch are additions after the 0.6.2 release;
+Harness 0.9.4, Runtime recorder 0.3.0 and Harness store 0.4.0. The guided onboarding,
+first-workflow example and Explorer on this branch are additions after the 0.6.2 release;
 use this checkout for them. The 0.6.2 artifacts retain their original bytes.
+
+After the [quickstart installation](docs/quickstart.md#setup-once), open the
+visual guide with `python -m lab_runner.explore`. The default launches documentation
+and playback without Docker, Node or model credentials. See the
+[Explorer guide](docs/explorer.md) to enable explicit, budgeted live controls.
 
 - Unified ordered pools combine native Claude/Codex profiles and local/API
   profiles. Eligible members are selected before work starts.

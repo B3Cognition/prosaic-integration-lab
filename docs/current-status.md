@@ -1,5 +1,16 @@
 # Current delivery status
 
+## Visual Explorer in this checkout — 2026-10-25
+
+[Explorer](explorer.md) adds bundled React Flow documentation, user/developer
+inspection, eight deterministic playback scenarios and explicit single-agent
+unified-pool controls. The default launcher uses no models or Docker. Live
+admission, durable allowance, filtered receipts and offline acknowledgment stay
+host-owned; Runtime 0.9.8 owns provider selection. The existing Harness browser
+service remains separate. This is post-0.6.2 work, not a published release or
+new live model benchmark. See the
+[implementation verification ledger](verification/explorer-2026-10-25.md) for scope.
+
 ## Lab 0.6.2 published and verified — 2026-10-25
 
 The [0.6.2 release verification](verification/release-0.6.2-2026-10-25.md)

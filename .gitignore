@@ -3,6 +3,10 @@
 .cache/
 .superpowers/
 .taste-skill/
+node_modules/
+frontend/explorer/test-results/
+frontend/explorer/playwright-report/
+.playwright-mcp/
 __pycache__/
 *.py[cod]
 .pytest_cache/

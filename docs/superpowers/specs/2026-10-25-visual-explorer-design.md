@@ -1,6 +1,6 @@
 # Prosaic Explorer — visual documentation, playback and live controls
 
-Date:2026-10-25. Status: proposed design for review.
+Date:2026-10-25. Status: approved for implementation by the maintainer's “ok, proceed”.
 
 ## Intent and approved direction
 

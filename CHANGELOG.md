@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Add Prosaic Explorer: bundled visual ecosystem documentation, eight safe
+  playback scenarios and explicitly authorized single-agent unified-pool runs.
+  Retain durable allowance, request identity, cancellation evidence and offline
+  reconciliation without replaying partial work.
+- Add the guided quickstart and first-workflow example, README integration map,
+  clean installed-asset smoke and locked frontend/browser acceptance checks.
+  Published 0.6.2 artifacts and SDK pins remain unchanged.
+
 ## 0.6.2 — 2026-10-25
 
 - Make the unified benchmark's `--local-timeout` configurable within 1–300

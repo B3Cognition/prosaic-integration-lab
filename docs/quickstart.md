@@ -43,6 +43,13 @@ Harness 0.9.4, store 0.4.0. `pip check` should report no broken requirements.
 If any command fails, stop and use [troubleshooting](#when-something-goes-wrong).
 No model server is contacted by these install/audit commands.
 
+Prefer a visual walkthrough? Run `"$LAB_PY" -m lab_runner.explore` after setup.
+Start in **Documentation**, select a component, and switch between **User** and
+**Developer** explanations. **Simulation** plays eight illustrative scenarios
+without contacting models. The [Explorer guide](explorer.md) covers dedicated
+live controls, permissions and retained evidence. This is another post-0.6.2
+addition; it does not replace the separate chat/workflow service below.
+
 ## 1. Build your first workflow
 
 ```sh
