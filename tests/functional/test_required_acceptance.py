@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 from types import SimpleNamespace
+import pytest
 from lab_runner.gates import COUNTS,required_modes
 
 
@@ -127,7 +128,8 @@ def test_missing_image_fails_gate_with_safe_summary_before_owned_resources(monke
         'event':'required_image_unavailable'}
     assert 'PRIVATE' not in capsys.readouterr().out
 
-def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path):
+@pytest.mark.parametrize('advertise_branch', [True, False], ids=['branch', 'detached-only'])
+def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path, advertise_branch):
     import hashlib
     import io
     import tarfile
@@ -150,16 +152,27 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         check=True,capture_output=True,timeout=30)
     subprocess.run(['git','checkout','--detach',commit],cwd=detached,
         check=True,capture_output=True,timeout=30)
+    if not advertise_branch:
+        # Actions initializes/fetches a detached checkout without local branches.
+        # Remove only refs in this owned fixture, never in the caller's checkout.
+        refs=subprocess.check_output(['git','for-each-ref','--format=%(refname)',
+            'refs/heads/'],cwd=detached,text=True).splitlines()
+        for ref in refs:
+            subprocess.run(['git','update-ref','-d',ref],cwd=detached,
+                check=True,capture_output=True,timeout=10)
     subprocess.run(['git','clone','--depth=1','--single-branch','--no-tags',
         detached.as_uri(),str(source)],check=True,capture_output=True,timeout=30)
     baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
     missing=subprocess.run(['git','cat-file','-e',baseline+'^{commit}'],cwd=source,capture_output=True)
     assert missing.returncode!=0,'regression must start with the historical object absent'
     if depth==0:
-        subprocess.run(['git','fetch','--unshallow','--no-tags','origin'],cwd=source,
+        # An origin with detached HEAD need not configure a branch fetch refspec.
+        # Fetch the candidate explicitly, as checkout does; do not fetch the
+        # baseline directly, which would bypass the workflow's depth guard.
+        subprocess.run(['git','fetch','--unshallow','--no-tags','origin',commit],cwd=source,
             check=True,capture_output=True,timeout=30)
     elif depth!=1:
-        subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin'],cwd=source,
+        subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin',commit],cwd=source,
             check=True,capture_output=True,timeout=30)
     result=subprocess.run(['git','archive',baseline],cwd=source,capture_output=True,timeout=30)
     assert result.returncode==0,result.stderr.decode()

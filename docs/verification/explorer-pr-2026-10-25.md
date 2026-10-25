@@ -68,3 +68,29 @@ The PR must pass its exact head's four required Linux AMD64/ARM64 × PostgreSQL
 16/18 cells, including real stack cleanup, installed distributions, locked
 frontend reproduction and the Linux Chromium lane. Local results do not certify
 that matrix. This request prepares a PR; it does not merge or publish a release.
+
+## PR #34 CI repair and merge authorization
+
+The maintainer subsequently authorized reviewing PR #34, fixing CI failures and
+merging only after every required final-head check passes. The original
+[CI run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40225804569)
+failed the AMD64/PG16 source suite at
+`test_candidate_checkout_history_can_archive_exact_released_baseline`
+(1 failed, 1,978 passed). The released baseline was absent after an implicit
+unshallow fetch from the nested detached clone. Explorer's locked build and
+Linux Chromium regressions had already passed.
+
+The test now explicitly fetches the candidate commit when applying the workflow's
+configured depth. It exercises both an advertised branch and an Actions-style
+detached origin without local branches. It still first requires the baseline to
+be absent and then checks the original baseline manifest digest and legacy asset
+bytes. It never fetches the baseline directly or changes the caller's refs.
+
+Focused local verification: 8 tests passed in 3.13s on Apple Git 2.54.0. Separate
+owned temporary workflow probes with `fetch-depth: 1` correctly failed to archive
+the baseline in both variants. The original Git 2.55 runner failure was observed
+in CI; it was not reproduced on local Git 2.54, which implicitly fetched HEAD.
+Independent review of the repair found no weakening of the depth/history guard
+and no further Explorer blocker. No production code, frontend asset, SDK pin or
+execution allowance changed in this CI repair. A fresh four-cell exact-head CI
+run is required before merge; no release is authorized.
