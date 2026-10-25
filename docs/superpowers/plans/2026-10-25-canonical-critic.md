@@ -61,3 +61,21 @@ Scratch: /private/tmp/prosaic-sue-canonical-critic-20261025.
 User explicitly requested implementation and rerun; native execution continues
 without another design approval. Any measured semantic failure stays evidence,
 not a reason to relax assertions or silently change the frozen run.
+
+## Necessary second frozen qualification
+
+The first complete run exposed a real input/response-limit mismatch in raw advice
+preparation (six zero-call failures), persistent absence-statement-only citations,
+and spurious contradictions/ordinary-connective findings. Preserve this run and
+its original audit failure; reconcile preparation failures with separate offline
+auditors rather than editing the frozen scripts.
+
+- [ ] Watch a >16 KB, <256 KB raw-handoff regression fail, then fix decoding to
+  the existing input ceiling and retain rejection above 256 KB after composition.
+- [ ] Version the opt-in profile separately; clarify the existing public rules:
+  absence of enforcement is not negation, absence findings cite trigger plus
+  supplied gap, logical connectives are not business terms, subjective acceptance
+  criteria differ from missing failure behavior. No fixture IDs/answer imports.
+- [ ] Rerun source/installed checks, full default suite and same frozen 138-cell
+  comparison in a fresh directory/environment. Preserve the first profile/wheel,
+  all failed outcomes and every prior reservation. Do not tune during either run.

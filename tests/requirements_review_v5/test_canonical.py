@@ -135,3 +135,19 @@ def test_new_capture_has_no_unverified_raw_evidence_entrypoint():
     import lab_runner.requirements_review_v5 as profile
     assert not hasattr(profile,'capture_critic')
     assert not hasattr(IndependentReview,'from_critic_evidence')
+
+
+def test_raw_candidate_uses_input_allowance_instead_of_response_decode_limit():
+    from lab_runner.requirements_review_v5 import candidate_messages
+    task,final=sample();captured=IndependentReview.capture(task,final,run_id='a'*32)
+    advice={'untrusted':'A'*20000}
+    _,user=candidate_messages(captured,advice,handoff='raw',boundary='strong')
+    assert 16384<len(user.encode())<262144
+    assert json.loads(user)['strategyAdvice']==advice
+    assert captured.final==final
+
+
+def test_combined_candidate_input_still_rejects_above_unchanged_input_ceiling():
+    from lab_runner.requirements_review_v5 import candidate_messages
+    task,final=sample();captured=IndependentReview.capture(task,final,run_id='a'*32)
+    with pytest.raises(ValueError):candidate_messages(captured,{'untrusted':'A'*262000},handoff='raw',boundary='strong')
