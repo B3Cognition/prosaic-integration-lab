@@ -7,12 +7,14 @@ from prosaic_harness import Validator,WorkflowBindings,WorkflowCatalog,WorkflowF
 from prosaic_runtime import ProsaicRuntime,RuntimeAdapter
 from lab_runner.requirements_review_v1.contracts import CRITIC_SCHEMA,FINAL_SCHEMA,LIMITS
 from lab_runner.requirements_review_v2 import project_stage_arguments as critic_projection
-from lab_runner.requirements_review_v3 import build_comparison_workflow
+from lab_runner.requirements_review_v3 import build_comparison_workflow,project_stage_arguments as original_projection
+from lab_runner.requirements_review_v3.workflow import validate_final
 from lab_runner.requirements_review_v4 import IndependentReview,checked_review
 from lab_runner.requirements_review_v4.protection import checked_task,candidate_messages as previous_messages
 from prosaic_integration_lab.sue_review.contracts import decode,encoded,own
 
 VERSION='requirements-review-v5-canonical-critic-2'
+PROTECTED_VERSION='requirements-review-v5-protected-existing-1'
 EVIDENCE_GUIDANCE=(
     'Review only the requirements explicitly supplied, without inventing additional product requirements. '
     'Before proposing a defect, check every supplied denial, exception and acceptance clause for an answer. '
@@ -83,6 +85,34 @@ def validate_canonical(value,context):
     return []
 
 
+def project_protected_critic(artifact,arguments,*,execute,**options):
+    """Close canonical inputs, then preserve the existing v3 native projection."""
+    if artifact.id not in ('requirements-v1/critic','requirements-v1/final'):raise ValueError('unknown_canonical_role')
+    data=checked_arguments(artifact.id.rsplit('/',1)[1],decode(arguments,maximum=262144))
+    data['request']['strategyAdvice']=None
+    return original_projection(artifact,encoded(data).decode(),execute=execute)
+
+
+def validate_protected_critic(value,context):
+    errors=validate_final(value,context)
+    return errors if errors else validate_canonical(value,context)
+
+
+def build_protected_critic_workflow(config,limits=None):
+    """Protect the current critic without adopting experimental generation changes."""
+    limits=dict(LIMITS if limits is None else limits)
+    base=build_comparison_workflow(config,'critic_author',limits)
+    policy=WorkflowPolicy(allowed_agents=list(base.artifacts),allowed_schemas=list(base.schemas),allowed_tools=[],
+        allowed_validators=['final-consistency'],allow_agent_composition=True,max_calls=min(limits['calls'],4),
+        max_attempts=2,max_visits=1,max_tokens=limits['tokens'],max_run_s=limits['elapsedSeconds'],
+        timeout_s=min(60,limits['elapsedSeconds']),max_provider_requests_per_invocation=1,max_tool_calls_per_invocation=0,
+        max_run_input_bytes=262144,max_invocation_bytes=262144,max_output_bytes=16384,max_state_bytes=4194304)
+    return WorkflowFactory(catalog=WorkflowCatalog(agents=base.artifacts,schemas=base.schemas),
+        bindings=WorkflowBindings(config=config,runtime_adapter=RuntimeAdapter(ProsaicRuntime(config),PROTECTED_VERSION,project_protected_critic,max_attempts=1),
+            validators={'final-consistency':Validator(PROTECTED_VERSION,validate_protected_critic)}),policy=policy).build(
+                {k:v for k,v in base.definition.items() if k!='limits'})
+
+
 def build_canonical_workflow(config,limits=None):
     limits=dict(LIMITS if limits is None else limits)
     base=build_comparison_workflow(config,'critic_author',limits)
@@ -106,7 +136,8 @@ def _checked_critic_evidence(task,evidence):
     try:
         state=evidence['checkpoint'];bindings=state['bindings'];outputs=state['outputs']
         if (state['status']!='completed' or state['inputs']!={'publicTask':task}
-                or state['validators']!={'canonical-review':VERSION} or set(bindings)!={'critic','final'}
+                or state['validators'] not in ({'canonical-review':VERSION},{'final-consistency':PROTECTED_VERSION})
+                or set(bindings)!={'critic','final'}
                 or bindings['critic']['dependencies']!={} or bindings['final']['dependencies']!={'critic':bindings['critic']}):
             raise ValueError('canonical_run_not_accepted')
         receipts={r['id']:r for r in evidence['receipts']}

@@ -34,3 +34,23 @@ Same Qwen, strict scorer/keys, temperature0.2, max4096 output, toolsnone,
 shared720requests/1572864tokens/7200s/138samples. Stop unknown/overrun and retain
 full reservations. Freeze before calls, audit offline, preserve every failure,
 all12 prior archives/6466 files and original unknown usage. No push or release.
+
+## Measured disposition and protection-only path
+
+Both frozen comparisons are complete and preserved. Generation revisions remain
+experimental: the latest profile scores13/24, clean07 only1/3, and case02 still
+fails exact citation completeness. Do not adopt `build_canonical_workflow` as the
+canonical replacement based on these results. The semantic fix is incomplete.
+
+Separate ownership hardening from generation experiments with the explicit
+`build_protected_critic_workflow` entry point. Preserve the existing v3 artifacts,
+workflow definition, native projection, consistency feedback and generation
+settings. Close input scope before original projection; add strict source/case/
+hash/range validation after the original consistency validator. Use the same
+sealed public-Harness canonical capture and separate advisory outcome.
+
+Qualification is exact network-denied replay of103 recorded native requests,
+55 final validations, real SDK fixtures including rejection/retry and zero-call
+resume, installed packaging checks and the full default regression suite.
+This is not a fresh live quality qualification of the protection-only wrapper.
+No further model calls or prompt tuning follow the second frozen comparison.

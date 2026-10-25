@@ -62,6 +62,11 @@ User explicitly requested implementation and rerun; native execution continues
 without another design approval. Any measured semantic failure stays evidence,
 not a reason to relax assertions or silently change the frozen run.
 
+Execution status: Tasks1–3 and the necessary second frozen qualification below
+are mechanically complete. Their original checkboxes describe the pre-execution
+plan; measured semantic acceptance remains FAILED, not waived. Both runs and all
+failed outcomes are sealed. See verification/sue-canonical-critic-2026-10-25.md.
+
 ## Necessary second frozen qualification
 
 The first complete run exposed a real input/response-limit mismatch in raw advice
@@ -79,3 +84,18 @@ auditors rather than editing the frozen scripts.
 - [ ] Rerun source/installed checks, full default suite and same frozen 138-cell
   comparison in a fresh directory/environment. Preserve the first profile/wheel,
   all failed outcomes and every prior reservation. Do not tune during either run.
+
+## Protection-only completion after failed semantic qualification
+
+- [x] Preserve exact existing critic native generation in a separate explicit
+  build_protected_critic_workflow, with closed inputs and sealed canonical capture.
+- [x] Watch missing API tests fail, then verify unchanged native projection,
+  original consistency feedback, strict source rejection/retry and zero-call resume.
+- [x] Independently review this separate subtask; no material findings. Review
+  excludes model quality and historical integrity, which remain separate gates.
+- [x] Replay103 recorded native requests exactly;55 final validations show zero
+  additional provenance rejections. Replay is network-denied and makes no calls.
+- [x] Verify43 installed review tests,4 released-SDK protection tests and2033
+  full default tests; direct/sdist-rebuilt payloads and installed sources match.
+- [ ] Seal final mechanics evidence and update handoff; keep defaults off and
+  semantic quality changes experimental. No push or release.
