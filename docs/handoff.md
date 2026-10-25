@@ -1,5 +1,48 @@
 # Codex handoff
 
+## Explorer PR #34 CI review and merge gate — 2026-10-25
+
+The maintainer authorized fixing PR #34 and merging once all required checks
+pass. Independent review found no new Explorer blocker. CI exposed Playwright's
+automatic GitHub PR diff capture fetching the base with depth one, making the
+browser lane's original checkout shallow. Disable optional Git metadata capture
+and retain an early full-history gate; candidate-only fetch and branch/detached
+fixtures preserve depth-one rejection and exact released-baseline bytes. See the
+[review/CI ledger](verification/explorer-pr-2026-10-25.md). Merge only the exact
+head passing all four Linux/database cells. No release or real inference is
+included in this authorization.
+
+## Explorer review and PR preparation — 2026-10-25
+
+The maintainer authorized reviewing Explorer, fixing findings, completing checks
+and preparing an integration-lab PR. This supersedes the earlier local-only scope
+for these branch changes; it does not authorize merging or a release. Explorer
+includes visual documentation, eight deterministic scenarios, explicitly bounded
+live controls, System/Light/Dark appearance and viewport-stable chapter navigation.
+The [review ledger](verification/explorer-pr-2026-10-25.md) records final checks
+and two corrected navigation/receipt-selection findings. SDK pins and released
+artifacts remain unchanged; no new live inference is included. Require the exact
+PR head's four Linux AMD64/ARM64 × PostgreSQL 16/18 cells before a later merge.
+
+## Guided ecosystem onboarding — 2026-10-25
+
+The maintainer approved a newcomer-oriented README, credential-free first run,
+fallback walkthrough, optional service/browser demo, real-model setup, benchmark
+and developer integration map. The [quickstart](quickstart.md) reuses released
+SDKs; `examples/first_workflow.py` only parses, admits and prepares, never executes.
+Unified browser pooling remains separate. The old README's operator/history
+material is retained in `reference-guide.md`, with original section anchors
+linked from the new README. [Local verification](verification/guided-onboarding-2026-10-25.md)
+passed 1,923 source tests, fresh setup, installed consumers and both service demos
+with cleanup verified; independent review is clean after fixing setup. Keep this
+follow-up local; no new release or live benchmark is authorized by onboarding work.
+
+Lab 0.6.2 is published at qualified source
+`b5773c33ba7305b92667c9874e4a8526c4394dd9`, with PR33 merged as 46a2d80.
+The [release ledger](verification/release-0.6.2-2026-10-25.md) records exact
+artifacts and both clean consumers' 54 checks. Preserve immutable release bytes,
+private receipts and all earlier benchmark/model evidence.
+
 ## Lab 0.6.2 release preparation — 2026-10-25
 
 The maintainer authorized releasing 0.6.2 with configurable local timeout and

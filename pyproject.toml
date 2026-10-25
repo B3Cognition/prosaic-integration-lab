@@ -21,6 +21,7 @@ include = ["prosaic_integration_lab*", "lab_runner*"]
 "lab_runner.native_eval" = ["data/subagents/*.md"]
 "lab_runner.quality" = ["data/*.json", "data/*.md"]
 "lab_runner.memory" = ["data/*.json"]
+"lab_runner.explore" = ["web/*", "web/assets/*", "web/font-licenses/*"]
 
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"

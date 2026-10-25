@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+- Keep chapter navigation and receipt inspection independent: changing chapters
+  opens documentation, and polling preserves historical receipt selection after
+  the current request completes without weakening lost-response recovery.
+
+- Replace Explorer's IBM Plex fonts with locally bundled Instrument Sans and
+  Geist Mono. Keep the chapter frame and Previous/Next controls within the
+  window; scroll longer content inside and reset its position on navigation.
+
+- Refine Explorer typography, graph selection and reading panels; add a
+  persistent System/Light/Dark appearance switcher with system-change support
+  and a working fallback when browser storage is restricted.
+
+- Add Prosaic Explorer: bundled visual ecosystem documentation, eight safe
+  playback scenarios and explicitly authorized single-agent unified-pool runs.
+  Retain durable allowance, request identity, cancellation evidence and offline
+  reconciliation without replaying partial work.
+- Add the guided quickstart and first-workflow example, README integration map,
+  clean installed-asset smoke and locked frontend/browser acceptance checks.
+  Published 0.6.2 artifacts and SDK pins remain unchanged.
+
 ## 0.6.2 — 2026-10-25
 
 - Make the unified benchmark's `--local-timeout` configurable within 1–300

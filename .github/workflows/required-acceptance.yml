@@ -90,6 +90,21 @@ jobs:
           .venv/bin/python -m pip check
       - name: Select installed CLI bindings
         run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '22'
+      - name: Verify Explorer source and committed offline assets
+        run: |
+          npm ci --prefix frontend/explorer --ignore-scripts
+          npm test --prefix frontend/explorer
+          npm run build --prefix frontend/explorer
+          git diff --exit-code -- lab_runner/explore/web
+          test -z "$(git ls-files --others --exclude-standard -- lab_runner/explore/web)"
+      - name: Explorer browser regressions without model calls
+        if: ${{ matrix.runner == 'ubuntu-24.04' && matrix.postgres == 16 }}
+        run: |
+          npm exec --prefix frontend/explorer -- playwright install --with-deps chromium
+          npm run test:browser --prefix frontend/explorer
       - name: Install pinned Linux CLI sandbox backend
         run: |
           sudo apt-get update
@@ -112,6 +127,8 @@ jobs:
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
+      - name: Verify exact checkout history before full regressions
+        run: .venv/bin/python -m pytest -q tests/functional/test_required_acceptance.py -k candidate_checkout_history
       - name: Unit and functional regressions
         if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
         run: .venv/bin/python -m pytest -q

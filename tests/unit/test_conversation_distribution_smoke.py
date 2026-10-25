@@ -58,6 +58,9 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
                    wheels=tmp_path, lock=tmp_path / 'lock', environment={})
+    explorer = [call for call in calls if any(str(arg).endswith('explorer_smoke.py') for arg in call)]
+    assert len(explorer) == 1
+    assert '-I' in explorer[0] and '-B' in explorer[0]
     for script in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
         selected = [call for call in calls if any(str(arg).endswith(script) for arg in call)]
         assert len(selected) == int(train != 'context')

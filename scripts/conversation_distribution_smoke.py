@@ -191,6 +191,8 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
     verify_cli_versions(version,json.loads(manifest.read_bytes()))
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
+    run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
+        directory=directory,environment=environment)
     from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN
     selected=json.loads(manifest.read_bytes())
     if supports_consumer_blueprints(selected):

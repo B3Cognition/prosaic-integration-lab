@@ -7,11 +7,12 @@ Two separately authorized [released-wheel live studies](verification/unified-cli
 passed 54/54 assignments. Historical candidate evidence stays separately
 identified below; offline release validation and live measurements have distinct scopes.
 
-Use released [Lab 0.6.1](release-0.6.1.md) for standalone installed evaluation.
-It packages the auditor that Lab 0.6.0's wheel-only entry point omitted.
-[Clean public-wheel and rebuilt-source installs](verification/release-0.6.1-2026-10-25.md)
-each passed all 51 standalone checks with Runtime 0.9.8, including fallback,
-cooldowns and no partial-work replay, with verified cleanup and zero live calls.
+Start with the [guided quickstart](quickstart.md). Released
+[Lab 0.6.2](release-0.6.2.md) includes the packaged evaluation auditor and
+configurable local benchmark deadline. Its
+[clean public-wheel and rebuilt-source installs](verification/release-0.6.2-2026-10-25.md)
+each passed 51 standalone checks plus 3 deadline cases with Runtime 0.9.8, including
+fallback, cooldowns and no partial-work replay, with verified cleanup and zero live calls.
 The 0.6.0 Runtime API/CLI examples and extracted-source commands retain their
 original qualification; historical model measurements are unchanged.
 

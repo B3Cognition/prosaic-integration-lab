@@ -1,5 +1,29 @@
 # Current delivery status
 
+## Visual Explorer in this checkout — 2026-10-25
+
+[Explorer](explorer.md) adds bundled React Flow documentation, user/developer
+inspection, eight deterministic playback scenarios and explicit single-agent
+unified-pool controls. The default launcher uses no models or Docker. Live
+admission, durable allowance, filtered receipts and offline acknowledgment stay
+host-owned; Runtime 0.9.8 owns provider selection. The existing Harness browser
+service remains separate. This is post-0.6.2 work, not a published release or
+new live model benchmark. See the
+[implementation verification ledger](verification/explorer-2026-10-25.md) for scope.
+The [PR review ledger](verification/explorer-pr-2026-10-25.md) records the current
+review fixes and final local checks; required Linux/database CI remains a separate
+merge gate.
+
+## Lab 0.6.2 published and verified — 2026-10-25
+
+The [0.6.2 release verification](verification/release-0.6.2-2026-10-25.md)
+records four green exact-source CI cells, original CI archives and verified
+public downloads. Clean public-wheel/rebuilt-source installs with Runtime 0.9.8
+each passed 51 standalone checks plus 3 deadline checks, including default 180s and
+explicit 240s, with cleanup verified and zero live model calls. The
+[guided quickstart](quickstart.md) and standalone first-workflow example are
+post-release onboarding additions in this checkout, not changes to released bytes.
+
 ## Configurable benchmark deadline and 240s study — 2026-10-25
 
 The unified benchmark now accepts a finite `--local-timeout` from 1–300s,
