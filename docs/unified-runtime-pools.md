@@ -7,10 +7,13 @@ Two separately authorized [released-wheel live studies](verification/unified-cli
 passed 54/54 assignments. Historical candidate evidence stays separately
 identified below; offline release validation and live measurements have distinct scopes.
 
-Lab 0.6.0's wheel-only evaluation entry point has a packaging limitation: it
-requires a source-only auditor. Its Runtime API/CLI examples and commands from
-the extracted source archive work. The 0.6.1 patch packages the auditor and
-adds isolated installed-command coverage; it is not yet released.
+Use released [Lab 0.6.1](release-0.6.1.md) for standalone installed evaluation.
+It packages the auditor that Lab 0.6.0's wheel-only entry point omitted.
+[Clean public-wheel and rebuilt-source installs](verification/release-0.6.1-2026-10-25.md)
+each passed all 51 standalone checks with Runtime 0.9.8, including fallback,
+cooldowns and no partial-work replay, with verified cleanup and zero live calls.
+The 0.6.0 Runtime API/CLI examples and extracted-source commands retain their
+original qualification; historical model measurements are unchanged.
 
 ## Configuration and invocation
 

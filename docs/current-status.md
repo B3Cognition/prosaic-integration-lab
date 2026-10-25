@@ -1,18 +1,23 @@
 # Current delivery status
 
-## Installed evaluation CLI repair — 2026-10-24
+## Lab 0.6.1 release and clean-install verification — 2026-10-25
 
-The 0.6.1 patch candidate moves the SDK payload auditor into the installed Lab
-package. Lab 0.6.0's standalone evaluation command failed before dispatch because
-it imported the source-only `scripts.audit_install`; the published 0.6.0 artifacts
-and historical benchmark evidence remain unchanged.
+Lab [0.6.1 is published](release-0.6.1.md), fixing the standalone installed
+evaluation CLI by packaging the SDK payload auditor. The compatibility source
+command retains the same payload, ownership and executable-cache checks.
 
-The compatibility script uses the same packaged auditor, preserving payload,
-ownership and executable-cache verification. Clean wheel and rebuilt-sdist
-qualification now invokes all four evaluation fixture commands through isolated
-Python, requiring 51 credential-free checks with verified cleanup. SDK pins
-remain unchanged. Source regressions and clean artifact verification must pass
-before the patch can be released.
+All four Linux AMD64/ARM64 × PostgreSQL 16/18 CI cells passed 1,899 source tests
+each and 1,336 required real-stack checks across 36 lanes. Original qualified CI
+wheel/source bytes were published with checksums and exact-source verification.
+
+The [post-publication verification](verification/release-0.6.1-2026-10-25.md)
+downloaded all four assets and verified their bytes. Clean public-wheel and
+rebuilt-public-source installs on macOS ARM64/Python 3.12.15 each passed all 51
+standalone CLI checks with Runtime 0.9.8, including quota fallback, persisted
+cooldowns and no partial-work replay. Isolated imports, 176 installed Lab files
+per consumer and cleanup were verified; no repository `scripts` package was
+available and no live provider calls were made. SDK pins, earlier artifacts and
+historical model measurements remain unchanged.
 
 ## Lab 0.6.0 release — 2026-10-24
 
