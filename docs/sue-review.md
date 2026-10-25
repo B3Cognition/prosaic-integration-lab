@@ -28,6 +28,9 @@ handoff and checks final assessment/issue consistency with bounded retries.
 Older comparison versions, canonical guidance and the strict scorer remain
 available unchanged. These features do not establish semantic entailment or
 make an advisory terminal a quality certificate.
+The new engine candidate has a distinct content identity. Resume older reviews
+with their original pinned engine; a different installation must fail binding
+checks. Start a fresh review ID to opt into the new profile.
 
 **Live review quality remains unqualified.** A separate
 [360-second Qwen comparison](verification/sue-qwen360-2026-10-25.md) completed
