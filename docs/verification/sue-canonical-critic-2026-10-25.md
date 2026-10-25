@@ -152,4 +152,3 @@ that historical HEAD. Final archive:190 files, manifest SHA256
 [Final mechanics archive](/Users/michalbachorik/work/prosaics/prosaic-integration-lab/reports/castle-sue-protected-existing-20261025/manifest.json),
 [first Qwen run](/Users/michalbachorik/work/prosaics/prosaic-integration-lab/reports/castle-sue-canonical-critic-20261025/verification.md),
 [second Qwen run](/Users/michalbachorik/work/prosaics/prosaic-integration-lab/reports/castle-sue-canonical-critic-r2-20261025/verification.md).
-
