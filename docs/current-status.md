@@ -3,7 +3,7 @@
 ## Configurable benchmark deadline and 240s study — 2026-10-25
 
 The unified benchmark now accepts a finite `--local-timeout` from 1–300s,
-defaulting to 180s. This is an unreleased post-0.6.1 change; native60s,
+defaulting to 180s. The [0.6.2 release preparation](release-0.6.2.md) includes it; native60s,
 pool300s, grants, attempt/request/tool/token caps and allowance remain fixed.
 The [recipe](realistic-runtime-benchmark.md) describes invocation and metadata.
 

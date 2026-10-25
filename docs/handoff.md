@@ -1,5 +1,16 @@
 # Codex handoff
 
+## Lab 0.6.2 release preparation — 2026-10-25
+
+The maintainer authorized releasing 0.6.2 with configurable local timeout and
+post-publication clean-install checks using Runtime 0.9.8. PR #32 merged as
+`eff161943c5e816468eef504bf9c4fc055a0fb11` after four green CI cells and review.
+The [release notes](release-0.6.2.md) describe the patch. Qualify the versioned
+source in all four cells, retain original CI artifacts, then publish and verify
+downloaded bytes. Clean consumers must exercise default180s/explicit240s and
+the installed evaluation lanes without live inference. Preserve SDK pins,
+historical releases and private benchmark evidence.
+
 ## Configurable local benchmark deadline — 2026-10-25
 
 The maintainer authorized configurable unified benchmark local timeouts, tests,
