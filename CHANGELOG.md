@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.0 — 2026-10-25
+
+- Release Explorer and guided onboarding with the unchanged public Runtime 0.9.8
+  SDK train. Bundle visual documentation, playback, fonts and styles for installed
+  consumers, with no Node requirement at runtime.
+- Preserve full checkout history during browser CI by disabling optional
+  Playwright Git metadata capture, and require a full-history preflight.
+
 - Keep chapter navigation and receipt inspection independent: changing chapters
   opens documentation, and polling preserves historical receipt selection after
   the current request completes without weakening lost-response recovery.

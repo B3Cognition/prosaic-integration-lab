@@ -2,8 +2,9 @@
 
 Explorer explains how Markdown, execution policy, provider pools, workflows and
 receipts fit together. It is a local Integration Lab application consuming public
-SDKs. This checkout adds it after Lab 0.6.2; published 0.6.2 artifacts do not
-contain it. SDK versions remain Core 0.4.1, Runtime 0.9.8 and Harness 0.9.4.
+SDKs. Lab 0.7.0 includes Explorer in its wheel and source archive; earlier 0.6.2
+artifacts do not contain it. SDK versions remain Core 0.4.1, Runtime 0.9.8 and
+Harness 0.9.4.
 
 ## Open the visual guide
 

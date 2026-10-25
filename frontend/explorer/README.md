@@ -14,6 +14,9 @@ EXPLORER_PYTHON=/absolute/path/to/lab/.venv/bin/python npm run test:browser
 `EXPLORER_NODE` optionally selects the Node executable used for Playwright;
 otherwise the runner uses its current Node executable. On Linux CI, install
 browser system libraries with `npx playwright install --with-deps chromium`.
+Set `EXPLORER_INSTALLED=1` with a clean consumer's Python to launch using `-I -B`
+from the fixture's temporary directory, ensuring the browser uses installed
+assets rather than the source checkout.
 
 The browser suite starts and stops its own loopback documentation launcher per
 test, with a private temporary launch file. It tests the actual single-use HTTP

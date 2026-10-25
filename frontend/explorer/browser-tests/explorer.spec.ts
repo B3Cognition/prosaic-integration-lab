@@ -14,8 +14,8 @@ const test = base.extend<{ launcher: { url: string; origin: string } }>({
     const file = join(directory, "launch.json");
     const child = spawn(
       process.env.EXPLORER_PYTHON || "python3",
-      ["-m", "lab_runner.explore", "--no-open", "--launch-file", file],
-      { cwd: resolve("../.."), stdio: "ignore" },
+      [...(process.env.EXPLORER_INSTALLED === "1" ? ["-I", "-B"] : []), "-m", "lab_runner.explore", "--no-open", "--launch-file", file],
+      { cwd: process.env.EXPLORER_INSTALLED === "1" ? directory : resolve("../.."), stdio: "ignore" },
     );
     let exit = false;
     const closed = new Promise<void>((done) =>

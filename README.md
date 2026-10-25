@@ -41,10 +41,10 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-**Lab [0.6.2](docs/release-0.6.2.md)** consumes **Runtime 0.9.8**, Core 0.4.1,
-Harness 0.9.4, Runtime recorder 0.3.0 and Harness store 0.4.0. The guided onboarding,
-first-workflow example and Explorer on this branch are additions after the 0.6.2 release;
-use this checkout for them. The 0.6.2 artifacts retain their original bytes.
+**Lab [0.7.0](docs/release-0.7.0.md)** consumes **Runtime 0.9.8**, Core 0.4.1,
+Harness 0.9.4, Runtime recorder 0.3.0 and Harness store 0.4.0. It includes Explorer,
+the guided onboarding and the first-workflow example. Earlier release artifacts
+retain their original bytes.
 
 After the [quickstart installation](docs/quickstart.md#setup-once), open the
 visual guide with `python -m lab_runner.explore`. The default launches documentation
@@ -60,7 +60,7 @@ and playback without Docker, Node or model credentials. See the
 - Permissions and budgets stay explicit. Native permissions and API tool/file
   grants are separate; API token limits do not bound native subscription spend.
 - The standalone evaluation CLI works from installed wheels without repository
-  `scripts`. Lab 0.6.2 makes the unified benchmark local timeout configurable
+  `scripts`. The unified benchmark local timeout remains configurable
   within 1–300s, default 180s; native 60s/pool 300s ceilings remain fixed.
 
 [Release 0.6.2 verification](docs/verification/release-0.6.2-2026-10-25.md)
