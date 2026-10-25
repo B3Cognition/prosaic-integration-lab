@@ -27,9 +27,24 @@ Harness 0.9.4 and store 0.4.0. Existing benchmarks, Markdown inputs, historical
 release assets and experimental boundaries remain unchanged. Qualification uses
 synthetic providers and makes no new model-quality claim.
 
-Release preparation requires the versioned source's complete Linux AMD64/ARM64 ×
-PostgreSQL 16/18 matrix, including browser, installed distribution and real-stack
-gates. Publish the original qualified CI wheel and source archive together with
-`SHA256SUMS-0.7.0.txt` and `VERIFICATION-0.7.0.json`. Then verify anonymous public
-downloads and clean wheel/rebuilt-source consumers with Runtime 0.9.8, including
-installed visual docs/playback and synthetic bounded live execution controls.
+## Published and verified
+
+[Release 0.7.0](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.7.0)
+publishes the original qualified CI wheel and source archive with
+`SHA256SUMS-0.7.0.txt` and `VERIFICATION-0.7.0.json`. All four Linux AMD64/ARM64 ×
+PostgreSQL 16/18 cells passed 1,980 source tests and 334 required stack checks
+each, with zero skipped/failed stack checks and verified cleanup.
+
+Anonymous downloads matched all four audited assets. Clean public-wheel and
+rebuilt-public-source installs with Runtime 0.9.8 each passed 51 standalone
+fixtures, three deadline CLI checks and 10 installed-browser checks: 128 checks
+across both consumers. All five visual chapters, eight playback scenarios,
+themes, local fonts and stable navigation were checked. Separate actual
+installed Runtime CLI execution through an owned synthetic provider verified
+reviewed SQL completion, duplicate-request protection, cancellation, retained
+allowance and refused admission across restart.
+
+The [release verification ledger](verification/release-0.7.0-2026-10-25.md)
+records source/tag provenance, exact asset hashes, commands, platforms and limits.
+Cleanup passed and no real model calls were made; this is release qualification,
+separate from the historical live benchmarks.

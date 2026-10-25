@@ -63,16 +63,18 @@ and playback without Docker, Node or model credentials. See the
   `scripts`. The unified benchmark local timeout remains configurable
   within 1–300s, default 180s; native 60s/pool 300s ceilings remain fixed.
 
-[Release 0.6.2 verification](docs/verification/release-0.6.2-2026-10-25.md)
-records original CI artifacts, anonymous download checks and clean public-wheel
-and rebuilt-source installs with Runtime 0.9.8. Both passed 51 standalone fixtures
-plus 3 deadline checks (default 180s, explicit 240s and fractional precision), with
-cleanup verified and zero live model calls.
+[Release 0.7.0 verification](docs/verification/release-0.7.0-2026-10-25.md)
+records four green CI cells, original CI artifacts and matching anonymous
+downloads. Clean public-wheel and rebuilt-source installs with Runtime 0.9.8
+each passed 51 standalone fixtures, 3 deadline checks and 10 browser checks.
+Installed visual docs/playback and bounded synthetic live controls passed,
+including duplicate protection, cancellation and blocked admission across
+restart, with cleanup verified and zero real model calls.
 
 The latest [live study](docs/verification/unified-cli-lab061-local240-2026-10-25.md)
 passed 9/9 tasks per backend, with median latencies Claude 10.86s, Codex 21.73s
 and local 62.37s. It used identical neutral Markdown/inputs and a disclosed
-Lab 0.6.1 private 240s driver. It is separate from 0.6.2 fixture qualification;
+Lab 0.6.1 private 240s driver. It is separate from release fixture qualification;
 small studies do not establish general model quality rankings.
 
 ## Troubleshooting and deeper examples
