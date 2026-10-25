@@ -31,6 +31,12 @@ On phones the list opens first; **Graph view** switches to the overview. Graph
 nodes are keyboard selectable and the list offers ordinary buttons. Motion
 respects reduced-motion preferences.
 
+The interface uses locally bundled **Instrument Sans**, with **Geist Mono** for
+code and identifiers. Chapters share a window-sized frame: Previous/Next stay
+anchored at the bottom while longer content scrolls inside. Each new chapter
+opens at the start of its content. The content pane can receive keyboard focus
+for scrolling, and no model work starts during navigation.
+
 Use **Appearance** at the top right to choose **System**, **Light** or **Dark**.
 System follows your device, including changes while the page is open. Light
 uses the Taste v2 Framed sheet direction; Dark uses neutral black surfaces and

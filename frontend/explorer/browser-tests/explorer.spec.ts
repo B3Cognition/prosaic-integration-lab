@@ -80,6 +80,52 @@ async function connect(page: Page, url: string) {
   ).toEqual([0, 0]);
 }
 
+test("chapter frame and navigation remain in the viewport while long content scrolls", async ({ page, launcher }) => {
+  for (const viewport of [{ width: 1920, height: 900 }, { width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 768, height: 1024 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto(launcher.origin);
+    const previous = page.getByRole("button", { name: "Previous chapter", exact: true });
+    const next = page.getByRole("button", { name: "Next chapter →", exact: true });
+    let frameHeight: number | undefined;
+    for (let chapter = 0; chapter < 5; chapter++) {
+      await expect(page.locator(".chapter-footer > span")).toHaveText(`${chapter + 1} of 5 chapters`);
+      const bounds = await page.locator(".sheet").boundingBox();
+      if (frameHeight === undefined) frameHeight = bounds!.height;
+      expect(Math.abs(bounds!.height - frameHeight)).toBeLessThan(1);
+      for (const button of [previous, next]) {
+        const rect = await button.boundingBox();
+        expect(rect!.y).toBeGreaterThanOrEqual(0);
+        expect(rect!.y + rect!.height).toBeLessThanOrEqual(viewport.height);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+      if (viewport.width >= 1440) {
+        await expect(page.getByRole("button", { name: "Explore a scenario →", exact: true })).toBeInViewport();
+      }
+      const content = page.locator(".lesson-layout");
+      await content.evaluate(element => element.scrollTo(0, element.scrollHeight));
+      await expect(previous).toBeInViewport();
+      await expect(next).toBeInViewport();
+      if (chapter < 4) {
+        await next.click();
+        await expect.poll(() => content.evaluate(element => element.scrollTop)).toBe(0);
+      }
+    }
+  }
+});
+
+test("modern interface and code fonts load from the local bundle", async ({ page, launcher }) => {
+  await page.goto(launcher.origin);
+  await page.getByRole("button", { name: "Developer", exact: true }).click();
+  await expect(page.locator(".code-wrap code")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain("Instrument Sans");
+  expect(await page.locator(".code-wrap code").evaluate(element => getComputedStyle(element).fontFamily)).toContain("Geist Mono");
+  expect(await page.evaluate(() => [...document.fonts].filter(font => font.status === "loaded").map(font => font.family))).toEqual(expect.arrayContaining(["Instrument Sans", "Geist Mono"]));
+  const fontUrls = await page.evaluate(() => performance.getEntriesByType("resource").map(resource => resource.name).filter(name => /\.woff2?$/.test(name)));
+  expect(fontUrls.length).toBeGreaterThan(1);
+  expect(fontUrls.every(url => new URL(url).origin === new URL(launcher.origin).origin)).toBe(true);
+});
+
 test("appearance follows the system, persists only preferences and preserves playback without dispatch", async ({ page, launcher }) => {
   const mutations: string[] = [];
   page.on("request", request => { if (request.method() !== "GET") mutations.push(request.method()); });

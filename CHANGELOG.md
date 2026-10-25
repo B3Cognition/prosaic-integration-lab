@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Replace Explorer's IBM Plex fonts with locally bundled Instrument Sans and
+  Geist Mono. Keep the chapter frame and Previous/Next controls within the
+  window; scroll longer content inside and reset its position on navigation.
+
 - Refine Explorer typography, graph selection and reading panels; add a
   persistent System/Light/Dark appearance switcher with system-change support
   and a working fallback when browser storage is restricted.

@@ -16,10 +16,10 @@ import {
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import "@fontsource/ibm-plex-sans/latin-400.css";
-import "@fontsource/ibm-plex-sans/latin-500.css";
-import "@fontsource/ibm-plex-sans/latin-600.css";
-import "@fontsource/ibm-plex-mono/latin-400.css";
+import "@fontsource/instrument-sans/latin-400.css";
+import "@fontsource/instrument-sans/latin-500.css";
+import "@fontsource/instrument-sans/latin-600.css";
+import "@fontsource/geist-mono/latin-400.css";
 import "./style.css";
 import {
   readAppearance,
@@ -128,7 +128,8 @@ function App() {
     [receipt, setReceipt] = useState<Receipt | null>(null);
   const submitting = useRef(false),
     mounted = useRef(true),
-    intentRef = useRef<RunIntent | null>(null);
+    intentRef = useRef<RunIntent | null>(null),
+    sheetRef = useRef<HTMLElement | null>(null);
   const chapter = chapters.find((c) => c.id === chapterId)!,
     scenario = scenarios.find((s) => s.id === scenarioId)!,
     current = scenario.steps[index],
@@ -199,6 +200,10 @@ function App() {
     )
       setSelected(current.node);
   }, [mode, index, scenarioId]);
+  useEffect(() => {
+    // Each lesson opens at its start; retained live receipts are not reset.
+    sheetRef.current?.querySelector(".lesson-layout")?.scrollTo(0, 0);
+  }, [chapterId, mode, textView]);
   function changeChapter(id: string) {
     setChapterId(id);
     setSelected(chapters.find((c) => c.id === id)!.nodes[0].id);
@@ -408,7 +413,7 @@ function App() {
             </select>
           </label>
         </header>
-        <main className="sheet" id="workspace">
+        <main className="sheet" id="workspace" ref={sheetRef}>
           <div className="title-row">
             <div>
               <h1>{chapter.question}</h1>
@@ -452,7 +457,7 @@ function App() {
             </span>
           </div>
           {mode === "Live" ? (
-            <section className="live-surface">
+            <section className="live-surface" tabIndex={0} aria-label="Live execution controls">
               <div className="live-column">
                 <div className="section-heading">
                   <h2>Bounded agent execution</h2>
@@ -831,7 +836,7 @@ function App() {
             </section>
           ) : (
             <>
-              <div className="lesson-layout">
+              <div className="lesson-layout" tabIndex={0} role="region" aria-label="Chapter content">
                 <section
                   className="graph-column"
                   aria-label="Component handoff"
@@ -957,25 +962,27 @@ function App() {
                     </section>
                   ) : (
                     <section className="under-graph">
-                      <h2>Trace the contract</h2>
+                      <div className="section-heading">
+                        <h2>Trace the contract</h2>
+                        <button
+                          onClick={() =>
+                            chooseScenario(
+                              chapterId === "workflow"
+                                ? "waiting"
+                                : chapterId === "pool"
+                                  ? "fallback"
+                                  : "complete",
+                            )
+                          }
+                        >
+                          Explore a scenario →
+                        </button>
+                      </div>
                       <p>
                         {chapterId === "ecosystem"
                           ? "The Markdown describes the task. The host supplies permission. Runtime chooses a safe execution path; the receipt preserves what is known."
                           : "Select any component to inspect its inputs, outputs and authority boundary. The list view exposes the same material with standard keyboard controls."}
                       </p>
-                      <button
-                        onClick={() =>
-                          chooseScenario(
-                            chapterId === "workflow"
-                              ? "waiting"
-                              : chapterId === "pool"
-                                ? "fallback"
-                                : "complete",
-                          )
-                        }
-                      >
-                        Explore a scenario →
-                      </button>
                     </section>
                   )}
                 </section>

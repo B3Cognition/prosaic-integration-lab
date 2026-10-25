@@ -2,7 +2,7 @@ Prosaic Explorer — bundled JavaScript third-party notices
 
 These are the exact license notices for the production JavaScript packages
 identified in Vite output chunk.modules, at the versions in package-lock.json.
-Development tools and erased type-only packages are excluded. Bundled IBM Plex
+Development tools and erased type-only packages are excluded. Bundled
 font licenses are supplied separately in font-licenses/.
 
 ========================================================================
