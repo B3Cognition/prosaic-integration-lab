@@ -2,9 +2,47 @@
 
 import html
 import json
+from copy import deepcopy
+
+from .contracts import encoded, own
 
 
-def render_review(request, state, attempt_summary):
+def compact_advice(report):
+    """Lossless distinct advisory content; raw reports remain in host evidence."""
+    if report is None:
+        return None
+    report = own(report,262144)
+
+    def unique(items, with_turns=False):
+        grouped={}
+        for original in items:
+            item=deepcopy(original)
+            turn=item.pop('turn') if with_turns else None
+            key=encoded(item)
+            if key not in grouped:
+                grouped[key]={**item,'turns':[]} if with_turns else item
+            if with_turns and turn not in grouped[key]['turns']:
+                grouped[key]['turns'].append(turn)
+        return list(grouped.values())
+
+    fields=('advisory','terminal','claim','acceptedTurns','meaning','sourcesSha256','sources')
+    result={k:report[k] for k in fields}
+    coverage=report['coverage']
+    result['coverage']={k:v for k,v in coverage.items() if k not in {'issues','open_issues'}}
+    result['coverage']['issues']=unique(coverage.get('issues',[]),True)
+    result['citations']=unique(report['citations'],True)
+    for name in ('premises','witnesses'):
+        result[name]=unique(report[name])
+    result['openQuestions']=list(dict.fromkeys(report['openQuestions']))
+    if 'turnEvidence' in report:
+        for name,field in [('premiseOrigins','premises'),('questionOrigins','openQuestions'),
+                           ('witnessOrigins','witnesses')]:
+            result[name]=unique([{'value':value,'turn':t['turn']}
+                for t in report['turnEvidence'] for value in t[field]],True)
+    return result
+
+
+def render_review(request, state, attempt_summary, *, include_turns=False):
     frozen = request['evidence']
     citations = []
     for turn in state['turns']:
@@ -20,7 +58,11 @@ def render_review(request, state, attempt_summary):
             'witnesses':[t['witness'] for t in state['turns'] if t.get('witness')],
             'attempts':attempt_summary['attempts'],'reportedTokens':attempt_summary['reportedTokens'],
             'usageComplete':attempt_summary['usageComplete'],
-            'meaning':'Dimensions examined is not truth, implementation correctness, or release approval.'}
+            'meaning':'Dimensions examined is not truth, implementation correctness, or release approval.',
+            **({'turnEvidence':[{'turn':t['turn_no'],'premises':t.get('premises',[]),
+                 'openQuestions':t.get('open_questions',[]),
+                 'witnesses':[t['witness']] if t.get('witness') else []}
+                 for t in state['turns']]} if include_turns else {})}
 
 
 def render_markdown(report):

@@ -150,6 +150,7 @@ class SueReviewSession:
         accepted = fold_accepted(request,state['outputs'],engine=engine)
         usage = [v['token_usage'] for v in state['invocations']]
         report = render_review(request,accepted,{'coverage':engine.coverage(accepted),'attempts':state['calls'],
-                      'reportedTokens':sum(v for v in usage if v is not None),'usageComplete':all(v is not None for v in usage)})
+                      'reportedTokens':sum(v for v in usage if v is not None),'usageComplete':all(v is not None for v in usage)},
+                      include_turns=request['reviewPolicy'].get('task_context',False))
         return {**report,'runId':run_id,'status':state['status'],'reason':state['reason'],
                 'deadline':state['deadline'],'proposal':self._proposal(request)}
