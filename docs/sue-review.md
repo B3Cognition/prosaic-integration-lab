@@ -12,12 +12,15 @@ disables it. Other review settings are rejected while disabled. Installing the
 engine does not enable review, record chats, retrieve sources or start a model.
 The disabled session constructor loads no SUE engine or SDK execution machinery.
 
-**Live review quality remains unqualified.** The latest
-[v1.5 Qwen study](verification/sue-grounding-schema-2026-10-24.md) stopped after
-12/24 cells at the unchanged120-second deadline. Three SUE workflows completed;
-case4 accepted seven turns before timeout. Two invalid stated premises were
-rejected and corrected within existing retries. The full comparison remains
-incomplete, and its unknown request reservation remains charged. The preceding
+**Live review quality remains unqualified.** A separate
+[360-second Qwen comparison](verification/sue-qwen360-2026-10-25.md) completed
+all24workflows: SUE passes4/8strict reviews, direct3/8, critic2/8. SUE uses about
+11.7times direct tokens; the14-turn case still fails the scorer. This one small
+trial does not establish general benefit. The earlier
+[120-second v1.5 study](verification/sue-grounding-schema-2026-10-24.md) remains
+safety-stopped at12/24cells with its unknown reservation fully retained. Both
+studies keep strict validation and disabled defaults; the360-second limit is
+an explicit experiment setting. The preceding
 [constrained Qwen comparison](verification/sue-constrained-json-2026-10-24.md)
 and Qwen27B invocation-limit failure remain preserved. Keep review disabled for normal work. The
 [earlier failed comparison](verification/review-contract-fixes-2026-10-24.md)

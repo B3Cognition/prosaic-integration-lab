@@ -1,5 +1,26 @@
 # Codex handoff
 
+## Separate 360-second Qwen comparison completed — 2026-10-25
+
+[Qualification](verification/sue-qwen360-2026-10-25.md): same v1.5 candidate,
+cases/scorer/profile and strict validation; only common cell deadline120→360.
+Experiment-only public Harness construction preserves the closed120s builder;
+preflight proves120s fingerprint equality. All24cells/workflows complete:
+direct3/8strict, critic2/8, SUE4/8.56requests/121,791tokens reconcile, zero new
+unknowns/overruns/tools, zero-call replay and56request audit. All24SUE replies
+match both schemas; two invalid stated premises rejected/recovered in existing
+retries. Case4 takes263.950s/14turns/64,408tokens toBOUNDED_STOP and still fails
+the strict scorer. SUE uses11.67times direct tokens for net one extra strict
+pass in this single small trial; no general efficacy/quality certification.
+
+Fresh installed62 and fixture24/24 pass. All8prior archives/3629files verify
+unchanged; original120s unknown entry keeps its full30request/65536token cell
+reservation, old total49requests/90,345tokens. Never substitute this new run's
+known result for the old unknown receipt. Production code/pins/defaults remain
+unchanged: memory/SUE disabled, native CI/general private-SDK adoption/release
+still separate. No push, merge or publication. Historical checkpoints below
+retain their original deadlines/results.
+
 ## SUE generation grounding tightened; unchanged deadline stops pilot — 2026-10-24
 
 [Schema qualification](verification/sue-grounding-schema-2026-10-24.md): v1.5
