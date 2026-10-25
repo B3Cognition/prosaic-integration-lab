@@ -1,5 +1,20 @@
 # Current delivery status
 
+## Configurable benchmark deadline and 240s study — 2026-10-25
+
+The unified benchmark now accepts a finite `--local-timeout` from 1–300s,
+defaulting to 180s. This is an unreleased post-0.6.1 change; native60s,
+pool300s, grants, attempt/request/tool/token caps and allowance remain fixed.
+The [recipe](realistic-runtime-benchmark.md) describes invocation and metadata.
+
+The preceding authorized [240s live study](verification/unified-cli-lab061-local240-2026-10-25.md)
+used released Lab 0.6.1 and Runtime 0.9.8 with a disclosed private deadline-only
+consumer driver. All 27 assignments passed on unchanged Markdown, inputs and
+graders. Claude/Codex/local medians were 10.86s/21.73s/62.37s; all nine local
+runs finished within 180s. It retained 27 controlled skips, zero provider
+fallbacks/timeouts and 45/243 known mixed units, with cleanup verified. The
+implementation uses credential-free tests; this follow-up makes no new live calls.
+
 ## Lab 0.6.1 release and clean-install verification — 2026-10-25
 
 Lab [0.6.1 is published](release-0.6.1.md), fixing the standalone installed
