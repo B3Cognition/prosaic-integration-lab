@@ -113,6 +113,44 @@ test("chapter frame and navigation remain in the viewport while long content scr
   }
 });
 
+test("chapter navigation opens documentation instead of retaining unrelated simulation or live content", async ({ page, launcher }) => {
+  await page.goto(launcher.origin);
+  await page.getByRole("button", { name: "Simulation", exact: true }).click();
+  await page.getByRole("button", { name: "Next chapter →", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Documentation", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("region", { name: "Scenario playback" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Live", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Live execution controls" })).toBeVisible();
+  await page.getByRole("navigation").getByRole("button", { name: /Provider pool/ }).click();
+  await expect(page.getByRole("region", { name: "Chapter content" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Documentation", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("retained receipt selection survives polling after the current request completes", async ({ page, launcher }) => {
+  const host = status(), old = receipt("a".repeat(32), "completed");
+  host.runs.push(old);
+  let polls = 0;
+  await page.route("**/api/status", route => { polls++; return route.fulfill({ json: host }); });
+  await page.route("**/api/runs/*", route => route.fulfill({ json: host.runs.find(row => row.runId === route.request().url().split("/").pop()) }));
+  await page.route("**/api/runs", route => {
+    const row = receipt(route.request().postDataJSON().requestId, "completed");
+    host.runs.push(row);
+    return route.fulfill({ json: row });
+  });
+  await connect(page, launcher.url);
+  await page.getByRole("button", { name: "Live", exact: true }).click();
+  await authorize(page);
+  await expect(page.locator(".receipt-column > dl code")).toHaveText(host.runs[1].runId);
+  await page.locator(".run-list button").filter({ hasText: old.runId }).click();
+  await expect(page.locator(".receipt-column > dl code")).toHaveText(old.runId);
+  const before = polls;
+  await expect.poll(() => polls).toBeGreaterThanOrEqual(before + 2);
+  await expect(page.locator(".receipt-column > dl code")).toHaveText(old.runId);
+  await page.getByRole("navigation").getByRole("button", { name: /Provider pool/ }).click();
+  await page.getByRole("button", { name: "Live", exact: true }).click();
+  await expect(page.locator(".receipt-column > dl code")).toHaveText(old.runId);
+});
+
 test("modern interface and code fonts load from the local bundle", async ({ page, launcher }) => {
   await page.goto(launcher.origin);
   await page.getByRole("button", { name: "Developer", exact: true }).click();

@@ -10,6 +10,9 @@ host-owned; Runtime 0.9.8 owns provider selection. The existing Harness browser
 service remains separate. This is post-0.6.2 work, not a published release or
 new live model benchmark. See the
 [implementation verification ledger](verification/explorer-2026-10-25.md) for scope.
+The [PR review ledger](verification/explorer-pr-2026-10-25.md) records the current
+review fixes and final local checks; required Linux/database CI remains a separate
+merge gate.
 
 ## Lab 0.6.2 published and verified — 2026-10-25
 

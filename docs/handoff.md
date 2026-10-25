@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Explorer review and PR preparation — 2026-10-25
+
+The maintainer authorized reviewing Explorer, fixing findings, completing checks
+and preparing an integration-lab PR. This supersedes the earlier local-only scope
+for these branch changes; it does not authorize merging or a release. Explorer
+includes visual documentation, eight deterministic scenarios, explicitly bounded
+live controls, System/Light/Dark appearance and viewport-stable chapter navigation.
+The [review ledger](verification/explorer-pr-2026-10-25.md) records final checks
+and two corrected navigation/receipt-selection findings. SDK pins and released
+artifacts remain unchanged; no new live inference is included. Require the exact
+PR head's four Linux AMD64/ARM64 × PostgreSQL 16/18 cells before a later merge.
+
 ## Guided ecosystem onboarding — 2026-10-25
 
 The maintainer approved a newcomer-oriented README, credential-free first run,

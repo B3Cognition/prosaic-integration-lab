@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep chapter navigation and receipt inspection independent: changing chapters
+  opens documentation, and polling preserves historical receipt selection after
+  the current request completes without weakening lost-response recovery.
+
 - Replace Explorer's IBM Plex fonts with locally bundled Instrument Sans and
   Geist Mono. Keep the chapter frame and Previous/Next controls within the
   window; scroll longer content inside and reset its position on navigation.

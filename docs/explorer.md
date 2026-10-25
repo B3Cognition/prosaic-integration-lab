@@ -37,6 +37,12 @@ anchored at the bottom while longer content scrolls inside. Each new chapter
 opens at the start of its content. The content pane can receive keyboard focus
 for scrolling, and no model work starts during navigation.
 
+Selecting a chapter opens its documentation and stops illustrative playback.
+Returning to **Live** retains the current request and selected receipt. After a
+request reaches an observed terminal state, status polling leaves your selected
+historical receipt in view. A lost submission response still recovers the exact
+admitted request rather than authorizing another dispatch.
+
 Use **Appearance** at the top right to choose **System**, **Light** or **Dark**.
 System follows your device, including changes while the page is open. Light
 uses the Taste v2 Framed sheet direction; Dark uses neutral black surfaces and

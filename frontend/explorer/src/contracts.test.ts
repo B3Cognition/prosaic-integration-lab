@@ -206,4 +206,12 @@ describe("browser authority", () => {
       receiptToRefresh({ ...status, runs: [prior] }, intent, prior),
     ).toBeNull();
   });
+  it("stops following an observed terminal intent so history stays selected", () => {
+    const intent = new RunIntent("release-brief", 180, "current");
+    const prior = { runId: "old-run", requestId: "previous", state: "completed" } as Receipt;
+    const terminal = { runId: "current-run", requestId: "current", state: "completed" } as Receipt;
+    const status = { activeRunId: null, runs: [prior, terminal] } as Status;
+    expect(receiptToRefresh(status, intent, prior, "current")).toBeNull();
+    expect(receiptToRefresh(status, intent, prior, null)).toBe("current-run");
+  });
 });

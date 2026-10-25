@@ -129,6 +129,8 @@ function App() {
   const submitting = useRef(false),
     mounted = useRef(true),
     intentRef = useRef<RunIntent | null>(null),
+    settledRequestId = useRef<string | null>(null),
+    receiptSelection = useRef(0),
     sheetRef = useRef<HTMLElement | null>(null);
   const chapter = chapters.find((c) => c.id === chapterId)!,
     scenario = scenarios.find((s) => s.id === scenarioId)!,
@@ -136,18 +138,22 @@ function App() {
     lesson = chapter.nodes.find((n) => n.id === selected) ?? chapter.nodes[0],
     task = tasks.find((t) => t.id === taskId)!;
   const refresh = async () => {
+    const selection = receiptSelection.current;
     try {
       const next = await api.status();
       if (!mounted.current) return;
       setStatus(next);
       setLastUpdated(new Date().toLocaleTimeString());
       setError("");
-      const id = receiptToRefresh(next, intentRef.current, receipt);
-      if (id) {
+      const id = receiptToRefresh(next, intentRef.current, receipt, settledRequestId.current);
+      if (id && selection === receiptSelection.current) {
         const requestId = intentRef.current?.requestId;
         const r = await api.receipt(id);
-        if (mounted.current && requestId === intentRef.current?.requestId)
+        if (mounted.current && requestId === intentRef.current?.requestId && selection === receiptSelection.current) {
+          if (r.requestId === requestId && r.state !== "running")
+            settledRequestId.current = requestId;
           setReceipt(r);
+        }
       }
     } catch (e) {
       if (mounted.current) setError((e as Error).message);
@@ -204,8 +210,9 @@ function App() {
     // Each lesson opens at its start; retained live receipts are not reset.
     sheetRef.current?.querySelector(".lesson-layout")?.scrollTo(0, 0);
   }, [chapterId, mode, textView]);
-  function changeChapter(id: string) {
+  function changeChapter(id: string, nextMode = "Documentation") {
     setChapterId(id);
+    setMode(nextMode);
     setSelected(chapters.find((c) => c.id === id)!.nodes[0].id);
     setPlaying(false);
     setMenu(false);
@@ -215,14 +222,14 @@ function App() {
     setScenarioId(id);
     setIndex(0);
     setPlaying(false);
-    setMode("Simulation");
-    changeChapter(next.chapter);
+    changeChapter(next.chapter, "Simulation");
     setSelected(next.steps[0].node);
   }
   async function submit() {
     if (submitting.current || !confirmed || (!intent && !canRun(status)))
       return;
     const request = intent ?? new RunIntent(taskId, timeout);
+    receiptSelection.current++;
     intentRef.current = request;
     setIntent(request);
     if (receipt?.requestId !== request.requestId) setReceipt(null);
@@ -231,6 +238,8 @@ function App() {
     setError("");
     try {
       const result = await api.run(request);
+      if (result.requestId === request.requestId && result.state !== "running")
+        settledRequestId.current = request.requestId;
       setReceipt(result);
       setReviewing(false);
       void refresh();
@@ -243,9 +252,13 @@ function App() {
   }
   async function cancel() {
     if (!receipt || pending) return;
+    const selection = ++receiptSelection.current;
     setPending(true);
     try {
-      setReceipt(await api.cancel(receipt.runId));
+      const result = await api.cancel(receipt.runId);
+      if (result.requestId === intentRef.current?.requestId && result.state !== "running")
+        settledRequestId.current = result.requestId;
+      if (selection === receiptSelection.current) setReceipt(result);
       void refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -434,7 +447,7 @@ function App() {
                 onClick={() => {
                   setMode(m);
                   setPlaying(false);
-                  if (m === "Live") changeChapter("results");
+                  if (m === "Live") changeChapter("results", "Live");
                   if (m === "Simulation")
                     chooseScenario(
                       chapterId === "workflow"
@@ -817,8 +830,11 @@ function App() {
                         <li key={r.runId}>
                           <button
                             onClick={async () => {
+                              const selection = ++receiptSelection.current;
                               try {
-                                setReceipt(await api.receipt(r.runId));
+                                const selected = await api.receipt(r.runId);
+                                if (mounted.current && selection === receiptSelection.current)
+                                  setReceipt(selected);
                               } catch (e) {
                                 setError((e as Error).message);
                               }

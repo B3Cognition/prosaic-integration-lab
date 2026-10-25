@@ -106,8 +106,9 @@ export function receiptToRefresh(
   status: Status,
   intent: RunIntent | null,
   receipt: Receipt | null,
+  settledRequestId: string | null = null,
 ): string | null {
-  const matching = intent
+  const matching = intent && settledRequestId !== intent.requestId
     ? status.runs.find(
         (run) => "requestId" in run && run.requestId === intent.requestId,
       )
