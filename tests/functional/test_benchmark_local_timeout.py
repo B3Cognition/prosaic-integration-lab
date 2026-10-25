@@ -7,7 +7,11 @@ from threading import Thread
 import pytest
 
 
-@pytest.mark.parametrize('flags,expected', [([], 180), (['--local-timeout', '240'], 240)])
+@pytest.mark.parametrize('flags,expected', [
+    ([], 180),
+    (['--local-timeout', '240'], 240),
+    (['--local-timeout', '299.999999'], 299.999999),
+])
 def test_cli_timeout_reaches_commands_plan_samples_and_report(flags, expected, tmp_path, monkeypatch, capsys):
     from lab_runner.native_eval import provenance, unified_benchmark
     from lab_runner.native_eval.__main__ import main

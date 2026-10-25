@@ -255,6 +255,7 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
                 interrupted = True
                 break
     finally:
+        timeout_label = int(local_timeout_s) if local_timeout_s == int(local_timeout_s) else local_timeout_s
         same = all(len({(r['artifactSha256'], r.get('inputSha256')) for r in rows if r['case'] == case}) <= 1 for case in CASE_IDS)
         stable = all(_sha(path) == digest for path, digest in frozen.items())
         report = {'suiteVersion': 'unified-cli-realistic-v1', 'origin': 'live_repeated_unified_cli',
@@ -265,7 +266,7 @@ def run_unified_benchmark(*, native_config, local_config, output, provenance,
             'allowance': allowance.status(), 'allowanceUnit': 'native_cli_attempt_or_api_request',
             'providerQuotaExhaustionInduced': False, 'cleanup': 'verified' if not list(root.glob('workspace-*')) else 'failed',
             'provenance': provenance, 'limitations': ['Three trials per task and availability state.',
-                f'Native 60s, local {local_timeout_s:g}s, pool total 300s.', 'Controlled skips differ from provider-triggered fallback.',
+                f'Native 60s, local {timeout_label}s, pool total 300s.', 'Controlled skips differ from provider-triggered fallback.',
                 'No concurrent test load or deliberate warmup; cache and host state uncontrolled.',
                 'Native provider loops opaque; factual contracts graded, prose quality ungraded.']}
         _private_json(root / 'report.json', report)
