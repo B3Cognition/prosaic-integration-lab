@@ -113,6 +113,20 @@ class IndependentReview:
             raise ValueError('independent_run_not_accepted')
         return cls.from_evidence(task,harness.recovery_evidence(maximum_bytes=16777216))
 
+    @classmethod
+    def from_critic_harness(cls,task,harness):
+        """Capture a host-authorized critic run through public SDK seal checks."""
+        from prosaic_harness import Harness
+        from lab_runner.requirements_review_v5.workflow import _checked_critic_evidence
+        if type(harness) is not Harness or harness.status().state['status']!='completed':
+            raise ValueError('canonical_run_not_accepted')
+        review,run_id,receipts=_checked_critic_evidence(task,harness.recovery_evidence(maximum_bytes=16777216))
+        captured=cls.capture(task,review,run_id=run_id)
+        value=json.loads(captured._encoded)
+        value.update(criticReceiptSha256=digest(receipts[0]),receiptSha256=digest(receipts[1]))
+        object.__setattr__(captured,'_encoded',encoded(value))
+        return captured
+
     @property
     def final(self):return json.loads(self._encoded)['review']
 
@@ -124,7 +138,7 @@ class IndependentReview:
         proposed=None if candidate is None else checked_review(value['task'],candidate)
         return {'version':VERSION,'final':value['review'],'candidate':proposed,
             'candidateAdvisory':True,'autoApplied':False,
-            'independent':{k:value[k] for k in ('runId','taskSha256','reviewSha256','sourcesSha256','receiptSha256') if k in value}}
+            'independent':{k:value[k] for k in ('runId','taskSha256','reviewSha256','sourcesSha256','receiptSha256','criticReceiptSha256') if k in value}}
 
 
 def candidate_messages(independent,advice,*,handoff='compact',boundary='strong'):
