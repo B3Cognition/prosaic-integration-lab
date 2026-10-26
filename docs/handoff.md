@@ -1,16 +1,22 @@
 # Codex handoff
 
-## Lab 0.7.0 release authorized — 2026-10-25
+## Lab 0.7.0 published; verification documentation — 2026-10-25
 
-The maintainer authorized releasing 0.7.0 with Explorer and verifying downloaded
-artifacts in clean installs using Runtime 0.9.8. PR #34 merged as `0d22306` after
-all four final-head CI cells passed. Qualify the versioned release source, retain
-and audit original CI wheel/source bytes, publish with checksums/provenance, and
-verify clean wheel and rebuilt-source consumers. Exercise the installed visual
-docs/playback, explicit live confirmation, fixed grants/budgets, actual installed
-Runtime CLI with owned synthetic responses, idempotency, cancellation and retained
-uncertainty. No real vendor inference or new benchmark is included. Preserve
-older releases, SDK pins and historical evidence.
+Lab 0.7.0 is published at qualified source
+`9a7542c8b736939bf4d22ee2cd3164760eb07449`; PR #35 merged as `4fa6e46` with
+the same tree. All four versioned CI cells passed, original archives were
+published with checksums/provenance, and anonymous downloads matched. The
+[release ledger](verification/release-0.7.0-2026-10-25.md) records both clean
+public consumers with Runtime 0.9.8: 64 fixture/browser checks each, installed
+visual docs/playback, explicit live confirmation and actual synthetic Runtime
+CLI execution, duplicate protection, cancellation, retained allowance and
+blocked admission across restart. Cleanup passed; no real vendor inference or
+new benchmark was performed.
+
+The maintainer authorized documenting these results, committing the docs and
+preparing a PR. This follow-up changes documentation only; preserve published
+archives, package versions, SDK pins and historical evidence. Earlier entries
+below retain their original authorization/checkpoint context.
 
 ## Explorer PR #34 CI review and merge gate — 2026-10-25
 

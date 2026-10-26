@@ -1,13 +1,20 @@
 # Current delivery status
 
-## Lab 0.7.0 release preparation — 2026-10-25
+## Lab 0.7.0 published and verified — 2026-10-25
 
-[Lab 0.7.0](release-0.7.0.md) packages Explorer and the guided onboarding merged
-in PR #34 (`0d22306`) after all four final-head CI cells passed. Runtime remains
-0.9.8 and the other SDK pins are unchanged. Qualify the versioned source again,
-publish its original CI artifacts, and verify public wheel/rebuilt-source clean
-installs, visual documentation, playback and bounded synthetic live controls.
-This checkpoint records preparation, not publication or a new model benchmark.
+[Lab 0.7.0](release-0.7.0.md) is published from qualified source `9a7542c`,
+with release PR #35 merged as `4fa6e46` and an identical file tree. Its four
+Linux AMD64/ARM64 × PostgreSQL 16/18 cells passed 1,980 source tests each and
+1,336 required stack checks in total, with cleanup verified.
+
+The [release ledger](verification/release-0.7.0-2026-10-25.md) records original
+CI artifacts, matching anonymous downloads and clean public-wheel/rebuilt-source
+installs with Runtime 0.9.8. Each consumer passed 51 standalone fixtures,
+3 deadline CLI checks and 10 browser checks. All five chapters/eight scenarios
+and separate actual synthetic Runtime CLI controls passed, including reviewed
+completion, duplicate protection, cancellation and blocked admission across
+restart. Cleanup passed; no real models were called. SDK pins and historical
+benchmarks are unchanged. Earlier checkpoints below describe their original scope.
 
 ## Visual Explorer in this checkout — 2026-10-25
 

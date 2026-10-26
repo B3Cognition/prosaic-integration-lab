@@ -9,6 +9,9 @@ Use a terminal on macOS or Linux; commands below use a POSIX shell. Windows
 shell and Docker host setup are not covered by this walkthrough. Lab 0.7.0
 includes this guide, `examples/first_workflow.py` and Explorer; the SDKs remain
 released packages. Earlier 0.6.2 artifacts retain their original contents.
+The [0.7.0 verification ledger](verification/release-0.7.0-2026-10-25.md)
+records clean public-wheel/rebuilt-source checks with Runtime 0.9.8, including
+installed visual docs, playback and bounded synthetic execution controls.
 
 ## Setup once
 

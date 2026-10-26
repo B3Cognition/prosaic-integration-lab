@@ -6,6 +6,13 @@ SDKs. Lab 0.7.0 includes Explorer in its wheel and source archive; earlier 0.6.2
 artifacts do not contain it. SDK versions remain Core 0.4.1, Runtime 0.9.8 and
 Harness 0.9.4.
 
+The [0.7.0 release verification](verification/release-0.7.0-2026-10-25.md)
+checks clean public-wheel and rebuilt-source installs, all chapters/playback,
+themes and viewport-stable navigation. Separate synthetic execution checks
+cover explicit confirmation, actual Runtime CLI execution, duplicate protection,
+cancellation and blocked admission across restart. These checks make no real
+model calls; they are separate from live-provider benchmarks.
+
 ## Open the visual guide
 
 Complete [quickstart setup](quickstart.md#setup-once), then run:

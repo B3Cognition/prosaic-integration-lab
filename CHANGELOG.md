@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Document the published Lab 0.7.0 artifacts, exact-source qualification and
+  clean public-wheel/rebuilt-source verification with Runtime 0.9.8, including
+  installed Explorer documentation, playback and bounded synthetic live controls.
+
 ## 0.7.0 — 2026-10-25
 
 - Release Explorer and guided onboarding with the unchanged public Runtime 0.9.8
