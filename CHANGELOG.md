@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Update SHA-pinned GitHub Actions to stable Node 24 releases, removing the
+  deprecated action-runtime warnings while retaining the acceptance matrix,
+  full checkout history, read-only permissions and artifact retention settings.
+
 - Document the published Lab 0.7.0 artifacts, exact-source qualification and
   clean public-wheel/rebuilt-source verification with Runtime 0.9.8, including
   installed Explorer documentation, playback and bounded synthetic live controls.
