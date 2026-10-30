@@ -73,6 +73,13 @@ review, resume or disable memory. Castle stays **off by default**. The
 qualification commands; [verification evidence](docs/verification/castle-integration-2026-10-23.md)
 records actual tested platforms and limits.
 
+The experimental [own-data memory benchmark](docs/memory-benchmark.md) adds
+frozen datasets, file-search/FTS/expanded comparisons, optional bounded
+completeness review, strict external adjudication and offline replay. Larger
+corpora do not increase per-task context; fixture success is not quality evidence.
+Memory and review remain disabled by default, and live constrained generation
+requires the separately qualified SDK candidate described in that guide.
+
 The separately opt-in [SUE review guide](docs/sue-review.md) shows a
 credential-free requirements-review walkthrough, frozen sources, approval and
 recovery with the lightweight engine. Review stays **off by default**, independent

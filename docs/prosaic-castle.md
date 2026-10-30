@@ -20,6 +20,12 @@ Memory supplies evidence. SUE does not independently establish truth or
 correctness, and a judge result is not authorization. These fixtures make no
 claim that a real model becomes better at retrieval, review or coding.
 
+For a repeatable comparison on your own notes/session exports, use the
+[memory benchmark guide](memory-benchmark.md). It keeps file-search, Castle
+retrieval and optional completeness review results separate, with explicit
+dataset/key freezing and finite live budgets. It does not enable either feature
+for ordinary Lab workflows.
+
 ## 1. Obtain the matching candidate bundle
 
 Run from the root of this Lab checkout using Python 3.12. Obtain the three
