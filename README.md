@@ -80,6 +80,11 @@ corpora do not increase per-task context; fixture success is not quality evidenc
 Memory and review remain disabled by default, and live constrained generation
 requires the separately qualified SDK candidate described in that guide.
 
+The optional [answer-span audit](docs/answer-span-audit.md) checks actual answer
+wording against frozen source requirements, citations and status. Its explicit
+loopback fixture covers omissions, complete answers, unavailable context and
+unknown usage. It preserves the original answer and adds no automatic repair.
+
 The separately opt-in [SUE review guide](docs/sue-review.md) shows a
 credential-free requirements-review walkthrough, frozen sources, approval and
 recovery with the lightweight engine. Review stays **off by default**, independent

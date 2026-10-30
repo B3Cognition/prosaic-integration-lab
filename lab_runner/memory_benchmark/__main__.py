@@ -38,6 +38,9 @@ def initialize(directory,questions=3):
 
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__);sub=parser.add_subparsers(dest='command')
+    p=sub.add_parser('audit-fixture',help='explicit synthetic answer-span audit; no real model or memory provider')
+    p.add_argument('--output',required=True)
+    p.add_argument('--case',choices=('omitted','complete','unavailable','unknown-usage'),default='omitted')
     init=sub.add_parser('init');init.add_argument('--directory',required=True);init.add_argument('--questions',type=int,default=3)
     for command in ('validate','freeze'):
         p=sub.add_parser(command);p.add_argument('--dataset');p.add_argument('--policy');p.add_argument('--key');p.add_argument('--castle-map')
@@ -57,6 +60,9 @@ def main(argv=None):
     args=parser.parse_args(argv)
     try:
         if args.command is None:result=dict(enabled=False,executed=False,version=VERSION)
+        elif args.command=='audit-fixture':
+            from .span_audit_fixture import run_fixture
+            result=run_fixture(args.output,case=args.case)
         elif args.command=='init':result=initialize(args.directory,args.questions)
         elif args.command in ('freeze','validate'):
             if args.command=='validate' and args.frozen:
