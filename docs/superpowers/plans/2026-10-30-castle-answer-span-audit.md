@@ -37,10 +37,10 @@
 
 **Produces:** Immutable baseline source/package proof and a passing baseline test log.
 
-- [ ] Verify source/wheel hashes against the durable manifest and extract only safe regular paths; reject archive links/traversal.
-- [ ] Restore the exact 73 differing/new source files relative to `f6673f3b761842f17fa78129c748dddde27485cb`; leave unrelated primary checkouts untouched. Compare all packaged Lab payloads with the previous installed proof.
-- [ ] Reconstruct the previous locked public SDK environment; verify candidate Runtime `0.9.8+jsonschema.3` and Harness `0.9.4` payloads instead of using the unrelated main checkout's older SDKs.
-- [ ] Run the existing memory benchmark/candidate suites, memory workflow and canonical review tests before changes. Save complete output; resolve a failed baseline before attributing failures to this feature.
+- [x] Verify source/wheel hashes against the durable manifest and extract only safe regular paths; reject archive links/traversal.
+- [x] Restore the exact 73 differing/new source files relative to `f6673f3b761842f17fa78129c748dddde27485cb`; leave unrelated primary checkouts untouched. Compare all packaged Lab payloads with the previous installed proof.
+- [x] Reconstruct the previous locked public SDK environment; verify candidate Runtime `0.9.8+jsonschema.3` and Harness `0.9.4` payloads instead of using the unrelated main checkout's older SDKs.
+- [x] Run the existing memory benchmark/candidate suites, memory workflow and canonical review tests before changes. Save complete output; resolve a failed baseline before attributing failures to this feature.
 
 ## Task 2: Immutable views and strict audit contracts
 
@@ -50,10 +50,10 @@
 
 **Produces:** `freeze_audit(packet) -> AuditPacket`; `AuditPacket.to_dict() -> dict`; `source_view(packet) -> dict`; `answer_view(packet) -> dict`; `validate_ledger(value, packet) -> dict`; `validate_audit(value, packet, ledger) -> dict`.
 
-- [ ] Write and watch failing tests for source-only "disabled", Unicode/CRLF offsets, source/header spill, missing rows, substituted IDs, foreign scope, mutable input and limit exhaustion.
-- [ ] Build distinct source, claim-answer and limitation span types; freeze canonical renderer order, question, status, links and original bytes. Exclude quotes, frame reasons and wire placeholders from factual answer text.
-- [ ] Add closed versioned schemas for source obligations and answer audit. Enforce complete identity sets and state-specific proof requirements. Derive `clear/findings/unresolved` structurally; never infer entailment in the host.
-- [ ] Add and run controls for clean paraphrases, unknown-in-context abstention, conflicting sources, mixed claims, swapped citations and explicit scoped limitation proof. Model semantic claims remain unproven by schema validity.
+- [x] Write and watch failing tests for source-only "disabled", Unicode/CRLF offsets, source/header spill, missing rows, substituted IDs, foreign scope, mutable input and limit exhaustion.
+- [x] Build distinct source, claim-answer and limitation span types; freeze canonical renderer order, question, status, links and original bytes. Exclude quotes, frame reasons and wire placeholders from factual answer text.
+- [x] Add closed versioned schemas for source obligations and answer audit. Enforce complete identity sets and state-specific proof requirements. Derive `clear/findings/unresolved` structurally; never infer entailment in the host.
+- [x] Add and run controls for clean paraphrases, unknown-in-context abstention, conflicting sources, mixed claims, swapped citations and explicit scoped limitation proof. Model semantic claims remain unproven by schema validity.
 
 ## Task 3: Public two-stage Harness workflow
 
@@ -63,10 +63,10 @@
 
 **Produces:** `build_audit_workflow(config, packet) -> workflow`; `run_audit(config, packet, directory, *, accounting=None) -> dict` containing the unchanged original, distinct audit sidecar/status and private operator evidence.
 
-- [ ] Write failing loopback-provider tests for draft-hidden source extraction, exact dependency bindings, strict projected schemas, zero tools/retries and unchanged original answer.
-- [ ] Compose `source-obligations -> answer-audit -> done` through installed public Runtime/Harness APIs. Stage 2 independently sees the same authorized bodies and bound ledger; no grading key or historical verdict enters either prompt.
-- [ ] Verify completed resume makes zero calls. Changed owner, packet, answer, scope, versions or policy rejects resume. Unknown usage prevents dependent dispatch and retains full allowance.
-- [ ] Preserve failed raw receipts and inner timeout metadata alongside outer unknown usage. Assert prompt-injection fixtures cannot alter tools, scope or workflow ownership.
+- [x] Write failing loopback-provider tests for draft-hidden source extraction, exact dependency bindings, strict projected schemas, zero tools/retries and unchanged original answer.
+- [x] Compose `source-obligations -> answer-audit -> done` through installed public Runtime/Harness APIs. Stage 2 independently sees the same authorized bodies and bound ledger; no grading key or historical verdict enters either prompt.
+- [x] Verify completed resume makes zero calls. Changed owner, packet, answer, scope, versions or policy rejects resume. Unknown usage prevents dependent dispatch and retains full allowance.
+- [x] Preserve failed raw receipts and inner timeout metadata alongside outer unknown usage. Assert prompt-injection fixtures cannot alter tools, scope or workflow ownership.
 
 ## Task 4: Explicit opt-in runner, documentation and review
 
@@ -78,12 +78,22 @@
 
 **Produces:** An explicitly selected audit-only fixture/consumer operation; ordinary memory/SUE/default paths remain unchanged.
 
-- [ ] Write failing CLI/default tests, including attempted automatic repair, missing opt-in and unavailable memory with frozen context.
-- [ ] Add explicit audit-only selection and report original answer versus audit sidecar separately. Preserve strict fixed denominators and no-oracle fallback reporting.
-- [ ] Run the full appropriate Lab unit/functional suite plus memory/canonical review suites; build the wheel and run installed-wheel fixture checks. Record actual results and infrastructure limitations.
-- [ ] Request a fresh final regression review, fix substantive findings with RED/GREEN checks, and preserve final diff/verification evidence privately.
-- [ ] Document that real Qwen quality, q022 adjudication and any repair stage require a separately predeclared bounded comparison. Do not issue model requests or reuse unknown invocations.
+- [x] Write failing CLI/default tests, including attempted automatic repair, missing opt-in and unavailable memory with frozen context.
+- [x] Add explicit audit-only selection and report original answer versus audit sidecar separately. Preserve strict fixed denominators and no-oracle fallback reporting.
+- [x] Run the full appropriate Lab unit/functional suite plus memory/canonical review suites; build the wheel and run installed-wheel fixture checks. Record actual results and infrastructure limitations.
+- [x] Request a fresh final regression review, fix substantive findings with RED/GREEN checks, and preserve final diff/verification evidence privately.
+- [x] Document that real Qwen quality, q022 adjudication and any repair stage require a separately predeclared bounded comparison. Do not issue model requests or reuse unknown invocations.
 
 ## Current state
 
-The old temporary worktree and tested virtual environment were cleaned between sessions. Their durable source/wheel artifacts remain available and their hashes were verified on 2026-10-30. The native isolated worktree is based on the Castle integration branch; the primary Lab checkout has unrelated changes and is untouched. No product restoration or audit implementation has started. Review the linked design and this plan before implementation, consistent with the earlier request to design before changing behavior.
+The baseline was restored from sealed artifacts and the audit-only workflow is
+implemented in the isolated `codex/castle-answer-span-audit` worktree. The primary
+Lab checkout remains untouched. A fresh review found four Important issues;
+limitation-only coverage, unaudited positive-claim suffixes, contradictory status
+judgments and same-version SDK replacement are now rejected. The focused native
+suite passed 44 tests before the final conflict/instruction-boundary controls.
+The final wider candidate suite passed 368 tests plus 109 subtests, and the
+released-SDK rerun passed all 2033 tests. Installed-wheel checks passed on macOS
+ARM64 and offline Linux ARM64. Final source packaging includes the verification
+report and private evidence is retained with a sealed recovery archive. No live
+inference, repair, push or publication is authorized by this plan.

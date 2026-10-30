@@ -1,7 +1,7 @@
 """Exact, scoped audit attachment. Valid proof addresses do not prove semantics."""
 from dataclasses import dataclass
 import hashlib
-from importlib.metadata import version
+from importlib.metadata import distribution, version
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -73,9 +73,27 @@ def address(kind, identifier, text):
     return dict(kind=kind, id=identifier, sha256=sha(text), start=0, end=len(text), quote=text)
 
 
+def _sdk_payload(name):
+    installed = distribution(name)
+    require(installed.files is not None, 'installed SDK payload inventory required')
+    # Wheel-installed import payloads only: generated scripts/bytecode and
+    # installer-specific metadata are not immutable distribution contents.
+    paths = sorted(str(p) for p in installed.files if not (
+        Path(p).is_absolute() or '..' in Path(p).parts or '__pycache__' in Path(p).parts
+        or Path(p).suffix in ('.pyc', '.pyo') or any(part.endswith('.dist-info') for part in Path(p).parts)))
+    require(bool(paths) and len(paths) == len(set(paths)), 'installed SDK payload inventory invalid')
+    payload = {}
+    for name in paths:
+        path = Path(installed.locate_file(name))
+        require(path.is_file() and not path.is_symlink(), 'installed SDK payload unavailable')
+        payload[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return baseline._sha(payload)
+
+
 def _binding():
     return dict(profile=PROFILE,
         sdk={name: version(name) for name in ('b3-prosaic-runtime', 'b3-prosaic-harness', 'prosaic-integration-lab')},
+        sdkPayloads={name: _sdk_payload(name) for name in ('b3-prosaic-runtime', 'b3-prosaic-harness')},
         sources={name: hashlib.sha256((Path(__file__).parent / name).read_bytes()).hexdigest()
                  for name in ('span_audit_contracts.py', 'span_audit_workflow.py', 'completeness_profile.py', 'answer_contract.py')},
         schemas=dict(ledger=baseline._sha(LEDGER_SCHEMA), audit=baseline._sha(AUDIT_SCHEMA)),
@@ -207,6 +225,10 @@ def validate_audit(value, packet, ledger):
     for cid, row in claim_checks.items():
         claim = claims[cid]
         _spans(row['answerSpans'], packet, 'answer', allowed={cid}, required=True)
+        if row['verdict'] in ('supported', 'appropriate-limitation'):
+            coverage = {i for span in row['answerSpans'] for i in range(span['start'], span['end'])}
+            require(all(i in coverage for i, c in enumerate(claim['text']) if not c.isspace()),
+                    'positive disposition requires complete claim coverage')
         _spans(row['sourceSpans'], packet, 'source', required=row['verdict'] in ('supported', 'contradicted'))
         if row['verdict'] == 'appropriate-limitation':
             require(claim['kind'] == 'absence' and cid in data['draft']['sections']['limitations']['claimIds']
@@ -223,6 +245,13 @@ def validate_audit(value, packet, ledger):
             unresolved |= citation['verdict'] == 'unresolved'
         findings |= row['verdict'] in ('unsupported', 'contradicted')
         unresolved |= row['verdict'] == 'unresolved'
+    limitation_only = {cid for cid, claim in claims.items() if
+        claim_checks[cid]['verdict'] == 'appropriate-limitation'
+        or claim['kind'] == 'absence' and not claim['evidenceIds']}
+    for row in obligation_checks.values():
+        if row['verdict'] == 'covered':
+            require(all(s['id'] not in limitation_only for s in row['answerSpans']),
+                    'limitation-only claim cannot establish factual coverage')
     for pid, row in part_checks.items():
         matching = [p for p in data['draft']['questionParts'] if any(
             s['start'] < p['end'] and p['start'] < s['end'] for s in parts[pid]['questionSpans'])]
@@ -235,6 +264,8 @@ def validate_audit(value, packet, ledger):
         if row['verdict'] == 'fact-supported':
             require(parts[pid]['answerability'] == 'answerable' and bool(row['answerSpans'])
                     and all(obligation_checks[oid]['verdict'] == 'covered' for oid in linked), 'unproved fact-supported part')
+            require(all(s['id'] not in limitation_only for s in row['answerSpans']),
+                    'limitation-only claim cannot establish factual coverage')
         elif row['verdict'] == 'appropriately-limited':
             require(parts[pid]['answerability'] != 'answerable' and data['draft']['status'] != 'answered', 'unjustified limited question part')
             absence_ids = {cid for cid, c in claims.items() if c['kind'] == 'absence' and claim_checks[cid]['verdict'] == 'appropriate-limitation'}
@@ -257,5 +288,13 @@ def validate_audit(value, packet, ledger):
     _spans(status['answerSpans'], packet, 'answer')
     _spans(status['limitationSpans'], packet, 'limitation')
     require(bool(status['answerSpans'] or status['limitationSpans']), 'status explanation requires actual answer or limitation proof')
+    if not unresolved:
+        all_factual = all(row['verdict'] == 'fact-supported' for row in part_checks.values())
+        factual_progress = (any(row['verdict'] == 'fact-supported' for row in part_checks.values())
+            or any(row['verdict'] == 'covered' for row in obligation_checks.values())
+            or any(cid not in limitation_only and row['verdict'] == 'supported' for cid, row in claim_checks.items()))
+        require((status['recommendation'] == 'answered') == all_factual
+                and (status['recommendation'] != 'abstained' or not factual_progress),
+                'status contradicts audit judgments')
     findings |= status['recommendation'] != data['draft']['status']
     return dict(audit=result, outcome='unresolved' if unresolved else 'findings' if findings else 'clear')

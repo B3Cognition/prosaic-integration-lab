@@ -81,6 +81,13 @@ that an answer correctly acknowledges an unknown; it cannot count as an answered
 fact. Conditions and citation entailment remain semantic judgments to evaluate,
 not guarantees supplied by JSON validation.
 
+A positive claim judgment must account for every non-whitespace character in
+that claim, using one or several exact spans. Reviewing only a supported prefix
+cannot clear an unaudited suffix. An adverse judgment may identify just the
+offending clause. Limitation-only claims cannot satisfy factual obligations,
+and a status recommendation that contradicts the audit's own completed judgments
+is rejected. These checks require consistent coverage; they do not prove meaning.
+
 `result['original']` always retains the original canonical answer.
 `result['audit']` is the accepted sidecar, or `None` when it was not accepted.
 `outcome` is `findings`, `clear` or `unresolved`; `clear` means the auditor found
@@ -96,7 +103,8 @@ to 262144 UTF-8 bytes, with at most 16 question parts, 32 source obligations and
 32 extra findings. Exceeding a bound fails closed; nothing is silently truncated.
 
 Completed resume makes zero provider calls. Changed packet, provenance, scope,
-SDK/validator versions or serving configuration refuses resume. A blocked or
+SDK/validator versions, installed Runtime/Harness payload contents or serving
+configuration refuses resume. A blocked or
 unknown invocation is never automatically dispatched again. Unknown usage or
 completion retains the full reservation, even if a later health check succeeds.
 The local allowance is checked against native receipt evidence. Losing its final
@@ -118,3 +126,6 @@ strict scorer/contexts/denominators and predeclare calls, token reservations,
 repeats and stopping rules. Report false alarms, missed obligations, citation and
 status mistakes, unresolved runs and cost separately. A repair stage requires
 a later design and comparison. SUE and SOAR remain separate.
+
+See the [verification record](verification/answer-span-audit-2026-10-30.md) for
+the tested SDK profiles, review fixes, fixture results and remaining limits.
