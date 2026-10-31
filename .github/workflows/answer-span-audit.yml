@@ -7,6 +7,7 @@ on:
       - 'dependencies/**'
       - 'scripts/**'
       - 'lab_runner/memory_benchmark/**'
+      - 'lab_runner/answer_span_refs/**'
       - 'lab_runner/requirements_review_v5/**'
       - 'tests/unit/test_mb*'
       - 'tests/unit/test_memory_benchmark*'
@@ -134,11 +135,13 @@ jobs:
         run: |
           for case in omitted complete unavailable unknown-usage; do
             .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-direct-$case" > "reports/audit-ci/direct-$case.json"
+            .venv-candidate/bin/python -I -m lab_runner.answer_span_refs fixture --case "$case" --output "$RUNNER_TEMP/refs-direct-$case" > "reports/audit-ci/refs-direct-$case.json"
           done
           .venv-candidate/bin/python -m pip install --no-deps --force-reinstall bundle/rebuilt-runtime/*.whl bundle/rebuilt-lab/*.whl
           .venv-candidate/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
           for case in omitted complete unavailable unknown-usage; do
             .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-rebuilt-$case" > "reports/audit-ci/rebuilt-$case.json"
+            .venv-candidate/bin/python -I -m lab_runner.answer_span_refs fixture --case "$case" --output "$RUNNER_TEMP/refs-rebuilt-$case" > "reports/audit-ci/refs-rebuilt-$case.json"
           done
           .venv-candidate/bin/python - <<'PY'
           import json
@@ -148,6 +151,11 @@ jobs:
                   assert row['outcome']==outcome and row['syntheticProviderRequests']==calls and row['retainedTokens']==held
                   assert row['originalUnchanged'] and row['resumeProviderRequests']==0 and row['realModelCalls']==0
                   assert row['memoryDefault'] is False and row['sueDefault'] is False
+                  refs = json.load(open(f'reports/audit-ci/refs-{origin}-{case}.json'))
+                  assert refs['profileId']=='consumer-answer-span-audit-refs-v2'
+                  assert refs['outcome']==outcome and refs['syntheticProviderRequests']==calls and refs['retainedTokens']==held
+                  assert refs['rawNativeRecords']==calls and refs['originalUnchanged'] and refs['resumeProviderRequests']==0
+                  assert refs['realModelCalls']==0 and refs['memoryDefault'] is False and refs['sueDefault'] is False
           PY
       - name: Retain only synthetic qualification summaries and distribution bytes
         if: always()

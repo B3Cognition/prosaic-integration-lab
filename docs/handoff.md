@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Host-resolved audit candidate — 2026-10-31
+
+The separately opt-in [reference profile](answer-span-resolved.md) resolves exact
+proof addresses on the host and constrains audit keys to the accepted ledger.
+It preserves all legacy benchmark/critic package bytes, strict canonical
+validation, original answers, native accounting and unknown holds. The new
+fixture CLI has no live switch. Memory and SUE stay off; no SOAR or publication.
+The [approved plan](superpowers/plans/2026-10-31-answer-span-host-refs.md) requires
+installed direct/rebuilt qualification and complete released/candidate regression
+coverage before one fresh bounded packet029 qualification. This entry describes
+the implementation intent; verification evidence is recorded separately.
+
 ## Castle audit draft CI preparation — 2026-10-31
 
 Draft [PR #38](https://github.com/B3Cognition/prosaic-integration-lab/pull/38)

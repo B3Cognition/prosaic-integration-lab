@@ -183,3 +183,18 @@ def test_legacy_benchmark_and_critic_packages_remain_byte_identical():
         if p.is_file() and '__pycache__' not in p.parts and p.suffix in ('.py','.json','.md','.txt')}
     assert actual==set(manifest['files'])
     for name,digest in manifest['files'].items():assert hashlib.sha256((root/name).read_bytes()).hexdigest()==digest
+
+
+def test_boolean_binding_cannot_alias_an_integer_version():
+    m=api();p=packet();data=p.to_dict();data['binding']['version']=True
+    from lab_runner.memory_benchmark.storage import encoded,sha
+    raw=encoded(data)
+    with pytest.raises(ValueError):m.canonical_packet(m.RefsPacket(raw,sha(raw)))
+
+
+def test_cli_without_command_is_disabled_and_exposes_no_live_switch(capsys):
+    cli=importlib.import_module('lab_runner.answer_span_refs.__main__')
+    assert cli.main([])==0
+    assert json.loads(capsys.readouterr().out)==dict(profileId=cli.PROFILE,enabled=False,executed=False,memoryDefault=False,sueDefault=False)
+    with pytest.raises(SystemExit) as error:cli.main(['--live'])
+    assert error.value.code==2

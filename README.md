@@ -10,6 +10,10 @@ account, API key, local model or Docker.
 
 ## What can I try?
 
+For the unpublished optional audit candidate, see
+[host-resolved evidence fixtures and application boundaries](docs/answer-span-resolved.md).
+Memory and SUE remain disabled by default.
+
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |

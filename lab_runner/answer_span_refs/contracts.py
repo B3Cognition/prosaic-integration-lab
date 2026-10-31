@@ -45,10 +45,10 @@ def canonical_packet(packet):
     require(type(packet) is RefsPacket,'frozen reference packet required')
     data=packet.to_dict();shape(data,('version','profile','canonical','canonicalSha256','binding'))
     require(type(data['version']) is int and data['version']==1 and data['profile']==PROFILE
-        and data['binding']==_binding(),'reference profile or source binding changed')
+        and encoded(data['binding'])==encoded(_binding()),'reference profile or source binding changed')
     body=data['canonical']
     base=canonical.freeze_audit(baseline.freeze_packet(body['question'],body['draft'],body['frames'],identity=body['identity']))
-    require(base.to_dict()==body and base.sha256==data['canonicalSha256'],'canonical packet binding changed')
+    require(base.payload==encoded(body) and base.sha256==data['canonicalSha256'],'canonical packet binding changed')
     return base
 
 

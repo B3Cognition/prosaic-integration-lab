@@ -64,10 +64,13 @@ Structurally valid references do not establish semantic truth or completeness.
 Persist the exact native Result before host transformation. Harness accepts a
 closed envelope containing the canonical object and the raw-record/catalog/wire
 schema digests. Validators re-resolve that raw record and require exact equality;
-dependent stages receive only its canonical ledger. Result metadata also binds
-the raw record. Native usage/timeout/error evidence remains intact, including
-failures. Refuse changed raw records, envelopes or catalogs before resume; do not
-convert a failed or unknown native call into successful execution.
+dependent model stages receive its validated reference ledger, with its canonical
+form retained in Harness. Accepted-result metadata also binds the raw record.
+When a native policy failure discards host metadata, a separate capture seal
+binds raw bytes and the native snapshot for blocked-run inspection only; that
+capture can never become accepted proof. Native usage/timeout/error evidence
+remains intact. Refuse changed records, envelopes or catalogs before resume;
+never convert a failed or unknown native call into successful execution.
 
 ## Limits and lifecycle
 

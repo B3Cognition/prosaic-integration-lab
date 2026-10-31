@@ -144,6 +144,19 @@ def test_candidate_ci_has_a_fresh_environment_without_released_executable_caches
     assert '.venv-audit/bin/python' not in installed['run']
 
 
+def test_refs_ci_keeps_legacy_cases_and_requires_direct_rebuilt_reference_cases():
+    import yaml
+    path=ROOT/'.github/workflows/answer-span-audit.yml'
+    assert "'lab_runner/answer_span_refs/**'" in path.read_text()
+    steps=yaml.safe_load(path.read_text())['jobs']['audit']['steps']
+    installed=next(step['run'] for step in steps if step.get('name')=='Qualify installed direct and rebuilt wheels without live inference')
+    assert '-I -m lab_runner.memory_benchmark audit-fixture' in installed
+    assert installed.count('-I -m lab_runner.answer_span_refs fixture')==2
+    assert 'refs-direct-$case' in installed and 'refs-rebuilt-$case' in installed
+    for field in ('rawNativeRecords','originalUnchanged','resumeProviderRequests','retainedTokens','memoryDefault','sueDefault'):
+        assert field in installed
+
+
 def test_existing_ci_assigns_candidate_only_tests_without_dropping_other_assertions():
     import yaml
     for name in ['required-acceptance.yml', 'sue-review.yml']:
