@@ -44,7 +44,8 @@ and sets `no_proxy`/`NO_PROXY` to `*` before preflight, credential reads or disp
 This bypass also disables system proxy discovery. It restores the exact original
 proxy environment on success or exceptions. It then validates every profile and
 both routes without reading the credential file. It accepts literal loopback IP endpoints, secret-managed
-`api_key_file`, non-streaming responses and at most 512 output tokens. It admits
+`api_key_file`, streaming responses by default and at most 512 output tokens.
+An explicit boolean `streaming: false` still selects buffered transport. It admits
 three separate workflows: omitted tier with empty explicit tier grants, balanced,
 then strong. Each invocation permits one provider request, no tools, no retries
 and a 60-second deadline. The command reserves failed/uncertain attempts from the

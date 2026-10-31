@@ -67,7 +67,6 @@ def test_observations_preserve_uncertain_workflow_start_without_redispatch(chat_
 
 def test_streamed_generation_uses_actual_sdk_deltas_and_retains_owner_filter(chat_client):
     chat=chat_client;sink=RunObservations();chat.host.observations=sink
-    chat.host.config['conversation']['bundles'][0]['streaming']=True
     chat.restore();install_observation_routes(chat.client.app,sink)
     session=create(chat,'streamed-generation');before=stats(chat)['calls']
     reply=send(chat,session,'hello','Hello')
@@ -156,3 +155,36 @@ def test_one_request_local_allowance_can_admit_one_streamed_turn(chat_client):
     reply=send(chat,create(chat,'one-request-stream'),'hello','Hello')
     assert reply['status']=='completed'
     assert stats(chat)['calls']==before+1
+
+
+def test_session_budget_does_not_implicitly_reduce_the_per_turn_reservation(chat_client):
+    chat=chat_client
+    chat.host.config['conversation']['bundles'][0]['policy']={'max_provider_requests':1}
+    chat.restore();session=create(chat,'small-cumulative-budget');before=stats(chat)['calls']
+    response=chat.client.post('/conversations/'+session['sessionId']+'/messages',
+        json={'messageId':'bounded','message':'Hello','expectedRevision':session['revision']},headers=HEADERS)
+    assert response.status_code==422 and response.json()['detail']['limit']=='maxProviderRequests'
+    assert stats(chat)['calls']==before
+
+
+def test_launcher_explicit_buffered_opt_out_survives_streaming_default(chat_client):
+    from lab_runner.chat import configure_conversations
+    chat=chat_client;sink=RunObservations();chat.host.observations=sink
+    configure_conversations(chat.host.config['conversation'],model_url=chat.provider+'/v1',streaming=False)
+    chat.restore();install_observation_routes(chat.client.app,sink)
+    session=create(chat,'buffered-launcher');reply=send(chat,session,'hello','Hello')
+    assert reply['status']=='completed'
+    call=sink.snapshot(session['sessionId'])['generation']['calls'][0]
+    assert call['mode']=='unavailable' and call['chunks']==0 and call['preview']==''
+
+
+def test_old_buffered_session_and_workflow_survive_the_new_omitted_default(chat_client):
+    chat=chat_client
+    definition=chat.host.config['conversation']['bundles'][0]
+    definition['streaming']=False;chat.restore()
+    old=create(chat,'old-buffered');waiting=send(chat,old,'find','Find players')
+    assert waiting['pendingInteraction']['stepId']=='select'
+    del definition['streaming'];chat.restore()
+    assert create(chat,'old-buffered')['sessionId']==old['sessionId']
+    selected=send(chat,waiting,'select','the second result',reference=waiting['pendingInteraction']['reference'])
+    assert selected['pendingInteraction']['stepId']=='confirm-b'

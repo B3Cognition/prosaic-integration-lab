@@ -29,6 +29,20 @@ registered tool and workflow waiting, or `Hello` for a short completed turn. Ctr
 stops the UI and verifies cleanup of its owned Docker resources. Default fixture
 mode needs no paid provider credential. `--no-open` writes a private launch file.
 
+Streaming is now also the default for Lab conversations, native workflows and
+the chat launcher. Explicit `streaming: false` in a trusted bundle retains
+buffered transport. Existing sessions/proposals from the earlier omitted/default
+buffered configuration retain their exact identities; new sessions use streaming.
+
+Opening the one-use launcher link authorizes that browser. A process-bound,
+HttpOnly, SameSite=Strict session cookie lets the same browser reconnect after
+reload for up to eight hours or until the launcher stops. The API token is never
+saved in localStorage/sessionStorage. Manual tokens are verified before the UI
+shows Connected; a 401 reveals reconnect controls and stops polling/dispatch.
+Opening the plain URL in a different browser still requires a fresh launch link
+or a valid Lab API token. A successful stream cannot run again after its bounded
+model allowance is spent; Replay reuses the trace without another request.
+
 The optional owner-authorized `/conversations/{session_id}/observations` endpoint
 exposes allowlisted Runtime/Harness events, a bounded ordinary-output generation
 projection and separately filtered recorder usage. Default application

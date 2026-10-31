@@ -2,6 +2,54 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {connectLab} from './lab-connection.js';
 
+function browser(t,{hosted=false}={}) {
+  const keys=['document','location','history','fetch','setInterval','clearInterval'];
+  const originals=keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]);
+  t.after(()=>{for(const[key,descriptor]of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}});
+  const elements=new Map(),timers=new Map();let next=0;
+  const element=key=>{if(!elements.has(key))elements.set(key,{value:'',addEventListener(type,fn){this[type]=fn;}});return elements.get(key);};
+  globalThis.document={querySelector:element};globalThis.location={pathname:hosted?'/observatory/':'/standalone/',hash:''};
+  globalThis.history={replaceState(){}};
+  globalThis.setInterval=fn=>{timers.set(++next,fn);return next;};globalThis.clearInterval=id=>timers.delete(id);
+  return {element,timers};
+}
+
+test('reloading restores an authorized launcher session without dispatching a run',async t=>{
+  const {element}=browser(t,{hosted:true});const requests=[];
+  globalThis.fetch=async(path,options)=>{requests.push([path,options]);return {ok:true,json:async()=>({token:'fixture-secret',label:'Owned synthetic fixture'})};};
+  const client=connectLab({onRun(){},onStatus(){}});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(client.status().connected,true);
+  assert.equal(element('#lab-start').disabled,false);
+  assert.deepEqual(requests.map(r=>r[0]),['/chat/session']);
+  assert.equal(requests[0][1].headers['X-Chat-Session'],'restore');
+});
+
+test('a rejected credential exposes reconnect controls and cannot dispatch a message',async t=>{
+  const {element,timers}=browser(t);const requests=[];
+  globalThis.fetch=async path=>{requests.push(path);return {ok:false,status:401};};
+  const client=connectLab({onRun(){},onStatus(){}});
+  element('#lab-token').value='rejected-token';await element('#lab-connect').submit({preventDefault(){}});
+  await element('#lab-run').submit({preventDefault(){}});
+  assert.equal(client.status().connected,false);
+  assert.equal(element('#lab-connect').hidden,false);
+  assert.equal(element('#lab-start').disabled,true);
+  assert.ok(!requests.some(path=>path.endsWith('/messages')));
+  assert.equal(timers.size,0);
+});
+
+test('authentication lost at the first observation cannot dispatch the message',async t=>{
+  const {element,timers}=browser(t);const requests=[];
+  globalThis.fetch=async path=>{requests.push(path);return path.endsWith('/observations')?{ok:false,status:401}:
+    {ok:true,json:async()=>path==='/conversations'?{sessionId:'owned',revision:'r1'}:{connected:true}};};
+  const client=connectLab({onRun(){},onStatus(){}});
+  element('#lab-token').value='fixture';await element('#lab-connect').submit({preventDefault(){}});
+  await element('#lab-run').submit({preventDefault(){}});
+  assert.equal(client.status().connected,false);assert.equal(timers.size,0);
+  assert.equal(requests.filter(path=>path.endsWith('/messages')).length,0);
+  assert.equal(client.status().inFlight,false);
+});
+
 test('POST settlement requires a fresh poll before polling can stop',async t=>{
   const keys=['document','location','fetch','setInterval','clearInterval'];
   const originals=keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]);
@@ -18,6 +66,7 @@ test('POST settlement requires a fresh poll before polling can stop',async t=>{
   const idle={runId:'abc',elapsed:0,active:false,waiting:false,events:[]};
   let reads=0,lastFeed;
   globalThis.fetch=async path=>{
+    if(path==='/chat/connection')return response({connected:true});
     if(path==='/conversations')return response({sessionId:'abc',revision:'r1'});
     if(path.endsWith('/messages')){postRequested.resolve();return post.promise;}
     if(++reads===1)return response(idle);
@@ -25,7 +74,7 @@ test('POST settlement requires a fresh poll before polling can stop',async t=>{
     return response({...idle,elapsed:1,waiting:true});
   };
   const client=connectLab({onRun:feed=>lastFeed=feed,onStatus:()=>{}});
-  element('#lab-token').value='fixture-token';element('#lab-connect').submit({preventDefault(){}});
+  element('#lab-token').value='fixture-token';await element('#lab-connect').submit({preventDefault(){}});
   element('#lab-message').value='Find players';
   const submitted=element('#lab-run').submit({preventDefault(){}});
   await postRequested.promise;

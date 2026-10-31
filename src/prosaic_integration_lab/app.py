@@ -115,6 +115,10 @@ def create_app(*, observations=None):
     def principal(request: Request):
         return request.state.principal
 
+    @app.get('/chat/connection')
+    def chat_connection(actor=Depends(principal)):
+        return {'connected':True}
+
     @app.exception_handler(RequestValidationError)
     async def invalid(request, error):
         return JSONResponse({'detail': 'invalid_request'}, status_code=422)

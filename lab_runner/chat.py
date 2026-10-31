@@ -1,5 +1,6 @@
 """Keep an owned local conversation stack running for browser interaction."""
 import argparse
+import hashlib
 import ipaddress
 import json
 import os
@@ -9,6 +10,7 @@ import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import SimpleCookie, CookieError
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -24,23 +26,41 @@ class Bootstrap:
         self.code = secrets.token_urlsafe(32)
         self.expires = time.monotonic() + 600
         self.lock = threading.Lock()
+        self.cookie_name='prosaic-chat-'+hashlib.sha256(origin.encode()).hexdigest()[:12]
+        self.session=secrets.token_urlsafe(32)
+        self.session_expires=0
 
     async def __call__(self, scope, receive, send):
-        if scope['type'] != 'http' or scope['path'] != '/chat/bootstrap' or scope['method'] != 'POST':
+        if (scope['type'] != 'http' or scope['path'] not in {'/chat/bootstrap','/chat/session'}
+                or scope['method'] != 'POST'):
             return await self.app(scope, receive, send)
         from starlette.responses import JSONResponse
         headers = scope.get('headers', [])
         codes = [value for key, value in headers if key.lower() == b'x-chat-launch']
         origins = [value for key, value in headers if key.lower() == b'origin']
         with self.lock:
-            valid = (time.monotonic() < self.expires and len(codes) == len(origins) == 1 and
-                origins[0] == self.origin.encode() and self.code and
-                secrets.compare_digest(codes[0], self.code.encode()))
-            if valid:
-                self.code = ''
+            same_origin=len(origins)==1 and origins[0]==self.origin.encode()
+            if scope['path']=='/chat/bootstrap':
+                valid = (same_origin and time.monotonic() < self.expires and len(codes)==1 and
+                    self.code and secrets.compare_digest(codes[0], self.code.encode()))
+                if valid:
+                    self.code = ''
+                    self.session_expires=time.monotonic()+8*3600
+            else:
+                cookies=[value for key,value in headers if key.lower()==b'cookie']
+                markers=[value for key,value in headers if key.lower()==b'x-chat-session']
+                cookie=SimpleCookie()
+                try:
+                    if len(cookies)==1 and len(cookies[0])<=8192:cookie.load(cookies[0].decode('ascii'))
+                except (CookieError,UnicodeError):pass
+                entry=cookie.get(self.cookie_name)
+                valid=(same_origin and markers==[b'restore'] and time.monotonic()<self.session_expires
+                    and entry is not None and secrets.compare_digest(entry.value.encode(),self.session.encode()))
         response = JSONResponse({'token': self.token, 'label': self.label} if valid else
             {'detail': 'launch_link_unavailable'}, status_code=200 if valid else 403,
             headers={'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer'})
+        if valid and scope['path']=='/chat/bootstrap':
+            response.set_cookie(self.cookie_name,self.session,path='/chat',httponly=True,samesite='strict')
         await response(scope, receive, send)
 
 
@@ -154,7 +174,8 @@ def configure_conversations(settings, *, model_url, streaming, profile=None, max
     for definition in settings['bundles']:
         definition['version']=versions[definition['version']]
         definition['model_url']=model_url
-        if streaming or 'streaming' in definition:definition['streaming']=streaming
+        definition['streaming']=streaming
+        definition['provider_request_limit']=min(2,maximum)
         if profile is not None:
             definition['model']=profile.model
             definition['policy']={'max_provider_requests':maximum}
@@ -164,7 +185,7 @@ def configure_conversations(settings, *, model_url, streaming, profile=None, max
             tenant['retained_versions']=[versions[version] for version in tenant['retained_versions']]
 
 
-def main(argv=None, *, application_factory=None, landing_path='/chat', streaming=False):
+def main(argv=None, *, application_factory=None, landing_path='/chat', streaming=True):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--live-local', action='store_true', help='explicitly use approved local Qwen')
     parser.add_argument('--runtime-config', type=Path, default=ROOT/'configs/runtime-local.example.yml')

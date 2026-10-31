@@ -76,10 +76,24 @@ class ConversationExecution:
             environment=host.config['environment'])
         self.bindings={}
         self.workflow_materials={}
+        self.retained_bindings={}
+        self.retained_workflows={}
         for definition in settings['bundles']:
             binding=build_bindings(host,definition,registry=self.registry,workflow_materials=self.workflow_materials)
             if binding.version in self.bindings:raise ValueError('duplicate conversation binding version')
             self.bindings[binding.version]=binding
+            self.retained_bindings[(binding.version,binding.identity)]=binding
+            if binding.version in self.workflow_materials:
+                self.retained_workflows[(binding.version,binding.identity)]=self.workflow_materials[binding.version]
+            # Omitted flags used buffered transport before the default changed.
+            # Retain that exact public identity for existing sessions only.
+            if 'streaming' not in definition:
+                legacy_workflows={}
+                legacy=build_bindings(host,{**definition,'streaming':False},registry=self.registry,
+                    workflow_materials=legacy_workflows)
+                self.retained_bindings[(legacy.version,legacy.identity)]=legacy
+                if legacy.version in legacy_workflows:
+                    self.retained_workflows[(legacy.version,legacy.identity)]=legacy_workflows[legacy.version]
         if not self.bindings or type(settings['tenants']) is not dict:
             raise ValueError('invalid conversation configuration')
         for grant in settings['tenants'].values():
@@ -100,8 +114,8 @@ class ConversationExecution:
     def _controller(self,principal,reservation):
         from prosaic_harness import Conversation,ConversationScope
         from prosaic_runtime import ExecutionContext
-        binding=self.bindings.get(reservation['binding_version'])
-        if binding is None or binding.identity!=reservation['binding_identity']:
+        binding=self.retained_bindings.get((reservation['binding_version'],reservation['binding_identity']))
+        if binding is None:
             raise HTTPException(409,{'code':'bindingConflict'})
         scope=ConversationScope(reservation['namespace'],reservation['environment'],APPLICATION,
             reservation['tenant_id'],reservation['actor_id'],reservation['billing_account_id'])
@@ -140,7 +154,7 @@ class ConversationExecution:
     def _workflow_harness(self,row):
         from prosaic_harness import Harness
         from prosaic_runtime import ExecutionContext
-        workflow,registration=self.workflow_materials[row['binding_version']]
+        workflow,registration=self.retained_workflows[(row['binding_version'],row['binding_identity'])]
         context=ExecutionContext(application_id=APPLICATION,tenant_id=row['tenant_id'],
             actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
             request_id='workflow-'+row['session_id'],run_id=row['session_id'])

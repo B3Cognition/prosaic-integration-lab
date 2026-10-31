@@ -1,5 +1,9 @@
 # Observatory generation — 2026-10-31
 
+**Later checkpoint:** the spent 55864 preview described below has been stopped.
+The [streaming-defaults follow-up](observatory-streaming-defaults-2026-10-31.md)
+records the new defaults, connection recovery and replacement synthetic preview.
+
 Unreleased work on `codex/observatory-token-stream`, based on current main
 `4787265953bbda9a9e7ed63b500d152b8bcf486b`. The maintainer authorized research,
 implementation and bounded real-model verification. No merge, release, SDK

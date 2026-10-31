@@ -1,5 +1,10 @@
 # Observable generation in the execution Observatory
 
+**Follow-up authorization:** the maintainer subsequently requested streaming by
+default in Lab/chat, connection recovery, full tests and commit/push. That
+supersedes the original default-false/Observatory-only choice below. See the
+streaming-defaults verification ledger for the implemented follow-up.
+
 The maintainer asked to implement visible token generation in both Observatory
 views, research what matters, and choose another local model if useful. The
 current 0.8.0 scene animates requests but disables streaming and receives only

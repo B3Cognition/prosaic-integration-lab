@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Streaming defaults and usable launcher connection — 2026-10-31
+
+The maintainer additionally authorized enabling streaming throughout Lab/chat,
+fixing the nonworking Start button, testing, committing and pushing this whole
+work package. The earlier screenshot showed a401 before dispatch; the old real
+preview also had a spent one-call allowance. New defaults preserve retained
+buffered identities and explicit opt-out. Launcher sessions survive reload;
+invalid manual credentials cannot appear Connected. A fresh synthetic preview
+is retained for repeated review. See the [follow-up ledger](verification/observatory-streaming-defaults-2026-10-31.md).
+No merge/release or SDK changes are included. Preserve original0.8.0 artifacts
+and the unrelated dirty original checkout.
+
 ## Unreleased Observatory generation — 2026-10-31
 
 The maintainer authorized research and implementation of visible generation in

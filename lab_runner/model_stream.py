@@ -5,7 +5,7 @@ import time
 from fastapi.responses import StreamingResponse
 
 
-def conversation_stream(message, *, model, call_id, usage):
+def conversation_stream(message, *, model, call_id, usage, delay=0):
     def frame(delta=None, *, finish=None, report=None):
         payload={'id':f'fixture-{call_id}', 'object':'chat.completion.chunk',
             'created':1, 'model':model, 'choices':[] if report else
@@ -20,11 +20,11 @@ def conversation_stream(message, *, model, call_id, usage):
             yield frame({'tool_calls':[{'index':index,'id':call['id'],'type':'function',
                 'function':{'name':function['name'],'arguments':''}}]})
             for offset in range(0,len(arguments),8):
-                time.sleep(.04)
+                if delay:time.sleep(delay)
                 yield frame({'tool_calls':[{'index':index,'function':{'arguments':arguments[offset:offset+8]}}]})
         content=message.get('content') or ''
         for offset in range(0,len(content),4):
-            time.sleep(.06)
+            if delay:time.sleep(delay)
             yield frame({'content':content[offset:offset+4]})
         yield frame(finish='tool_calls' if message.get('tool_calls') else 'stop')
         yield frame(report=usage)

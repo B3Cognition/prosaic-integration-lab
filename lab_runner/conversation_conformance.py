@@ -80,7 +80,7 @@ def preflight(path,*,live_local=False,live_hosted=False,max_calls=12):
         try:loopback=ipaddress.ip_address(url.hostname).is_loopback
         except ValueError:loopback=False
         if (type(profile.max_tokens) is not int or not 1<=profile.max_tokens<=512 or
-                profile.features.get('streaming') is not False or
+                type(profile.features.get('streaming',True)) is not bool or
                 profile.provider not in {'openai-compatible','anthropic'} or
                 (profile.api_key_env is None)==(profile.api_key_file is None)):
             raise ValueError('conversation conformance requires bounded secret-managed profiles')

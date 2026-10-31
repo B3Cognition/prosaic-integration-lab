@@ -78,3 +78,10 @@ Completed: 2,023 Python tests, 21 Node tests, audited SDK payloads, source/vendo
 guard, isolated wheel/rebuilt-source consumers and extracted-source Node tests
 passed. Browser verification and the bounded completed real stream are recorded
 in `docs/verification/observatory-generation-2026-10-31.md`. No merge/release.
+
+Follow-up requested by the maintainer: enable streaming in Lab/chat by default,
+fix Start/connection recovery, test and commit/push the whole package. Completed
+with legacy identity retention and explicit buffered opt-out: 2,031 Python tests,
+24 Node tests, 97 conversation and 54 native PostgreSQL acceptance cases; all
+passed with verified qualification cleanup. Clean wheel/source consumers and
+actual synthetic/real-model browser runs passed. See the streaming-defaults ledger.

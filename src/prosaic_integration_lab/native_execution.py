@@ -61,8 +61,10 @@ class NativeExecution:
         if type(native) is not dict or set(native) != {'bundles','tenants'} or not native['bundles']:
             raise ValueError('invalid native configuration')
         for definition in native['bundles']:
-            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version','fixture_provider_request_limit','fixture_tiers'}:
+            if set(definition) - {'version','model_url','operation_namespace','journal_identity','policies','routes','assets','fixture_effects','fixture_effect_version','fixture_provider_request_limit','fixture_tiers','streaming'}:
                 raise ValueError('invalid native configuration')
+            if type(definition.get('streaming',True)) is not bool:
+                raise ValueError('invalid native streaming configuration')
             if (type(definition.get('fixture_tiers',False)) is not bool or
                 definition.get('fixture_tiers') and not definition.get('fixture_effects')):
                 raise ValueError('fixture tiers require explicit fixture bindings')
@@ -75,12 +77,15 @@ class NativeExecution:
                 definition['fixture_provider_request_limit'] not in {1,2}):
                 raise ValueError('invalid fixture provider limit')
             material = self.material(definition)
+            legacy=(self.material({**definition,'streaming':False}) if 'streaming' not in definition else None)
             # Historical grants travel with each retained host bundle. Never rebuild
             # an old identity using mutable current tenant grants on a fresh worker.
             for tenant, settings in definition['policies'].items():
                 setting = grants(settings)
                 factory = self.factory(material, setting)
                 bundle = self.registry.register(WorkflowBundle(definition['version'],factory))
+                if legacy is not None:
+                    self.registry.register(WorkflowBundle(definition['version'],self.factory(legacy,setting)))
                 key = (tenant,definition['version'])
                 if key in self.factories: raise ValueError('invalid native configuration')
                 self.factories[key] = (bundle,factory)
@@ -115,12 +120,12 @@ class NativeExecution:
             'agents':{name:{'description':f'Synthetic {name} fixture'} for name in agents},
             'schemas':{name:{'description':f'Closed synthetic {name} value'} for name in schemas},
             'validators':{'approved':{'description':'Synthetic approved flag check'}}})
-        profiles={'fixture':EndpointConfig(definition['model_url'],'test-model',features={'streaming':False})}
+        profiles={'fixture':EndpointConfig(definition['model_url'],'test-model',features={'streaming':definition.get('streaming',True)})}
         routes=dict(definition.get('routes',{}))
         if definition.get('fixture_tiers',False):
             for tier in ('balanced','strong'):
                 profiles['fixture-'+tier]=EndpointConfig(definition['model_url'],'fixture-'+tier,
-                    features={'streaming':False})
+                    features={'streaming':definition.get('streaming',True)})
                 routes[tier]='fixture-'+tier
         config = RuntimeConfig(profiles,routes,'fixture',
             allowed_tools=frozenset(tools))
