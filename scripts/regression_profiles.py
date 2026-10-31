@@ -35,6 +35,7 @@ def coverage(all_tests, released, candidate):
 class Evidence:
     def __init__(self):
         self.nodeids = []
+        self.executed = set()
         self.skipped = 0
 
     def pytest_collection_modifyitems(self, items):
@@ -45,6 +46,8 @@ class Evidence:
 
     def pytest_runtest_logreport(self, report):
         self.skipped += int(report.skipped)
+        if report.when == 'call':
+            self.executed.add(report.nodeid)
 
 
 def main():
@@ -77,10 +80,11 @@ def main():
     if options[:1] == ['--']: options = options[1:]
     # Retain pytest's importlib isolation even for tiny external qualification fixtures.
     status = int(pytest.main(['-q','--import-mode=importlib',*(['--collect-only'] if args.collect_only else []),*files,*options], plugins=[evidence]))
-    if not evidence.nodeids or evidence.skipped:
+    nodeids = evidence.nodeids if args.collect_only else sorted(evidence.executed)
+    if not nodeids or evidence.skipped:
         status = status or 1
-    result = dict(version=1,profile=args.profile,nodeIds=sorted(evidence.nodeids),
-        skipped=evidence.skipped,exitCode=status,collectedOnly=args.collect_only)
+    result = dict(version=1,profile=args.profile,nodeIds=sorted(nodeids),
+        collectedNodeIds=sorted(evidence.nodeids),skipped=evidence.skipped,exitCode=status,collectedOnly=args.collect_only)
     with args.output.open('x') as f: json.dump(result, f, indent=2)
     return status
 

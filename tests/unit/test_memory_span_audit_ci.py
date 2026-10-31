@@ -53,6 +53,22 @@ def test_required_profile_rejects_skips_and_retains_summary(tmp_path):
     assert summary['skipped'] == 1 and summary['exitCode'] == 1
 
 
+@pytest.mark.parametrize('options', [['--collect-only'], ['--setup-only'], ['-k','test_first']])
+def test_execution_proof_counts_actual_test_calls_not_collection(tmp_path, options):
+    p = tmp_path/'tests/unit/test_execution.py'; p.parent.mkdir(parents=True)
+    p.write_text('def test_first(): pass\ndef test_second(): pass\n')
+    output = tmp_path/'summary.json'
+    result = subprocess.run([sys.executable, '-I', str(ROOT/'scripts/regression_profiles.py'),
+        '--root',str(tmp_path),'--profile','released','--output',str(output),'--',*options],
+        capture_output=True,text=True,timeout=30)
+    summary = json.loads(output.read_text())
+    if options[0] in ('--collect-only','--setup-only'):
+        assert result.returncode == 1 and summary['nodeIds'] == []
+    else:
+        assert result.returncode == 0
+        assert summary['nodeIds'] == ['tests/unit/test_execution.py::test_first']
+
+
 def wheel_fixture(tmp_path):
     name = 'b3_prosaic_runtime-0.9.8+jsonschema.3-py3-none-any.whl'
     members = {'prosaic_runtime/__init__.py':b'VALUE = 1\n',
@@ -119,3 +135,19 @@ def test_existing_ci_assigns_candidate_only_tests_without_dropping_other_asserti
     commands = (ROOT/'.github/workflows/sue-review.yml').read_text()
     for directory in ['tests/sue_review','tests/requirements_review','tests/requirements_review_v2']:
         assert directory in commands
+
+
+def test_sue_ci_preserves_legacy_engine_and_qualifies_opt_in_context_separately():
+    import yaml
+    workflow = yaml.safe_load((ROOT/'.github/workflows/sue-review.yml').read_text())
+    steps = workflow['jobs']['synthetic']['steps']
+    checkout = next(step for step in steps if 'checkout@' in step.get('uses',''))
+    assert checkout['with']['fetch-depth'] == 0
+    context = next(step for step in steps if step.get('name')=='Qualify opt-in context with its exact engine and restore legacy bytes')
+    assert 'tests/sue_review/test_review_context.py' in context['run']
+    assert 'bundle/sue-cycle/*.whl' in context['run']
+    assert '--force-reinstall bundle/sue/*.whl' in context['run']
+    assert 'dependencies/sue-cycle-ci-source.json' in '\n'.join(step.get('run','') for step in steps)
+    legacy = next(step for step in steps if step.get('name')=='Require ordinary and explicitly enabled source regressions without skips')
+    assert '--ignore=tests/sue_review/test_review_context.py' in legacy['run']
+    assert 'dependencies/sue-review-source.json' in (ROOT/'.github/workflows/sue-review.yml').read_text()

@@ -112,8 +112,10 @@ jobs:
                   source = runtime
                   row.update(filename=runtime.name,version='0.9.8+jsonschema.3',
                       sha256=hashlib.sha256(runtime.read_bytes()).hexdigest(),
-                      source_commit='d713e078a661a19a057f02482d47d3f7a23b0c5a',url='immutable-candidate-source')
+                      source_commit='d713e078a661a19a057f02482d47d3f7a23b0c5a',
+                      url='immutable-candidate-source',checksum_url='exact-source-build')
               shutil.copyfile(source,target/row['filename'])
+          data['qualification'] = 'Unpublished exact-source Runtime candidate; other SDK bytes remain released. No publication authorized.'
           pathlib.Path('reports/audit-ci/sdk-manifest.json').write_text(json.dumps(data,indent=2)+'\n')
           PY
           .venv-audit/bin/python scripts/install_dependencies.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk

@@ -129,3 +129,6 @@ a later design and comparison. SUE and SOAR remain separate.
 
 See the [verification record](verification/answer-span-audit-2026-10-30.md) for
 the tested SDK profiles, review fixes, fixture results and remaining limits.
+
+The [prepared small comparison](answer-span-comparison.md) freezes saved answers,
+independent controls, budgets and the remaining serving/adjudication gates.

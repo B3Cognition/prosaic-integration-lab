@@ -68,17 +68,17 @@ and a new verification record. Keep original historical reports unchanged.
 **Files:** Private new study directory, preparation helper/tests if needed, and
 public protocol/verification documentation containing no corpus or raw outputs.
 
-- [ ] Verify original archives before reading frozen drafts. Select the six
+- [x] Verify original archives before reading frozen drafts. Select the six
   declared questions, both retrieval arms and all three saved profiles from
   the controlled study. Freeze every scheduled cell and report missing/invalid
   outputs as such; do not regenerate originals.
-- [ ] Freeze exact unique audit packets and map repeated aliases separately.
+- [x] Freeze exact unique audit packets and map repeated aliases separately.
   Prepare correct and fault-injected controls with labels outside model inputs.
-- [ ] Prepare disputed q022 source/judgment material for independent adjudication;
+- [x] Prepare disputed q022 source/judgment material for independent adjudication;
   preserve original labels and leave unresolved decisions visibly pending.
-- [ ] Predeclare repeats, order seed, exact call/token ceilings, serving preflight,
+- [x] Predeclare repeats, order seed, exact call/token ceilings, serving preflight,
   unknown-usage stop rules and independent semantic scoring requirements.
-- [ ] Verify credential-free dry preparation dispatches zero calls, leaves all
+- [x] Verify credential-free dry preparation dispatches zero calls, leaves all
   inputs/reservations untouched and keeps memory/SUE off. Live status remains
   not-authorized/not-started until the declared gates are satisfied.
 
