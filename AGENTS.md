@@ -52,3 +52,12 @@ evidence as consent to retry, authority to approve output or a customer invoice.
 Verified commands are in README.md. Run `.venv/bin/python -m pytest -q` for
 local unit tests, build the consumer image, then use `python -m lab_runner test`
 for required real-stack acceptance. Unit tests alone are not stack evidence.
+
+The optional memory benchmark/audit requires the separately pinned Runtime
+candidate in `dependencies/answer-span-runtime.json`. Qualify both SDK profiles:
+run `scripts/regression_profiles.py --profile released --output <new-json>` in
+the SDK-only released environment and `--profile candidate` in the installed
+candidate environment. `--profile all --collect-only` and `--coverage` must prove
+the executed union covers the full default collection, with zero skips. Never
+relax SDK guards or count collection alone as an executed profile. The ordinary
+released manifests and feature defaults remain unchanged.

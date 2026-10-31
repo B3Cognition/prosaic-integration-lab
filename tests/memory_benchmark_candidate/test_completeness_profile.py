@@ -252,7 +252,7 @@ class CompletenessTests(unittest.TestCase):
             self.assertEqual(after.schemas["critic"], CRITIC_SCHEMA)
             self.assertEqual(server.requests, [])
             details = profile.provenance()
-            self.assertEqual(details["sdkVersions"]["prosaic-integration-lab"], "0.6.0")
+            self.assertEqual(details["sdkVersions"]["prosaic-integration-lab"], "0.7.0")
 
     def test_scoped_absence_with_no_source_bodies_remains_valid_without_citations(self):
         q, d, _, identity = fixture()

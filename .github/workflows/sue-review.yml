@@ -61,12 +61,12 @@ jobs:
           assert wheel['sha256'] == 'fdfb1690505a85b4cbb49e2b4845c91e318efe945068a379ac230c3b4ebf9b75'
           print('commit=' + p['source_commit'])
           PY
-      # This candidate is local/unpublished at preparation time. This checkout
-      # must fail until its exact source is made available through an authorized
-      # push; a prepared workflow does not establish a green CI qualification.
+      # The public independent fork retains this exact historical commit.
+      # Keep the original source manifest and artifact/engine pins unchanged;
+      # only the fetch location changes. Do not substitute the fork's main.
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          repository: B3Cognition/cognitive-castle
+          repository: B3Cognition/prosaic-castle
           ref: ${{ steps.source.outputs.commit }}
           path: .cache/sue-source
           persist-credentials: false
@@ -131,7 +131,7 @@ jobs:
           .venv/bin/python -m pip install --no-deps bundle/sue/*.whl
           .venv/bin/python -m pip check
           mkdir -p reports
-          .venv/bin/python -m pytest -q tests/unit tests/functional tests/sue_review tests/requirements_review tests/requirements_review_v2 --junitxml reports/sue-enabled-source.xml
+          .venv/bin/python scripts/regression_profiles.py --profile released --output reports/sue-released-regressions.json -- tests/sue_review tests/requirements_review tests/requirements_review_v2 --junitxml reports/sue-enabled-source.xml
           .venv/bin/python - <<'PY'
           from xml.etree import ElementTree
           root = ElementTree.parse('reports/sue-enabled-source.xml').getroot()

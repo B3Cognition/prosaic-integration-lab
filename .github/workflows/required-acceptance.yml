@@ -131,16 +131,16 @@ jobs:
         run: .venv/bin/python -m pytest -q tests/functional/test_required_acceptance.py -k candidate_checkout_history
       - name: Unit and functional regressions
         if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
-        run: .venv/bin/python -m pytest -q
+        run: .venv/bin/python scripts/regression_profiles.py --profile released --output reports/released-regressions.json
       - name: Released native and unified pool acceptance
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python -m pytest -q tests/native_acceptance
       - name: Current conversation train without context capability
         if: ${{ steps.conversation-sdk.outputs.enabled == 'true' && steps.conversation-sdk.outputs.context != 'true' }}
-        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
+        run: .venv/bin/python scripts/regression_profiles.py --profile released --output reports/released-regressions.json -- --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
-        run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
+        run: .venv/bin/python scripts/regression_profiles.py --profile released --output reports/released-regressions.json -- --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
       - name: Qualify current Lab distributions with public SDKs
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:
