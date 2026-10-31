@@ -2,10 +2,12 @@
 import copy
 import hashlib
 import json
+from importlib.metadata import version
 from pathlib import Path
 import sys
 import tempfile
 import threading
+import tomllib
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -252,7 +254,12 @@ class CompletenessTests(unittest.TestCase):
             self.assertEqual(after.schemas["critic"], CRITIC_SCHEMA)
             self.assertEqual(server.requests, [])
             details = profile.provenance()
-            self.assertEqual(details["sdkVersions"]["prosaic-integration-lab"], "0.7.0")
+            with (ROOT.parents[1] / "pyproject.toml").open("rb") as source:
+                expected_lab_version = tomllib.load(source)["project"]["version"]
+            expected_versions = {name: version(name) for name in
+                ("prosaic-integration-lab", "b3-prosaic-runtime", "b3-prosaic-harness")}
+            self.assertEqual(expected_versions["prosaic-integration-lab"], expected_lab_version)
+            self.assertEqual(details["sdkVersions"], expected_versions)
 
     def test_scoped_absence_with_no_source_bodies_remains_valid_without_citations(self):
         q, d, _, identity = fixture()
