@@ -1,5 +1,15 @@
 # Codex handoff
 
+## Castle audit draft CI preparation — 2026-10-31
+
+Draft [PR #38](https://github.com/B3Cognition/prosaic-integration-lab/pull/38)
+adds the previously tested optional integrations and answer-span audit. Current
+main is being reconciled and candidate CI is being qualified. Memory and SUE
+remain disabled by default; live audit quality is unmeasured. Runtime candidate
+`d713e078a661a19a057f02482d47d3f7a23b0c5a` matches all 58 original qualified
+package payloads and is available as candidate source only, with no PyPI release.
+The new comparison is preparation-only; old unknown reservations remain held.
+
 ## Lab 0.7.0 published; verification documentation — 2026-10-25
 
 Lab 0.7.0 is published at qualified source
@@ -132,6 +142,234 @@ Adoption [PR27](https://github.com/B3Cognition/prosaic-integration-lab/pull/27)
 merged as `8194f6a0f6e64c6186c8aa129bc759e9e3ef3008` after all four exact-head
 CI cells passed, including 36 real-stack lanes with cleanup verified. This
 documentation follow-up does not change SDK pins, execution or benchmark code.
+
+## Existing critic protected; generation quality still unqualified — 2026-10-25
+
+[Verification](verification/sue-canonical-critic-2026-10-25.md): use explicit
+`build_protected_critic_workflow` for the existing critic's unchanged native
+generation, then public-Harness sealed canonical capture. SUE candidates remain
+separate and cannot replace it. Memory/SUE defaults remain off. Protection-only
+code commit02a8007 is local. The separately named `build_canonical_workflow` is
+the experimental generation profile; do not adopt it on current evidence.
+
+Full default2033, installed review43 and released-SDK protection4 tests pass.
+Network-denied replay matches103 native requests and55 final validations, zero
+extra provenance rejections; no fresh live protection-only quality claim.
+Direct/sdist-rebuilt223 member payloads and191 Python sources match.
+
+Two frozen138-cell Qwen comparisons are preserved. Latest:189requests/363492
+tokens, experimental13/24 vs unchanged critic11/24, no new unknowns/overruns.
+Raw-handoff16KB/256KB mismatch is fixed, all six affected handoffs complete.
+Clean07 remains1/3; case02 citation completeness and03/05 categories still fail.
+Case08 exact citation now3/3. Semantic fix request remains incomplete. All90
+canonical invariants hold; advisory63/90 vs matched canonical70/90, with no
+incremental saved-advice quality benefit. No fresh SUE generation or general
+inferiority/significance claim. Next: isolate grammar on/off before further
+generation changes, preserving prompts and saved critic context.
+
+Final mechanics archive:castle-sue-protected-existing-20261025,190files, manifest
+SHA256 e4320e6945220ee1115f3a188347b2ac3801841fd91087ab69647f999a9b23e5.
+Both failed-generation archives, all14 prior archives/8842files and the original
+unknown30request/65536token reservation reverify unchanged. No SDK changes,
+push, merge, release, default enablement or new PostgreSQL/native qualification.
+
+## Protected review and paired handoffs completed — 2026-10-25
+
+[Verification](verification/sue-protected-2026-10-25.md): explicit v4 source-only
+review, immutable public-Harness capture and separate advisory candidate prompts
+are implemented. Existing v1/v2/v3, SDKs, canonical SUE, scorer, pins and defaults
+are unchanged. Memory/SUE remain disabled. Full default: 2,033, candidate v4/v3 25,
+installed protection14 and study10 tests pass; wheel/sdist221 payloads match.
+
+Same Qwen/strict scorer,138 accounted cells/three repeats:96 complete,12 blocked,
+30 dependency-failed.145requests/219,943tokens, zero unknowns/tools/overruns;
+both network-denied audits reconcile usage, source identity and canonical state.
+All 60 executed candidates preserve their matched independent final;30 clean-
+control handoffs issue no calls because the source-only baseline fails schema.
+
+The new source-only profile scores7/24 versus existing critic 14/24; do not adopt
+it as a replacement. Case 04 strong/no-advice passes3/3 at lower token cost than
+successful SUE handoffs. Compact gains 9 matched passes over raw with39.3% fewer
+candidate-stage tokens; this excludes SUE generation. Case 08 identifies the
+contradiction30/30 but fails exact citation spans30/30. No new end-to-end SUE
+dialogues, general quality claim, default enablement or release qualification.
+Recommend qualifying immutable capture of the exact existing critic workflow,
+then addressing clean-output feedback/citation generation separately; no tuning
+or citation repair after seeing these results.
+
+Evidence: `reports/castle-sue-protected-20261025`,1040 files, manifest SHA256
+`d15198cf33cb8467f842e707fd4991a23cf3f62690bf3f883acd52bd0f350d87`.
+All 11 prior archives/5426 files and original unknown30request/65536token
+reservation remain unchanged. Implementation commitdb8d780 is local/unpublished.
+No push, merge, public candidate adoption, release or new PG/native matrix.
+
+## Controlled SUE comparisons completed — 2026-10-25
+
+[Diagnostic report](verification/sue-controlled-2026-10-25.md):108 samples,
+three repeats across saved-advice/guidance, source-derived focus/context and
+matched final-review instruction-role conditions.177requests/315,765tokens,
+zero new unknowns/tools/overruns;92 workflows complete,15 strict SUE-blocked
+and1 final schema-blocked remain failures.13 credential-free preflight checks
+pass; both network-denied audits reconcile all usage/frozen inputs/receipts.
+
+Case4 new reviewer without advice passes3/3, latest SUE advice0/3. Focused seeds
+pass0/18 with6/18 completed; they are not an adopted fix. Case8 injection removal
+passes3/3 in each role arm; canonical no-advice strict results remain0/3 each.
+Previous advice identifies contradiction6/6 in the handoff but every output
+fails the exact citation representation; no scorer relaxation or output repair.
+Original-engine replay revalidates44 accepted replies; original live runner
+untested. Keep SUE experimental and memory/SUE disabled by default.
+
+Evidence: `reports/castle-sue-controlled-20261025`,849 files, manifest SHA256
+`bbf249b270bd950d6e63e7bc28d09743ed7c952a6ba6e6fb04c7b803ea89d6c4`.
+All10 prior archives/4,577 files and original unknown30request/65,536token
+reservation remain unchanged. No product/SDK/pin/default changes, release,
+push or publication. Next recommendations are in the report; none implemented.
+
+## Optional SUE review fixes and rerun — 2026-10-25
+
+[Verification](verification/sue-review-fixes-2026-10-25.md): opt-in cycle guard,
+signed frozen review context, compact final advice, strict final consistency
+with bounded retries, and separate diagnostics are implemented and separately
+verified. Existing modes/defaults and canonical rules remain unchanged.
+Full default Lab 2033, installed 116, matrix 24/24 and PG16/18 six each pass.
+Legacy Castle has the same 131 failing/error IDs as its pre-change snapshot;
+it is not a green release gate. Independent review gap closed by three real
+held-out scripted session-to-final integrations; no model-quality claim.
+
+Fresh 360s Qwen comparison measures all24 cells:18 completed,5 final-blocked,
+1 SUE-blocked. Strict direct4/8, critic5/8, SUE3/8;54 requests/87,113tokens
+reconcile with zero new unknowns/overruns/tools. SUE tokens fall43% but lose
+case8's prior pass. Case4 uses3480tokens/22.483s and still misses failure
+behavior; case3 guard stops8turns at26822tokens. Keep SUE/memory disabled.
+All9prior archives/4078files and original unknown30/65536 reservation remain
+unchanged (old total49requests/90,345tokens). New evidence is separate; no push,
+publication, public candidate adoption or release qualification.
+
+## Separate 360-second Qwen comparison completed — 2026-10-25
+
+[Qualification](verification/sue-qwen360-2026-10-25.md): same v1.5 candidate,
+cases/scorer/profile and strict validation; only common cell deadline120→360.
+Experiment-only public Harness construction preserves the closed120s builder;
+preflight proves120s fingerprint equality. All24cells/workflows complete:
+direct3/8strict, critic2/8, SUE4/8.56requests/121,791tokens reconcile, zero new
+unknowns/overruns/tools, zero-call replay and56request audit. All24SUE replies
+match both schemas; two invalid stated premises rejected/recovered in existing
+retries. Case4 takes263.950s/14turns/64,408tokens toBOUNDED_STOP and still fails
+the strict scorer. SUE uses11.67times direct tokens for net one extra strict
+pass in this single small trial; no general efficacy/quality certification.
+
+Fresh installed62 and fixture24/24 pass. All8prior archives/3629files verify
+unchanged; original120s unknown entry keeps its full30request/65536token cell
+reservation, old total49requests/90,345tokens. Never substitute this new run's
+known result for the old unknown receipt. Production code/pins/defaults remain
+unchanged: memory/SUE disabled, native CI/general private-SDK adoption/release
+still separate. No push, merge or publication. Historical checkpoints below
+retain their original deadlines/results.
+
+## SUE generation grounding tightened; unchanged deadline stops pilot — 2026-10-24
+
+[Schema qualification](verification/sue-grounding-schema-2026-10-24.md): v1.5
+keeps canonical schema/acceptance and v1.2 behavior unchanged, adding only
+generation constraints for field relationships. Fullpublic2158passed, installed62, generation18,
+focused39, absence105; grammar23schemas/49values blocks all10 prior rejected
+replies while admitting34 canonical-valid synthetic turns and five prior valid
+replies. Fixture24/24, constrainedPG16/18 six each, legacy memory/SUE76each with
+cleanup. Guidance-only [failed study](verification/sue-grounding-2026-10-24.md)
+is separately archived604files, all six previous archives reverified.
+
+Same Qwen120s pilot stopped12/24cells: direct2/4strict, critic3/4, SUE3/4strict
+and3completed; case4 SUE accepted7turns before answer08 timed out. Two invalid
+stated premises were rejected and corrected within existing retries. All13 SUE
+wire replies match generation/canonical schemas; no invalid output accepted.
+28physical calls,44,810Runtime-known tokens plus3,894late provider tokens;
+one unknown cell retains its full reservation, total49calls/90,345tokens charged.
+Do not retry/release this reservation, reinterpret late output as accepted, or
+claim a completed/beneficial quality comparison. Memory/SUE remain disabled;
+native CI, general private-SDK adoption, longer-budget qualification and release
+remain separate gates. No push, merge, original Castle backport or publication.
+
+## Constrained JSON fixes SUE shape; semantic/quality gate remains — 2026-10-24
+
+[Qualification](verification/sue-constrained-json-2026-10-24.md): unpublished
+Runtime0.9.8+jsonschema.2 adds bounded per-call schema requests; Lab's explicit
+`SueReviewSession(..., constrained_json=True)` freezes the mode without changing
+legacy settings/policies. Canonical schemas, guidance and semantic validators
+are unchanged. Runtime full1459passed plus separate installed metadata/transport,
+conversation/production checks; public Lab2132passed, absent-package105,
+installed constrained PG16/18 six cases each and unchanged memory76each;
+fixture24/24 and zero-call offline replay. Qwen7B24cells: direct4/8 strict,
+critic3/8, SUE0/8 (3completed). All16 SUE replies are plain schema-valid JSON;
+13fail grounding (11SILENT answer citations,2premise citations outside an empty
+answer-evidence set);3stop at one-turn APORIA_UNDEFINED.
+All43requests/49467tokens reconcile, zero new unknowns. Closed general SDK
+profiles reject the unpublished candidate; they were not weakened. Memory/SUE
+remain disabled. Preserve all failed archives and charged reservations; no
+push, release, Linux consumer/remote CI qualification or general SDK adoption.
+
+## Critic contract fixed; SUE guidance restored; Qwen rerun complete — 2026-10-24
+
+[Fresh verification](verification/review-contract-fixes-2026-10-24.md): code
+`50c1b08`, full Lab2119 passed, disabled/unavailable105, installed PG16/18 76/76
+each with cleanup, fixture24/24, independent review clean. Frozen v1 stays
+unchanged; v2 projects the critic's feedback contract. Canonical SUE instructions
+are hash-pinned prompt data, sealed in adapter v1.2; validators/engine unchanged.
+Qwen7B rerun: direct8completed/5strict passes, critic8completed/2strict passes,
+SUE0completed/0passes. All40requests/43477tokens reconcile, zero new unknowns,
+zero-call offline replay. SUE still omits required fields; keep memory/review
+disabled by default. Preserve failed-run archives/unknown reservations and old
+wheels; old bindings remain inspectable with the original candidate, and fail
+closed under the new one. No push, merge, release or original Castle backport.
+
+## Live Qwen SUE pilot found promotion blockers — 2026-10-24
+
+[Live evidence](verification/sue-qwen-live-2026-10-24.md): the 24-cell Qwen 7B
+pilot completed 8/8 direct workflows (4/8 strict passes), but 0/8 critic and
+0/8 SUE workflows. All 40 requests/40,817 reported tokens reconcile; offline
+replay added zero calls. The critic receives a conflicting final-output schema;
+all 16 SUE attempts omitted required `addresses`, and canonical semantic
+response guidance is missing from the adapter prompt. Preserve these failures
+before a separately identified corrected study. Qwen 27B exceeded the hard
+60-second invocation policy; two unknown reservations remain retained.
+Memory/review stay disabled by default. No production changes, weakened
+assertions, push or release. Prior [fresh tests and retrieval benchmarks](verification/prosaic-castle-retest-2026-10-24.md)
+remain unchanged; scripted passes do not qualify live review quality.
+
+## Independent Prosaic Castle fork — 2026-10-24
+
+The [new enable/use guide](prosaic-castle.md) adopts the independent local fork
+with a lean FTS provider, unchanged separately installable SUE, and optional
+[Runtime/Harness model jobs](castle-model-jobs.md). Memory/review remain
+independently disabled. Original Castle modules, custom SOAR compatibility,
+legacy model transports, old SDK/profile pins and hackathon evidence remain.
+No backport, push, release or live inference was performed.
+
+[Qualification](verification/prosaic-castle-fork-2026-10-24.md): default2,033,
+enabled2,107 Lab tests; installed76/76 on each PostgreSQL16/18; Castle2,606 tests
+and85.59% coverage;24-cell fixture comparison and zero-call network-denied replay.
+Actual worker qualification fixed a SUE snapshot wire-hash mismatch; review
+fixed judge objectives and strict candidate/test-inventory admission. Linux
+native AMD64/ARM64, real SML/live transport parity and review quality remain
+separate gates. Historical quickstarts describe their original bundles; use
+the new guide/profile for this unpublished independent candidate.
+
+## Optional SUE review guide and package provenance — 2026-10-24
+
+The [SUE guide](sue-review.md) describes the independently disabled advisory
+workflow, credential-free demo, frozen sources, approval-inclusive lifetime and
+owner/revision recovery. The [optional source profile](../dependencies/sue-review-source.json)
+pins the standalone engine candidate at Castle `53637196`, preserving canonical
+origin `58f4242`, normal SDK pins and r7 memory archives. It does not authorize
+publication or live inference. The [implementation plan](superpowers/plans/2026-10-24-optional-sue-review.md)
+tracks remaining integration/qualification work; documentation and standalone
+package review are not whole-feature completion or live-provider certification.
+
+The implemented optional workflow and frozen-source requirements comparison
+are recorded in the [dated verification](verification/sue-review-2026-10-24.md).
+Direct/rebuilt installed candidates pass all14 SUE cases on both PostgreSQL16/18;
+both24-cell comparison matrices and network-blocked replay pass. Native Linux CI
+and any review-quality claim remain separate gates. The original v10 scorer,
+retrieval assertions, source ZIP and historic evidence are preserved.
 
 ## Runtime 0.9.8 public adoption — 2026-10-24
 

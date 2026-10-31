@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "profile": "sue-review-v1",
+  "repository": "B3Cognition/cognitive-castle",
+  "source_commit": "53637196cc215e9bd5b85b9253b3430b2781b884",
+  "canonical_source_commit": "58f4242080212c2bebcca0c685af0f5e1090aa94",
+  "package_directory": "packages/sue",
+  "distribution": "cognitive-castle-sue",
+  "version": "0.1.0",
+  "import_name": "castle_sue",
+  "license": "MIT",
+  "runtime_dependencies": [],
+  "optional": true,
+  "default_enabled": false,
+  "candidate": true,
+  "publication_authorized": false,
+  "normal_sdk_manifest": "dependencies/releases.json",
+  "preserved_memory_profile": "dependencies/memory-release-candidates-2026-10-24-r7.json",
+  "preserved_memory_profile_sha256": "a7b011ba17708bec6216c2953298ff95289c15ded992cc62bc2288875442fa0e",
+  "memory_profile_changed": false,
+  "artifacts": [
+    {
+      "kind": "wheel",
+      "filename": "cognitive_castle_sue-0.1.0-py3-none-any.whl",
+      "sha256": "fdfb1690505a85b4cbb49e2b4845c91e318efe945068a379ac230c3b4ebf9b75",
+      "size_bytes": 47924,
+      "rebuilt_sdist_wheel_sha256": "fdfb1690505a85b4cbb49e2b4845c91e318efe945068a379ac230c3b4ebf9b75"
+    },
+    {
+      "kind": "sdist",
+      "filename": "cognitive_castle_sue-0.1.0.tar.gz",
+      "sha256": "8846789e9c8534a33dd73807bf6e34543b64b24c1ace26ead05d503515a5cf8a",
+      "size_bytes": 49416
+    }
+  ],
+  "engine": {
+    "api_version": 1,
+    "schema_version": 2,
+    "policy_version": "2026-09-24",
+    "identity_sha256": "bbde4669d1eb069dcb8c72e121cd08be4ca953b349f9243b9e650e0d1b596f0b",
+    "source_manifest_sha256": "7b14272b3720261d71a472aadaa8b6a23fa8ec0e07f07c7a4c23aa75a887b892",
+    "identity_scope": "canonical resources, SOURCES.json, package wrapper and private loader"
+  },
+  "upstream": {
+    "repository": "B3Cognition/echelon",
+    "source_commit": "a4286d83427d03b1b1d019c98c68f5d2e0fac741"
+  },
+  "qualification": {
+    "scope": "standalone engine package; separate Lab workflow qualification required",
+    "direct_and_rebuilt_sdist_wheels_byte_identical": true,
+    "live_provider_certified": false
+  }
+}

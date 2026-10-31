@@ -1,0 +1,39 @@
+{
+  "built": true,
+  "published": false,
+  "castle_source_commit": "6329ecf4923f18e57795fae5dac87e1fb1c5f3a8",
+  "lab_source_commit": "886c0aaad5087379cf8d163ba5da6d1247419b33",
+  "source_date_epoch": "1792822837",
+  "packages": [
+    {
+      "distribution": "cognitive-castle",
+      "version": "3.4.2",
+      "wheel": "cognitive_castle-3.4.2-py3-none-any.whl",
+      "wheel_sha256": "a2a745878502a1f4911ce5d0631a956cf4b3c83accd60d8625392b4b3f03ac63",
+      "sdist": "cognitive_castle-3.4.2.tar.gz",
+      "sdist_sha256": "d60c230a8966ac15dc2b45f42ae9d0ae0225e8ea20bb3b9d0e07f0d253ebf35c",
+      "rebuilt_sdist_payloads_match": true
+    },
+    {
+      "distribution": "b3-prosaic-memory-castle",
+      "version": "0.1.0",
+      "wheel": "b3_prosaic_memory_castle-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "434cf2b8d1d43114d54e982449ccebd3afb97da200db53571fc7f6858e76fad3",
+      "sdist": "b3_prosaic_memory_castle-0.1.0.tar.gz",
+      "sdist_sha256": "ba36c4468906f0c7876d52a2f9fbd6f09c1950b546f09189a6464e75d0e6fc49",
+      "rebuilt_sdist_payloads_match": true
+    }
+  ],
+  "lab_wheel": {
+    "filename": "prosaic_integration_lab-0.6.0-py3-none-any.whl",
+    "sha256": "871adae14eb526b83c2730c93a52aa31b5a366c01e0a668138036d27b8480536"
+  },
+  "manifest_sha256": "c91d99ca1852ad6d7cd39a1cf4c18cdcbd882103e8fb0b525e85fd35c68b9ecf",
+  "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+  "build_tools": {
+    "build": "1.6.1",
+    "setuptools": "84.2.1",
+    "hatchling": "1.32.4",
+    "twine": "7.0.0"
+  }
+}

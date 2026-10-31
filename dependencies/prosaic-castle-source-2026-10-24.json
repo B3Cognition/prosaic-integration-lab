@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "profile": "prosaic-castle-v1",
+  "source_commit": "e810a016abab7b96b4c905b04314562065d5fed3",
+  "runtime_source_commit": "971dd4fe280667e7b61ea2e4b6e262ab77eaad43",
+  "source_repository": "independent-local-prosaic-castle",
+  "upstream_repository": "B3Cognition/cognitive-castle",
+  "upstream_commit": "53637196cc215e9bd5b85b9253b3430b2781b884",
+  "candidate": true,
+  "default_enabled": false,
+  "publication_authorized": false,
+  "worker": {
+    "distribution": "prosaic-castle",
+    "version": "3.4.2",
+    "wheel": "prosaic_castle-3.4.2-py3-none-any.whl",
+    "wheel_sha256": "3d8b1d9da57b9374ca8cdd6260c793cc105788ae242dc44116d294781eee1915",
+    "sdist_sha256": "51deb4b7d95aa1e624b01ffb4a963e0b0c34b6d44acb90d36f93ab10c7089d99",
+    "command": "prosaic-castle-provider",
+    "profile": "memory-fts-v1",
+    "recency_boost": false,
+    "dense_opt_in_profile": "memory-v1",
+    "qualified_store_dependencies": {"lancedb": "0.40.0", "pyarrow": "26.0.0", "PyYAML": "6.0.3"}
+  },
+  "adapter": {
+    "distribution": "b3-prosaic-memory-castle",
+    "version": "0.1.0",
+    "wheel_sha256": "7131c12e9b1bc36cb302874d7c5dbbd349de42d74581f8b5ec9c2981aabbbc35",
+    "qualified_payload_unchanged": true
+  },
+  "sue": {
+    "distribution": "cognitive-castle-sue",
+    "version": "0.1.0",
+    "default_enabled": false,
+    "wheel_sha256": "7dfe0697de596e745b5934570d449238d28db380e5e800a96a606d01eed0bc4d",
+    "engine_identity": "bbde4669d1eb069dcb8c72e121cd08be4ca953b349f9243b9e650e0d1b596f0b",
+    "qualified_payload_unchanged": true,
+    "source_manifest_sha256": "7b14272b3720261d71a472aadaa8b6a23fa8ec0e07f07c7a4c23aa75a887b892"
+  },
+  "deterministic_policy": {
+    "version": "castle-shipped-v1",
+    "automatic_provider_use": false,
+    "rules_sha256": "2f733306d6e5464cd2d63a1b639650a9730953b6217469d054fd05ce076821f9",
+    "custom_rules": "reject; retained legacy SOAR path remains available"
+  },
+  "preserved_profiles": {
+    "castle-release-source.json": "00ede35ba5e6ff823aec84ba507714f4818e79c54aae49dcf31906c2f6ba715f",
+    "sue-review-source.json": "1fa3053070fa9b795fb1117956f946b3326acc7609bb8f5af842d00f9faf4f51",
+    "memory-release-candidates-2026-10-24-r7.json": "a7b011ba17708bec6216c2953298ff95289c15ded992cc62bc2288875442fa0e"
+  },
+  "qualification_limits": [
+    "local candidate, no remote fork repository or publication",
+    "native Linux AMD64/ARM64 qualification remains required",
+    "scripted comparisons do not establish model review quality",
+    "real SML equivalence and live transport parity not certified"
+  ]
+}

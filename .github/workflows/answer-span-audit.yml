@@ -1,0 +1,164 @@
+name: Optional answer-span audit qualification
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'dependencies/**'
+      - 'scripts/**'
+      - 'lab_runner/memory_benchmark/**'
+      - 'lab_runner/requirements_review_v5/**'
+      - 'tests/unit/test_mb*'
+      - 'tests/unit/test_memory_benchmark*'
+      - 'tests/unit/test_memory_span_audit*'
+      - 'tests/memory_benchmark_candidate/**'
+      - 'tests/requirements_review_v5/**'
+      - 'pyproject.toml'
+      - 'MANIFEST.in'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: audit-${{ matrix.runner }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Select immutable unpublished Runtime source
+        id: runtime
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          spec = json.load(open('dependencies/answer-span-runtime.json'))
+          assert spec['repository'] == 'B3Cognition/prosaic-runtime'
+          assert spec['sourceCommit'] == 'd713e078a661a19a057f02482d47d3f7a23b0c5a'
+          assert spec['sourceTree'] == 'c6c46f49908f7df9a9e2845d80f57ba02cdf6c95'
+          assert spec['publicationAuthorized'] is False
+          print('commit=' + spec['sourceCommit'])
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: B3Cognition/prosaic-runtime
+          ref: ${{ steps.runtime.outputs.commit }}
+          path: .cache/answer-span-runtime
+          persist-credentials: false
+      - name: Install locked tools and unchanged released SDKs
+        run: |
+          python -m venv .venv-audit
+          .venv-audit/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv-audit/bin/python -m pip install --require-hashes -r dependencies/castle-build.lock
+          .venv-audit/bin/python scripts/prepare_dependencies.py
+          .venv-audit/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
+          .venv-audit/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+          echo "$PWD/.venv-audit/bin" >> "$GITHUB_PATH"
+      - name: Require the same native sandbox as released regressions
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc ripgrep
+          rg --version
+          git clone https://github.com/containers/bubblewrap.git "$RUNNER_TEMP/audit-bubblewrap"
+          git -C "$RUNNER_TEMP/audit-bubblewrap" checkout --detach 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$RUNNER_TEMP/audit-bubblewrap/_build" "$RUNNER_TEMP/audit-bubblewrap" --prefix=/usr -Dman=disabled -Dtests=false
+          meson compile -C "$RUNNER_TEMP/audit-bubblewrap/_build"
+          sudo meson install -C "$RUNNER_TEMP/audit-bubblewrap/_build"
+          sudo install -m 0644 .github/ci/bwrap.apparmor /etc/apparmor.d/prosaic-lab-ci-bwrap
+          sudo apparmor_parser -r /etc/apparmor.d/prosaic-lab-ci-bwrap
+          .venv-audit/bin/python scripts/sandboxed_tools_smoke.py --source-root . --output "$RUNNER_TEMP/audit-sandbox"
+      - name: Execute released regressions and record complete default collection
+        run: |
+          .venv-audit/bin/python scripts/regression_profiles.py --profile all --collect-only --output reports/audit-ci/all.json
+          .venv-audit/bin/python scripts/regression_profiles.py --profile released --output reports/audit-ci/released.json
+      - name: Build direct distributions and require every qualified Runtime member
+        run: |
+          .venv-audit/bin/python -m build --no-isolation --outdir bundle/lab .
+          .venv-audit/bin/python -m build --no-isolation --outdir "$PWD/bundle/runtime" .cache/answer-span-runtime
+          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --wheel bundle/runtime/*.whl --source .cache/answer-span-runtime --export reports/audit-ci/runtime-direct.json
+          .venv-audit/bin/python - <<'PY'
+          import pathlib, tarfile
+          for name in ('lab','runtime'):
+              archive = next(pathlib.Path('bundle',name).glob('*.tar.gz'))
+              with tarfile.open(archive) as z:
+                  z.extractall(pathlib.Path('bundle/source')/name, filter='data')
+          PY
+          .venv-audit/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-lab bundle/source/lab/*
+          .venv-audit/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-runtime bundle/source/runtime/*
+          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --wheel bundle/rebuilt-runtime/*.whl --export reports/audit-ci/runtime-rebuilt.json
+      - name: Install the explicit candidate family and audit installed payloads
+        run: |
+          python -m venv .venv-candidate
+          .venv-candidate/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv-candidate/bin/python - <<'PY'
+          import hashlib, json, pathlib, shutil, sys
+          sys.path.insert(0,'src')
+          from prosaic_integration_lab.dependencies import cache_directory
+          public = pathlib.Path('dependencies/releases.json')
+          data = json.loads(public.read_text())
+          cache = cache_directory(public,pathlib.Path('.cache/wheels'))
+          target = pathlib.Path('.cache/audit-sdk'); target.mkdir()
+          runtime = next(pathlib.Path('bundle/runtime').glob('*.whl'))
+          for row in data['artifacts']:
+              source = cache/row['filename']
+              if row['distribution'] == 'b3-prosaic-runtime':
+                  source = runtime
+                  row.update(filename=runtime.name,version='0.9.8+jsonschema.3',
+                      sha256=hashlib.sha256(runtime.read_bytes()).hexdigest(),
+                      source_commit='d713e078a661a19a057f02482d47d3f7a23b0c5a',
+                      url='immutable-candidate-source',checksum_url='exact-source-build')
+              shutil.copyfile(source,target/row['filename'])
+          data['qualification'] = 'Unpublished exact-source Runtime candidate; other SDK bytes remain released. No publication authorized.'
+          pathlib.Path('reports/audit-ci/sdk-manifest.json').write_text(json.dumps(data,indent=2)+'\n')
+          PY
+          .venv-candidate/bin/python scripts/install_dependencies.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          .venv-candidate/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          .venv-candidate/bin/python -m pip install --no-deps bundle/lab/*.whl
+          .venv-candidate/bin/python -m pip check
+          echo "$PWD/.venv-candidate/bin" >> "$GITHUB_PATH"
+      - name: Execute candidate regressions and require complete executed coverage
+        run: |
+          .venv-candidate/bin/python scripts/regression_profiles.py --profile candidate --output reports/audit-ci/candidate.json
+          .venv-candidate/bin/python scripts/regression_profiles.py --coverage reports/audit-ci/all.json reports/audit-ci/released.json reports/audit-ci/candidate.json --output reports/audit-ci/coverage.json
+      - name: Qualify installed direct and rebuilt wheels without live inference
+        run: |
+          for case in omitted complete unavailable unknown-usage; do
+            .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-direct-$case" > "reports/audit-ci/direct-$case.json"
+          done
+          .venv-candidate/bin/python -m pip install --no-deps --force-reinstall bundle/rebuilt-runtime/*.whl bundle/rebuilt-lab/*.whl
+          .venv-candidate/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          for case in omitted complete unavailable unknown-usage; do
+            .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-rebuilt-$case" > "reports/audit-ci/rebuilt-$case.json"
+          done
+          .venv-candidate/bin/python - <<'PY'
+          import json
+          for origin in ('direct','rebuilt'):
+              for case,outcome,calls,held in [('omitted','findings',2,0),('complete','clear',2,0),('unavailable','clear',2,0),('unknown-usage','unresolved',1,65536)]:
+                  row = json.load(open(f'reports/audit-ci/{origin}-{case}.json'))
+                  assert row['outcome']==outcome and row['syntheticProviderRequests']==calls and row['retainedTokens']==held
+                  assert row['originalUnchanged'] and row['resumeProviderRequests']==0 and row['realModelCalls']==0
+                  assert row['memoryDefault'] is False and row['sueDefault'] is False
+          PY
+      - name: Retain only synthetic qualification summaries and distribution bytes
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: answer-span-${{ matrix.runner }}
+          path: |
+            reports/audit-ci/*.json
+            bundle/lab/*.whl
+            bundle/lab/*.tar.gz
+            bundle/runtime/*.whl
+            bundle/runtime/*.tar.gz
+          if-no-files-found: error
+          retention-days: 90

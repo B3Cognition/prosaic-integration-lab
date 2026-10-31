@@ -1,0 +1,228 @@
+name: Optional SUE installed-wheel qualification
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/sue-review.yml'
+      - 'dependencies/sue-review-source.json'
+      - 'dependencies/sue-cycle-ci-source.json'
+      - 'dependencies/releases.json'
+      - 'dependencies/requirements.lock'
+      - 'dependencies/castle-build.lock'
+      - 'dependencies/images.json'
+      - '.github/ci/**'
+      - 'scripts/**'
+      - 'src/**'
+      - 'lab_runner/**'
+      - 'tests/unit/**'
+      - 'tests/functional/**'
+      - 'tests/sue_review/**'
+      - 'tests/requirements_review/**'
+      - 'tests/requirements_review_v2/**'
+      - 'tests/acceptance/test_sue_review_workflow.py'
+      - 'pyproject.toml'
+      - 'MANIFEST.in'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    name: sue-${{ matrix.runner }}-pg${{ matrix.postgres }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: [16, 18]
+    env:
+      PG_MAJOR: ${{ matrix.postgres }}
+      EXPECTED_ARCH: ${{ matrix.runner == 'ubuntu-24.04' && 'amd64' || 'arm64' }}
+      PYTHONPATH: ''
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Select exact unpublished SUE package source
+        id: source
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          p = json.load(open('dependencies/sue-review-source.json'))
+          assert p['repository'] == 'B3Cognition/cognitive-castle'
+          assert p['source_commit'] == '53637196cc215e9bd5b85b9253b3430b2781b884'
+          assert p['package_directory'] == 'packages/sue'
+          assert p['candidate'] is True and p['publication_authorized'] is False
+          wheel = next(a for a in p['artifacts'] if a['kind'] == 'wheel')
+          assert wheel['sha256'] == 'fdfb1690505a85b4cbb49e2b4845c91e318efe945068a379ac230c3b4ebf9b75'
+          print('commit=' + p['source_commit'])
+          PY
+      # The public independent fork retains this exact historical commit.
+      # Keep the original source manifest and artifact/engine pins unchanged;
+      # only the fetch location changes. Do not substitute the fork's main.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: B3Cognition/prosaic-castle
+          ref: ${{ steps.source.outputs.commit }}
+          path: .cache/sue-source
+          persist-credentials: false
+      - name: Select separate exact opt-in cycle/context engine
+        id: cycle
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          spec = json.load(open('dependencies/sue-cycle-ci-source.json'))
+          assert spec['repository']=='B3Cognition/prosaic-castle'
+          assert spec['source_commit']=='d684bc613ead86755464c878d596dfdea6ad7025'
+          assert spec['candidate'] is True and spec['publication_authorized'] is False
+          print('commit='+spec['source_commit'])
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: B3Cognition/prosaic-castle
+          ref: ${{ steps.cycle.outputs.commit }}
+          path: .cache/sue-cycle-source
+          persist-credentials: false
+      - name: Install locked build tools and unchanged public SDK profile
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv/bin/python -m pip install --require-hashes -r dependencies/castle-build.lock
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases.json
+          .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
+          .venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+      - name: Select installed CLI bindings
+        run: echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Install the existing pinned Linux CLI sandbox prerequisite
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc
+          git clone https://github.com/containers/bubblewrap.git "$RUNNER_TEMP/bubblewrap"
+          git -C "$RUNNER_TEMP/bubblewrap" checkout --detach 2a76602a8c71f36c1527cf9fc3417d9149822e0c
+          meson setup "$RUNNER_TEMP/bubblewrap/_build" "$RUNNER_TEMP/bubblewrap" --prefix=/usr -Dman=disabled -Dtests=false
+          meson compile -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo meson install -C "$RUNNER_TEMP/bubblewrap/_build"
+          sudo install -m 0644 .github/ci/bwrap.apparmor /etc/apparmor.d/prosaic-lab-ci-bwrap
+          sudo apparmor_parser -r /etc/apparmor.d/prosaic-lab-ci-bwrap
+      - name: Require actual confinement before the full regression lane
+        run: .venv/bin/python scripts/sandboxed_tools_smoke.py --source-root . --output "$RUNNER_TEMP/sue-sandbox-qualification"
+      - name: Build and verify exact optional wheel and both source rebuilds
+        run: |
+          .venv/bin/python -m build --no-isolation --wheel --sdist --outdir bundle/lab .
+          .venv/bin/python -m build --no-isolation --wheel --sdist --outdir "$PWD/bundle/sue" .cache/sue-source/packages/sue
+          .venv/bin/python - <<'PY'
+          import hashlib, json, pathlib, tarfile
+          source = json.load(open('dependencies/sue-review-source.json'))
+          for artifact in source['artifacts']:
+              path = pathlib.Path('bundle/sue') / artifact['filename']
+              assert path.stat().st_size == artifact['size_bytes']
+              assert hashlib.sha256(path.read_bytes()).hexdigest() == artifact['sha256']
+          for name in ('lab', 'sue'):
+              archive = next(pathlib.Path('bundle', name).glob('*.tar.gz'))
+              with tarfile.open(archive) as stream:
+                  stream.extractall(pathlib.Path('bundle/source') / name, filter='data')
+          PY
+          .venv/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-lab bundle/source/lab/*
+          .venv/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-sue bundle/source/sue/*
+          .venv/bin/python - <<'PY'
+          import pathlib, zipfile
+          for name in ('lab', 'sue'):
+              direct = next(pathlib.Path('bundle', name).glob('*.whl'))
+              rebuilt = next(pathlib.Path('bundle', 'rebuilt-' + name).glob('*.whl'))
+              if name == 'sue':
+                  assert direct.read_bytes() == rebuilt.read_bytes()
+              with zipfile.ZipFile(direct) as a, zipfile.ZipFile(rebuilt) as b:
+                  assert {n:a.read(n) for n in a.namelist()} == {n:b.read(n) for n in b.namelist()}
+          PY
+      - name: Cache exact owned PostgreSQL image
+        run: |
+          image=$(python -c "import json,os; print(json.load(open('dependencies/images.json'))['postgres'+os.environ['PG_MAJOR']])")
+          docker pull "$image"
+          docker tag "$image" "postgres:$PG_MAJOR"
+      - name: Require ordinary and explicitly enabled source regressions without skips
+        run: |
+          .venv/bin/python -m pip install --no-deps bundle/sue/*.whl
+          .venv/bin/python -m pip check
+          mkdir -p reports
+          .venv/bin/python scripts/regression_profiles.py --profile released --output reports/sue-released-regressions.json -- tests/sue_review tests/requirements_review tests/requirements_review_v2 --ignore=tests/sue_review/test_review_context.py --junitxml reports/sue-enabled-source.xml
+          .venv/bin/python - <<'PY'
+          from xml.etree import ElementTree
+          root = ElementTree.parse('reports/sue-enabled-source.xml').getroot()
+          suites = list(root.iter('testsuite'))
+          assert suites and sum(int(s.get('tests', '0')) for s in suites) > 0
+          assert sum(int(s.get('skipped', '0')) for s in suites) == 0
+          PY
+      - name: Qualify opt-in context with its exact engine and restore legacy bytes
+        run: |
+          .venv/bin/python -m build --no-isolation --outdir "$PWD/bundle/sue-cycle" .cache/sue-cycle-source/packages/sue
+          .venv/bin/python - <<'PY'
+          import hashlib,json,pathlib,subprocess,tarfile
+          spec=json.load(open('dependencies/sue-cycle-ci-source.json'))
+          assert subprocess.check_output(['git','-C','.cache/sue-cycle-source','rev-parse','HEAD'],text=True).strip()==spec['source_commit']
+          assert subprocess.check_output(['git','-C','.cache/sue-cycle-source','rev-parse','HEAD^{tree}'],text=True).strip()==spec['source_tree']
+          for row in spec['artifacts']:
+              path=pathlib.Path('bundle/sue-cycle')/row['filename']
+              assert path.stat().st_size==row['size_bytes'] and hashlib.sha256(path.read_bytes()).hexdigest()==row['sha256']
+          with tarfile.open(next(pathlib.Path('bundle/sue-cycle').glob('*.tar.gz'))) as z:
+              z.extractall('bundle/source/sue-cycle',filter='data')
+          PY
+          .venv/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-sue-cycle bundle/source/sue-cycle/*
+          .venv/bin/python - <<'PY'
+          import pathlib
+          assert next(pathlib.Path('bundle/sue-cycle').glob('*.whl')).read_bytes()==next(pathlib.Path('bundle/rebuilt-sue-cycle').glob('*.whl')).read_bytes()
+          PY
+          .venv/bin/python -m pip install --no-deps --force-reinstall bundle/sue-cycle/*.whl
+          .venv/bin/python -m pytest -q tests/sue_review/test_review_context.py --junitxml reports/sue-context.xml
+          .venv/bin/python - <<'PY'
+          import castle_sue,json
+          from xml.etree import ElementTree
+          spec=json.load(open('dependencies/sue-cycle-ci-source.json'));caps=castle_sue.capabilities()
+          assert caps['engineIdentity']['digest']==spec['engine_identity_sha256']
+          assert caps['engineIdentity']['sourceManifestDigest']==spec['source_manifest_sha256']
+          assert caps['engineIdentity']['files']['_vendor/sue/sue_dialectic.py']==spec['canonical_policy_sha256']
+          suites=list(ElementTree.parse('reports/sue-context.xml').getroot().iter('testsuite'))
+          assert suites and sum(int(s.get('tests','0')) for s in suites)==5
+          assert sum(int(s.get('skipped','0')) for s in suites)==0
+          with open('reports/sue-context.json','x') as f:
+              json.dump(dict(qualified=True,profile='opt-in-cycle-context',source_commit=spec['source_commit'],engine_identity=caps['engineIdentity']['digest'],tests=5,skipped=0,database_qualified=False,sue_default=False),f)
+          PY
+          .venv/bin/python -m pip install --no-deps --force-reinstall bundle/sue/*.whl
+          .venv/bin/python - <<'PY'
+          import castle_sue,json
+          original=json.load(open('dependencies/sue-review-source.json'))
+          assert castle_sue.capabilities()['engineIdentity']['digest']==original['engine']['identity_sha256']
+          PY
+      - name: Qualify explicit SUE enablement from the installed direct wheel
+        run: |
+          .venv/bin/python -m pip install --no-deps bundle/lab/*.whl bundle/sue/*.whl
+          .venv/bin/python -m pip check
+          .venv/bin/python -I -m lab_runner.sue_review_fixture
+          .venv/bin/python -I -m lab_runner.sue_review_fixture --enable --postgres-version "$PG_MAJOR" --tests "$PWD/tests/acceptance/test_sue_review_workflow.py" --lab-wheel bundle/lab/prosaic_integration_lab-*.whl --engine-wheel bundle/sue/cognitive_castle_sue-*.whl --output reports/sue-direct.json
+      - name: Qualify installed rebuilt source consumers independently
+        run: |
+          .venv/bin/python -m pip install --no-deps --force-reinstall bundle/rebuilt-lab/*.whl bundle/rebuilt-sue/*.whl
+          .venv/bin/python -m pip check
+          .venv/bin/python -I -m lab_runner.sue_review_fixture --enable --postgres-version "$PG_MAJOR" --tests "$PWD/tests/acceptance/test_sue_review_workflow.py" --lab-wheel bundle/rebuilt-lab/prosaic_integration_lab-*.whl --engine-wheel bundle/rebuilt-sue/cognitive_castle_sue-*.whl --output reports/sue-rebuilt.json
+          .venv/bin/python - <<'PY'
+          import json, os
+          for name in ('direct', 'rebuilt'):
+              receipt = json.load(open('reports/sue-' + name + '.json'))
+              assert receipt['qualified'] is True and receipt['skipped'] == 0
+              assert receipt['postgres']['cleanup_verified'] is True
+              assert receipt['postgres']['architecture'] == os.environ['EXPECTED_ARCH']
+              assert receipt['postgres']['server_version'].split('.')[0] == os.environ['PG_MAJOR']
+          PY
+      - name: Retain sanitized synthetic qualification receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: sue-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          path: reports/sue-*.json
+          if-no-files-found: error
+          retention-days: 90
