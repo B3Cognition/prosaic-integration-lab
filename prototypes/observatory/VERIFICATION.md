@@ -255,3 +255,30 @@ Current real-model review preview:
 `e513af72a6b0468eb104c832564cb3fe`, two-call allowance. A fresh one-use connection
 link was queued in Codex's browser; its private source is the owner's
 `secrets/chat-launch.json`. The earlier preview checkpoints above are historical.
+
+## Isolated work-package publication checkpoint
+
+The publication branch `codex/prosaic-observatory` starts at shared baseline
+`dc473daafb7b80d58afd5df8465868d3db14af0d`. It includes the Observatory, chat
+launcher/UI, its released SDK prerequisites and their regression coverage.
+Unrelated native benchmarks, local submission commits, private run state and
+browser automation logs are excluded. The original checkout is preserved.
+
+Fresh verification on this isolated source tree:
+
+- Full Python suite: **964 passed**, no exclusions, **91.27 s**. This count is
+  for the isolated package; the larger shared-checkout suite above includes
+  separate benchmark work.
+- JavaScript regressions: **11 passed**; entry modules parse successfully.
+- All **23 vendor checksums** and the Blender GLB digest match their manifests.
+  Upstream vendor bytes and licenses are preserved, including original line
+  endings; authored-file whitespace checks passed.
+- Redacted secret scans of both the staged diff and the source commit found
+  **zero leaks**. Three owner-authorized demo screenshots are included; no
+  credentials, private receipts or raw model logs are published.
+- Isolated consumer build succeeded with the five audited wheels. Image:
+  `sha256:21a60cc7742ca334bede985c733811417bb20c0a8b20c5b80f65803469cbd6d2`.
+- Fresh PostgreSQL 16 conversation acceptance on that image: **97 passed, zero
+  skipped**, **453.07 s**, payload audit and owned cleanup both verified.
+  The sanitized [acceptance receipt](.taste-skill/package-acceptance.json) records
+  the source commit, image digests and exact result. Raw evidence stays private.
