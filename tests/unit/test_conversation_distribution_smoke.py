@@ -114,6 +114,7 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'wheel_identity',lambda path:{'version':'0.5.0'})
     monkeypatch.setattr(module,'_helper',lambda name:SimpleNamespace(isolated_environment=lambda:{}))
     monkeypatch.setattr(module,'consume',lambda *args,**kwargs:Path('/fixture/python'))
+    monkeypatch.setattr(module,'verify_observatory_source',lambda source:None)
     def extract(archive,destination):
         destination.mkdir()
         for name in ('configs/conversation-conformance.example.json','docs/conversations.md',
@@ -124,6 +125,9 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'extract_sdist',extract)
     identifier='sha256:'+'a'*64
     def process(argv,**kwargs):
+        if 'pytest' in argv:
+            assert 'tests/unit/test_observatory_launcher.py' in argv
+            return b''
         if 'build' in argv:
             out=Path(argv[argv.index('--outdir')+1]);(out/'rebuilt.whl').write_bytes(b'rebuilt');return b''
         if any(str(arg).endswith('build_consumer.py') for arg in argv):return (identifier+'\n').encode()

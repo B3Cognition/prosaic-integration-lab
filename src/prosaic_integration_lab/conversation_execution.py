@@ -3,6 +3,7 @@ from fastapi import HTTPException
 
 from .conversation_registry import APPLICATION,ConversationRegistry,capacity,reference
 from .views import public_conversation_history,public_usage,public_context_report
+from .observability import scoped_observer
 
 
 PHASES=frozenset({'receiptSaved','turnCommitted','workflowCommandPrepared','workflowCommandReturned'})
@@ -108,7 +109,7 @@ class ConversationExecution:
             actor_id=reservation['actor_id'],billing_account_id=reservation['billing_account_id'],
             request_id=reservation['session_id'],run_id=reservation['session_id'])
         return Conversation(binding,store=self.store,scope=scope,context=context,
-            accounting=self.host.recorder,observer=self.host.observer)
+            accounting=self.host.recorder,observer=scoped_observer(self.host,reservation['session_id']))
 
     def _owned(self,principal,session_id):
         current_grant(self.host,principal)
@@ -144,7 +145,7 @@ class ConversationExecution:
             actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
             request_id='workflow-'+row['session_id'],run_id=row['session_id'])
         return registration,Harness(workflow,store=self.host.store,run_id=row['session_id'],context=context,
-            accounting=self.host.recorder,observer=self.host.observer)
+            accounting=self.host.recorder,observer=scoped_observer(self.host,row['session_id']))
 
     def _attachment_status(self,row,reply):
         """Project uncertain host intent; neither read nor recovery grants a start."""
@@ -174,6 +175,23 @@ class ConversationExecution:
                 actor_id=row['actor_id'],billing_account_id=row['billing_account_id'],
                 request_id='workflow-'+session_id,run_id=session_id)
             result['workflow']=public_usage(workflow)
+        return result
+
+    def observation_request(self,principal,session_id,observations):
+        from .run_observations import usage_projection
+        row = self._owned(principal,session_id)
+        status = self._attachment_status(row,self._controller(principal,row).status(session_id).document)
+        try:
+            rows = self.host.recorder.calls(application_id=APPLICATION,
+                tenant_id=row['tenant_id'],actor_id=row['actor_id'],
+                billing_account_id=row['billing_account_id'],run_id=session_id)
+        except Exception:
+            rows = None
+        result = observations.snapshot(session_id)
+        result['usage'] = usage_projection(rows)
+        result['sessionStatus'] = status.get('status')
+        result['failureCode'] = status.get('failureCode')
+        result['waiting'] = status.get('pendingInteraction') is not None
         return result
 
     def send_request(self,principal,session_id,*,message_id,message,expected_revision,
