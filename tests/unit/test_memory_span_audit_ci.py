@@ -121,6 +121,11 @@ def test_audit_ci_executes_both_profiles_and_checks_coverage_and_installed_fixtu
                  '--coverage', 'verify_answer_span_runtime.py', 'audit-fixture',
                  '--force-reinstall', '--no-deps']:
         assert term in commands
+    prerequisites = next(step['run'] for step in job['steps']
+                         if step.get('name') == 'Require the same native sandbox as released regressions')
+    install = next(line for line in prerequisites.splitlines() if 'apt-get install' in line)
+    assert 'ripgrep' in install.split(), 'manual search requires the real rg executable'
+    assert 'rg --version' in prerequisites
     assert 'secrets.' not in path.read_text()
     assert all('@' in step['uses'] and len(step['uses'].split('@')[1].split()[0])==40
                for step in job['steps'] if 'uses' in step)

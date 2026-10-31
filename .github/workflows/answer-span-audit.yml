@@ -67,7 +67,8 @@ jobs:
       - name: Require the same native sandbox as released regressions
         run: |
           sudo apt-get update
-          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc
+          sudo apt-get install -y bubblewrap meson ninja-build pkg-config libcap-dev gcc ripgrep
+          rg --version
           git clone https://github.com/containers/bubblewrap.git "$RUNNER_TEMP/audit-bubblewrap"
           git -C "$RUNNER_TEMP/audit-bubblewrap" checkout --detach 2a76602a8c71f36c1527cf9fc3417d9149822e0c
           meson setup "$RUNNER_TEMP/audit-bubblewrap/_build" "$RUNNER_TEMP/audit-bubblewrap" --prefix=/usr -Dman=disabled -Dtests=false
