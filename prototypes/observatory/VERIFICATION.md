@@ -284,5 +284,5 @@ Fresh verification on this isolated source tree:
   `sha256:21a60cc7742ca334bede985c733811417bb20c0a8b20c5b80f65803469cbd6d2`.
 - Fresh PostgreSQL 16 conversation acceptance on that image: **97 passed, zero
   skipped**, **453.07 s**, payload audit and owned cleanup both verified.
-  The sanitized [acceptance receipt](.taste-skill/package-acceptance.json) records
+  The sanitized [acceptance receipt](verification/package-acceptance.json) records
   the source commit, image digests and exact result. Raw evidence stays private.

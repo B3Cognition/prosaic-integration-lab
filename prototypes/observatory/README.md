@@ -4,9 +4,9 @@ An interactive visual prototype inspired by the plant-cell reference supplied
 by the maintainer. The approved scope is one detailed execution scene first,
 with Live and Inspect views and an optional authenticated Integration Lab feed.
 
-Verified real-model screenshots: [Live](.taste-skill/observatory-real-qwen-live-final.png),
-[Inspect](.taste-skill/observatory-real-qwen-inspect-final.png) and
-[phone](.taste-skill/observatory-real-qwen-phone-final.png). The shown 549-token
+Verified real-model screenshots: [Live](verification/observatory-real-qwen-live-final.png),
+[Inspect](verification/observatory-real-qwen-inspect-final.png) and
+[phone](verification/observatory-real-qwen-phone-final.png). The shown 549-token
 report carries the unqualified marker described below.
 
 ## Run with the Integration Lab

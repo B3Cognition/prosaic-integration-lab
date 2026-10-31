@@ -36,6 +36,10 @@ new real-model calls.
 - Extracted corrected archive: **8 Python checks and 11 JavaScript checks passed**.
 - Vendor provenance and GLB hashes verified; staged redacted secret scan clear.
 - Current-main consumer build succeeded against the five audited release wheels.
+- Local PostgreSQL 16 conversation/context acceptance: **103 passed**, zero
+  skipped, **492.19 s**, payload audit and owned cleanup verified. The sanitized
+  [receipt](../../prototypes/observatory/verification/main-pg16-acceptance.json)
+  records image and manifest digests.
 - Isolated wheel and rebuilt-source consumption passed, including public-index
   verification, installed-payload audit, isolated imports, `pip check`, public
   construction and the extracted Observatory gate. Manifest:
