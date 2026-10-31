@@ -1,0 +1,13 @@
+{
+  "archiveName": "ready-to-ship-v10.zip",
+  "archiveSha256": "f9c5aa8c2e5a8d8cad6685c38a61a506fc0d34c6317b5275b77e81d3715b190b",
+  "files": {
+    "lab_runner/ship_eval/__init__.py": "ec8a035a4eea484ee284e4f2ceded3631e9ef3b510a11c197176c732882b0800",
+    "lab_runner/ship_eval/cases.py": "9093f030f293b7f9e08da08fa62965b6b5b2c203cb118e602b172aea7d189d31",
+    "lab_runner/ship_eval/data/cases.json": "de9a04345b2e7cc185bdf2c1f48458e3c299d17c3fa84f8dc9b937e3ef9c0f98",
+    "lab_runner/ship_eval/data/keys.json": "83068a49daf2fb9a74d785d0e974f9948ee9be05d5feeb08c9d37dfbf067cfe1",
+    "lab_runner/ship_eval/grader.py": "afb691c4895fbb3293ad34d1181fbefe63c15157ef8eff5c62811056c929a62c",
+    "lab_runner/ship_eval/lookup.py": "27d7aa0262f546bcb5428302accc002538b31eb445c90ffa9e8500415b0dd532"
+  },
+  "interpretation": "Byte-exact historical scorer slice; Runtime 0.9.3/Harness 0.8.2 execution remains in the original archive."
+}

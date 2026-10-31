@@ -23,6 +23,9 @@ include = ["prosaic_integration_lab*", "lab_runner*"]
 "lab_runner.memory" = ["data/*.json"]
 "lab_runner.explore" = ["web/*", "web/assets/*", "web/font-licenses/*"]
 
+"lab_runner.requirements_review_v1" = ["*.json"]
+"lab_runner.ship_eval" = ["data/*.json"]
+
 [tool.pytest.ini_options]
 addopts = "--import-mode=importlib"
 pythonpath = ["src", ".", "tests/unit", "tests/acceptance"]

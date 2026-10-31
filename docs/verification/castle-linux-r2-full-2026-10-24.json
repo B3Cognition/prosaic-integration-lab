@@ -1,0 +1,343 @@
+{
+  "run_id": 40074232372,
+  "head_sha": "2b8807e1914737f78a6765aadb463582992ad222",
+  "conclusion": "success",
+  "cells": [
+    {
+      "cell": "acceptance-ubuntu-24.04-arm-pg16",
+      "postgres_major": 16,
+      "architecture": "aarch64",
+      "unit_passed": 1914,
+      "unit_seconds": 513.01,
+      "distribution_verified": true,
+      "distribution_extra_stack_executed": true,
+      "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+      "lanes": [
+        {
+          "mode": "audit",
+          "test_count": 88,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "identity",
+          "test_count": 20,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "ingress",
+          "test_count": 5,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "lago",
+          "test_count": 25,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native-persistence",
+          "test_count": 26,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native",
+          "test_count": 54,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "legacy-upgrade",
+          "test_count": 10,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "qualification",
+          "test_count": 3,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "conversation",
+          "test_count": 103,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        }
+      ]
+    },
+    {
+      "cell": "acceptance-ubuntu-24.04-arm-pg18",
+      "postgres_major": 18,
+      "architecture": "aarch64",
+      "unit_passed": 1914,
+      "unit_seconds": 511.1,
+      "distribution_verified": true,
+      "distribution_extra_stack_executed": false,
+      "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+      "lanes": [
+        {
+          "mode": "audit",
+          "test_count": 88,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "identity",
+          "test_count": 20,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "ingress",
+          "test_count": 5,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "lago",
+          "test_count": 25,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native-persistence",
+          "test_count": 26,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native",
+          "test_count": 54,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "legacy-upgrade",
+          "test_count": 10,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "qualification",
+          "test_count": 3,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "conversation",
+          "test_count": 103,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        }
+      ]
+    },
+    {
+      "cell": "acceptance-ubuntu-24.04-pg16",
+      "postgres_major": 16,
+      "architecture": "x86_64",
+      "unit_passed": 1914,
+      "unit_seconds": 540.86,
+      "distribution_verified": true,
+      "distribution_extra_stack_executed": false,
+      "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+      "lanes": [
+        {
+          "mode": "audit",
+          "test_count": 88,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "identity",
+          "test_count": 20,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "ingress",
+          "test_count": 5,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "lago",
+          "test_count": 25,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native-persistence",
+          "test_count": 26,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native",
+          "test_count": 54,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "legacy-upgrade",
+          "test_count": 10,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "qualification",
+          "test_count": 3,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "conversation",
+          "test_count": 103,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        }
+      ]
+    },
+    {
+      "cell": "acceptance-ubuntu-24.04-pg18",
+      "postgres_major": 18,
+      "architecture": "x86_64",
+      "unit_passed": 1914,
+      "unit_seconds": 453.28,
+      "distribution_verified": true,
+      "distribution_extra_stack_executed": false,
+      "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+      "lanes": [
+        {
+          "mode": "audit",
+          "test_count": 88,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "identity",
+          "test_count": 20,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "ingress",
+          "test_count": 5,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "lago",
+          "test_count": 25,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native-persistence",
+          "test_count": 26,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "native",
+          "test_count": 54,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "legacy-upgrade",
+          "test_count": 10,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "qualification",
+          "test_count": 3,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        },
+        {
+          "mode": "conversation",
+          "test_count": 103,
+          "skipped": 0,
+          "failed_count": 0,
+          "cleanup": "verified",
+          "gate_passed": true
+        }
+      ]
+    }
+  ]
+}

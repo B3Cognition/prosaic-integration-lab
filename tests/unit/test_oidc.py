@@ -184,13 +184,16 @@ def test_auth0_uses_verified_jwt_without_introspection_and_supports_audience_arr
     assert state['requests']==['/keys']
 
 @pytest.mark.parametrize('overrides',[{'aud':'login-client'},{'scope':'other'},
-    {'sub':'unbound'},{'exp':1},{'exp':int(time.time())+600}])
+    {'sub':'unbound'},{'exp':1},{'exp':lambda:int(time.time())+600}])
 def test_auth0_rejects_invalid_access_tokens(issuer,overrides):
     settings,state,endpoint,token,_=issuer
     settings=auth0_settings(settings); settings['required_scope']='run:service'
     async def run():
+        # Mint the excessive lifetime at execution, not suite collection: after
+        # a long suite delay the old absolute exp could become a valid lifetime.
+        current={key:value() if callable(value) else value for key,value in overrides.items()}
         async with OidcAuthenticator(settings,transport=httpx.MockTransport(endpoint)) as provider:
-            with pytest.raises(ValueError): await provider.authenticate(token(**{'scope':'run:service',**overrides}))
+            with pytest.raises(ValueError): await provider.authenticate(token(**{'scope':'run:service',**current}))
     asyncio.run(run())
     assert state['requests']==['/keys']
 
