@@ -1,6 +1,70 @@
 # Changelog
 
-## 0.6.0 — unreleased
+## Unreleased
+
+- Update SHA-pinned GitHub Actions to stable Node 24 releases, removing the
+  deprecated action-runtime warnings while retaining the acceptance matrix,
+  full checkout history, read-only permissions and artifact retention settings.
+
+- Document the published Lab 0.7.0 artifacts, exact-source qualification and
+  clean public-wheel/rebuilt-source verification with Runtime 0.9.8, including
+  installed Explorer documentation, playback and bounded synthetic live controls.
+
+## 0.7.0 — 2026-10-25
+
+- Release Explorer and guided onboarding with the unchanged public Runtime 0.9.8
+  SDK train. Bundle visual documentation, playback, fonts and styles for installed
+  consumers, with no Node requirement at runtime.
+- Preserve full checkout history during browser CI by disabling optional
+  Playwright Git metadata capture, and require a full-history preflight.
+
+- Keep chapter navigation and receipt inspection independent: changing chapters
+  opens documentation, and polling preserves historical receipt selection after
+  the current request completes without weakening lost-response recovery.
+
+- Replace Explorer's IBM Plex fonts with locally bundled Instrument Sans and
+  Geist Mono. Keep the chapter frame and Previous/Next controls within the
+  window; scroll longer content inside and reset its position on navigation.
+
+- Refine Explorer typography, graph selection and reading panels; add a
+  persistent System/Light/Dark appearance switcher with system-change support
+  and a working fallback when browser storage is restricted.
+
+- Add Prosaic Explorer: bundled visual ecosystem documentation, eight safe
+  playback scenarios and explicitly authorized single-agent unified-pool runs.
+  Retain durable allowance, request identity, cancellation evidence and offline
+  reconciliation without replaying partial work.
+- Add the guided quickstart and first-workflow example, README integration map,
+  clean installed-asset smoke and locked frontend/browser acceptance checks.
+  Published 0.6.2 artifacts and SDK pins remain unchanged.
+
+## 0.6.2 — 2026-10-25
+
+- Make the unified benchmark's `--local-timeout` configurable within 1–300
+  seconds, retaining the 180s default, fixed native/pool deadlines and existing
+  grants/budgets. Record the selected deadline in plans, samples and reports.
+- Preserve fractional timeout precision in human-readable report limitations.
+- Document the audited Lab 0.6.1 / Runtime 0.9.8 240s study: 27/27 successes,
+  unchanged Markdown/inputs, 27 controlled skips and zero provider-triggered
+  fallbacks. The study used a disclosed private deadline-only driver because
+  published Lab 0.6.1 fixes the local deadline at 180s.
+
+## 0.6.1 — 2026-10-25
+
+- Package the SDK payload auditor so the installed native/unified evaluation CLI
+  works without repository scripts. Preserve the source audit command and strict
+  tamper checks, and require all four installed fixture lanes in clean wheel and
+  rebuilt-sdist qualification. SDK pins and historical release bytes are unchanged.
+- Verify the published wheel and rebuilt public source archive in clean installs
+  with Runtime 0.9.8: 51 standalone checks each, quota fallback/cooldowns and no
+  partial-work replay, verified cleanup and zero live provider calls. See the
+  [release verification](docs/verification/release-0.6.1-2026-10-25.md).
+
+## 0.6.0 — 2026-10-24
+
+- Record two released Runtime 0.9.8 live CLI studies: 54/54 successful assignments
+  across Claude, Codex and local, with success/latency comparisons, controlled
+  cooldown evidence and unchanged Markdown, inputs and 180s local deadlines.
 
 - Adopt released Runtime 0.9.8 with native/unified pools, retaining the other four
   SDK pins. Require installed native/unified acceptance in public CI and preserve

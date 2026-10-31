@@ -178,6 +178,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     (helper/'scripts').mkdir(parents=True);(helper/'src/prosaic_integration_lab').mkdir(parents=True)
     shutil.copyfile(ROOT/'scripts/audit_install.py',helper/'scripts/audit_install.py')
     shutil.copyfile(ROOT/'src/prosaic_integration_lab/dependencies.py',helper/'src/prosaic_integration_lab/dependencies.py')
+    shutil.copyfile(ROOT/'src/prosaic_integration_lab/sdk_audit.py',helper/'src/prosaic_integration_lab/sdk_audit.py')
     (helper/'src/prosaic_integration_lab/__init__.py').write_text('')
     def audit():
         run([python,'-I','-B','-c',public.AUDIT_LAUNCH,helper/'scripts/audit_install.py',
@@ -190,8 +191,11 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
     verify_cli_versions(version,json.loads(manifest.read_bytes()))
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
-    from lab_runner.gates import supports_consumer_blueprints
-    if supports_consumer_blueprints(json.loads(manifest.read_bytes())):
+    run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
+        directory=directory,environment=environment)
+    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN
+    selected=json.loads(manifest.read_bytes())
+    if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
                 directory=directory, environment=environment)
@@ -199,6 +203,14 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
+    if {item['distribution']:item['version'] for item in selected['artifacts']} == UNIFIED_POOL_TRAIN:
+        for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
+            raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
+                '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
+            receipt=json.loads(raw)
+            if not (receipt.get('passed') is True and receipt.get('caseCount')==count
+                    and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
+                raise ValueError('installed evaluation qualification incomplete')
     audit()
     return python
 

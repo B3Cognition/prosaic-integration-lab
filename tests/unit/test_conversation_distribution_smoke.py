@@ -32,9 +32,9 @@ def test_wheel_identity_requires_current_source_version_instead_of_historical_re
     with pytest.raises(ValueError):module.wheel_identity(wheel('0.0.0'))
 
 
-@pytest.mark.parametrize('native_tools', [False, True])
-def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, native_tools):
-    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN
+@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified'])
+def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, train):
+    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN
     module = implementation()
     calls = []
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
@@ -42,18 +42,61 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
     monkeypatch.setattr(module, 'verify_cli_versions', lambda *args: None)
     monkeypatch.setattr(module, '_helper', lambda name: SimpleNamespace(
         INDEX='https://pypi.org/simple', AUDIT_LAUNCH='', PUBLIC_EXAMPLE=''))
-    monkeypatch.setattr(module, 'run', lambda argv, **kwargs: calls.append(argv) or b'{}')
+    def run(argv, **kwargs):
+        calls.append(argv)
+        if 'lab_runner.native_eval' in argv:
+            command = argv[argv.index('lab_runner.native_eval') + 1]
+            counts = {'test': 9, 'unified-test': 11, 'unified-cli-test': 13, 'unified-fallback-test': 18}
+            return json.dumps({'passed': True, 'caseCount': counts[command],
+                'cleanup': 'verified', 'liveInvocations': 0}).encode()
+        return b'{}'
+    monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
-    versions = CONSUMER_BLUEPRINT_TRAIN if native_tools else CONTEXT_TRAIN
+    versions = {'context': CONTEXT_TRAIN, 'blueprints': CONSUMER_BLUEPRINT_TRAIN,
+                'unified': UNIFIED_POOL_TRAIN}[train]
     manifest.write_text(json.dumps({'artifacts': [{'distribution': key, 'version': value}
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
                    wheels=tmp_path, lock=tmp_path / 'lock', environment={})
+    explorer = [call for call in calls if any(str(arg).endswith('explorer_smoke.py') for arg in call)]
+    assert len(explorer) == 1
+    assert '-I' in explorer[0] and '-B' in explorer[0]
     for script in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
         selected = [call for call in calls if any(str(arg).endswith(script) for arg in call)]
-        assert len(selected) == int(native_tools)
-        if native_tools:
+        assert len(selected) == int(train != 'context')
+        if train != 'context':
             assert '-I' in selected[0] and '--source-root' in selected[0]
+    installed = [call for call in calls if 'lab_runner.native_eval' in call]
+    assert len(installed) == (4 if train == 'unified' else 0)
+    if installed:
+        assert [call[call.index('lab_runner.native_eval') + 1] for call in installed] == [
+            'test', 'unified-test', 'unified-cli-test', 'unified-fallback-test']
+        assert all('-I' in call and '--manifest' in call and '--wheel-dir' in call for call in installed)
+
+
+@pytest.mark.parametrize('defect', ['failed', 'wrong-count', 'live-call', 'unclean'])
+def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(tmp_path, monkeypatch, defect):
+    from lab_runner.gates import UNIFIED_POOL_TRAIN
+    module = implementation()
+    monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
+    monkeypatch.setattr(module, 'wheel_identity', lambda path: {'name': 'lab', 'version': '0.6.0', 'files': {}})
+    monkeypatch.setattr(module, 'verify_cli_versions', lambda *args: None)
+    monkeypatch.setattr(module, '_helper', lambda name: SimpleNamespace(
+        INDEX='https://pypi.org/simple', AUDIT_LAUNCH='', PUBLIC_EXAMPLE=''))
+    def run(argv, **kwargs):
+        if 'lab_runner.native_eval' not in argv:
+            return b'{}'
+        row = {'passed': True, 'caseCount': 9, 'liveInvocations': 0, 'cleanup': 'verified'}
+        row.update({'failed': {'passed': False}, 'wrong-count': {'caseCount': 0},
+                    'live-call': {'liveInvocations': 1}, 'unclean': {'cleanup': 'pending'}}[defect])
+        return json.dumps(row).encode()
+    monkeypatch.setattr(module, 'run', run)
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text(json.dumps({'artifacts': [{'distribution': k, 'version': v}
+        for k, v in UNIFIED_POOL_TRAIN.items()]}))
+    with pytest.raises(ValueError, match='installed evaluation qualification incomplete'):
+        module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
+            wheels=tmp_path, lock=tmp_path / 'lock', environment={})
 
 
 @pytest.mark.parametrize('complete_context_evidence',[False,True])

@@ -1,5 +1,106 @@
 # Current delivery status
 
+## Lab 0.7.0 published and verified — 2026-10-25
+
+[Lab 0.7.0](release-0.7.0.md) is published from qualified source `9a7542c`,
+with release PR #35 merged as `4fa6e46` and an identical file tree. Its four
+Linux AMD64/ARM64 × PostgreSQL 16/18 cells passed 1,980 source tests each and
+1,336 required stack checks in total, with cleanup verified.
+
+The [release ledger](verification/release-0.7.0-2026-10-25.md) records original
+CI artifacts, matching anonymous downloads and clean public-wheel/rebuilt-source
+installs with Runtime 0.9.8. Each consumer passed 51 standalone fixtures,
+3 deadline CLI checks and 10 browser checks. All five chapters/eight scenarios
+and separate actual synthetic Runtime CLI controls passed, including reviewed
+completion, duplicate protection, cancellation and blocked admission across
+restart. Cleanup passed; no real models were called. SDK pins and historical
+benchmarks are unchanged. Earlier checkpoints below describe their original scope.
+
+## Visual Explorer in this checkout — 2026-10-25
+
+[Explorer](explorer.md) adds bundled React Flow documentation, user/developer
+inspection, eight deterministic playback scenarios and explicit single-agent
+unified-pool controls. The default launcher uses no models or Docker. Live
+admission, durable allowance, filtered receipts and offline acknowledgment stay
+host-owned; Runtime 0.9.8 owns provider selection. The existing Harness browser
+service remains separate. This is post-0.6.2 work, not a published release or
+new live model benchmark. See the
+[implementation verification ledger](verification/explorer-2026-10-25.md) for scope.
+The [PR review ledger](verification/explorer-pr-2026-10-25.md) records the current
+review fixes and final local checks; required Linux/database CI remains a separate
+merge gate.
+
+## Lab 0.6.2 published and verified — 2026-10-25
+
+The [0.6.2 release verification](verification/release-0.6.2-2026-10-25.md)
+records four green exact-source CI cells, original CI archives and verified
+public downloads. Clean public-wheel/rebuilt-source installs with Runtime 0.9.8
+each passed 51 standalone checks plus 3 deadline checks, including default 180s and
+explicit 240s, with cleanup verified and zero live model calls. The
+[guided quickstart](quickstart.md) and standalone first-workflow example are
+post-release onboarding additions in this checkout, not changes to released bytes.
+
+## Configurable benchmark deadline and 240s study — 2026-10-25
+
+The unified benchmark now accepts a finite `--local-timeout` from 1–300s,
+defaulting to 180s. The [0.6.2 release preparation](release-0.6.2.md) includes it; native60s,
+pool300s, grants, attempt/request/tool/token caps and allowance remain fixed.
+The [recipe](realistic-runtime-benchmark.md) describes invocation and metadata.
+
+The preceding authorized [240s live study](verification/unified-cli-lab061-local240-2026-10-25.md)
+used released Lab 0.6.1 and Runtime 0.9.8 with a disclosed private deadline-only
+consumer driver. All 27 assignments passed on unchanged Markdown, inputs and
+graders. Claude/Codex/local medians were 10.86s/21.73s/62.37s; all nine local
+runs finished within 180s. It retained 27 controlled skips, zero provider
+fallbacks/timeouts and 45/243 known mixed units, with cleanup verified. The
+implementation uses credential-free tests; this follow-up makes no new live calls.
+
+## Lab 0.6.1 release and clean-install verification — 2026-10-25
+
+Lab [0.6.1 is published](release-0.6.1.md), fixing the standalone installed
+evaluation CLI by packaging the SDK payload auditor. The compatibility source
+command retains the same payload, ownership and executable-cache checks.
+
+All four Linux AMD64/ARM64 × PostgreSQL 16/18 CI cells passed 1,899 source tests
+each and 1,336 required real-stack checks across 36 lanes. Original qualified CI
+wheel/source bytes were published with checksums and exact-source verification.
+
+The [post-publication verification](verification/release-0.6.1-2026-10-25.md)
+downloaded all four assets and verified their bytes. Clean public-wheel and
+rebuilt-public-source installs on macOS ARM64/Python 3.12.15 each passed all 51
+standalone CLI checks with Runtime 0.9.8, including quota fallback, persisted
+cooldowns and no partial-work replay. Isolated imports, 176 installed Lab files
+per consumer and cleanup were verified; no repository `scripts` package was
+available and no live provider calls were made. SDK pins, earlier artifacts and
+historical model measurements remain unchanged.
+
+## Lab 0.6.0 release — 2026-10-24
+
+The [0.6.0 release notes](release-0.6.0.md) describe the unified pool examples,
+public Runtime 0.9.8 train, two successful live CLI studies and accumulated
+consumer blueprints. Publication requires the final source's four-cell
+Linux AMD64/ARM64 × PostgreSQL 16/18 acceptance matrix, including installed
+distributions and verified cleanup. The release assets' `VERIFICATION-0.6.0.json`
+and `SHA256SUMS-0.6.0.txt` bind the exact qualified CI wheel/source archive,
+SDK manifest and source. Earlier study reports and experimental boundaries
+remain unchanged; release preparation makes no new live model calls.
+
+## Released Runtime live benchmarks — 2026-10-24
+
+Two authorized [live unified CLI studies](verification/unified-cli-released-2026-10-24.md)
+used the verified public Runtime 0.9.8 wheel and unchanged neutral Markdown,
+synthetic inputs, graders and deadlines: native 60s, local 180s, pool 300s.
+Each study passed 27/27 assignments (nine per model). Latest medians were
+Claude Sonnet 11.37s, Codex gpt-6.1-sol/low 23.07s and local ThinkingCap Qwen
+27B 60.69s; the preceding released study measured 10.38s, 23.61s and 66.21s.
+
+Each study verified 27 controlled cooldown skips, zero provider-triggered
+fallbacks, zero timeouts and known allowance accounting. Output regrading and
+owned-resource cleanup passed. These are small factual/workspace studies;
+timings do not isolate Runtime effects or establish a general model ranking.
+The latest run used port 8001 because the desktop local server occupied 8000;
+only the private endpoint URL changed. Raw evidence remains private.
+
 ## Released Runtime unified pools — 2026-10-24
 
 Runtime 0.9.8 is published with native Claude/Codex execution and unified

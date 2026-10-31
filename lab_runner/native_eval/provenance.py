@@ -18,7 +18,7 @@ def require_native():
 
 def audit_candidate(manifest, wheel_directory):
     """Audit the selected installed SDK train, whether released or candidate."""
-    from scripts.audit_install import audit
+    from prosaic_integration_lab.sdk_audit import audit
     data = sdk_manifest(manifest)
     with redirect_stdout(io.StringIO()):
         audit(Path(manifest), Path(wheel_directory))

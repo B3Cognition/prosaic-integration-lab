@@ -1,5 +1,148 @@
 # Codex handoff
 
+## Castle audit draft CI preparation — 2026-10-31
+
+Draft [PR #38](https://github.com/B3Cognition/prosaic-integration-lab/pull/38)
+adds the previously tested optional integrations and answer-span audit. Current
+main is being reconciled and candidate CI is being qualified. Memory and SUE
+remain disabled by default; live audit quality is unmeasured. Runtime candidate
+`d713e078a661a19a057f02482d47d3f7a23b0c5a` matches all 58 original qualified
+package payloads and is available as candidate source only, with no PyPI release.
+The new comparison is preparation-only; old unknown reservations remain held.
+
+## Lab 0.7.0 published; verification documentation — 2026-10-25
+
+Lab 0.7.0 is published at qualified source
+`9a7542c8b736939bf4d22ee2cd3164760eb07449`; PR #35 merged as `4fa6e46` with
+the same tree. All four versioned CI cells passed, original archives were
+published with checksums/provenance, and anonymous downloads matched. The
+[release ledger](verification/release-0.7.0-2026-10-25.md) records both clean
+public consumers with Runtime 0.9.8: 64 fixture/browser checks each, installed
+visual docs/playback, explicit live confirmation and actual synthetic Runtime
+CLI execution, duplicate protection, cancellation, retained allowance and
+blocked admission across restart. Cleanup passed; no real vendor inference or
+new benchmark was performed.
+
+The maintainer authorized documenting these results, committing the docs and
+preparing a PR. This follow-up changes documentation only; preserve published
+archives, package versions, SDK pins and historical evidence. Earlier entries
+below retain their original authorization/checkpoint context.
+
+## Explorer PR #34 CI review and merge gate — 2026-10-25
+
+The maintainer authorized fixing PR #34 and merging once all required checks
+pass. Independent review found no new Explorer blocker. CI exposed Playwright's
+automatic GitHub PR diff capture fetching the base with depth one, making the
+browser lane's original checkout shallow. Disable optional Git metadata capture
+and retain an early full-history gate; candidate-only fetch and branch/detached
+fixtures preserve depth-one rejection and exact released-baseline bytes. See the
+[review/CI ledger](verification/explorer-pr-2026-10-25.md). Merge only the exact
+head passing all four Linux/database cells. No release or real inference is
+included in this authorization.
+
+## Explorer review and PR preparation — 2026-10-25
+
+The maintainer authorized reviewing Explorer, fixing findings, completing checks
+and preparing an integration-lab PR. This supersedes the earlier local-only scope
+for these branch changes; it does not authorize merging or a release. Explorer
+includes visual documentation, eight deterministic scenarios, explicitly bounded
+live controls, System/Light/Dark appearance and viewport-stable chapter navigation.
+The [review ledger](verification/explorer-pr-2026-10-25.md) records final checks
+and two corrected navigation/receipt-selection findings. SDK pins and released
+artifacts remain unchanged; no new live inference is included. Require the exact
+PR head's four Linux AMD64/ARM64 × PostgreSQL 16/18 cells before a later merge.
+
+## Guided ecosystem onboarding — 2026-10-25
+
+The maintainer approved a newcomer-oriented README, credential-free first run,
+fallback walkthrough, optional service/browser demo, real-model setup, benchmark
+and developer integration map. The [quickstart](quickstart.md) reuses released
+SDKs; `examples/first_workflow.py` only parses, admits and prepares, never executes.
+Unified browser pooling remains separate. The old README's operator/history
+material is retained in `reference-guide.md`, with original section anchors
+linked from the new README. [Local verification](verification/guided-onboarding-2026-10-25.md)
+passed 1,923 source tests, fresh setup, installed consumers and both service demos
+with cleanup verified; independent review is clean after fixing setup. Keep this
+follow-up local; no new release or live benchmark is authorized by onboarding work.
+
+Lab 0.6.2 is published at qualified source
+`b5773c33ba7305b92667c9874e4a8526c4394dd9`, with PR33 merged as 46a2d80.
+The [release ledger](verification/release-0.6.2-2026-10-25.md) records exact
+artifacts and both clean consumers' 54 checks. Preserve immutable release bytes,
+private receipts and all earlier benchmark/model evidence.
+
+## Lab 0.6.2 release preparation — 2026-10-25
+
+The maintainer authorized releasing 0.6.2 with configurable local timeout and
+post-publication clean-install checks using Runtime 0.9.8. PR #32 merged as
+`eff161943c5e816468eef504bf9c4fc055a0fb11` after four green CI cells and review.
+The [release notes](release-0.6.2.md) describe the patch. Qualify the versioned
+source in all four cells, retain original CI artifacts, then publish and verify
+downloaded bytes. Clean consumers must exercise default180s/explicit240s and
+the installed evaluation lanes without live inference. Preserve SDK pins,
+historical releases and private benchmark evidence.
+
+## Configurable local benchmark deadline — 2026-10-25
+
+The maintainer authorized configurable unified benchmark local timeouts, tests,
+documentation, commit and PR preparation. `--local-timeout` now accepts finite
+1–300s values with a 180s default, retained in command arguments and receipts.
+Native60s/pool300s, all grants/budgets, tasks and inputs remain unchanged. This
+feature is not in the immutable 0.6.1 archives; no patch release is published here.
+
+The [240s study ledger](verification/unified-cli-lab061-local240-2026-10-25.md)
+records 27/27 successes using released Lab 0.6.1 / Runtime 0.9.8 and a private
+deadline-only driver. Audits paired all 27 input/Markdown hashes, regraded 54
+current/prior outputs and reconciled 45 known mixed units. Cleanup restored
+native marks, preserved the local bucket's original unknown state and stopped
+only the owned server. That absent capacity record is separate from the zero
+unknown dispatch reservations. Preserve all private and historical evidence.
+
+## Lab 0.6.1 released and verified — 2026-10-25
+
+[PR #30](https://github.com/B3Cognition/prosaic-integration-lab/pull/30) merged as
+`4b0258f306b8fde91ef22aaf347d7113a1ed630c` after review and four green CI cells.
+The [0.6.1 release](release-0.6.1.md) publishes the original qualified wheel and
+source archive from run `40133039899`. Tag `v0.6.1` selects qualified source
+`73a071480f4399ddea52839f6836ccaa742e9a03`, whose tree matches the merge.
+
+The [verification ledger](verification/release-0.6.1-2026-10-25.md) records exact
+artifact hashes, 1,899 source tests per CI cell, 1,336 real-stack checks and
+post-publication clean installs. Public wheel and rebuilt-source consumers each
+passed all four standalone CLI lanes (51 checks each) using Runtime 0.9.8,
+without repository `scripts`. Quota fallback, persisted cooldowns, no partial
+replay, import ownership, installed payloads and cleanup passed; zero live calls.
+
+This documentation follow-up marks publication after the immutable source
+snapshot's pre-release changelog. Keep the released archives, tag, SDK pins,
+freezes, 0.6.0 artifacts and historical benchmark evidence unchanged.
+
+## Lab 0.6.0 release preparation — 2026-10-24
+
+The maintainer authorized releasing 0.6.0 with unified pools and the released
+Runtime benchmark docs. The [release notes](release-0.6.0.md) summarize the
+release. SDK pins, benchmark code/inputs/deadlines and historical evidence
+remain unchanged. Build and review the final source, require all four native
+Linux/PostgreSQL CI cells, then retain the original CI wheel/sdist and attach
+checksums plus exact-source verification. Verify downloaded public assets
+against those same bytes; do not substitute a later local rebuild.
+
+## Released Runtime live measurements — 2026-10-24
+
+The separately authorized [0.9.8 live studies](verification/unified-cli-released-2026-10-24.md)
+completed 27/27 assignments twice, using the same tasks/inputs and native60s,
+local180s, pool300s deadlines. The latest Claude/Codex/local medians were
+11.37s/23.07s/60.69s; each model passed nine assignments per study. Private
+paired audits regraded all saved outputs and verified hashes, admissions and
+cleanup. Each run retained 45/243 known mixed dispatch units, zero unknowns.
+Each verified 27 controlled cooldown skips and zero provider-triggered fallback;
+no quota exhaustion was induced. Preserve original candidate/release reports.
+
+Adoption [PR27](https://github.com/B3Cognition/prosaic-integration-lab/pull/27)
+merged as `8194f6a0f6e64c6186c8aa129bc759e9e3ef3008` after all four exact-head
+CI cells passed, including 36 real-stack lanes with cleanup verified. This
+documentation follow-up does not change SDK pins, execution or benchmark code.
+
 ## Existing critic protected; generation quality still unqualified — 2026-10-25
 
 [Verification](verification/sue-canonical-critic-2026-10-25.md): use explicit

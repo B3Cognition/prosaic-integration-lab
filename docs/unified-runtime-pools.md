@@ -3,8 +3,23 @@
 Released Runtime 0.9.8 includes the opt-in `UnifiedRuntime`, selecting native Claude Code,
 Codex CLI and local/API profiles through one ordered pool. Runtime owns execution,
 capacity and safe switching; Lab consumes its public installed APIs.
-Historical candidate and live evidence stays separately
-identified below; release validation does not repeat live model benchmarks.
+Two separately authorized [released-wheel live studies](verification/unified-cli-released-2026-10-24.md)
+passed 54/54 assignments. Historical candidate evidence stays separately
+identified below; offline release validation and live measurements have distinct scopes.
+
+Start with the [guided quickstart](quickstart.md). Released
+[Lab 0.6.2](release-0.6.2.md) includes the packaged evaluation auditor and
+configurable local benchmark deadline. Its
+[clean public-wheel and rebuilt-source installs](verification/release-0.6.2-2026-10-25.md)
+each passed 51 standalone checks plus 3 deadline cases with Runtime 0.9.8, including
+fallback, cooldowns and no partial-work replay, with verified cleanup and zero live calls.
+The 0.6.0 Runtime API/CLI examples and extracted-source commands retain their
+original qualification; historical model measurements are unchanged.
+
+The later [240s local-deadline live study](verification/unified-cli-lab061-local240-2026-10-25.md)
+passed 27/27 assignments with the same Markdown and inputs. Its private driver
+override is disclosed separately from the Lab 0.6.2 configurable benchmark CLI
+in the [current recipe](realistic-runtime-benchmark.md).
 
 ## Configuration and invocation
 
