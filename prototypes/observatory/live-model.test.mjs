@@ -1,9 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { observedRun, reportedTokenText, displayUsage, messagePreview } from './live-model.js';
+import { observedRun, reportedTokenText, reportedOutputText, displayUsage, messagePreview } from './live-model.js';
 import { stateAt, usageAt } from './sample-runs.js';
 
 const event = (id, at, name, extra = {}) => ({id,at,event:name,source:'runtime',invocation_id:'attempt',...extra});
+test('output token labels preserve unknown calls and diagnostic qualification',()=>{
+  assert.equal(reportedOutputText({input:100,output:25,unknownCalls:1}),'≥25');
+  assert.equal(reportedOutputText({input:null,output:null}),'—');
+  assert.equal(reportedOutputText({input:null,output:null,providerReported:{input:100,output:31,unknownCalls:0}}),'31†');
+});
+test('observed model retains owner-filtered generation without changing usage',()=>{
+  const generation={version:1,calls:[{spanId:'event-2',chunks:3}],truncated:false};
+  const result=observedRun({runId:'run',elapsed:1,events:[],generation,usage:{input:10,output:2}});
+  assert.deepEqual(result.generation,generation);
+  assert.deepEqual(result.observedUsage,{input:10,output:2});
+});
 const feed = {runId:'owned-session',elapsed:2,active:true,available:true,truncated:false,
   usage:{input:null,output:null,totalCalls:1,unknownCalls:1,completeCalls:0,available:true},events:[
     event(1,0,'invocation_started'),event(2,.1,'provider_request_started',{turn:1}),

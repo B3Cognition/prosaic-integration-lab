@@ -7,6 +7,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { generationPackets } from './generation-model.js';
 
 const C = { coral: 0xff7952, teal: 0x42e5db, gold: 0xf4bd64, metal: 0x536c66, dark: 0x162c2d };
 const TAU = Math.PI * 2;
@@ -403,7 +404,9 @@ export function createExecutionScene(container, { onSelect, labels, reducedMotio
     }
     gsap.to(shellMaterial, { opacity: exploded ? .06 : .19, duration: reducedMotion ? 0 : .8, overwrite: true });
   }
+  let stateUpdated = performance.now();
   function update(next, isPlaying) {
+    stateUpdated = performance.now();
     state = next; playing = isPlaying;
     const failed = next.toolFailed;
     gold.color.setHex(failed ? 0xff5c4e : C.gold); gold.emissive.setHex(failed ? 0xff5c4e : C.gold);
@@ -423,6 +426,22 @@ export function createExecutionScene(container, { onSelect, labels, reducedMotio
     for (const item of animated) item.object.rotation[item.axis] = visualTime * item.rate;
     (authoredCore || core).scale.setScalar(1 + (!reducedMotion && playing ? Math.sin(visualTime * 2) * .013 : 0));
     for (const channel of cableGroups) {
+      if(channel.component==='provider'&&state.generation?.call) {
+        const now=state.time+(playing&&!reducedMotion?Math.min(.55,(performance.now()-stateUpdated)/1000):0);
+        const packets=generationPackets(state.generation,now,{reducedMotion}),count=packets.length;
+        const array=channel.particles.geometry.attributes.position;
+        for(let i=0;i<count;i++) {
+          const point=channel.curve.getPoint(Math.max(0,Math.min(1,packets[i].position)));
+          array.setXYZ(i,point.x,point.y,point.z);
+        }
+        channel.particles.geometry.setDrawRange(0,Math.min(count,90));
+        channel.particles.material.size=.27;
+        channel.particles.material.opacity=count?1:0;
+        channel.signal.material.opacity=count?.8:.12;
+        array.needsUpdate=true;
+        continue;
+      }
+      channel.particles.geometry.setDrawRange(0,90);
       const active = state.active?.component === channel.component || channel.component === 'harness' && state.active?.component === 'lab';
       channel.signal.material.opacity = active ? .75 : .14;
       channel.particles.material.opacity = active ? .95 : .06;

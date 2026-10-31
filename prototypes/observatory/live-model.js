@@ -47,7 +47,8 @@ export function observedRun(feed, {requestPending=false} = {}) {
   }
   return {id:feed.runId,name:'Recorded lab run',duration:elapsed,outcome:status,status,source:'observed',
     spans,observedEvents:eventLog,observedUsage:feed.usage||{input:null,output:null,available:false},
-    incomplete,toolName:[...spans].reverse().find(span=>span.kind==='tool')?.label||'Registered tool'};
+    incomplete,generation:feed.generation||{calls:[],truncated:false},
+    toolName:[...spans].reverse().find(span=>span.kind==='tool')?.label||'Registered tool'};
 }
 
 export function formatDuration(seconds) {
@@ -60,6 +61,12 @@ export function reportedTokenText(usage) {
   usage=displayUsage(usage);
   if(usage.available===false||!Number.isFinite(usage.input)||!Number.isFinite(usage.output))return '—';
   return (usage.unknownCalls?'≥':'')+(usage.input+usage.output).toLocaleString('en-US')+(usage.unqualified?'†':'');
+}
+
+export function reportedOutputText(usage) {
+  usage=displayUsage(usage);
+  if(usage.available===false||!Number.isFinite(usage.output))return '—';
+  return (usage.unknownCalls?'≥':'')+usage.output.toLocaleString('en-US')+(usage.unqualified?'†':'');
 }
 
 export function displayUsage(usage) {

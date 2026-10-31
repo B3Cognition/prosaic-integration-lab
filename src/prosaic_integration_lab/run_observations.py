@@ -5,6 +5,8 @@ import re
 import threading
 import time
 
+from .generation_observations import GenerationTrace
+
 EVENTS = {
     'runtime': {'invocation_started', 'invocation_completed', 'provider_request_started',
                 'provider_request_completed', 'tool_started', 'tool_completed'},
@@ -64,7 +66,7 @@ class RunObservations:
                 if len(self.runs) == self.max_runs:
                     self.runs.popitem(last=False)
                 self.runs[run_id] = {'start': now, 'events': deque(maxlen=self.max_events),
-                    'open': set(), 'count': 0, 'truncated': False}
+                    'open': set(), 'count': 0, 'truncated': False, 'generation':GenerationTrace()}
             run = self.runs[run_id]
             self.runs.move_to_end(run_id)
             run['count'] += 1
@@ -77,18 +79,29 @@ class RunObservations:
             elif safe['event'] == 'invocation_completed':
                 run['open'].discard(invocation)
             run['events'].append(safe)
+            run['generation'].observe(safe)
+
+    def output(self, run_id, event):
+        """Accept only public Harness provisional events for an existing run."""
+        with self.lock:
+            run = self.runs.get(run_id)
+            if run is not None:
+                at = round(max(0,self.clock()-run['start']),6)
+                run['generation'].output(event,at)
 
     def snapshot(self, run_id):
         with self.lock:
             run = self.runs.get(run_id)
             if run is None:
                 return {'version': 1, 'runId': run_id, 'events': [], 'elapsed': 0,
-                        'active': False, 'available': False, 'truncated': False}
+                        'active': False, 'available': False, 'truncated': False,
+                        'generation':GenerationTrace().snapshot()}
             events = [dict(event) for event in run['events']]
             elapsed = max(events[-1]['at'], self.clock() - run['start']) if run['open'] else events[-1]['at']
             return {'version': 1, 'runId': run_id, 'events': events,
                     'elapsed': round(max(0, elapsed), 6), 'active': bool(run['open']),
-                    'available': True, 'truncated': run['truncated']}
+                    'available': True, 'truncated': run['truncated'],
+                    'generation':run['generation'].snapshot()}
 
 
 def usage_projection(rows):

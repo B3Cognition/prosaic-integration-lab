@@ -83,6 +83,7 @@ class ModelGateway:
                 self.wfile.write(content)
 
             def do_POST(self):
+                streaming_started=False
                 if self.path != '/v1/chat/completions':
                     return self.reply(404, b'{"error":"not_found"}')
                 # The SDK is a server-side client. Browser requests must never
@@ -98,7 +99,7 @@ class ModelGateway:
                     self.connection.settimeout(5)
                     body = json.loads(self.rfile.read(length))
                     if (type(body) is not dict or body.get('model') != gateway.profile.model or
-                            body.get('stream') not in (None, False)):
+                            body.get('stream') is not None and type(body['stream']) is not bool):
                         return self.reply(422, b'{"error":"invalid_request"}')
                     body['max_tokens'] = min(body.get('max_tokens', 512), gateway.profile.max_tokens or 512)
                     with gateway.lock:
@@ -109,6 +110,20 @@ class ModelGateway:
                             '/chat/completions', json=body) as result:
                         if result.status_code != 200:
                             return self.reply(502, b'{"error":"local_provider_failed"}')
+                        if (body.get('stream') is True and
+                                result.headers.get('content-type','').split(';')[0].strip().lower()=='text/event-stream'):
+                            self.send_response(200)
+                            self.send_header('Content-Type','text/event-stream')
+                            self.send_header('Cache-Control','no-store')
+                            self.end_headers();streaming_started=True
+                            total=0;deadline=time.monotonic()+30
+                            for chunk in result.iter_bytes():
+                                total+=len(chunk)
+                                if total>8*1024*1024 or time.monotonic()>deadline:
+                                    self.close_connection=True
+                                    return
+                                self.wfile.write(chunk);self.wfile.flush()
+                            return
                         content = bytearray()
                         for chunk in result.iter_bytes():
                             content.extend(chunk)
@@ -116,7 +131,8 @@ class ModelGateway:
                                 return self.reply(502, b'{"error":"local_response_limit"}')
                         self.reply(200, bytes(content))
                 except (ValueError, TypeError, OSError, httpx.HTTPError):
-                    self.reply(502, b'{"error":"local_provider_unavailable"}')
+                    if not streaming_started:self.reply(502, b'{"error":"local_provider_unavailable"}')
+                    else:self.close_connection=True
         self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
         self.server.daemon_threads = True
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -131,7 +147,24 @@ class ModelGateway:
         self.client.close()
 
 
-def main(argv=None, *, application_factory=None, landing_path='/chat'):
+def configure_conversations(settings, *, model_url, streaming, profile=None, maximum=32):
+    """Rename the disposable bindings and every grant reference together."""
+    prefix='chat-'+('local' if profile is not None else 'synthetic')+('-stream-' if streaming else '-')
+    versions={definition['version']:prefix+definition['version'] for definition in settings['bundles']}
+    for definition in settings['bundles']:
+        definition['version']=versions[definition['version']]
+        definition['model_url']=model_url
+        if streaming or 'streaming' in definition:definition['streaming']=streaming
+        if profile is not None:
+            definition['model']=profile.model
+            definition['policy']={'max_provider_requests':maximum}
+    for tenant in settings['tenants'].values():
+        tenant['binding_version']=versions[tenant['binding_version']]
+        if 'retained_versions' in tenant:
+            tenant['retained_versions']=[versions[version] for version in tenant['retained_versions']]
+
+
+def main(argv=None, *, application_factory=None, landing_path='/chat', streaming=False):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--live-local', action='store_true', help='explicitly use approved local Qwen')
     parser.add_argument('--runtime-config', type=Path, default=ROOT/'configs/runtime-local.example.yml')
@@ -165,14 +198,9 @@ def main(argv=None, *, application_factory=None, landing_path='/chat'):
             config = {key:value for key,value in host.items() if key in allowed}
             config['assets'] = str(ROOT/'assets')
             config['fixture_events_url'] = stack.manifest['endpoints']['model'] + '/events'
-            for definition in config['conversation']['bundles']:
-                definition['version'] = 'chat-' + ('local' if gateway else 'synthetic') + '-' + definition['version']
-                definition['model_url'] = gateway.url if gateway else stack.manifest['endpoints']['model'] + '/v1'
-                if gateway:
-                    definition['model'] = profile.model
-                    definition['policy'] = {'max_provider_requests': args.max_calls}
-            for tenant in config['conversation']['tenants'].values():
-                tenant['binding_version'] = 'chat-' + ('local' if gateway else 'synthetic') + '-' + tenant['binding_version']
+            configure_conversations(config['conversation'],streaming=streaming,maximum=args.max_calls,
+                model_url=gateway.url if gateway else stack.manifest['endpoints']['model']+'/v1',
+                profile=profile if gateway else None)
             if not gateway:
                 httpx.post(stack.manifest['endpoints']['model']+'/control', json={'scenario':'conversation',
                     'maximum_calls':args.max_calls,'provider_latency_s':args.fixture_latency},trust_env=False).raise_for_status()

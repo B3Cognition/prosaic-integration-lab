@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Show actual streamed generation in both Observatory views: returning output
+  packets, provisional text, arrival marks, a character curve, first-output wait
+  and gaps, with pause/replay and separately qualified run-wide token totals.
+- Enable streaming only for the Observatory launcher, bound owner-only output
+  observations, preserve interrupted/truncated uncertainty, and admit a single
+  request when the local gateway allowance is one.
+
 ## 0.8.0 — 2026-10-31
 
 - Add the source/complete-archive execution Observatory: 3D Live and Inspect

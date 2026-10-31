@@ -162,9 +162,10 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
     if (type(definition) is not dict or set(definition)-{'version','model_url','model','model_tier',
             'assets','policy','fixture_effects','operation_namespace','journal_identity','fixture_lookup_padding',
             'context_policy','interpretation_context_policy','interpretation_model',
-            'interpretation_model_tier','interpretation_model_url'} or
+            'interpretation_model_tier','interpretation_model_url','streaming'} or
             not {'version','model_url'}<=set(definition) or
-            type(definition.get('fixture_effects',False)) is not bool):
+            type(definition.get('fixture_effects',False)) is not bool or
+            type(definition.get('streaming',False)) is not bool):
         raise ValueError('invalid conversation bundle')
     version=reference(definition['version'])
     directory=Path(definition.get('assets',Path(host.config['assets'])/'conversation'))
@@ -195,12 +196,13 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
             'model_tier':interpretation_tier if name=='interpreter' else tier,
             'tools':requested},'body':(directory/'agents'/f'{name}.md').read_text()})
     config=RuntimeConfig({'conversation':EndpointConfig(definition['model_url'],
-        definition.get('model','test-model'),features={'streaming':False})},
+        definition.get('model','test-model'),features={'streaming':definition.get('streaming',False)})},
         {tier:'conversation'},'conversation',allowed_tools=frozenset(tools))
     if any(key in definition for key in ('interpretation_model','interpretation_model_url')):
         if interpretation_tier==tier:raise ValueError('separate interpretation endpoint requires distinct tier')
         config.profiles['interpretation']=EndpointConfig(definition.get('interpretation_model_url',definition['model_url']),
-            definition.get('interpretation_model',definition.get('model','test-model')),features={'streaming':False})
+            definition.get('interpretation_model',definition.get('model','test-model')),
+            features={'streaming':definition.get('streaming',False)})
         config.routes[interpretation_tier]='interpretation'
     policy=ConversationPolicy(**definition.get('policy',{}))
     if definition.get('fixture_effects'):
@@ -211,7 +213,8 @@ def build_bindings(host,definition,*,registry=None,workflow_materials=None):
     context_args=context_configuration(definition)
     return ConversationBindings(artifact('assistant',list(tools)),version=version,config=config,
         policy=policy,run_policy=RunPolicy(allowed_tools=frozenset(tools),timeout_s=30,
-            max_tool_rounds=2,max_provider_requests=2,max_tool_calls=1,max_input_bytes=policy.max_input_bytes),
+            max_tool_rounds=2,max_provider_requests=min(2,policy.max_provider_requests),
+            max_tool_calls=1,max_input_bytes=policy.max_input_bytes),
         custom_tools=tools,interpreter=artifact('interpreter',[]),
         operation_namespace=definition.get('operation_namespace'),tool_journal=journal,workflows=workflows,
         interpretation_policy=RunPolicy(allowed_tools=frozenset(),timeout_s=30,max_tool_rounds=1,

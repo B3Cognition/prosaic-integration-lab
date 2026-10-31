@@ -8,12 +8,13 @@
   <link rel="icon" href="data:,">
   <title>Prosaic · Observatory</title>
   <link rel="stylesheet" href="observatory.css">
+  <link rel="stylesheet" href="generation.css">
   <script type="importmap">{"imports":{"three":"./vendor/three/three.module.js","three/addons/":"./vendor/three/addons/"}}</script>
   <script src="vendor/gsap/gsap.min.js" defer></script>
   <script type="module" src="observatory.js"></script>
 </head>
 <body>
-  <div class="observatory">
+  <div class="observatory" data-view="live">
     <header class="appbar">
       <a class="brand" href="./" aria-label="Prosaic Observatory"><span class="brand-mark">p.</span><span>prosaic<span class="brand-divider">/</span><span class="brand-section">observatory</span></span></a>
       <div class="app-meta"><span class="sample-tag"><span></span>Sample telemetry</span><span class="prototype-tag">Prototype</span></div>
@@ -28,11 +29,12 @@
       <section id="lab-controls" class="lab-controls" hidden aria-label="Actual integration-lab execution">
         <div class="lab-heading"><strong>Integration lab</strong><span id="lab-status" role="status" aria-live="polite">Connecting…</span></div>
         <form id="lab-connect"><label for="lab-token">Lab API token</label><input id="lab-token" type="password" autocomplete="off" maxlength="8192" required><button type="submit">Connect</button></form>
-        <form id="lab-run" hidden><label for="lab-message">Test message</label><input id="lab-message" value="Find players" maxlength="512" required><button id="lab-start" type="submit" disabled>Start lab test</button><button id="lab-follow" type="button">Follow live</button></form>
+        <form id="lab-run" hidden><label for="lab-message">Test message</label><input id="lab-message" value="Show generation" maxlength="512" required><button id="lab-start" type="submit" disabled>Start lab test</button><button id="lab-follow" type="button">Follow live</button></form>
         <p id="lab-model" class="lab-model"></p>
-        <details id="lab-exchange" hidden open><summary>Latest message exchange</summary><div id="lab-messages" aria-live="polite"></div></details>
+        <details id="lab-exchange" hidden><summary>Latest message exchange</summary><div id="lab-messages" aria-live="polite"></div></details>
       </section>
 
+      <div class="visual-stage">
       <section class="scene-shell" aria-label="Interactive execution scene">
         <div id="scene" role="img" aria-label="Three-dimensional cutaway Runtime connected by activity channels to Provider, read_file and Harness. Select a component below to focus."></div>
         <div id="graphics-message" class="graphics-message" role="status">Preparing the execution scene…</div>
@@ -44,15 +46,39 @@
         <aside class="component-card" id="component-card" aria-live="polite"><div class="component-kicker"><span id="component-role">Execution chamber</span><button type="button" id="close-focus" aria-label="Close component focus">×</button></div><h3 id="component-name">Runtime</h3><p id="component-description">Coordinates model turns and registered tools.</p><div class="component-facts"><span>At playback cursor</span><strong id="component-state">Active</strong></div></aside>
       </section>
 
+      <section class="generation-panel" id="generation" aria-label="Model output generation" data-phase="empty">
+        <div class="generation-heading"><div><span id="generation-source" class="generation-source">Scripted sample</span><h2>Generation stream</h2></div><label for="generation-call">Provider call<select id="generation-call"><option value="">Follow latest call</option></select></label></div>
+        <div class="generation-state-line"><span class="generation-state-dot" aria-hidden="true"></span><strong id="generation-state">Awaiting a provider call</strong></div>
+        <p class="generation-age" id="generation-age">Play the sample or start a lab test.</p>
+        <svg id="generation-chart" class="generation-chart" role="img" aria-labelledby="generation-chart-title" viewBox="0 0 420 166">
+          <title id="generation-chart-title">Client-observed output arrival timings</title>
+          <defs><pattern id="generation-missing-pattern" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1,1L1,-1M0,6L6,0M5,7L7,5" stroke="#97aaa8" stroke-opacity=".2" stroke-width="1"/></pattern></defs>
+          <text class="chart-unit" x="44" y="12">Characters received</text>
+          <rect id="generation-wait" class="generation-wait"/>
+          <rect id="generation-unknown" fill="url(#generation-missing-pattern)"/>
+          <path id="generation-grid" class="generation-grid"/>
+          <text id="generation-y0" text-anchor="end"></text><text id="generation-y1" text-anchor="end"></text><text id="generation-y2" text-anchor="end"></text>
+          <path id="generation-curve" class="generation-curve"/>
+          <circle id="generation-tail" r="3" fill="#5ce0db" visibility="hidden"/>
+          <path id="generation-arrivals" class="generation-arrivals"/>
+          <path id="generation-cursor" class="generation-cursor"/>
+          <text id="generation-x0" y="160" text-anchor="middle"></text><text id="generation-x1" y="160" text-anchor="middle"></text><text id="generation-x2" y="160" text-anchor="middle"></text>
+        </svg>
+        <div class="generation-output"><p class="generation-label">Recent output chunks</p><div id="generation-ribbon" class="generation-ribbon" aria-label="Streamed text chunks"></div><p id="generation-preview" class="generation-preview" hidden></p><p id="generation-evidence" class="generation-evidence">Provisional text · separate from committed history.</p></div>
+        <div class="generation-metrics"><div><span>First output</span><strong id="generation-first">—</strong></div><div><span>Chunks received</span><strong id="generation-count">0</strong></div><div><span>Largest gap</span><strong id="generation-gap">—</strong></div><div><span>Run output tokens<br><small id="generation-token-scope">Reported total</small></span><strong id="generation-tokens">—</strong></div></div>
+        <p class="generation-note">Marks are text chunks, not token boundaries. Token totals come from completed provider reports.</p>
+      </section>
+      </div>
+
       <div class="playback">
-        <button type="button" id="play" class="play-button" aria-label="Pause sample playback"><span id="play-icon">Ⅱ</span></button>
+        <button type="button" id="play" class="play-button" aria-label="Pause sample playback"><span id="play-icon">Ⅱ</span><span id="play-label" class="play-label">Pause</span></button>
         <div class="playback-track"><div class="playback-top"><span id="playback-mode">Sample replay</span><output id="clock" for="scrubber">15.2 / 24.0 s</output></div><input id="scrubber" type="range" min="0" max="24" step="0.01" value="15.2" aria-label="Run playback time in seconds"></div>
         <button type="button" id="speed" aria-label="Change playback speed">1×</button><span id="run-outcome" class="outcome">Running</span>
       </div>
 
       <section id="live-panel" class="telemetry-panel" role="tabpanel" aria-labelledby="live-tab">
         <div class="live-summary"><div><span class="eyebrow">At the cursor</span><h3 id="live-title">Final response</h3><p id="latest-event">provider_request_started</p></div><div class="metric"><span>Elapsed</span><strong id="elapsed">15.2<small>s</small></strong></div><div class="metric"><span>Provider calls</span><strong id="calls">2</strong></div><div class="metric"><span>Reported tokens</span><strong id="tokens">1,768</strong><span class="metric-foot" id="usage-note">Latest completed report</span></div></div>
-        <div class="activity-row"><div><span class="eyebrow">Activity channels</span><span class="activity-note">Motion represents activity, not individual tokens.</span></div><div class="channel"><span class="label-dot provider-dot"></span><span>Provider</span><div class="activity-strip" id="provider-strip" aria-label="Provider activity"></div></div><div class="channel"><span class="label-dot tool-dot"></span><span>Tool</span><div class="activity-strip tool-strip" id="tool-strip" aria-label="Tool activity"></div></div></div>
+        <div class="activity-row"><div><span class="eyebrow">Activity channels</span><span class="activity-note">Provider output follows chunk arrivals; tools show invocation activity.</span></div><div class="channel"><span class="label-dot provider-dot"></span><span>Provider</span><div class="activity-strip" id="provider-strip" aria-label="Provider output arrivals"></div></div><div class="channel"><span class="label-dot tool-dot"></span><span>Tool</span><div class="activity-strip tool-strip" id="tool-strip" aria-label="Tool activity"></div></div></div>
       </section>
 
       <section id="inspect-panel" class="telemetry-panel" role="tabpanel" aria-labelledby="inspect-tab" hidden>

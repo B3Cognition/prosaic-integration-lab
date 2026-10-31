@@ -64,3 +64,46 @@ def test_gateway_rejects_nonlocal_provider_before_reading_credentials():
     from prosaic_runtime import EndpointConfig
     with pytest.raises(ValueError,match='loopback'):
         ModelGateway(EndpointConfig('https://provider.invalid/v1','qwen',api_key_file='/must/not/read'),maximum=32)
+
+
+def test_gateway_forwards_sse_before_completion_and_charges_one_request(tmp_path):
+    from lab_runner.chat import ModelGateway
+    from prosaic_runtime import EndpointConfig
+    release=threading.Event();calls=[]
+    first=b'data: {"choices":[{"delta":{"content":"Hello "}}]}\n\n'
+    last=b'data: {"choices":[{"delta":{"content":"world"}}]}\n\ndata: [DONE]\n\n'
+    class Handler(BaseHTTPRequestHandler):
+        def log_message(self,*args):pass
+        def do_POST(self):
+            calls.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
+            self.send_response(200);self.send_header('Content-Type','text/event-stream');self.end_headers()
+            self.wfile.write(first);self.wfile.flush()
+            release.wait(5)
+            self.wfile.write(last);self.wfile.flush()
+    origin=ThreadingHTTPServer(('127.0.0.1',0),Handler)
+    worker=threading.Thread(target=origin.serve_forever,daemon=True);worker.start()
+    key=tmp_path/'key';key.write_text('fixture-only-key')
+    profile=EndpointConfig(f'http://127.0.0.1:{origin.server_port}/v1','qwen-fixture',api_key_file=str(key))
+    try:
+        with ModelGateway(profile,maximum=1) as gateway:
+            payload={'model':'qwen-fixture','messages':[],'stream':True}
+            with httpx.stream('POST',gateway.url+'/chat/completions',json=payload,trust_env=False) as result:
+                assert result.status_code==200
+                assert result.headers['content-type'].startswith('text/event-stream')
+                lines=result.iter_lines();assert next(lines)==first.decode().splitlines()[0]
+                assert not release.is_set()
+                release.set();assert '[DONE]' in '\n'.join(lines)
+            assert gateway.used==1 and len(calls)==1 and calls[0]['stream'] is True
+            assert httpx.post(gateway.url+'/chat/completions',json=payload,trust_env=False).status_code==429
+    finally:
+        release.set();origin.shutdown();origin.server_close();worker.join()
+
+
+@pytest.mark.parametrize('stream',[1,'true',[],{}])
+def test_gateway_rejects_invalid_stream_flags_before_consuming_allowance(tmp_path,stream):
+    from lab_runner.chat import ModelGateway
+    from prosaic_runtime import EndpointConfig
+    key=tmp_path/'key';key.write_text('fixture-only-key')
+    with ModelGateway(EndpointConfig('http://127.0.0.1:9/v1','qwen-fixture',api_key_file=str(key)),maximum=1) as gateway:
+        result=httpx.post(gateway.url+'/chat/completions',json={'model':'qwen-fixture','stream':stream},trust_env=False)
+        assert result.status_code==422 and gateway.used==0

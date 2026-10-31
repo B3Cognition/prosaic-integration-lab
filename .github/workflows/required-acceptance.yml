@@ -108,7 +108,7 @@ jobs:
       - name: Observatory source and animation regressions without model calls
         run: |
           .venv/bin/python scripts/observatory_source_smoke.py --source-root .
-          node --test prototypes/observatory/live-model.test.mjs prototypes/observatory/lab-connection.test.mjs
+          node --test prototypes/observatory/*.test.mjs
       - name: Install pinned Linux CLI sandbox backend
         run: |
           sudo apt-get update

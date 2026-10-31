@@ -198,9 +198,15 @@ class ConversationExecution:
             interaction_ref=None,on_event=None):
         row=self._owned(principal,session_id)
         controller=self._controller(principal,row)
+        def output(event):
+            sink=getattr(self.host,'observations',None)
+            if sink is not None:
+                try:sink.output(session_id,event)
+                except Exception:pass  # optional display cannot fail execution
+            if on_event is not None:on_event(event)
         reply=controller.send(session_id,message_id=message_id,message=message,
             expected_revision=expected_revision,interaction_ref=interaction_ref,
-            on_event=phase_observer(self.host.config,on_event)).document
+            on_event=phase_observer(self.host.config,output)).document
         if message=='Find players' and reply.get('status')=='completed' and row['binding_version'] in self.workflow_materials:
             return self._public_reply(self.attach_owned_workflow(principal,row,controller,reply))
         return self._public_reply(reply)

@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Unreleased Observatory generation — 2026-10-31
+
+The maintainer authorized research and implementation of visible generation in
+both Observatory views. Branch `codex/observatory-token-stream` starts at current
+main `4787265953bbda9a9e7ed63b500d152b8bcf486b` after the published 0.8.0 release.
+It consumes public Runtime/Harness callbacks, adds bounded owner-only provisional
+output and event-driven animation, and preserves SDK pins and published bytes.
+See the [generation ledger](verification/observatory-generation-2026-10-31.md)
+for tests, independent review, actual local-model observations and preview use.
+This feature is not merged or released; require the normal exact-head CI gate
+before integration. Preserve the original dirty Lab checkout and older evidence.
+
 ## Lab 0.7.0 published; verification documentation — 2026-10-25
 
 Lab 0.7.0 is published at qualified source

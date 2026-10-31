@@ -7,6 +7,7 @@ import re
 
 
 REQUIRED = ('index.html', 'observatory.css', 'observatory.js', 'scene-renderer.js',
+    'generation.css', 'generation-model.js', 'generation-view.js', 'generation-model.test.mjs',
     'sample-runs.js', 'live-model.js', 'lab-connection.js', 'live-model.test.mjs',
     'lab-connection.test.mjs', 'README.md', 'VERIFICATION.md', 'vendor/manifest.json',
     'assets/runtime-core.glb', 'assets/runtime-core.blend', 'assets/runtime-core-preview.png',

@@ -4,7 +4,10 @@ An interactive visual prototype inspired by the plant-cell reference supplied
 by the maintainer. The approved scope is one detailed execution scene first,
 with Live and Inspect views and an optional authenticated Integration Lab feed.
 
-Verified real-model screenshots: [Live](verification/observatory-real-qwen-live-final.png),
+The unreleased generation update adds actual streamed output arrivals in both
+views. See the [generation verification](../../docs/verification/observatory-generation-2026-10-31.md)
+for current evidence and limitations. Historical 0.8.0 real-model screenshots:
+[Live](verification/observatory-real-qwen-live-final.png),
 [Inspect](verification/observatory-real-qwen-inspect-final.png) and
 [phone](verification/observatory-real-qwen-phone-final.png). The shown 549-token
 report carries the unqualified marker described below.
@@ -20,17 +23,20 @@ and a consumer image built with `scripts/build_consumer.py`:
 
 The launcher starts an owned PostgreSQL stack and a bounded synthetic HTTP
 provider. It opens a one-use connection link; the API credential stays in browser
-memory. Use **Start lab test** with `Find players` for two provider calls, a
-registered tool and workflow waiting, or `Hello` for a completed turn. Ctrl+C
+memory. Use **Start lab test** with the default `Show generation` for a paced,
+52-chunk synthetic response, `Find players` for two provider calls, a
+registered tool and workflow waiting, or `Hello` for a short completed turn. Ctrl+C
 stops the UI and verifies cleanup of its owned Docker resources. Default fixture
 mode needs no paid provider credential. `--no-open` writes a private launch file.
 
 The optional owner-authorized `/conversations/{session_id}/observations` endpoint
-exposes allowlisted Runtime/Harness events and separately filtered recorder usage.
-Default application construction leaves this endpoint disabled. Live follows
-observed activity; Inspect pauses following and replays retained observations.
-**Follow live** resumes. Provider particles represent activity, not individual
-tokens. Token totals are the latest recorder counts, independent of replay time;
+exposes allowlisted Runtime/Harness events, a bounded ordinary-output generation
+projection and separately filtered recorder usage. Default application
+construction leaves this endpoint disabled. Both views follow observed activity.
+**Pause** or scrubbing stops following; **Follow live** resumes. **Replay** plays
+retained arrival timings without another provider request. Provider particles
+return when actual output chunks arrive. A chunk may contain several tokens.
+Token totals are the latest run-wide recorder counts, independent of replay time;
 missing reports stay unknown and partial totals are marked as subtotals.
 
 For the configured local model, explicitly opt in:
@@ -41,9 +47,19 @@ For the configured local model, explicitly opt in:
 
 The local-model gateway reads its configured key file, uses literal loopback
 only and enforces a shared request allowance without automatic retries. The
-tested profile is `ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ`. The initial short prompt
-is chosen to fit this lab's existing 30-second execution deadline; slower or
-longer generations can time out. It does not change model-server settings.
+tested profile is `ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ`. The initial prompt asks
+for numbers 1–20; longer requests exceeded this lab's existing 30-second
+execution deadline during verification. `/no_think` is only a prompt hint, not
+a guarantee or a change to model-server settings. Slow generations can time out;
+the retained output then stays provisional and visibly interrupted.
+
+The shared generation panel emphasizes first visible output, chunk arrivals,
+the cumulative character curve and gaps between arrivals. These are client
+observations, including transport time; they do not expose GPU phases or exact
+per-token timing. The optional preview retains up to 4,096 ordinary-output
+characters and 512 timing samples per call, with explicit truncation. Reduced
+motion suppresses moving provider packets. Committed history starts collapsed
+so it does not displace the live animation.
 
 Both views show a bounded, owner-authorized user/assistant message preview read
 from the existing history endpoint after the turn settles. Tool arguments and
@@ -84,8 +100,9 @@ database, or running lab stack are required. All browser dependencies are local.
   durations, outcomes and token reports derive from the selected fixture.
 - Inspect timeline, selectable spans, component details, usage breakdown,
   event history, keyboard controls and reduced-motion handling.
-- A readable timeline if WebGL is unavailable. Browser graphics are illustrative;
-  particles are activity marks, not individual tokens or provider reasoning.
+- A readable generation chart and timeline if WebGL is unavailable. Browser
+  geometry is illustrative; provider particles follow output chunk arrivals,
+  not individual token boundaries or provider reasoning.
 
 ## Boundaries
 
@@ -118,8 +135,10 @@ read the same bounded run model. Lab event history is in memory: up to 32 runs,
 256 events each, with explicit truncation/missing-observation markers. Restarting
 the UI loses that trace. This is not persisted run history or a billing record.
 Runtime observations alone are best effort and cannot prove durable history or
-exact token-stream timing. No prompt, response, tool argument, provider URL or
-credential is exposed in the observation projection.
+exact token-stream timing. The metadata event list remains content-free. The
+separate owner-filtered generation projection contains bounded provisional
+ordinary response text; it excludes prompts, reasoning, tool arguments, provider
+URLs and credentials.
 
 The chosen design direction is a data terminal around a cinematic specimen.
 The maintainer's explicit reference overrides the design skill's usual limits
