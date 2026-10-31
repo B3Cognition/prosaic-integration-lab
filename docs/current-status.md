@@ -1,5 +1,42 @@
 # Current delivery status
 
+## Published timeout patch adoption — 2026-10-14
+
+The current manifest selects Core 0.4.1, Runtime 0.9.3/recorder 0.3.0 and Harness
+0.8.2/store 0.3.0. The Runtime patch fixes the negative provider timeout status
+that caused `store_corrupt` during conversation receipt persistence. All five
+public wheels were downloaded, verified by hash and audited in `.venv-latest`.
+The lab suite passes 955 tests with no skips. See the
+[patch verification ledger](verification/conversation-timeout-patch-2026-10-14.md)
+for exact release provenance and stack acceptance results.
+
+The current conversation gate contains 97 cases, including real ordinary and
+interpretation timeouts followed by replica replay/recovery without redispatch.
+Historical evidence below retains the versions and counts actually verified.
+
+## Published conversation SDK adoption — 2026-10-13
+
+The 2026-10-13 checkout selected Core 0.4.1, Runtime 0.9.0/recorder 0.3.0 and
+Harness 0.8.0/store 0.3.0 from actual PyPI downloads in
+[`dependencies/releases.json`](../dependencies/releases.json). Runtime publication
+[38391849639](https://github.com/B3Cognition/prosaic-runtime/actions/runs/38391849639)
+and Harness publication
+[38393899829](https://github.com/B3Cognition/prosaic-harness/actions/runs/38393899829)
+passed the platform gates, public-download hash checks and GitHub release steps.
+Core 0.4.1 is unchanged. The previous patch manifest is preserved as
+[`releases-lab-0.4.0.json`](../dependencies/releases-lab-0.4.0.json).
+
+Use the [installation and demos](../README.md#install-packages-for-an-embedding-service),
+[workflow construction guide](consume-native-workflows.md) and
+[conversation guide](conversations.md). The new pins enable the required
+conversation lane in ordinary released mode, including the installed Lab
+wheel/sdist smoke and both documented demos. Fresh local adoption and stack
+evidence is recorded in the
+[2026-10-13 ledger](verification/published-conversation-adoption-2026-10-13.md).
+Lab 0.5.0 itself has not been released by this adoption change.
+
+## Historical Lab 0.4.0 checkpoint
+
 Checkpoint: 2026-10-11. [Lab **0.4.0**](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
 is the current release at source `f47328d2d5a8e7253ad6cb199583f9f0d311fd60`.
 [Released-package run 38147824985](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38147824985),
@@ -57,7 +94,7 @@ tests. See the
 [adoption verification ledger](verification/native-adoption-2026-10-10.md)
 for source/archive/installed checks and original native receipts.
 
-The current recipe selects the seven-fix patch train: Core 0.4.1,
+The historical patch recipe selected the seven-fix train: Core 0.4.1,
 Runtime 0.8.1/recorder 0.2.1 and Harness 0.7.1/store 0.2.1. Its original
 SDK bytes passed fresh qualification. Lab
 [run 38080612477](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38080612477)
@@ -85,7 +122,7 @@ migration](persistence.md), [required release gates](release-gates.md) and
 [2026-10-09 release ledger](verification/release-train-2026-10-09.md) records
 the historical published baseline; its versions and measurements are preserved.
 
-## Published SDK patch train
+## Historical published SDK patch train
 
 All five distributions are published on PyPI and in their GitHub releases.
 Actual downloads from both channels match the original qualified wheel and

@@ -22,6 +22,27 @@ def send(chat,session,message_id,text,*,reference=None,status=200):
 def stats(chat):return httpx.get(chat.provider+'/stats',timeout=5).json()
 
 
+def test_provider_timeout_returns_failed_turn_and_replay_never_redispatches(chat_client, monkeypatch):
+    chat = chat_client
+    current = create(chat, key='timeout-regression')
+    attempts = []
+
+    class Opener:
+        def open(self, *args, **kwargs):
+            attempts.append(1)
+            raise TimeoutError('synthetic provider timeout')
+
+    monkeypatch.setattr('urllib.request.build_opener', lambda *args: Opener())
+    failed = send(chat, current, 'timeout-message', 'Hello')
+    assert failed['status'] == 'failed'
+    assert failed['failureCode'] == 'timeout'
+    assert send(chat, current, 'timeout-message', 'Hello') == failed
+    recovered = chat.client.post('/conversations/' + current['sessionId'] + '/recover',
+        json={}, headers=HEADERS)
+    assert recovered.status_code == 200 and recovered.json() == failed
+    assert attempts == [1]
+
+
 def test_second_result_targets_displayed_order_then_requires_current_approval(chat_client):
     chat=chat_client;start=stats(chat)
     current=create(chat)

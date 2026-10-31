@@ -27,7 +27,7 @@ def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
 
 def test_conversation_is_required_and_cannot_reuse_legacy_test_counts():
     from lab_runner.gates import COUNTS
-    assert COUNTS['conversation']==95
+    assert COUNTS['conversation']==97
     item=receipt();item.update(mode='conversation',test_count=COUNTS['conversation'],dependency_mode='candidate',
         candidate_manifest_sha256='3'*64,candidate_lineage_sha256='4'*64)
     validate(item,'conversation',16,candidate=True,manifest_sha='3'*64,lineage_sha='4'*64)

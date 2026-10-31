@@ -1,15 +1,20 @@
 # Conversation adoption
 
-Lab 0.5.0's conversation candidate uses Runtime 0.9.0/recorder 0.3.0 and
-Harness 0.8.0/store 0.3.0, with Core 0.4.1. Exact source
+The active released manifest uses published Runtime 0.9.3/recorder 0.3.0 and
+Harness 0.8.2/store 0.3.0, with Core 0.4.1. Runtime 0.9.3 fixes durable provider
+timeout receipts; see the [patch verification](verification/conversation-timeout-patch-2026-10-14.md).
+Follow the
+[published installation recipe](../README.md#install-packages-for-an-embedding-service)
+and [fresh adoption evidence](verification/published-conversation-adoption-2026-10-13.md).
+Lab 0.5.0's earlier conversation candidate at exact source
 `34f291e8c7f7dd3809767c2fbf518b55e50204d6` passed all four Linux
 AMD64/ARM64 × PostgreSQL 16/18 cells in
 [run 38212165309](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/38212165309):
 1,395 acceptance executions, including 475 conversation checks, zero failures
 or skips and verified cleanup. Read the
 [original qualification evidence](verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12).
-The released manifest is unchanged; its SDKs do not provide this API. Publication
-and ordinary public-index adoption remain pending. Actual local Qwen checks
+Those receipts retain their original candidate source and artifact identities.
+Actual local Qwen checks
 passed the complete journey with balanced chat/interpretation and an explicitly
 approved strong workflow tier, plus quoted-approval denial and duplicate replay.
 Read the [live evidence](verification/local-conversation-2026-10-12.md) for the
@@ -21,6 +26,14 @@ model/tool execution. Ordinary conversation requires no workflow graph. Approved
 host workflows can separately supply selections, review and confirmation.
 
 ## Build a small assistant
+
+For interactive use of the installed Lab service, open `/chat` and connect with
+an authorized API token. The page reads public history and uses the same message,
+revision and interaction-reference contract described below. The
+[browser launcher](../README.md#converse-in-the-browser) creates an owned local
+PostgreSQL fixture, opens a connected page and keeps it running until Ctrl+C.
+`--live-local` explicitly enables the approved local Qwen profile with a shared
+bounded request allowance; the default mode uses scripted synthetic responses.
 
 For an in-process prototype, construct the public SDK directly. The endpoint,
 agent, scope and policy are trusted application configuration. Sending contacts
@@ -139,10 +152,12 @@ fixture-specific host rule is explicit; applications supply their own versioned
 the ordinary assistant has registered tools.
 
 Reuse the same `messageId`, exact text and original revision to replay a request.
-A changed body conflicts. Refreshing status never infers approval. If a worker
-stops after a workflow command may have run, `/recover` returns
-`needsResolution`; an operator must reconcile the actual workflow/effect ledger.
-Recovery does not resume that command automatically.
+A changed body conflicts. Refreshing status never infers approval. Harness 0.8.2
+can reconcile a command with an exact saved decision identity, choice, response
+and original revision when the owned workflow reached a known waiting or terminal
+state. If that evidence is missing or a command is merely prepared, `/recover`
+returns `needsResolution`; an operator must reconcile the actual workflow/effect
+ledger. Recovery never resumes a command or repeats an effect automatically.
 
 If the host committed a workflow-start claim but lost acknowledgement before an
 authoritative run appeared, status and recovery explicitly show `needsResolution`.
@@ -226,17 +241,17 @@ records actual Qwen results separately from the synthetic platform qualification
 
 ## Run the installed Lab fixture
 
-After curating all five genuine successful SDK runs into a separate manifest:
+Install the five published SDK wheels and locked Lab dependencies using the
+[README recipe](../README.md#try-the-native-workflow), then build a released
+consumer and run the fixture:
 
 ```sh
-conversation_image_id=$(.venv/bin/python scripts/build_consumer.py \
-  --manifest .lab/conversation-candidates.json --dependency-mode candidate \
-  --tag prosaic-integration-lab:conversation-candidate)
-.venv/bin/python -m lab_runner demo --mode conversation --candidate \
-  --candidate-manifest .lab/conversation-candidates.json \
+conversation_image_id=$(.venv-public/bin/python scripts/build_consumer.py \
+  --manifest dependencies/releases.json --dependency-mode released \
+  --tag prosaic-integration-lab:dev)
+.venv-public/bin/python -m lab_runner demo --mode conversation \
   --consumer-image "$conversation_image_id" --postgres-version 16
-.venv/bin/python -m lab_runner test --mode conversation --candidate \
-  --candidate-manifest .lab/conversation-candidates.json \
+.venv-public/bin/python -m lab_runner test --mode conversation \
   --consumer-image "$conversation_image_id" --postgres-version 18
 ```
 
@@ -257,7 +272,8 @@ the SDK engine or normal journey output.
 The exact candidate passed installed SDK, workflow-handoff, worker-loss,
 PostgreSQL 16/18 and Linux AMD64/ARM64 gates, including an actual extracted-sdist
 stack on ARM64/16. That platform receipt qualifies the exact source above;
-subsequent CLI and prompt fixes have separate local evidence. Public-index
-adoption must audit actual published bytes and rerun released-mode gates.
+subsequent CLI and prompt fixes have separate local evidence. Fresh public-index
+adoption audits actual published bytes and reruns released-mode gates in the
+[2026-10-13 ledger](verification/published-conversation-adoption-2026-10-13.md).
 Actual local Qwen evidence is linked above; hosted qualification remains pending.
 Missing infrastructure is a failure, never a successful skip.

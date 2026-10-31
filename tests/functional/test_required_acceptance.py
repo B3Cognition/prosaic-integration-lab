@@ -73,7 +73,7 @@ def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_
     command=selected['run'].replace('.venv/bin/python',shlex.quote(sys.executable))
     result=subprocess.run(['/bin/bash','-e','-c',command],cwd=root,env=environment,capture_output=True,timeout=15)
     assert result.returncode==0,result.stderr.decode()
-    assert output.read_text()=='enabled=false\n'
+    assert output.read_text()=='enabled=true\n'
 
 
 def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):

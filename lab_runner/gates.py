@@ -4,19 +4,20 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':95}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
 
 
 def supports_conversation(manifest):
     """Staged activation; old released SDKs cannot certify this new capability."""
-    expected={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
-        'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+    expected={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.3','b3-prosaic-runtime-postgres':'0.3.0',
+        'b3-prosaic-harness':'0.8.2','b3-prosaic-harness-postgres':'0.3.0'}
     if not (type(manifest) is dict and type(manifest.get('artifacts')) is list and
         len(manifest['artifacts'])==len(expected) and all(type(item) is dict for item in manifest['artifacts']) and
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
-    if actual==expected:return True
+    previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
+    if actual in (expected,previous):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -32,6 +33,8 @@ def required_modes(*,candidate,manifest):
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
     'conversation':{
+        'test_real_provider_timeout_is_durable_across_replica_replay_and_recovery[False]':'provider_timeout',
+        'test_real_provider_timeout_is_durable_across_replica_replay_and_recovery[True]':'provider_timeout',
         'test_owned_conversation_demo_uses_separate_frozen_usage':'conversation_demo',
         'test_offered_selection_survives_fresh_worker_and_quoted_approval_dispatches_no_effect':'interaction',
         'test_failed_user_correction_survives_without_partial_assistant_history':'failed_correction',

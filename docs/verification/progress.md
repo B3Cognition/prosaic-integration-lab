@@ -1,5 +1,16 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Published SDK adoption checkpoint — 2026-10-13
+
+The active manifest now selects actual published Core 0.4.1, Runtime 0.9.0/
+recorder 0.3.0 and Harness 0.8.0/store 0.3.0 wheels. The previous manifest is
+preserved as `dependencies/releases-lab-0.4.0.json`. Fresh ordinary-index
+adoption, unit/functional tests and released-mode stack evidence are recorded
+in [the separate adoption ledger](published-conversation-adoption-2026-10-13.md).
+The checkpoints below retain their original candidate and release evidence.
+
+## Historical conversation candidate checkpoint
+
 Conversation adoption is tracked separately in
 [conversation-adoption-2026-10-11.md](conversation-adoption-2026-10-11.md).
 Lab 0.5.0 candidate source `34f291e8c7f7dd3809767c2fbf518b55e50204d6`

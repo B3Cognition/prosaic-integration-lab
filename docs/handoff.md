@@ -1,5 +1,30 @@
 # Codex handoff
 
+## Published timeout patch adoption — 2026-10-14
+
+The active manifest now pins published Runtime 0.9.3 and Harness 0.8.2, retaining
+Core 0.4.1 and both PostgreSQL adapters at 0.3.0. Use `.venv-latest` for this
+checkout's audited installed family; `.venv-published` preserves the earlier
+demo environment. The full local suite passes 955 tests. Required conversation
+acceptance now has 97 cases, adding real provider timeouts for ordinary and
+interpretation turns with no redispatch on replica replay/recovery.
+
+Read the [patch ledger](verification/conversation-timeout-patch-2026-10-14.md)
+for exact publication, manifest hashes and acceptance results. Older checkpoints
+retain their original versions and counts.
+
+## Published SDK adoption — 2026-10-13
+
+Runtime 0.9.0/recorder 0.3.0 and Harness 0.8.0/store 0.3.0 are now published.
+The active release manifest selects their exact verified PyPI wheels alongside
+unchanged Core 0.4.1. The former patch manifest is preserved in
+`dependencies/releases-lab-0.4.0.json`. Ordinary released acceptance now selects
+the conversation lane without candidate flags. Start with the README's assistant,
+workflow and approved-conversation recipes, and read the separate
+[fresh adoption ledger](verification/published-conversation-adoption-2026-10-13.md).
+Lab release and hosted-provider qualification are separate remaining work.
+The checkpoints below preserve their original publication state and evidence.
+
 ## Conversation adoption checkpoint — 2026-10-12
 
 Lab target 0.5.0 implements authenticated bounded conversations, a fixed host-only
