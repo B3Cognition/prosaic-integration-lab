@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 0.8.0 — 2026-10-31
+
+- Add the source/complete-archive execution Observatory: 3D Live and Inspect
+  views, Blender-authored assets, owner-authorized message previews and bounded
+  Runtime/Harness observations with separately qualified provider usage counts.
+- Preserve unresolved workflow-start intent in the observations API, return
+  proper static-resource 404s, and require complete source assets, licenses and
+  texture/model provenance in distribution qualification.
+- Preserve Runtime 0.9.8, Harness 0.9.4, both adapter pins and existing Explorer,
+  execution, authorization, accounting and recovery behavior.
+
 - Update SHA-pinned GitHub Actions to stable Node 24 releases, removing the
   deprecated action-runtime warnings while retaining the acceptance matrix,
   full checkout history, read-only permissions and artifact retention settings.

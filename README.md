@@ -41,10 +41,11 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-**Lab [0.7.0](docs/release-0.7.0.md)** consumes **Runtime 0.9.8**, Core 0.4.1,
-Harness 0.9.4, Runtime recorder 0.3.0 and Harness store 0.4.0. It includes Explorer,
-the guided onboarding and the first-workflow example. Earlier release artifacts
-retain their original bytes.
+This checkout targets **[Lab 0.8.0](docs/release-0.8.0.md)**, adding the execution
+Observatory while retaining **Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4,
+Runtime recorder 0.3.0 and Harness store 0.4.0. Explorer, guided onboarding and
+the first-workflow example remain available. Earlier release artifacts retain
+their original bytes.
 
 After the [quickstart installation](docs/quickstart.md#setup-once), open the
 visual guide with `python -m lab_runner.explore`. The default launches documentation
@@ -81,8 +82,8 @@ small studies do not establish general model quality rankings.
 
 The source-only [execution Observatory](prototypes/observatory/README.md) adds a
 3D Live view and an Inspect timeline for actual conversation/provider/tool events.
-Use its owned-stack launcher from a checkout or complete source archive. It is a
-development addition; the published 0.7.0 release described above is unchanged.
+Use its owned-stack launcher from a checkout or complete source archive. The
+Observatory is new in 0.8.0; published 0.7.0 artifacts remain unchanged.
 
 Start with [common first-run problems](docs/quickstart.md#when-something-goes-wrong).
 Then use the [consumer guide](docs/consume-native-workflows.md),
