@@ -25,5 +25,6 @@ prune frontend/explorer/node_modules
 prune frontend/explorer/test-results
 prune frontend/explorer/playwright-report
 recursive-include lab_runner/explore/web *
+recursive-include prototypes/observatory *
 recursive-include tests *.py *.json *.yml *.md
 global-exclude __pycache__ *.py[cod]

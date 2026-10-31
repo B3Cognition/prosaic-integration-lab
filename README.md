@@ -79,6 +79,11 @@ small studies do not establish general model quality rankings.
 
 ## Troubleshooting and deeper examples
 
+The source-only [execution Observatory](prototypes/observatory/README.md) adds a
+3D Live view and an Inspect timeline for actual conversation/provider/tool events.
+Use its owned-stack launcher from a checkout or complete source archive. It is a
+development addition; the published 0.7.0 release described above is unchanged.
+
 Start with [common first-run problems](docs/quickstart.md#when-something-goes-wrong).
 Then use the [consumer guide](docs/consume-native-workflows.md),
 [unified pool contracts](docs/unified-runtime-pools.md),

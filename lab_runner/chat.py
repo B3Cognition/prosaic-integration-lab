@@ -131,7 +131,7 @@ class ModelGateway:
         self.client.close()
 
 
-def main(argv=None):
+def main(argv=None, *, application_factory=None, landing_path='/chat'):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--live-local', action='store_true', help='explicitly use approved local Qwen')
     parser.add_argument('--runtime-config', type=Path, default=ROOT/'configs/runtime-local.example.yml')
@@ -139,13 +139,18 @@ def main(argv=None):
     parser.add_argument('--max-calls', type=int, default=32)
     parser.add_argument('--postgres-version', type=int, choices=(16,18), default=16)
     parser.add_argument('--no-open', action='store_true')
+    parser.add_argument('--consumer-image', help='immutable, provenance-checked consumer image')
+    parser.add_argument('--fixture-latency',type=float,default=0,help='owned synthetic provider delay, 0–5 seconds')
     args = parser.parse_args(argv)
+    if (type(args.max_calls) is not int or not 1<=args.max_calls<=128 or
+            not 0<=args.fixture_latency<=5):
+        parser.error('bounded request allowance and fixture latency required')
     sys.path.insert(0, str(ROOT/'src'))
     from contextlib import ExitStack
     from prosaic_runtime import RuntimeConfig
     from prosaic_integration_lab.app import create_app
     import uvicorn
-    stack = OwnedStack(postgres_major=args.postgres_version, conversation=True)
+    stack = OwnedStack(postgres_major=args.postgres_version, conversation=True,consumer_image=args.consumer_image)
     try:
         with ExitStack() as resources:
             gateway = None
@@ -169,7 +174,8 @@ def main(argv=None):
             for tenant in config['conversation']['tenants'].values():
                 tenant['binding_version'] = 'chat-' + ('local' if gateway else 'synthetic') + '-' + tenant['binding_version']
             if not gateway:
-                httpx.post(stack.manifest['endpoints']['model']+'/control', json={'scenario':'conversation'}, trust_env=False).raise_for_status()
+                httpx.post(stack.manifest['endpoints']['model']+'/control', json={'scenario':'conversation',
+                    'maximum_calls':args.max_calls,'provider_latency_s':args.fixture_latency},trust_env=False).raise_for_status()
             stack._secret('chat-service.json', json.dumps(config))
             token = next(key for key,value in config['principals'].items() if value['actor_id']=='alice')
             with socket.socket() as listener:
@@ -179,7 +185,7 @@ def main(argv=None):
                 previous_config = os.environ.get('LAB_CONFIG')
                 os.environ['LAB_CONFIG'] = str(stack.secrets/'chat-service.json')
                 try:
-                    app = create_app()
+                    app = application_factory() if application_factory is not None else create_app()
                 finally:
                     if previous_config is None:
                         os.environ.pop('LAB_CONFIG', None)
@@ -188,9 +194,9 @@ def main(argv=None):
                 label = ('Local Qwen · ' + profile.model + ' · ' + str(args.max_calls) + ' request allowance' if gateway else
                     'Synthetic fixture · scripted responses') + ' · synthetic workflow tools'
                 app = Bootstrap(app, token=token, label=label, origin=origin)
-                launch = origin + '/chat#connect=' + app.code
+                launch = origin + landing_path + '#connect=' + app.code
                 stack._secret('chat-launch.json', json.dumps({'url':launch,'owner':stack.owner}))
-                print('Chat: ' + origin + '/chat', flush=True)
+                print(('Chat: ' if landing_path == '/chat' else 'Observatory: ') + origin + landing_path, flush=True)
                 print('Connection file: ' + str(stack.secrets/'chat-launch.json'), flush=True)
                 print(label + '\nPress Ctrl+C to stop and clean up the owned stack.', flush=True)
                 if not args.no_open:

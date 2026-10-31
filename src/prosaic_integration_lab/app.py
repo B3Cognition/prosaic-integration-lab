@@ -69,7 +69,7 @@ async def conversation_body(request,model=None):
         raise HTTPException(422,'invalid_request') from None
 
 
-def create_app():
+def create_app(*, observations=None):
     config = load_config()
     metrics=Metrics(config.get('metrics_token'))
     authenticator = make_authenticator(config)
@@ -82,6 +82,11 @@ def create_app():
             except Exception:
                 raise RuntimeError('lab startup configuration failed') from None
             app.state.execution = execution
+            if observations is not None:
+                from prosaic_runtime import ProsaicRuntime
+                if 'observer_v1' not in ProsaicRuntime.capabilities:
+                    raise RuntimeError('installed Runtime observation capability unavailable')
+                execution.observations = observations
             try:
                 await asyncio.to_thread(execution.ready)
                 metrics.ready=1
@@ -98,6 +103,9 @@ def create_app():
 
     app.add_middleware(HttpGuard,authenticator=authenticator,**config.get('http_bounds',{}))
     app.add_middleware(Observability,metrics=metrics,operator_token=config.get('metrics_token'))
+    if observations is not None:
+        from .run_observations import install_observation_routes
+        install_observation_routes(app, observations)
 
     @app.get('/chat')
     def chat_page():

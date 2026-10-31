@@ -125,6 +125,7 @@
     "src/prosaic_integration_lab/oidc.py",
     "src/prosaic_integration_lab/proposals.py",
     "src/prosaic_integration_lab/retention.py",
+    "src/prosaic_integration_lab/run_observations.py",
     "src/prosaic_integration_lab/tool_journal.py",
     "src/prosaic_integration_lab/views.py",
     "lab_runner/agent_quality.py",

@@ -132,6 +132,10 @@ def wheel_identity(path):
         return {'name':info['Name'],'version':info['Version'],'files':files}
 
 
+def verify_observatory_source(source):
+    return _helper('observatory_source_smoke').verify(source)
+
+
 PUBLIC_CONVERSATION='''
 from prosaic_harness import Conversation, ConversationBindings, ConversationPolicy, ConversationScope, MemorySessionStore
 from prosaic_runtime import RunPolicy, ProsaicRuntime
@@ -248,6 +252,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                      'assets/conversation/agents/assistant.md','scripts/conversation_conformance.py',
                      'tests/acceptance/test_conversation_journey.py','dependencies/public-build-inputs.json'):
             if not (source/name).is_file():raise ValueError('incomplete conversation source distribution')
+        verify_observatory_source(source)
         stage='sdist_build';built=directory/'rebuilt';built.mkdir()
         run([python,'-I','-m','build','--wheel','--outdir',built,source],directory=directory,environment=environment)
         choices=list(built.glob('*.whl'))
@@ -255,6 +260,9 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             raise ValueError('source build differs from Lab version')
         stage='sdist_consumer';second=directory/'sdist-consumer';second.mkdir()
         source_python=consume(choices[0],directory=second,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
+        stage='sdist_observatory'
+        run([source_python,'-m','pytest','-q','-p','no:cacheprovider',
+            'tests/unit/test_observatory_launcher.py'],directory=source,environment=environment)
         if run_stack:
             stage='sdist_image_build'
             image=run([source_python,source/'scripts/build_consumer.py','--manifest',snapshot,
@@ -287,7 +295,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             wheel_sha256=hashlib.sha256(original_wheel.read_bytes()).hexdigest(),
             sdist_sha256=hashlib.sha256(original_sdist.read_bytes()).hexdigest(),
             installed_payloads_verified=True,isolated_imports_verified=True,pip_check_passed=True,
-            public_construction_verified=True,sdist_assets_verified=True)
+            public_construction_verified=True,sdist_assets_verified=True,observatory_source_verified=True)
     except Exception as error:
         result.update(failure='distribution_failed',failure_stage=stage)
         if stage in {'sdist_demo','sdist_acceptance'}:
