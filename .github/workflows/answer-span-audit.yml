@@ -97,7 +97,9 @@ jobs:
           .venv-audit/bin/python scripts/verify_answer_span_runtime.py --wheel bundle/rebuilt-runtime/*.whl --export reports/audit-ci/runtime-rebuilt.json
       - name: Install the explicit candidate family and audit installed payloads
         run: |
-          .venv-audit/bin/python - <<'PY'
+          python -m venv .venv-candidate
+          .venv-candidate/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv-candidate/bin/python - <<'PY'
           import hashlib, json, pathlib, shutil, sys
           sys.path.insert(0,'src')
           from prosaic_integration_lab.dependencies import cache_directory
@@ -118,25 +120,26 @@ jobs:
           data['qualification'] = 'Unpublished exact-source Runtime candidate; other SDK bytes remain released. No publication authorized.'
           pathlib.Path('reports/audit-ci/sdk-manifest.json').write_text(json.dumps(data,indent=2)+'\n')
           PY
-          .venv-audit/bin/python scripts/install_dependencies.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
-          .venv-audit/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
-          .venv-audit/bin/python -m pip install --no-deps bundle/lab/*.whl
-          .venv-audit/bin/python -m pip check
+          .venv-candidate/bin/python scripts/install_dependencies.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          .venv-candidate/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          .venv-candidate/bin/python -m pip install --no-deps bundle/lab/*.whl
+          .venv-candidate/bin/python -m pip check
+          echo "$PWD/.venv-candidate/bin" >> "$GITHUB_PATH"
       - name: Execute candidate regressions and require complete executed coverage
         run: |
-          .venv-audit/bin/python scripts/regression_profiles.py --profile candidate --output reports/audit-ci/candidate.json
-          .venv-audit/bin/python scripts/regression_profiles.py --coverage reports/audit-ci/all.json reports/audit-ci/released.json reports/audit-ci/candidate.json --output reports/audit-ci/coverage.json
+          .venv-candidate/bin/python scripts/regression_profiles.py --profile candidate --output reports/audit-ci/candidate.json
+          .venv-candidate/bin/python scripts/regression_profiles.py --coverage reports/audit-ci/all.json reports/audit-ci/released.json reports/audit-ci/candidate.json --output reports/audit-ci/coverage.json
       - name: Qualify installed direct and rebuilt wheels without live inference
         run: |
           for case in omitted complete unavailable unknown-usage; do
-            .venv-audit/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-direct-$case" > "reports/audit-ci/direct-$case.json"
+            .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-direct-$case" > "reports/audit-ci/direct-$case.json"
           done
-          .venv-audit/bin/python -m pip install --no-deps --force-reinstall bundle/rebuilt-runtime/*.whl bundle/rebuilt-lab/*.whl
-          .venv-audit/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
+          .venv-candidate/bin/python -m pip install --no-deps --force-reinstall bundle/rebuilt-runtime/*.whl bundle/rebuilt-lab/*.whl
+          .venv-candidate/bin/python scripts/audit_install.py --manifest reports/audit-ci/sdk-manifest.json --wheel-dir .cache/audit-sdk
           for case in omitted complete unavailable unknown-usage; do
-            .venv-audit/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-rebuilt-$case" > "reports/audit-ci/rebuilt-$case.json"
+            .venv-candidate/bin/python -I -m lab_runner.memory_benchmark audit-fixture --case "$case" --output "$RUNNER_TEMP/audit-rebuilt-$case" > "reports/audit-ci/rebuilt-$case.json"
           done
-          .venv-audit/bin/python - <<'PY'
+          .venv-candidate/bin/python - <<'PY'
           import json
           for origin in ('direct','rebuilt'):
               for case,outcome,calls,held in [('omitted','findings',2,0),('complete','clear',2,0),('unavailable','clear',2,0),('unknown-usage','unresolved',1,65536)]:

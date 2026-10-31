@@ -126,6 +126,19 @@ def test_audit_ci_executes_both_profiles_and_checks_coverage_and_installed_fixtu
                for step in job['steps'] if 'uses' in step)
 
 
+def test_candidate_ci_has_a_fresh_environment_without_released_executable_caches():
+    import yaml
+    job = yaml.safe_load((ROOT/'.github/workflows/answer-span-audit.yml').read_text())['jobs']['audit']
+    step = next(s for s in job['steps'] if s.get('name')=='Install the explicit candidate family and audit installed payloads')
+    assert 'python -m venv .venv-candidate' in step['run']
+    assert '.venv-candidate/bin/python scripts/install_dependencies.py' in step['run']
+    assert '.venv-candidate/bin/python scripts/audit_install.py' in step['run']
+    candidate = next(s for s in job['steps'] if s.get('name')=='Execute candidate regressions and require complete executed coverage')
+    assert '.venv-candidate/bin/python scripts/regression_profiles.py --profile candidate' in candidate['run']
+    installed = next(s for s in job['steps'] if s.get('name')=='Qualify installed direct and rebuilt wheels without live inference')
+    assert '.venv-audit/bin/python' not in installed['run']
+
+
 def test_existing_ci_assigns_candidate_only_tests_without_dropping_other_assertions():
     import yaml
     for name in ['required-acceptance.yml', 'sue-review.yml']:
