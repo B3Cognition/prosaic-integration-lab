@@ -218,8 +218,9 @@ def _verify_trace(evidence,packet,request,directory):
         # The public adapter replaces callback metadata when a native policy
         # failure wins. Such a capture is never accepted proof; a separate seal
         # preserves its bytes for zero-dispatch inspection of the held run.
-        failed_policy=(result['exit_code']!=0 and role not in outputs and meta.get('failure_reason') in
-            {'usage_unknown','token_limit','provider_request_limit','adapter_timeout','adapter_cancelled'})
+        failed_policy=(result['exit_code']!=0 and role not in outputs and
+            (result['timed_out'] is True or meta.get('failure_reason') in
+             {'usage_unknown','token_limit','provider_request_limit','adapter_timeout','adapter_cancelled','cancelled'}))
         require(META in meta or failed_policy,'missing native raw transport binding')
         record=_record(directory,role)
         _verify_record(record,role,packet,request,ledger=ledger if role==ROLES[1] else None,

@@ -140,6 +140,37 @@ def test_wrong_draft_part_id_cannot_become_an_accepted_native_audit(tmp_path):
         assert len(provider.requests)==2
 
 
+@pytest.mark.parametrize('failure',['deadline','cancelled'])
+def test_terminal_adapter_capture_can_be_inspected_without_acceptance_or_dispatch(failure,tmp_path):
+    from copy import deepcopy
+    workflow=api();p=packet();source=ledger_wire(contracts,p);ledger=contracts.resolve_ledger(source,p)
+    with Provider([source,audit_wire(contracts,p,ledger)]) as provider:
+        result=workflow.run_audit(provider.config,p,tmp_path/'terminal')
+        evidence=deepcopy(result['evidence'])
+        # Public adapter terminal receipts can replace callback metadata after
+        # a successful native capture. Model them without patching SDK engines.
+        evidence['checkpoint']['outputs']={}
+        evidence['checkpoint']['status']='blocked'
+        evidence['receipts']=evidence['receipts'][:1]
+        receipt=evidence['receipts'][0]['result']
+        receipt['metadata'].pop(workflow.META)
+        receipt.update(exit_code=1,stdout='',timed_out=failure=='deadline')
+        receipt['metadata'].pop('failure_reason',None)
+        if failure=='cancelled':receipt['metadata']['failure_reason']='cancelled'
+        request=workflow._request(provider.config,p)
+        raw=(tmp_path/'terminal/transport/source-obligations.json').read_bytes()
+        workflow._verify_trace(evidence,p,request,tmp_path/'terminal')
+        assert evidence['checkpoint']['outputs']=={} and len(provider.requests)==2
+        assert raw==(tmp_path/'terminal/transport/source-obligations.json').read_bytes()
+        # Neither a successful receipt nor an unrecognized failure may use
+        # the terminal-inspection exception to bypass its native binding.
+        receipt.update(exit_code=0,timed_out=False)
+        with pytest.raises(ValueError):workflow._verify_trace(evidence,p,request,tmp_path/'terminal')
+        receipt.update(exit_code=1)
+        receipt['metadata']['failure_reason']='unrecognized'
+        with pytest.raises(ValueError):workflow._verify_trace(evidence,p,request,tmp_path/'terminal')
+
+
 @pytest.mark.parametrize('case',['omitted','complete','unavailable','unknown-usage'])
 def test_explicit_resolved_fixture_cli_case(case,tmp_path):
     assert (Path(__file__).parents[2]/'lab_runner/answer_span_refs/fixture.py').is_file(),'resolved fixture is missing'
