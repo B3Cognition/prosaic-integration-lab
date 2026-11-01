@@ -72,3 +72,8 @@ demos. Publication uses the original successful CI wheel and source archive,
 with checksums and a verification record binding them to their exact source,
 SDK manifest and safe receipts. Qualification uses synthetic providers and makes
 no new live-provider or model-quality claim.
+
+Conversation acceptance allows up to 15 minutes for its provider-timeout,
+worker-loss and lease-recovery cases, with a separate bounded stack-lifecycle
+allowance. A deadline still fails qualification and safe receipts identify it
+as `execution_timeout`; required counts, assertions and cleanup remain enforced.

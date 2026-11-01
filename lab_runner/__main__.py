@@ -291,7 +291,10 @@ def main():
             test = subprocess.run([sys.executable, '-m', 'pytest', *files, '-q',
                 f'--junitxml={stack.directory / "junit.xml"}'], cwd=ROOT,
                 env={**os.environ, 'LAB_ACCEPTANCE_CONFIG': str(config_path)}, capture_output=True, text=True,
-                timeout=600 if args.mode in {'lago','native','legacy-upgrade','qualification','conversation'} else 180)
+                # Conversation recovery deliberately waits through provider
+                # deadlines, worker loss and lease expiry. Shared AMD64 CI
+                # runners can exceed ten minutes without completing the suite.
+                timeout=900 if args.mode=='conversation' else 600 if args.mode in {'lago','native','legacy-upgrade','qualification'} else 180)
             result['test_returncode'] = test.returncode
     except Exception as error:
         result['error'] = type(error).__name__

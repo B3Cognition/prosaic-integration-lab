@@ -30,3 +30,16 @@ Release review: no Critical/Important findings. Fixed the reproduced Minor
 paused-replay usage cache bug with a watched failing/passing Node regression;
 recorder totals and subtotal qualification now refresh independently of cursor
 motion. The updated source requires a fresh complete four-cell qualification.
+
+Initial versioned CI qualified ARM64/PostgreSQL 18 but both AMD64 conversation
+lanes hit the runner's fixed 600-second subprocess deadline after their other
+eight lanes passed. Cleanup was verified. Allow a bounded 900-second
+conversation suite, 1,200 seconds for its wrapper including stack lifecycle,
+and 65 minutes for the complete matrix job. Safe exports now identify execution
+timeouts without copying exception text or captured output. Watched regressions
+cover a completed suite beyond ten minutes, a still-failing timeout, cleanup,
+wrapper headroom and closed failure diagnostics. All four cells must qualify
+the resulting new source; no assertion or required case count is removed.
+Focused read-only review of this deadline change found no Critical/Important
+blockers; all 46 affected runner/gate regressions passed independently. Full
+local regressions and the new exact-source matrix remain required.

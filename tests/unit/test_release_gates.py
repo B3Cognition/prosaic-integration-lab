@@ -71,6 +71,14 @@ def test_conversation_failures_export_only_fixed_phase_codes():
     assert 'PRIVATE' not in str(safe)
 
 
+@pytest.mark.parametrize('error,code', [('TimeoutExpired','execution_timeout'),('PRIVATE_TOKEN',None)])
+def test_execution_timeout_is_diagnostic_and_cannot_pass_or_leak_errors(error,code):
+    item=receipt();item.update(error=error)
+    safe=export(item)
+    assert safe['passed'] is False and safe.get('failure_code')==code
+    assert 'PRIVATE' not in json.dumps(safe)
+
+
 def test_conversation_effect_and_lease_failures_have_fixed_public_codes():
     item=receipt();item.update(mode='conversation',passed=False,test_returncode=1,failed_tests=[
         'test_approval_handoff_loss_preserves_effect_journal_without_resume[after-committed-effect]',

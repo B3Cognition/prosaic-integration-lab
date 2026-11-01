@@ -17,6 +17,8 @@
 - Bound owner-only output observations and preserve interrupted/truncated
   uncertainty. Support an explicit one-request launcher allowance while keeping
   ordinary per-turn reservations independent of cumulative session budgets.
+- Allow bounded execution headroom for the full conversation recovery suite on
+  shared CI runners and identify deadline failures in safe receipts.
 
 ## 0.8.0 — 2026-10-31
 
