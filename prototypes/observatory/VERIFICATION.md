@@ -1,5 +1,9 @@
 # Observatory prototype verification — 2026-10-30
 
+For the unreleased actual-stream generation update, see the
+[2026-10-31 generation ledger](../../docs/verification/observatory-generation-2026-10-31.md).
+It records real chunk timings, both views, review fixes and bounded Qwen tests.
+
 For the current-main port and release checks, see the
 [2026-10-31 port ledger](../../docs/verification/observatory-main-port-2026-10-31.md).
 The earlier SDK/source checkpoints below remain historical evidence.

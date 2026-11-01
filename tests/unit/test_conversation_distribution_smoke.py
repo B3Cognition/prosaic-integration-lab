@@ -100,7 +100,8 @@ def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(t
 
 
 @pytest.mark.parametrize('complete_context_evidence',[False,True])
-def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monkeypatch,complete_context_evidence):
+@pytest.mark.parametrize('stack_elapsed',[0,950])
+def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monkeypatch,complete_context_evidence,stack_elapsed):
     from lab_runner.gates import CONTEXT_TRAIN
     module=implementation()
     lineage={'version':1,'candidates':[]}  # structural process-double evidence only
@@ -133,6 +134,9 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
         if any(str(arg).endswith('build_consumer.py') for arg in argv):return (identifier+'\n').encode()
         assert '--context-assembly' in argv
         kind='demo' if 'demo' in argv else 'conversation'
+        if kind=='conversation' and kwargs['timeout']<stack_elapsed:
+            import subprocess
+            raise subprocess.TimeoutExpired(argv,kwargs['timeout'],output='PRIVATE_TOKEN')
         receipt={'owner':'a'*32,'mode':kind,'passed':True,'cleanup':'verified','test_returncode':0,
             'test_count':103 if complete_context_evidence else 97,'skipped':0,'failed_tests':[],
             'context_assembly':complete_context_evidence,'host_architecture':'arm64','dependency_mode':'candidate',
@@ -145,6 +149,8 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'run',process)
     result=module.verify(wheel,sdist,manifest,candidate=True,run_stack=True)
     assert result['passed'] is complete_context_evidence, json.dumps(result)
+    assert result['owned_temporary_cleanup'] is True
+    assert 'PRIVATE' not in json.dumps(result)
     if not complete_context_evidence:assert result['failure_stage']=='sdist_acceptance', result
 
 

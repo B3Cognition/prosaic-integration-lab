@@ -3,10 +3,20 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
   const $=selector=>document.querySelector(selector);
   let token='',context=null,timer=null,generation=0;
   const hosted=location.pathname.startsWith('/observatory/');
+  function disconnected() {
+    token='';clearInterval(timer);
+    if(context)context.following=false;
+    $('#lab-start').disabled=true;$('#lab-run').hidden=true;$('#lab-connect').hidden=false;
+  }
   async function api(path,options={}) {
     const response=await fetch(path,{...options,credentials:'same-origin',cache:'no-store',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...options.headers}});
-    if(!response.ok)throw Error('Lab request returned HTTP '+response.status+'.');
+    if(!response.ok){
+      const error=Error(response.status===401?'Connection rejected. Reconnect with a valid Lab API token or a fresh launcher link.':'Lab request returned HTTP '+response.status+'.');
+      error.authentication=response.status===401;
+      if(error.authentication)disconnected();
+      throw error;
+    }
     return response.json();
   }
   function emit() {
@@ -29,13 +39,13 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
     } catch(error) {
       if(current!==context||settlement!==current.settlement)return;
       current.following=false;
-      onStatus('Trace update unavailable. Retained history is still available; no request was repeated.');
+      onStatus(error.authentication?error.message:'Trace update unavailable. Retained history is still available; no request was repeated.');
     } finally {current.polling=false;finished();}
   }
   async function start(event) {
     event.preventDefault();
     if(!token||context?.inFlight)return;
-    clearInterval(timer);generation++;
+    clearInterval(timer);generation++;context=null;
     const own=generation;
     $('#lab-start').disabled=true;
     onMessages([]);
@@ -48,18 +58,19 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
       emit();
       timer=setInterval(()=>poll(context),500);
       await poll(context);
+      if(!token)return;
       onStatus('Lab request running. The page follows actual Runtime observations.');
       const reply=await api('/conversations/'+session.sessionId+'/messages',{method:'POST',body:JSON.stringify({
         messageId:'observatory-'+crypto.randomUUID(),message:$('#lab-message').value.trim(),expectedRevision:session.revision})});
       context.inFlight=false;context.settling=true;context.settlement++;
       await poll(context,true);
       await readMessages(context);
-      onStatus(reply.status==='needsResolution'?'Execution outcome requires resolution. Inspect the retained trace.':reply.pendingInteraction?'Waiting for workflow input.':reply.failureCode?'Turn failed: '+reply.failureCode:'Lab turn completed.');
+      if(token)onStatus(reply.status==='needsResolution'?'Execution outcome requires resolution. Inspect the retained trace.':reply.pendingInteraction?'Waiting for workflow input.':reply.failureCode?'Turn failed: '+reply.failureCode:'Lab turn completed.');
     } catch(error) {
       if(context){context.inFlight=false;context.settling=true;context.settlement++;}
-      onStatus(error.message+' Inspect the retained trace before deciding what to do next.');
-      if(context)await poll(context,true);
-    } finally {if(context)context.settling=false;$('#lab-start').disabled=!token;}
+      onStatus(error.message+(error.authentication?' No request was repeated.':' Inspect the retained trace before deciding what to do next.'));
+      if(context&&token)await poll(context,true);
+    } finally {if(context){context.inFlight=false;context.settling=false;}$('#lab-start').disabled=!token;}
   }
   async function readMessages(current) {
     try {
@@ -72,9 +83,14 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
     $('#lab-start').disabled=false;onModel(label);onStatus('Connected · '+label);
   }
   $('#lab-run').addEventListener('submit',start);
-  $('#lab-connect').addEventListener('submit',event=>{
-    event.preventDefault();token=$('#lab-token').value.trim();$('#lab-token').value='';
-    if(token)connected('Lab API credential in browser memory');
+  $('#lab-connect').addEventListener('submit',async event=>{
+    event.preventDefault();if(context?.inFlight)return;
+    const candidate=$('#lab-token').value.trim();$('#lab-token').value='';
+    if(!candidate)return;
+    disconnected();
+    try{await api('/chat/connection',{headers:{Authorization:'Bearer '+candidate}});
+      token=candidate;context=null;connected('Lab API credential verified');}
+    catch(error){onStatus(error.message);}
   });
   $('#lab-follow').addEventListener('click',()=>{if(context){context.following=true;context.visible=true;emit();}});
   async function bootstrap() {
@@ -82,10 +98,10 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
     $('#lab-controls').hidden=false;
     const code=new URLSearchParams(location.hash.slice(1)).get('connect');
     history.replaceState(null,'',location.pathname);
-    if(!code){onStatus('Connect with the lab launch link or a lab API token.');return;}
     try {
-      const response=await fetch('/chat/bootstrap',{method:'POST',credentials:'same-origin',headers:{'X-Chat-Launch':code}});
-      if(!response.ok)throw Error('Launch link expired or already used.');
+      const response=await fetch(code?'/chat/bootstrap':'/chat/session',{method:'POST',credentials:'same-origin',
+        headers:code?{'X-Chat-Launch':code}:{'X-Chat-Session':'restore'}});
+      if(!response.ok)throw Error(code?'Launch link expired or already used.':'No active launcher session.');
       const result=await response.json();token=result.token;connected(result.label);
     } catch(error){onStatus(error.message+' Use a fresh launch link or connect below.');}
   }

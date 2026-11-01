@@ -51,7 +51,7 @@ def application():
 
 def main(argv=None):
     from .chat import main as chat_main
-    return chat_main(argv,application_factory=application,landing_path='/observatory/')
+    return chat_main(argv,application_factory=application,landing_path='/observatory/',streaming=True)
 
 
 if __name__=='__main__':

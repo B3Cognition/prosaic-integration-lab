@@ -1,0 +1,46 @@
+/* Existing palette/type retained. At 1440: available width = scene + 20 + stream. */
+.visual-stage{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(360px,1fr);gap:20px;align-items:stretch}
+.visual-stage .scene-shell{height:auto;min-height:510px;min-width:0}
+.visual-stage .scene-caption{top:74px;left:24px}.visual-stage .scene-caption h2{font-size:30px}
+.visual-stage .scene-caption p{max-width:180px}
+.generation-panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:20px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.generation-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.generation-heading h2{font-size:19px;letter-spacing:-.4px;margin-top:5px}
+.generation-heading label{font-size:12px;color:var(--muted);display:grid;gap:6px}
+.generation-heading select{max-width:170px;font-size:12px;padding-left:9px}
+.generation-source{font-size:12px;color:var(--muted)}
+.generation-state-line{display:flex;align-items:center;gap:9px}
+.generation-state-dot{width:7px;height:7px;background:var(--muted);border-radius:50%;flex:none}
+.generation-panel[data-phase=generating] .generation-state-dot{background:var(--teal)}
+.generation-panel[data-phase=interrupted] .generation-state-dot{background:var(--red)}
+#generation-state{font-size:14px;font-weight:500}
+.generation-age{font-size:12px;color:var(--muted);min-height:18px;line-height:1.5}
+.generation-chart{display:block;width:100%;height:146px;overflow:visible}
+.generation-chart text{font:13px 'Public Sans',sans-serif;fill:var(--muted)}
+.generation-chart .chart-unit{font-size:13px}.generation-grid{stroke:var(--line);stroke-width:1;fill:none}
+.generation-wait{fill:#97aaa80a}.generation-curve{stroke:var(--teal);stroke-width:2;fill:none;vector-effect:non-scaling-stroke}
+.generation-arrivals{stroke:var(--teal);stroke-width:2;opacity:.8}.generation-cursor{stroke:var(--muted);stroke-width:1;opacity:.5}
+.generation-ribbon{display:flex;align-items:stretch;gap:4px;overflow:hidden;min-height:30px;max-height:30px}
+.generation-chunk{display:inline-flex;align-items:center;flex:none;padding:5px 6px;border:1px solid #344443;border-radius:2px;font:11px var(--mono);color:var(--muted);white-space:nowrap;max-width:96px;overflow:hidden}
+.generation-chunk.is-fresh{color:var(--teal);border-color:#5ce0db99;background:#5ce0db0d}
+.generation-empty{font-size:12px;color:var(--muted);padding:6px 0}
+.generation-preview{font-size:14px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap;max-height:72px;overflow:auto;color:var(--ink);scrollbar-color:var(--line) transparent}
+.generation-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding-top:12px;border-top:1px solid var(--line);margin-top:auto;font-variant-numeric:tabular-nums}
+.generation-metrics span{display:block;color:var(--muted);font-size:11px;line-height:1.4;min-height:30px}
+.generation-metrics strong{display:block;font-size:18px;font-weight:400;white-space:nowrap;margin-top:2px}
+.generation-note,.generation-evidence{font-size:11px;color:var(--muted);line-height:1.6}
+.generation-note{margin-top:2px}.generation-evidence{min-height:18px}
+.generation-label{font-size:11px;color:var(--muted)}
+.play-button{width:auto;min-width:94px;gap:9px;display:flex;justify-content:center;align-items:center;padding:0 12px}
+.play-label{font-size:12px}.observatory[data-view=inspect] .visual-stage{grid-template-columns:1fr}
+.observatory[data-view=inspect] .scene-shell{display:none}
+.observatory[data-view=inspect] .generation-panel{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:10px 28px}
+.observatory[data-view=inspect] .generation-heading{grid-column:1/-1}
+.observatory[data-view=inspect] .generation-output{grid-column:2;grid-row:2/5;min-width:0;align-self:center}
+.observatory[data-view=inspect] .generation-chart{height:166px}
+.observatory[data-view=inspect] .generation-preview{max-height:120px;margin-top:16px}
+.observatory[data-view=inspect] .generation-metrics,.observatory[data-view=inspect] .generation-note{grid-column:1/-1}
+@media(max-width:1100px){.visual-stage{grid-template-columns:minmax(0,1.2fr) minmax(340px,1fr);gap:14px}.generation-panel{padding:16px}.generation-metrics{gap:8px}.generation-metrics strong{font-size:17px}.visual-stage .scene-caption{display:none}}
+@media(max-width:850px){.visual-stage{display:flex;flex-direction:column;gap:16px}.generation-panel{order:-1}.visual-stage .scene-shell{height:440px;min-height:440px}.generation-heading h2{font-size:20px}.generation-preview{max-height:66px}.generation-chart{height:154px}.generation-panel{gap:8px}.observatory[data-view=inspect] .generation-panel{display:flex}.observatory[data-view=inspect] .generation-output{align-self:stretch;width:100%}.generation-output{min-width:0}.generation-metrics span{min-height:16px}.generation-metrics{margin-top:4px}.visual-stage .scene-caption{display:block}.generation-preview{margin-top:8px}}
+@media(max-width:480px){.generation-panel{padding:14px}.generation-heading{gap:10px}.generation-heading select{max-width:151px;font-size:12px}.generation-heading h2{font-size:18px}.generation-metrics{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}.generation-metrics strong{font-size:20px}.generation-metrics span{min-height:0}.visual-stage .scene-shell{height:380px}.generation-preview{font-size:13px}.play-button{min-width:84px}.play-label{font-size:11px}.generation-age{min-height:32px}.generation-evidence{margin-top:6px}}
+@media(prefers-reduced-motion:no-preference){.generation-chunk{transition:color .18s,border-color .18s,background-color .18s}}

@@ -41,6 +41,34 @@ def text(kind='pause'):
     return json.dumps({'definition':{'version':1,'start':start,'steps':steps}})
 
 
+def test_native_default_requests_streaming_with_explicit_opt_out(native,monkeypatch):
+    import prosaic_integration_lab.native_execution as module
+    execution,_,_=native
+    definition=execution.host.config['native']['bundles'][0]
+    original=module.WorkflowBindings;configs=[]
+    def bindings(**kwargs):
+        configs.append(kwargs['config']);return original(**kwargs)
+    monkeypatch.setattr(module,'WorkflowBindings',bindings)
+    execution.material(definition)
+    execution.material({**definition,'streaming':False})
+    assert [config.profiles['fixture'].features['streaming'] for config in configs]==[True,False]
+
+
+def test_old_buffered_native_proposal_and_pause_survive_the_new_default(native):
+    from prosaic_integration_lab.native_execution import NativeExecution
+    execution,a,_=native
+    definition=execution.host.config['native']['bundles'][0]
+    definition['streaming']=False
+    old=NativeExecution(execution.host);old.proposals.connection=execution.proposals.connection
+    proposal=old.propose(a,'buffered-before-upgrade',text())
+    paused=old.start_request(a,'old-buffered-run',proposal['proposal_id'],{})
+    reservation=old.host.metadata.owned(a,paused['run_id'])
+    del definition['streaming']
+    fresh=NativeExecution(execution.host);fresh.proposals.connection=execution.proposals.connection
+    assert fresh.status(reservation)['revision']==paused['revision']
+    assert fresh.resume(reservation,paused['revision'],'accept',{'confirmed':True},False)['status']=='completed'
+
+
 def test_catalogue_is_projected_and_contains_no_private_host_values(native):
     execution,a,b = native
     one,two = execution.catalogue(a),execution.catalogue(b)

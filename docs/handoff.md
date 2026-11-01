@@ -1,5 +1,40 @@
 # Codex handoff
 
+## Authorized Lab 0.9.0 release — 2026-11-01
+
+The maintainer now explicitly authorizes the version bump, release notes, PR,
+four-cell CI, fixes, merge and release once green. This supersedes the earlier
+no-merge/release scope below. Version 0.9.0 includes actual generation, streaming
+defaults, exact legacy identity retention and launcher reconnection, with the
+unchanged released SDK train. Follow the
+[release plan](superpowers/plans/2026-11-01-observatory-streaming-release.md).
+Require the exact versioned head's four CI cells and publish its original CI
+artifacts/provenance; preserve earlier releases and unrelated worktree changes.
+
+## Streaming defaults and usable launcher connection — 2026-10-31
+
+The maintainer additionally authorized enabling streaming throughout Lab/chat,
+fixing the nonworking Start button, testing, committing and pushing this whole
+work package. The earlier screenshot showed a401 before dispatch; the old real
+preview also had a spent one-call allowance. New defaults preserve retained
+buffered identities and explicit opt-out. Launcher sessions survive reload;
+invalid manual credentials cannot appear Connected. A fresh synthetic preview
+is retained for repeated review. See the [follow-up ledger](verification/observatory-streaming-defaults-2026-10-31.md).
+No merge/release or SDK changes are included. Preserve original0.8.0 artifacts
+and the unrelated dirty original checkout.
+
+## Unreleased Observatory generation — 2026-10-31
+
+The maintainer authorized research and implementation of visible generation in
+both Observatory views. Branch `codex/observatory-token-stream` starts at current
+main `4787265953bbda9a9e7ed63b500d152b8bcf486b` after the published 0.8.0 release.
+It consumes public Runtime/Harness callbacks, adds bounded owner-only provisional
+output and event-driven animation, and preserves SDK pins and published bytes.
+See the [generation ledger](verification/observatory-generation-2026-10-31.md)
+for tests, independent review, actual local-model observations and preview use.
+This feature is not merged or released; require the normal exact-head CI gate
+before integration. Preserve the original dirty Lab checkout and older evidence.
+
 ## Lab 0.7.0 published; verification documentation — 2026-10-25
 
 Lab 0.7.0 is published at qualified source

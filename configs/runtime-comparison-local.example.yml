@@ -12,4 +12,4 @@ profiles:
     max_tokens: 2048
     temperature: 0
     features:
-      streaming: false
+      streaming: true

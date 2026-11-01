@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+## 0.9.0 — 2026-11-01
+
+- Enable streaming by default in Lab conversations, native workflow bindings,
+  chat and local example profiles; preserve explicit buffered opt-out and exact
+  legacy binding identities for retained sessions and proposals.
+- Restore authorized local-launcher connections after reload with a bounded
+  same-origin session, validate manual credentials, and expose reconnect controls
+  after authentication failure instead of leaving a nonworking Start button.
+
+- Show actual streamed generation in both Observatory views: returning output
+  packets, provisional text, arrival marks, a character curve, first-output wait
+  and gaps, with pause/replay and separately qualified run-wide token totals.
+- Bound owner-only output observations and preserve interrupted/truncated
+  uncertainty. Support an explicit one-request launcher allowance while keeping
+  ordinary per-turn reservations independent of cumulative session budgets.
+- Allow bounded execution headroom for the full conversation recovery suite on
+  shared CI runners and identify deadline failures in safe receipts.
+
 ## 0.8.0 — 2026-10-31
 
 - Add the source/complete-archive execution Observatory: 3D Live and Inspect

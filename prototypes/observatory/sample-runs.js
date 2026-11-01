@@ -21,6 +21,20 @@ const timeout = {
     { id: 'settle', component: 'lab', label: 'Timeout recorded', start: 13, end: 13.8, kind: 'host', outcome: 'timed_out' },
   ],
 };
+// Deterministic, explicitly synthetic arrival samples; not inferred BPE tokens.
+for(const run of [success,timeout]) {
+  run.generation={version:1,truncated:false,calls:run.spans.filter(s=>s.kind==='provider').map((span,index)=>{
+    const preview=index===0?'I will look up the registered records before composing a response.':
+      'The response arrives in small pieces. Each new mark records an actual output chunk. Close marks show a fast burst; an empty stretch shows a pause. The first shaded interval is the wait before visible output. Once the provider finishes, its usage report supplies the token totals. Tool calls form their own steps between model turns.';
+    const pieces=preview.match(/\S+\s*/gu),weights=pieces.map((_,i)=>i===9||i===28?4:1),total=weights.reduce((a,b)=>a+b,0);
+    let weight=0,characters=0;
+    const samples=pieces.map((text,i)=>{weight+=weights[i];characters+=Array.from(text).length;return {index:i+1,
+      at:span.start+.7+(span.end-span.start-1)*weight/total,characters:Array.from(text).length,totalCharacters:characters};});
+    return {spanId:span.id,invocationId:'sample',start:span.start,end:span.end,mode:'streamed',outcome:'completed',
+      firstOutputAt:samples[0].at,lastOutputAt:samples.at(-1).at,chunks:samples.length,characters,preview,samples,
+      maxGap:Math.max(...samples.slice(1).map((p,i)=>p.at-samples[i].at)),samplesTruncated:false,previewTruncated:false};
+  })};
+}
 export const RUNS = Object.freeze({ success, timeout });
 export const COMPONENTS = Object.freeze({
   lab: { name: 'Integration lab', role: 'Application boundary', description: 'Accepts the request and presents the result.', color: '#a4b4aa' },

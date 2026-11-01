@@ -16,11 +16,11 @@ profiles:
     api_key_file: ~/.omlx_token
     max_tokens: 512
     features:
-      streaming: false
+      streaming: true
   local-strong:
     base_url: http://127.0.0.1:8000/v1
     model: ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ
     api_key_file: ~/.omlx_token
     max_tokens: 512
     features:
-      streaming: false
+      streaming: true

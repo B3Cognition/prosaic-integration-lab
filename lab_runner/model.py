@@ -203,6 +203,11 @@ def conversation_reply(messages,selected):
     if messages and messages[-1].get('role')=='tool':
         return {'role':'assistant','content':'1. player-a\n2. player-b'}
     if 'find' in text.lower():return tool('fixture_lookup',{'query':'players'})
+    if text=='Show generation':
+        return {'role':'assistant','content':
+            'An incoming prompt is processed first. Output then arrives in small chunks. '
+            'Watch each chunk return from the provider while the timeline records its arrival. '
+            'The final usage report supplies the token totals.'}
     history='\n'.join(message.get('content','') for message in messages
         if message.get('role')=='user' and type(message.get('content')) is str)
     answer='Your city is Prague.' if 'Prague' in history else 'Preference recorded.'
@@ -242,6 +247,11 @@ def completions(body: dict | None = None):
     if selected_fault == 'slow':time.sleep(fault_delay)
     if selected.startswith('conversation'):
         message=conversation_reply((body or {}).get('messages',[]),selected)
+        if (body or {}).get('stream') is True:
+            from .model_stream import conversation_stream
+            return conversation_stream(message,model=(body or {}).get('model','test-model'),
+                call_id=call_id,usage={'prompt_tokens':100,'completion_tokens':25,'total_tokens':125},
+                delay=.06 if (message.get('content') or '').startswith('An incoming prompt is processed first.') else 0)
         return {'id':f'fixture-{call_id}','object':'chat.completion','created':1,
             'model':(body or {}).get('model','test-model'),'choices':[{'index':0,
                 'finish_reason':'tool_calls' if message.get('tool_calls') else 'stop','message':message}],
@@ -313,4 +323,8 @@ def completions(body: dict | None = None):
             {'id':f'effect-{call_id}-{index}','type':'function','function':{'name':'fixture_apply',
              'arguments':json.dumps({'amount':getattr(app.state,'effect_amount',1)})}}
             for index in range(2 if selected=='native_effect_batch' else 1)]}
+    if (body or {}).get('stream') is True:
+        from .model_stream import conversation_stream
+        return conversation_stream(result['choices'][0]['message'],model=(body or {}).get('model','test-model'),
+            call_id=call_id,usage=result.get('usage'))
     return result

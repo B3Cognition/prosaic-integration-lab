@@ -51,7 +51,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    timeout-minutes: 55
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -108,7 +108,7 @@ jobs:
       - name: Observatory source and animation regressions without model calls
         run: |
           .venv/bin/python scripts/observatory_source_smoke.py --source-root .
-          node --test prototypes/observatory/live-model.test.mjs prototypes/observatory/lab-connection.test.mjs
+          node --test prototypes/observatory/*.test.mjs
       - name: Install pinned Linux CLI sandbox backend
         run: |
           sudo apt-get update

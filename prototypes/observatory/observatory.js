@@ -2,6 +2,8 @@ import { RUNS, COMPONENTS, stateAt, usageAt, eventsFor } from './sample-runs.js'
 import { createExecutionScene } from './scene-renderer.js';
 import { observedRun, formatDuration, reportedTokenText, displayUsage, messagePreview } from './live-model.js';
 import { connectLab } from './lab-connection.js';
+import { generationAt } from './generation-model.js';
+import { createGenerationView } from './generation-view.js';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -12,7 +14,9 @@ let reducedMotion = motionPreference.matches;
 let run = RUNS.success, view = 'live', selectedComponent = null, selectedSpan = 'provider-2';
 let playing = false, speed = 1, tween = null, graphics = null, currentPhase = '';
 let lab = null;
-const playhead = { time: reducedMotion ? 15.2 : 0 };
+let generationSpan = null;
+const generationView = createGenerationView($('#generation'), span => { generationSpan=span;render(); });
+const playhead = { time: 15.2 };
 
 function text(selector, value) { const element = $(selector); if (element.textContent !== String(value)) element.textContent = value; }
 function announce(value) { text('#announcement', value); }
@@ -45,15 +49,17 @@ function selectComponent(component, focus = true) {
 
 function setView(next) {
   view = next;
+  $('.observatory').dataset.view=next;
   for (const name of ['live', 'inspect']) {
     $('#' + name + '-tab').setAttribute('aria-selected', String(name === next));
     $('#' + name + '-panel').hidden = name !== next;
   }
-  if (next === 'inspect') { lab?.pauseFollowing(); pause(); }
   text('#playback-mode', run.source==='observed'?'Recorded lab run':next === 'live' ? 'Sample replay' : 'Inspect recorded sample');
+  render();
 }
 
 function selectSpan(id, focus = true) {
+  if(focus&&run.spans.some(span=>span.id===id&&span.kind==='provider'))generationSpan=id;
   const span = run.spans.find(item => item.id === id);
   if (!span) return;
   selectedSpan = id;
@@ -126,7 +132,9 @@ for (const selector of ['#provider-strip', '#tool-strip']) for (let i = 0; i < 2
 
 function render() {
   const state = stateAt(run, playhead.time), active = state.active?.component;
-  const providerActive = active === 'provider', toolActive = active === 'tool';
+  const generation = generationAt(run,playhead.time,state.active?.kind==='provider'?state.active.id:null);
+  const providerActive = active === 'provider' && generation.recent.length>0, toolActive = active === 'tool';
+  generationView.render(run,playhead.time,generationSpan,playing,reducedMotion);
   text('#phase', (run.source==='observed'?'Lab events / ':state.done ? 'Sample ended / ' : 'Sample replay / ') + state.label);
   $('#status-light').style.background = state.toolFailed||state.providerFailed||['failed','timed_out'].includes(state.outcome) ? 'var(--red)' : state.done ? 'var(--muted)' : 'var(--teal)';
   text('#clock', run.source==='observed'&&lab?.status().following?formatDuration(state.time)+' elapsed':`${state.time.toFixed(1)} / ${run.duration.toFixed(1)} s`);
@@ -141,6 +149,7 @@ function render() {
   text('#run-outcome',outcomeLabels[state.outcome]||state.outcome);
   $('#run-outcome').classList.toggle('is-error', state.toolFailed||state.providerFailed||['failed','timed_out'].includes(state.outcome));
   text('#play-icon', playing ? 'Ⅱ' : state.done ? '↺' : '▶');
+  text('#play-label',playing?'Pause':state.done?'Replay':'Play');
   $('#play').setAttribute('aria-label', playing ? 'Pause playback' : state.done ? 'Replay recorded run' : 'Play recorded run');
   $$('.cursor-line').forEach(line => { line.style.left = Math.min(99.9, state.time / Math.max(run.duration,.001) * 100) + '%'; });
   for (const [selector, activeNow] of [['#provider-strip', providerActive], ['#tool-strip', toolActive]]) {
@@ -156,7 +165,7 @@ function render() {
   }
   const phaseKey = state.active?.id || state.outcome;
   if (phaseKey !== currentPhase) { currentPhase = phaseKey; announce(state.label); }
-  graphics?.update(state, playing);
+  graphics?.update({...state,generation}, playing);
 }
 
 function pause() { tween?.kill(); tween = null; playing = false; render(); }
@@ -174,7 +183,7 @@ function play() {
 $('#play').addEventListener('click', () => {lab?.pauseFollowing();playing ? pause() : play();});
 $('#scrubber').addEventListener('input', event => { const time = Number(event.target.value); seek(time); });
 $('#speed').addEventListener('click', () => { const speeds = [.5, 1, 2]; speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length]; text('#speed', speed + '×'); tween?.timeScale(speed); });
-$('#scenario').addEventListener('change', event => {if(event.target.value==='observed'){lab?.follow();return;}lab?.hide();pause();run=RUNS[event.target.value];playhead.time=0;currentPhase='';selectComponent(null);buildRecordedView();render();if(!reducedMotion&&view==='live')play();});
+$('#scenario').addEventListener('change', event => {if(event.target.value==='observed'){lab?.follow();return;}lab?.hide();pause();generationSpan=null;run=RUNS[event.target.value];playhead.time=0;currentPhase='';selectComponent(null);buildRecordedView();render();if(!reducedMotion)play();});
 for (const name of ['live', 'inspect']) $('#' + name + '-tab').addEventListener('click', () => setView(name));
 $('.view-tabs').addEventListener('keydown', event => {
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -206,7 +215,7 @@ try {
 }
 lab=connectLab({onStatus:message=>text('#lab-status',message),onModel:label=>{
   text('#lab-model',label);
-  if(label.startsWith('Local Qwen')&&$('#lab-message').value==='Find players')$('#lab-message').value='Reply with exactly one word: Ready. /no_think';
+  if(label.startsWith('Local Qwen')&&$('#lab-message').value==='Show generation')$('#lab-message').value='Count from 1 to 20, separated by commas. Output only the numbers, no explanation. /no_think';
 },onMessages:messages=>{
   const list=$('#lab-messages');list.replaceChildren();
   $('#lab-exchange').hidden=messages!==null&&!messages.length;
@@ -218,13 +227,13 @@ lab=connectLab({onStatus:message=>text('#lab-status',message),onModel:label=>{
   }
 },onRun:(feed,options)=>{
   const previous=playhead.time,newRun=feed.runId!==run.id,previousTool=run.toolName;
-  if(newRun&&options.following)setView('live');
+  if(newRun)generationSpan=null;
   run=observedRun(feed,options);
   if(newRun)selectComponent(null);
   else if(selectedComponent==='tool'&&previousTool!==run.toolName)selectComponent('tool',false);
   if(!$('#scenario option[value="observed"]')){const option=document.createElement('option');option.value='observed';option.textContent='Actual lab execution';$('#scenario').append(option);}
   $('#scenario').value='observed';
-  if(options.following){tween?.kill();tween=null;playhead.time=run.duration;playing=run.status==='running'&&!reducedMotion&&view==='live';}
+  if(options.following){tween?.kill();tween=null;playhead.time=run.duration;playing=run.status==='running'&&!document.hidden;}
   else playhead.time=Math.min(previous,run.duration);
   buildRecordedView();render();
   text('#playback-mode',options.following&&run.status==='running'?'Following lab execution':'Recorded lab run');
@@ -232,5 +241,5 @@ lab=connectLab({onStatus:message=>text('#lab-status',message),onModel:label=>{
 }});
 // Diagnostic surface for prototype verification, never a lab API.
 Object.defineProperty(window, 'prosaicObservatory', { value: Object.freeze({
-  snapshot: () => ({ runId: run.id, source:run.source||'sample',view, playing, time: playhead.time, selectedComponent, selectedSpan, state: stateAt(run, playhead.time), usage: usageAt(run),lab:lab?.status(),events:eventsFor(run),incomplete:!!run.incomplete,graphics: graphics?.info() || null }),
+  snapshot: () => ({ runId: run.id, source:run.source||'sample',view, playing, time: playhead.time, selectedComponent, selectedSpan, state: stateAt(run, playhead.time), generation:generationAt(run,playhead.time,generationSpan),usage: usageAt(run),lab:lab?.status(),events:eventsFor(run),incomplete:!!run.incomplete,graphics: graphics?.info() || null }),
 }), writable: false });

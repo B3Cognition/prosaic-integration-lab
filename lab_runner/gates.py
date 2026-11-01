@@ -243,6 +243,7 @@ def export(item):
         type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
     if item.get('context_assembly') is True:result['context_assembly']=True
+    if item.get('error')=='TimeoutExpired':result['failure_code']='execution_timeout'
     for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
         value = item.get(key)
