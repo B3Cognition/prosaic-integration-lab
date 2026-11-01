@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.0 — 2026-11-01
+
 - Enable streaming by default in Lab conversations, native workflow bindings,
   chat and local example profiles; preserve explicit buffered opt-out and exact
   legacy binding identities for retained sessions and proposals.
@@ -12,9 +14,9 @@
 - Show actual streamed generation in both Observatory views: returning output
   packets, provisional text, arrival marks, a character curve, first-output wait
   and gaps, with pause/replay and separately qualified run-wide token totals.
-- Enable streaming only for the Observatory launcher, bound owner-only output
-  observations, preserve interrupted/truncated uncertainty, and admit a single
-  request when the local gateway allowance is one.
+- Bound owner-only output observations and preserve interrupted/truncated
+  uncertainty. Support an explicit one-request launcher allowance while keeping
+  ordinary per-turn reservations independent of cumulative session budgets.
 
 ## 0.8.0 — 2026-10-31
 

@@ -1,5 +1,16 @@
 # Codex handoff
 
+## Authorized Lab 0.9.0 release — 2026-11-01
+
+The maintainer now explicitly authorizes the version bump, release notes, PR,
+four-cell CI, fixes, merge and release once green. This supersedes the earlier
+no-merge/release scope below. Version 0.9.0 includes actual generation, streaming
+defaults, exact legacy identity retention and launcher reconnection, with the
+unchanged released SDK train. Follow the
+[release plan](superpowers/plans/2026-11-01-observatory-streaming-release.md).
+Require the exact versioned head's four CI cells and publish its original CI
+artifacts/provenance; preserve earlier releases and unrelated worktree changes.
+
 ## Streaming defaults and usable launcher connection — 2026-10-31
 
 The maintainer additionally authorized enabling streaming throughout Lab/chat,
