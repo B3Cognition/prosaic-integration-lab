@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import ipaddress
 import json
+import re
 import os
 import secrets
 import socket
@@ -62,6 +63,48 @@ class Bootstrap:
         if valid and scope['path']=='/chat/bootstrap':
             response.set_cookie(self.cookie_name,self.session,path='/chat',httponly=True,samesite='strict')
         await response(scope, receive, send)
+
+
+def _local_sse_chunks(chunks):
+    """Translate only oMLX's empty prefill sentinel; preserve real wire evidence."""
+    def unique(items):
+        value={}
+        for key,item in items:
+            if key in value:raise ValueError('duplicate heartbeat key')
+            value[key]=item
+        return value
+
+    def frame(raw):
+        if len(raw)>4096:return raw
+        lines=[line for line in raw.splitlines() if line]
+        if len(lines)!=1 or not lines[0].startswith(b'data:'):return raw
+        try:
+            value=json.loads(lines[0][5:].decode('utf-8'),object_pairs_hook=unique)
+        except (ValueError,UnicodeError,RecursionError):return raw
+        if (type(value) is not dict or set(value)!={'id','object','created','model','choices'} or
+                value['model']!='keepalive' or value['object']!='chat.completion.chunk' or
+                type(value['created']) is not int or value['created']!=0 or
+                type(value['id']) is not str or
+                re.fullmatch(r'chatcmpl-(?:[0-9a-f]{8}|keepalive)',value['id']) is None or
+                type(value['choices']) is not list or len(value['choices'])!=1):return raw
+        choice=value['choices'][0]
+        if (type(choice) is not dict or set(choice)!={'index','delta','finish_reason'} or
+                type(choice['index']) is not int or choice['index']!=0 or
+                choice['finish_reason'] is not None or
+                choice['delta']!={'role':'assistant','content':''}):return raw
+        return b': keep-alive\n\n'
+
+    boundary=re.compile(rb'\r?\n\r?\n')
+    pending=bytearray();search=0
+    for chunk in chunks:
+        pending.extend(chunk);start=0
+        while match:=boundary.search(pending,search):
+            end=match.end()
+            yield frame(bytes(pending[start:end]))
+            start=search=end
+        if start:del pending[:start]
+        search=max(0,len(pending)-3)
+    if pending:yield bytes(pending)
 
 
 class ModelGateway:
@@ -136,12 +179,14 @@ class ModelGateway:
                             self.send_header('Content-Type','text/event-stream')
                             self.send_header('Cache-Control','no-store')
                             self.end_headers();streaming_started=True
-                            total=0;deadline=time.monotonic()+30
-                            for chunk in result.iter_bytes():
-                                total+=len(chunk)
-                                if total>8*1024*1024 or time.monotonic()>deadline:
-                                    self.close_connection=True
-                                    return
+                            def bounded_chunks():
+                                total=0;deadline=time.monotonic()+30
+                                for chunk in result.iter_bytes():
+                                    total+=len(chunk)
+                                    if total>8*1024*1024 or time.monotonic()>deadline:
+                                        raise ValueError('local response limit')
+                                    yield chunk
+                            for chunk in _local_sse_chunks(bounded_chunks()):
                                 self.wfile.write(chunk);self.wfile.flush()
                             return
                         content = bytearray()

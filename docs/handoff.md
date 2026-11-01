@@ -1,5 +1,19 @@
 # Codex handoff
 
+## Real-model usage compatibility fix — 2026-11-01
+
+The maintainer requested actual token counts in both Observatory views after
+the released 0.9.0 real-model preview showed unknown usage. On
+`codex/observatory-token-usage`, the local gateway translates only the exact
+empty oMLX prefill heartbeat into a transport comment. Its fake model name had
+caused correct recorder quarantine of otherwise present counts. Live verification
+now shows 533 input / 98 output / 631 total provider-reported tokens in both views, with
+the existing unqualified marker; accounting qualification is unchanged. See the
+[verification ledger](verification/observatory-token-usage-2026-11-01.md).
+All 2,072 Python tests and 25 frontend tests passed, along with a focused review.
+Keep published 0.9.0 artifacts/tags, older previews, SDK pins and model-server
+settings unchanged. This fix has not been released.
+
 ## Authorized Lab 0.9.0 release — 2026-11-01
 
 The maintainer now explicitly authorizes the version bump, release notes, PR,

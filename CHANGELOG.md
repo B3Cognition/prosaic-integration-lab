@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve real-model token usage in both Observatory views by translating the
+  local oMLX provider's exact empty prefill heartbeat into an SSE comment. Keep
+  real model conflicts, usage payloads and recorder accounting qualification intact.
+
 ## 0.9.0 — 2026-11-01
 
 - Enable streaming by default in Lab conversations, native workflow bindings,

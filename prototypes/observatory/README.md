@@ -85,6 +85,13 @@ the original recorder status and qualified totals remain unchanged. Untrusted,
 partial and incomplete reports are not promoted. Counts arrive after completion,
 not as individually timed token events.
 
+The local gateway translates oMLX's exact empty `model: keepalive` prefill frame
+into an SSE comment. This prevents a transport heartbeat from appearing to change
+the response model and quarantining its real usage report. Actual content,
+usage, model changes, malformed frames and unknown fields pass through unchanged
+for normal SDK validation. This compatibility fix does not change model-server
+settings, SDK packages or the recorder's accounting qualification.
+
 This branch follows current main's Runtime 0.9.8, Harness 0.9.4 and unchanged
 release checksums. The launcher requires a checkout or complete source archive;
 installing the wheel alone does not provide the host fixture/authoring tree.
