@@ -276,7 +276,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=None
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
-                    '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
+                    '--consumer-image',image_id,*flags],directory=source,environment=environment,
+                    timeout=1200 if command=='test' else 900)
                 receipt=execution_receipt(raw,command=command)
                 if receipt.get('images',{}).get('consumer')!=image_id:
                     raise ValueError('source consumer image changed between build and qualification')

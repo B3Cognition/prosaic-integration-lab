@@ -43,3 +43,7 @@ the resulting new source; no assertion or required case count is removed.
 Focused read-only review of this deadline change found no Critical/Important
 blockers; all 46 affected runner/gate regressions passed independently. Full
 local regressions and the new exact-source matrix remain required.
+The extracted-source distribution wrapper also receives the 1,200-second test
+allowance so it cannot kill the 900-second suite before owned cleanup. Watched
+regression evidence covers both complete and incomplete context receipts beyond
+the previous wrapper deadline. The intermediate qualification is superseded.
