@@ -25,3 +25,8 @@ replacement or publication of private logs/state. Local rebuilds cannot replace
 the qualified CI artifacts. Rerun the required matrix if implementation/source
 qualification changes. Record post-publication evidence in the release assets
 and notes without rewriting the qualified source.
+
+Release review: no Critical/Important findings. Fixed the reproduced Minor
+paused-replay usage cache bug with a watched failing/passing Node regression;
+recorder totals and subtotal qualification now refresh independently of cursor
+motion. The updated source requires a fresh complete four-cell qualification.

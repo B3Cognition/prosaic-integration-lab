@@ -62,6 +62,10 @@ export function createGenerationView(root, onSelect) {
       model.calls.forEach((c,i)=>{const option=document.createElement('option');option.value=c.spanId;option.textContent='Provider call '+(i+1);select.append(option);});
     }
     select.value=preferred && model.calls.some(c=>c.spanId===preferred)?preferred:'';
+    // Recorder evidence can settle while the playback cursor remains paused.
+    const usage=displayUsage(usageAt(run));
+    put('#generation-tokens',reportedOutputText(usage));
+    put('#generation-token-scope',usage.available===false?'Unavailable':usage.unknownCalls?'Known subtotal':'Reported total');
     const nextFrame=[run.id,call?.spanId,model.chunks,model.phase,Math.floor(time*10),playing,reducedMotion,preferred].join('|');
     if(frameKey===nextFrame)return model;frameKey=nextFrame;
     root.dataset.phase=model.phase;root.dataset.motion=playing&&!reducedMotion?'on':'off';
@@ -71,9 +75,6 @@ export function createGenerationView(root, onSelect) {
     put('#generation-first',seconds(model.firstOutput));
     put('#generation-count',(model.partial?'≥':'')+number(model.chunks));
     put('#generation-gap',seconds(model.largestGap));
-    const usage=displayUsage(usageAt(run));
-    put('#generation-tokens',reportedOutputText(usage));
-    put('#generation-token-scope',usage.available===false?'Unavailable':usage.unknownCalls?'Known subtotal':'Reported total');
     put('#generation-age',model.phase==='generating'&&model.sinceLastOutput>.5?
       seconds(model.sinceLastOutput)+' since the last output':model.phase==='waiting'?
       seconds(model.elapsed)+' elapsed · includes transport and model work':

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { generationAt, generationPackets } from './generation-model.js';
+import { createGenerationView } from './generation-view.js';
 
 const call={spanId:'event-2',start:1,end:5,mode:'streamed',outcome:'completed',
   firstOutputAt:2,lastOutputAt:4,chunks:3,characters:12,preview:'Hello 🌍there',
@@ -88,4 +89,26 @@ test('a truncated stream uses known live tail timing and marks unrecorded histor
   const past=generationAt(trace,18);
   assert.equal(past.sinceLastOutput,null);assert.equal(past.tail,null);
   assert.deepEqual(past.unknownInterval,{start:15,end:18});
+});
+
+test('paused replay refreshes recorder totals and qualification without moving the cursor',t=>{
+  const saved=['document','ResizeObserver'].map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]);
+  t.after(()=>{for(const[key,descriptor]of saved){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else delete globalThis[key];}});
+  const nodes=new Map();
+  function node(){return {textContent:'',clientWidth:420,dataset:{},scrollHeight:0,scrollTop:0,clientHeight:0,
+    addEventListener(){},replaceChildren(){},append(){},setAttribute(){},classList:{toggle(){}}};}
+  const root=node();root.querySelector=key=>{if(!nodes.has(key))nodes.set(key,node());return nodes.get(key);};
+  globalThis.document={createElement:node};globalThis.ResizeObserver=class{observe(){}};
+  const view=createGenerationView(root,()=>{});
+  const paused={id:'same-run',source:'observed',generation:{calls:[]},
+    observedUsage:{available:true,input:null,output:null,completeCalls:0,totalCalls:1,unknownCalls:1}};
+  view.render(paused,.5,null,false,false);
+  assert.equal(nodes.get('#generation-tokens').textContent,'—');
+  const known={...paused,observedUsage:{available:true,input:100,output:25,completeCalls:1,totalCalls:1,unknownCalls:0}};
+  view.render(known,.5,null,false,false);
+  assert.equal(nodes.get('#generation-tokens').textContent,'25');
+  assert.equal(nodes.get('#generation-token-scope').textContent,'Reported total');
+  view.render({...known,observedUsage:{...known.observedUsage,totalCalls:2,unknownCalls:1}},.5,null,false,false);
+  assert.equal(nodes.get('#generation-tokens').textContent,'≥25');
+  assert.equal(nodes.get('#generation-token-scope').textContent,'Known subtotal');
 });
