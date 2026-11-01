@@ -28,8 +28,19 @@ class Bootstrap:
         self.expires = time.monotonic() + 600
         self.lock = threading.Lock()
         self.cookie_name='prosaic-chat-'+hashlib.sha256(origin.encode()).hexdigest()[:12]
-        self.session=secrets.token_urlsafe(32)
-        self.session_expires=0
+        self.sessions={}
+
+    async def verified(self, scope, receive, token):
+        """Validate the exact credential through the ordinary host auth boundary."""
+        status=0
+        async def capture(message):
+            nonlocal status
+            if message['type']=='http.response.start':status=message['status']
+        child={**scope,'method':'GET','path':'/chat/connection',
+            'raw_path':b'/chat/connection','query_string':b'', 'state':{},
+            'headers':[(b'authorization',('Bearer '+token).encode('ascii'))]}
+        await self.app(child,receive,capture)
+        return status==200
 
     async def __call__(self, scope, receive, send):
         if (scope['type'] != 'http' or scope['path'] not in {'/chat/bootstrap','/chat/session'}
@@ -39,29 +50,47 @@ class Bootstrap:
         headers = scope.get('headers', [])
         codes = [value for key, value in headers if key.lower() == b'x-chat-launch']
         origins = [value for key, value in headers if key.lower() == b'origin']
+        markers=[value for key,value in headers if key.lower()==b'x-chat-session']
+        same_origin=len(origins)==1 and origins[0]==self.origin.encode()
+        manual=None
+        if scope['path']=='/chat/session' and same_origin and markers==[b'connect']:
+            authorization=[value for key,value in headers if key.lower()==b'authorization']
+            if len(authorization)==1 and authorization[0].startswith(b'Bearer ') and 7<len(authorization[0])<=8192:
+                try:
+                    candidate=authorization[0][7:].decode('ascii')
+                    if await self.verified(scope,receive,candidate):manual=candidate
+                except UnicodeError:pass
+        session=None
+        record=None
         with self.lock:
-            same_origin=len(origins)==1 and origins[0]==self.origin.encode()
+            now=time.monotonic()
+            self.sessions={key:value for key,value in self.sessions.items() if now<value['expires']}
             if scope['path']=='/chat/bootstrap':
-                valid = (same_origin and time.monotonic() < self.expires and len(codes)==1 and
+                valid = (same_origin and now < self.expires and len(codes)==1 and
                     self.code and secrets.compare_digest(codes[0], self.code.encode()))
-                if valid:
-                    self.code = ''
-                    self.session_expires=time.monotonic()+8*3600
+                if valid and len(self.sessions)<32:
+                    self.code=''
+                    record={'token':self.token,'label':self.label,'expires':now+8*3600}
+            elif manual is not None:
+                if len(self.sessions)<32:
+                    record={'token':manual,'label':'Lab API credential verified','expires':now+8*3600}
             else:
                 cookies=[value for key,value in headers if key.lower()==b'cookie']
-                markers=[value for key,value in headers if key.lower()==b'x-chat-session']
                 cookie=SimpleCookie()
                 try:
                     if len(cookies)==1 and len(cookies[0])<=8192:cookie.load(cookies[0].decode('ascii'))
                 except (CookieError,UnicodeError):pass
                 entry=cookie.get(self.cookie_name)
-                valid=(same_origin and markers==[b'restore'] and time.monotonic()<self.session_expires
-                    and entry is not None and secrets.compare_digest(entry.value.encode(),self.session.encode()))
-        response = JSONResponse({'token': self.token, 'label': self.label} if valid else
-            {'detail': 'launch_link_unavailable'}, status_code=200 if valid else 403,
+                if same_origin and markers==[b'restore'] and entry is not None:
+                    record=self.sessions.get(entry.value)
+            if record is not None and markers!=[b'restore']:
+                session=secrets.token_urlsafe(32)
+                self.sessions[session]=record
+        response = JSONResponse({key:record[key] for key in ('token','label')} if record is not None else
+            {'detail': 'launch_link_unavailable'}, status_code=200 if record is not None else 403,
             headers={'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer'})
-        if valid and scope['path']=='/chat/bootstrap':
-            response.set_cookie(self.cookie_name,self.session,path='/chat',httponly=True,samesite='strict')
+        if session is not None:
+            response.set_cookie(self.cookie_name,session,path='/chat',httponly=True,samesite='strict',max_age=8*3600)
         await response(scope, receive, send)
 
 

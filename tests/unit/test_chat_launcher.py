@@ -58,6 +58,37 @@ def test_launcher_session_reconnects_only_authorized_same_origin_browser(monkeyp
         assert browser.post('/chat/session',headers=headers).status_code==403
 
 
+def test_manual_browser_session_preserves_verified_principal_and_survives_refresh():
+    from lab_runner.chat import Bootstrap
+    from starlette.responses import JSONResponse
+    seen=[]
+    async def protected(scope,receive,send):
+        if scope['type']=='lifespan':
+            await receive();await send({'type':'lifespan.startup.complete'})
+            await receive();await send({'type':'lifespan.shutdown.complete'});return
+        seen.append((scope['method'],scope['path']))
+        authorization=[v for k,v in scope['headers'] if k.lower()==b'authorization']
+        valid=authorization==[b'Bearer bob-lab-token']
+        await JSONResponse({'connected':True} if valid else {'detail':'unauthenticated'},
+            status_code=200 if valid else 401)(scope,receive,send)
+    app=Bootstrap(protected,token='alice-launcher-token',label='Alice',origin='http://testserver')
+    connect={'Origin':'http://testserver','X-Chat-Session':'connect','Authorization':'Bearer bob-lab-token'}
+    restore={'Origin':'http://testserver','X-Chat-Session':'restore'}
+    with TestClient(app) as browser:
+        assert browser.post('/chat/session',headers={**connect,'Authorization':'Bearer omlx-token'}).status_code==403
+        assert browser.post('/chat/session',headers={**connect,'Origin':'https://foreign.invalid'}).status_code==403
+        response=browser.post('/chat/session',headers=connect)
+        assert response.status_code==200
+        assert response.json()['token']=='bob-lab-token'
+        assert 'bob-lab-token' not in response.headers['set-cookie']
+        assert 'HttpOnly' in response.headers['set-cookie']
+        assert browser.post('/chat/session',headers=restore).json()['token']=='bob-lab-token'
+        assert 'alice-launcher-token' not in response.text
+        assert set(seen)=={('GET','/chat/connection')}
+        with TestClient(app) as stranger:
+            assert stranger.post('/chat/session',headers=restore).status_code==403
+
+
 def test_gateway_does_not_follow_redirects_or_dispatch_after_allowance(tmp_path):
     from lab_runner.chat import ModelGateway
     from prosaic_runtime import EndpointConfig

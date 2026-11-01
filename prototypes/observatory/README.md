@@ -2,10 +2,13 @@
 
 An interactive visual prototype inspired by the plant-cell reference supplied
 by the maintainer. The approved scope is one detailed execution scene first,
-with Live and Inspect views and an optional authenticated Integration Lab feed.
+with Flow and Inspect views and an authenticated Integration Lab monitor.
 
-The unreleased generation update adds actual streamed output arrivals in both
-views. See the [generation verification](../../docs/verification/observatory-generation-2026-10-31.md)
+Version 0.9.0 added actual streamed output arrivals in both views. The current
+unreleased follow-up makes monitoring the default, fixes local oMLX usage
+reporting, and discovers owned runs started from Chat or the API. See the
+[monitor verification](../../docs/verification/observatory-monitor-2026-11-01.md)
+and [generation verification](../../docs/verification/observatory-generation-2026-10-31.md)
 for current evidence and limitations. Historical 0.8.0 real-model screenshots:
 [Live](verification/observatory-real-qwen-live-final.png),
 [Inspect](verification/observatory-real-qwen-inspect-final.png) and
@@ -23,7 +26,29 @@ and a consumer image built with `scripts/build_consumer.py`:
 
 The launcher starts an owned PostgreSQL stack and a bounded synthetic HTTP
 provider. It opens a one-use connection link; the API credential stays in browser
-memory. Use **Start lab test** with the default `Show generation` for a paced,
+memory. An eight-hour HttpOnly same-origin browser session restores that exact
+credential after refresh. Connect another browser using its **Lab API token**
+from the launcher's private `.lab/<owner>/secrets/chat-service.json`; an oMLX key
+authenticates the model server and cannot authenticate Lab. Manual connections
+are verified through the host auth boundary and retain their own principal.
+
+The hosted page starts idle. After connecting, it discovers your recent captured
+Chat/API and standalone legacy/native workflow runs in this Lab process, without
+dispatching inference. Discovery continues after a turn finishes. **Your captured
+runs** pins a run or follows latest activity. Pausing or scrubbing pins replay
+until **Follow live** is selected. Refresh rediscovers retained events and leaves
+completed traces still. **Demo · …** choices explicitly enable scripted playback.
+
+Observations are optional, process-local and bounded to 32 recent runs. They are
+cleared on restart or evicted by later activity; other replicas and other oMLX
+clients are outside this monitor's capture scope. The page identifies missing or
+stale observations. Released SDK callbacks do not cover linked conversation
+workflow resumes; recorder counts may therefore include calls with no captured
+timing. Those missing calls are identified rather than reconstructed. Standalone
+workflow output exposes arrival timing and character counts, withholding raw
+agent text to preserve existing output visibility rules.
+
+Use **Start lab test** with the default `Show generation` for a paced,
 52-chunk synthetic response, `Find players` for two provider calls, a
 registered tool and workflow waiting, or `Hello` for a short completed turn. Ctrl+C
 stops the UI and verifies cleanup of its owned Docker resources. Default fixture

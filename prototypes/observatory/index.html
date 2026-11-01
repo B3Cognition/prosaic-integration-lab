@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Prosaic Observatory — an interactive execution scene using labelled sample telemetry.">
+  <meta name="description" content="Prosaic Observatory — authenticated Lab traffic, generation timing and recorder token reports, with explicit optional demos.">
   <link rel="icon" href="data:,">
   <title>Prosaic · Observatory</title>
   <link rel="stylesheet" href="observatory.css">
@@ -17,28 +17,31 @@
   <div class="observatory" data-view="live">
     <header class="appbar">
       <a class="brand" href="./" aria-label="Prosaic Observatory"><span class="brand-mark">p.</span><span>prosaic<span class="brand-divider">/</span><span class="brand-section">observatory</span></span></a>
-      <div class="app-meta"><span class="sample-tag"><span></span>Sample telemetry</span><span class="prototype-tag">Prototype</span></div>
+      <div class="app-meta"><span class="sample-tag">Disconnected</span><span class="prototype-tag">Lab monitor</span></div>
     </header>
     <main>
       <div class="runbar">
-        <div><div class="eyebrow">Execution specimen <span id="run-id">sample-7a41</span></div><h1>Inside the run.</h1></div>
-        <div class="run-controls"><label for="scenario">Sample run</label><select id="scenario"><option value="success">Tool-assisted response</option><option value="timeout">Tool timeout</option></select></div>
-        <div class="view-tabs" role="tablist" aria-label="Observatory view"><button id="live-tab" type="button" role="tab" aria-selected="true" aria-controls="live-panel">Live<span class="tab-dot"></span></button><button id="inspect-tab" type="button" role="tab" aria-selected="false" aria-controls="inspect-panel">Inspect</button></div>
+        <div><div class="eyebrow">Execution specimen <span id="run-id">—</span></div><h1>Inside the run.</h1></div>
+        <div class="run-controls"><label for="scenario">Run source</label><select id="scenario"><option value="observed">Live Lab monitor</option><option value="success">Demo · tool-assisted response</option><option value="timeout">Demo · tool timeout</option></select></div>
+        <div class="view-tabs" role="tablist" aria-label="Observatory view"><button id="live-tab" type="button" role="tab" aria-selected="true" aria-controls="live-panel">Flow</button><button id="inspect-tab" type="button" role="tab" aria-selected="false" aria-controls="inspect-panel">Inspect</button></div>
       </div>
 
       <section id="lab-controls" class="lab-controls" hidden aria-label="Actual integration-lab execution">
         <div class="lab-heading"><strong>Integration lab</strong><span id="lab-status" role="status" aria-live="polite">Connecting…</span></div>
-        <form id="lab-connect"><label for="lab-token">Lab API token</label><input id="lab-token" type="password" autocomplete="off" maxlength="8192" required><button type="submit">Connect</button></form>
+        <form id="lab-connect"><label for="lab-token">Lab API token</label><input id="lab-token" type="password" autocomplete="off" maxlength="8192" aria-describedby="lab-auth-help" required><button type="submit">Connect</button></form>
+        <p id="lab-auth-help" class="lab-model">Use this Lab launcher's API token from its private chat-service.json, or a fresh launcher link. Your oMLX/provider API key does not connect to Lab. The browser session lasts up to eight hours.</p>
+        <div class="lab-selection"><label for="lab-runs">Your captured runs</label><select id="lab-runs" disabled><option value="latest">Follow latest activity</option></select><span id="lab-freshness">Disconnected · no traffic displayed</span></div>
+        <p class="lab-model">Monitors your Chat, API and workflow runs in this Lab process. Retains up to 32 recent runs in memory; a server restart clears the captured traces. Opening this page never starts inference.</p>
         <form id="lab-run" hidden><label for="lab-message">Test message</label><input id="lab-message" value="Show generation" maxlength="512" required><button id="lab-start" type="submit" disabled>Start lab test</button><button id="lab-follow" type="button">Follow live</button></form>
         <p id="lab-model" class="lab-model"></p>
-        <details id="lab-exchange" hidden><summary>Latest message exchange</summary><div id="lab-messages" aria-live="polite"></div></details>
+        <details id="lab-exchange" hidden><summary>Latest captured Lab messages</summary><div id="lab-messages" aria-live="polite"></div></details>
       </section>
 
       <div class="visual-stage">
       <section class="scene-shell" aria-label="Interactive execution scene">
         <div id="scene" role="img" aria-label="Three-dimensional cutaway Runtime connected by activity channels to Provider, read_file and Harness. Select a component below to focus."></div>
         <div id="graphics-message" class="graphics-message" role="status">Preparing the execution scene…</div>
-        <div class="scene-topline"><span class="scene-status"><span id="status-light"></span><span id="phase">Provider / final response</span></span><span class="render-mode" id="render-mode">Three.js · WebGL</span></div>
+        <div class="scene-topline"><span class="scene-status"><span id="status-light"></span><span id="phase">Disconnected · no traffic</span></span><span class="render-mode" id="render-mode">Three.js · WebGL</span></div>
         <div class="scene-caption"><span class="eyebrow">Execution anatomy</span><h2>One request.<br>A whole system.</h2><p id="scene-description">Follow the handoffs between<br>workflow, model and tool.</p></div>
         <div class="camera-controls" aria-label="Scene presentation"><button type="button" id="section-view" aria-pressed="true">Cutaway</button><button type="button" id="explode-view" aria-pressed="false">Exploded</button><button type="button" id="reset-camera">Overview ↗</button></div>
         <div class="scene-labels" id="scene-labels" hidden><button type="button" class="scene-label" data-component="runtime"><span class="label-dot runtime-dot"></span>Runtime<span>Execution chamber</span></button><button type="button" class="scene-label" data-component="provider"><span class="label-dot provider-dot"></span>Provider<span>Model transport</span></button><button type="button" class="scene-label" data-component="tool"><span class="label-dot tool-dot"></span>read_file<span>Tool boundary</span></button><button type="button" class="scene-label" data-component="harness"><span class="label-dot host-dot"></span>Harness<span>Workflow control</span></button></div>
@@ -47,9 +50,9 @@
       </section>
 
       <section class="generation-panel" id="generation" aria-label="Model output generation" data-phase="empty">
-        <div class="generation-heading"><div><span id="generation-source" class="generation-source">Scripted sample</span><h2>Generation stream</h2></div><label for="generation-call">Provider call<select id="generation-call"><option value="">Follow latest call</option></select></label></div>
+        <div class="generation-heading"><div><span id="generation-source" class="generation-source">No traffic</span><h2>Generation stream</h2></div><label for="generation-call">Provider call<select id="generation-call"><option value="">Follow latest call</option></select></label></div>
         <div class="generation-state-line"><span class="generation-state-dot" aria-hidden="true"></span><strong id="generation-state">Awaiting a provider call</strong></div>
-        <p class="generation-age" id="generation-age">Play the sample or start a lab test.</p>
+        <p class="generation-age" id="generation-age">Connect to monitor your Lab runs.</p>
         <svg id="generation-chart" class="generation-chart" role="img" aria-labelledby="generation-chart-title" viewBox="0 0 420 166">
           <title id="generation-chart-title">Client-observed output arrival timings</title>
           <defs><pattern id="generation-missing-pattern" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1,1L1,-1M0,6L6,0M5,7L7,5" stroke="#97aaa8" stroke-opacity=".2" stroke-width="1"/></pattern></defs>
@@ -71,20 +74,20 @@
       </div>
 
       <div class="playback">
-        <button type="button" id="play" class="play-button" aria-label="Pause sample playback"><span id="play-icon">Ⅱ</span><span id="play-label" class="play-label">Pause</span></button>
-        <div class="playback-track"><div class="playback-top"><span id="playback-mode">Sample replay</span><output id="clock" for="scrubber">15.2 / 24.0 s</output></div><input id="scrubber" type="range" min="0" max="24" step="0.01" value="15.2" aria-label="Run playback time in seconds"></div>
-        <button type="button" id="speed" aria-label="Change playback speed">1×</button><span id="run-outcome" class="outcome">Running</span>
+        <button type="button" id="play" class="play-button" disabled aria-label="No captured run"><span id="play-icon">·</span><span id="play-label" class="play-label">Waiting</span></button>
+        <div class="playback-track"><div class="playback-top"><span id="playback-mode">Monitor idle</span><output id="clock" for="scrubber">—</output></div><input id="scrubber" type="range" min="0" max="0" step="0.01" value="0" disabled aria-label="Run playback time in seconds"></div>
+        <button type="button" id="speed" disabled aria-label="Change playback speed">1×</button><span id="run-outcome" class="outcome">Idle</span>
       </div>
 
       <section id="live-panel" class="telemetry-panel" role="tabpanel" aria-labelledby="live-tab">
-        <div class="live-summary"><div><span class="eyebrow">At the cursor</span><h3 id="live-title">Final response</h3><p id="latest-event">provider_request_started</p></div><div class="metric"><span>Elapsed</span><strong id="elapsed">15.2<small>s</small></strong></div><div class="metric"><span>Provider calls</span><strong id="calls">2</strong></div><div class="metric"><span>Reported tokens</span><strong id="tokens">1,768</strong><span class="metric-foot" id="usage-note">Latest completed report</span></div></div>
+        <div class="live-summary"><div><span class="eyebrow">At the cursor</span><h3 id="live-title">Disconnected · no traffic</h3><p id="latest-event">Connect to monitor your Lab runs.</p></div><div class="metric"><span>Elapsed</span><strong id="elapsed">—</strong></div><div class="metric"><span>Provider calls</span><strong id="calls">—</strong></div><div class="metric"><span>Reported tokens</span><strong id="tokens">—</strong><span class="metric-foot" id="usage-note">No reports received</span></div></div>
         <div class="activity-row"><div><span class="eyebrow">Activity channels</span><span class="activity-note">Provider output follows chunk arrivals; tools show invocation activity.</span></div><div class="channel"><span class="label-dot provider-dot"></span><span>Provider</span><div class="activity-strip" id="provider-strip" aria-label="Provider output arrivals"></div></div><div class="channel"><span class="label-dot tool-dot"></span><span>Tool</span><div class="activity-strip tool-strip" id="tool-strip" aria-label="Tool activity"></div></div></div>
       </section>
 
       <section id="inspect-panel" class="telemetry-panel" role="tabpanel" aria-labelledby="inspect-tab" hidden>
-        <div class="inspect-heading"><div><span class="eyebrow">Recorded sample</span><h3 id="finding">Provider transport accounts for 64% of elapsed time.</h3></div><span class="duration-total" id="duration-total">24.0 s total</span></div>
-        <div class="inspect-grid"><div class="timeline-wrap"><div class="timeline-axis"><span>Elapsed time</span><div id="time-ticks"></div></div><div id="timeline" aria-label="Sample run timing by component"></div><div class="span-detail" aria-live="polite"><span id="span-name">Final response</span><strong id="span-value">9.1 s · 2,972 tokens</strong></div></div><div class="usage-detail"><div class="eyebrow">Provider-reported tokens</div><div class="usage-total" id="total-tokens">4,740</div><div class="usage-bar" role="img" aria-label="Input and output token proportions"><span id="input-bar"></span><span id="output-bar"></span></div><div class="usage-legend"><span><i class="input-key"></i>Input<strong id="input-tokens">4,100</strong></span><span><i class="output-key"></i>Output<strong id="output-tokens">640</strong></span></div><p>Complete sample reports.<br> Independent of playback position.</p></div></div>
-        <details class="event-history"><summary>Event history <span id="event-count">12 events</span></summary><ol id="events"></ol></details>
+        <div class="inspect-heading"><div><span class="eyebrow">Lab monitor</span><h3 id="finding">No captured traffic.</h3></div><span class="duration-total" id="duration-total">—</span></div>
+        <div class="inspect-grid"><div class="timeline-wrap"><div class="timeline-axis"><span>Elapsed time</span><div id="time-ticks"></div></div><div id="timeline" aria-label="Captured run timing by component"></div><div class="span-detail" aria-live="polite"><span id="span-name">No span selected</span><strong id="span-value">Awaiting observations</strong></div></div><div class="usage-detail"><div class="eyebrow">Provider-reported tokens</div><div class="usage-total" id="total-tokens">—</div><div class="usage-bar" role="img" aria-label="No token reports received"><span id="input-bar"></span><span id="output-bar"></span></div><div class="usage-legend"><span><i class="input-key"></i>Input<strong id="input-tokens">—</strong></span><span><i class="output-key"></i>Output<strong id="output-tokens">—</strong></span></div><p>No reports received.</p></div></div>
+        <details class="event-history"><summary>Event history <span id="event-count">0 events</span></summary><ol id="events"></ol></details>
       </section>
       <footer class="app-footer"><span>prosaic integration lab <span class="footer-dot">·</span> visual prototype</span><span id="renderer-info">Three.js + GSAP · local assets · no provider calls</span></footer>
     </main>

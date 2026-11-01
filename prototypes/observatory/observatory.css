@@ -20,6 +20,10 @@
 @media(pointer:coarse){button,select{min-height:44px}input[type=range]{height:28px;margin-top:0}.timeline-span{height:22px;min-height:22px;top:6px}.timeline-span:after{position:absolute;content:'';inset:-6px 0}.play-button{min-height:44px;width:44px}.scene-label{min-height:36px}}
 /* Owner-authorized text history is separate from the content-free event feed. */
 .lab-model { margin: 12px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.lab-selection {display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;font-size:12px}
+.lab-selection select {min-width:220px;max-width:100%;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:7px}
+#lab-freshness {color:var(--muted);font:11px var(--mono)}
+button:disabled {opacity:.5;cursor:default}
 #lab-exchange { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
 #lab-exchange summary { cursor: pointer; font-size: 12px; }
 #lab-messages { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); gap: 20px; margin-top: 12px; }

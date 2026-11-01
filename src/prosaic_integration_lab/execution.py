@@ -11,7 +11,7 @@ from .metadata import Metadata
 from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
-from .observability import bind_run,accounting_observation,workflow_observation
+from .observability import bind_run,accounting_observation,workflow_observation,scoped_observer,scoped_output
 from .capacity import policy
 
 def validate_workflow_limits(definition):
@@ -100,8 +100,9 @@ class Execution:
             actor_id=reservation['actor_id'], billing_account_id=reservation['billing_account_id'], request_id=reservation['run_id'])
         return Harness(workflows[reservation['workflow']], store=self.store,
                        run_id=reservation['run_id'], context=context, accounting=self.recorder,
-                       **({'observer':self.observer} if self.observer is not None else {}),
-                       on_event=self.fixture_event if self.config.get('fixture_events_url') else None)
+                       **({'observer':scoped_observer(self,reservation['run_id'])}
+                          if self.observer is not None or getattr(self,'observations',None) is not None else {}),
+                       on_event=scoped_output(self,reservation['run_id']))
 
     def check_scope(self, reservation):
         if any(reservation[name] != self.config[name] for name in ('namespace', 'environment')):

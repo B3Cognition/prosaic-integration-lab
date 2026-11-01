@@ -46,6 +46,22 @@ def test_capacity_and_mutation_do_not_corrupt_other_runs():
     assert sink.snapshot('c')['events'][0]['event'] != 'mutated'
 
 
+def test_discovery_is_bounded_and_ordered_by_real_activity():
+    now=[1.0]
+    sink=RunObservations(max_runs=2,clock=lambda:now[0])
+    sink.observe('a',event('invocation_started'))
+    now[0]=2
+    sink.observe('b',event('invocation_started'))
+    now[0]=3
+    assert sink.recent()==[{'runId':'b','active':True,'ageSeconds':1},
+                           {'runId':'a','active':True,'ageSeconds':2}]
+    sink.output('a',{'event':'ignored'})
+    assert sink.recent()[0]['runId']=='a'
+    sink.observe('c',event('invocation_started'))
+    assert [item['runId'] for item in sink.recent()]==['c','a']
+    assert not sink.snapshot('b')['available']
+
+
 def test_invalid_events_and_nonfinite_fields_are_ignored():
     sink = RunObservations()
     sink.observe('a', event('secret_payload'))

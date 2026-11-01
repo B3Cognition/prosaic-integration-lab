@@ -61,7 +61,7 @@ export function stateAt(run, time) {
   const reports = usageAt(run, t);
   const done = t >= run.duration && run.status !== 'running';
   const outcome = done ? run.outcome : 'running';
-  const labels = {completed:'Turn completed',waiting:'Waiting for input',failed:'Execution failed',timed_out:'Run timed out',needs_resolution:'Resolution required',ready:'Ready'};
+  const labels = {completed:'Turn completed',waiting:'Waiting for input',failed:'Execution failed',timed_out:'Run timed out',needs_resolution:'Resolution required',ready:'Ready',blocked:'Workflow blocked',rejected:'Workflow rejected',start_uncertain:'Start uncertain · reconciliation required',cancelled:'Cancelled'};
   const failures=new Set(['timed_out','execution_failure','http_error','failed','budget_failure','critical_hook_error','cancelled']);
   return { time: t, active, done, reports,
     calls: run.spans.filter(s => s.kind === 'provider' && s.start <= t).length,

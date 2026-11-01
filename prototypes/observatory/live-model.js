@@ -40,14 +40,17 @@ export function observedRun(feed, {requestPending=false} = {}) {
     eventLog.push(entry);
   }
   const lastInvocation=[...events].reverse().find(event=>event.event==='invocation_completed');
-  const status=feed.sessionStatus==='needsResolution'?'needs_resolution':feed.active||requestPending?'running':feed.waiting?'waiting':feed.sessionStatus==='failed'||lastInvocation&&lastInvocation.outcome!=='completed'?
-    lastInvocation?.outcome==='timed_out'||feed.failureCode==='timeout'?'timed_out':'failed':lastInvocation?'completed':'ready';
-  if(status==='needs_resolution')for(const span of spans)if(span.pending){
+  const missingCalls=Number.isInteger(feed.usage?.totalCalls)?Math.max(0,feed.usage.totalCalls-providerCount):0;
+  incomplete ||= missingCalls>0;
+  const workflowStatus=feed.kind==='workflow'&&['completed','rejected','blocked','start_uncertain','waiting','running','failed','cancelled'].includes(feed.sessionStatus)?feed.sessionStatus:null;
+  const status=workflowStatus||(feed.sessionStatus==='needsResolution'?'needs_resolution':feed.active||requestPending?'running':feed.waiting?'waiting':feed.sessionStatus==='failed'||lastInvocation&&lastInvocation.outcome!=='completed'?
+    lastInvocation?.outcome==='timed_out'||feed.failureCode==='timeout'?'timed_out':'failed':lastInvocation?'completed':'ready');
+  if(status==='needs_resolution'||workflowStatus&&status!=='running')for(const span of spans)if(span.pending){
     span.pending=false;span.endUnknown=true;span.observedUntil=elapsed;span.end=span.start;span.outcome='unknown';incomplete=true;
   }
   return {id:feed.runId,name:'Recorded lab run',duration:elapsed,outcome:status,status,source:'observed',
     spans,observedEvents:eventLog,observedUsage:feed.usage||{input:null,output:null,available:false},
-    incomplete,generation:feed.generation||{calls:[],truncated:false},
+    incomplete,missingCalls,recoveryStatus:feed.recoveryStatus,captureUnavailable:feed.available===false,generation:feed.generation||{calls:[],truncated:false},
     toolName:[...spans].reverse().find(span=>span.kind==='tool')?.label||'Registered tool'};
 }
 

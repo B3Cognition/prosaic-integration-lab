@@ -60,7 +60,7 @@ class GenerationTrace:
                         latest['spanId'] not in self.tool_after):
                     latest['outcome']='unknown'
 
-    def output(self, event, at):
+    def output(self, event, at, *, capture_text=True):
         if (type(event) is not dict or event.get('provisional') is not True or
                 event.get('event') not in {'text_delta','text'} or
                 type(event.get('text')) is not str or not 0 < len(event['text']) <= 65536):
@@ -86,9 +86,12 @@ class GenerationTrace:
                 'characters':len(event['text']), 'totalCharacters':call['characters']})
         else:
             call['samplesTruncated'] = True
-        remaining = max(0,4096-len(call['preview']))
-        call['preview'] += event['text'][:remaining]
-        call['previewTruncated'] |= call['characters'] > 4096
+        if capture_text:
+            remaining = max(0,4096-len(call['preview']))
+            call['preview'] += event['text'][:remaining]
+            call['previewTruncated'] |= call['characters'] > 4096
+        else:
+            call['previewWithheld'] = True
 
     def snapshot(self):
         return {'version':1, 'calls':deepcopy(list(self.calls)), 'truncated':self.truncated,

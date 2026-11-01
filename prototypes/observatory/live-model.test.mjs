@@ -4,6 +4,26 @@ import { observedRun, reportedTokenText, reportedOutputText, displayUsage, messa
 import { stateAt, usageAt } from './sample-runs.js';
 
 const event = (id, at, name, extra = {}) => ({id,at,event:name,source:'runtime',invocation_id:'attempt',...extra});
+test('recorder calls without captured callback timing are explicit instead of reconstructed',()=>{
+  const run=observedRun({runId:'resumed',events:[],usage:{input:30,output:5,totalCalls:2}});
+  assert.equal(run.incomplete,true);assert.equal(run.missingCalls,2);
+  assert.equal(run.spans.length,0);assert.deepEqual(usageAt(run),{input:30,output:5,totalCalls:2});
+});
+test('durable workflow outcomes override invocation guesses, including runs without model calls',()=>{
+  for(const status of ['completed','rejected','blocked','start_uncertain','waiting','running','failed']){
+    for(const events of [[],[event(1,0,'invocation_started'),event(2,1,'invocation_completed',{outcome:'completed'})]]){
+      const run=observedRun({runId:'workflow',kind:'workflow',sessionStatus:status,elapsed:1,events});
+      assert.equal(run.status,status);
+      assert.equal(stateAt(run,run.duration).outcome,status);
+    }
+    if(status!=='running'){
+      const run=observedRun({runId:'workflow',kind:'workflow',sessionStatus:status,elapsed:1,
+        events:[event(1,0,'invocation_started'),event(2,.1,'provider_request_started',{turn:1})]});
+      assert.equal(run.incomplete,true);
+      assert.equal(stateAt(run,run.duration).active,undefined);
+    }
+  }
+});
 test('output token labels preserve unknown calls and diagnostic qualification',()=>{
   assert.equal(reportedOutputText({input:100,output:25,unknownCalls:1}),'≥25');
   assert.equal(reportedOutputText({input:null,output:null}),'—');

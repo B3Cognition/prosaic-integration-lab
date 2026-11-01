@@ -1,5 +1,24 @@
 # Codex handoff
 
+## Authenticated Observatory monitoring — 2026-11-01
+
+The maintainer confirmed automatic monitoring of all their Integration Lab runs.
+The hosted page now defaults to idle monitoring, discovers owned captured
+Chat/API and standalone workflow runs, keeps watching after completion, and
+requires explicit selection of demos/replay. Safari restores the exact verified
+Lab identity; provider keys are clearly distinguished. Capture remains optional,
+process-local and bounded; workflow raw text is withheld and missing callback
+timing is explicit. See the [plan](superpowers/plans/2026-11-01-observatory-monitor.md)
+and [verification ledger](verification/observatory-monitor-2026-11-01.md).
+One external real-model API request was automatically observed in Safari:
+533 input / 111 output / 644 provider-reported tokens in both views. Keep the
+unqualified accounting marker, immutable published artifacts and SDK pins.
+The source-only preview is retained for the maintainer; this follow-up is not
+merged or released.
+
+Final regressions: 2,077 Python + 32 Node passed. Owned PostgreSQL16 observability
+acceptance: 26 passed with cleanup verified; focused review has no blockers.
+
 ## Real-model usage compatibility fix — 2026-11-01
 
 The maintainer requested actual token counts in both Observatory views after

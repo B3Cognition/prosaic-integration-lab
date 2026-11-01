@@ -11,12 +11,13 @@ const format = value => Number.isFinite(value) ? value.toLocaleString('en-US') :
 const gsap = globalThis.gsap;
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 let reducedMotion = motionPreference.matches;
-let run = RUNS.success, view = 'live', selectedComponent = null, selectedSpan = 'provider-2';
+const idleRun=()=>({...observedRun({runId:'—',events:[],usage:{input:null,output:null,available:false}}),idle:true});
+let run = idleRun(), view = 'live', selectedComponent = null, selectedSpan = null, monitorConnected=false, monitorStale=false;
 let playing = false, speed = 1, tween = null, graphics = null, currentPhase = '';
 let lab = null;
 let generationSpan = null;
 const generationView = createGenerationView($('#generation'), span => { generationSpan=span;render(); });
-const playhead = { time: 15.2 };
+const playhead = { time: 0 };
 
 function text(selector, value) { const element = $(selector); if (element.textContent !== String(value)) element.textContent = value; }
 function announce(value) { text('#announcement', value); }
@@ -27,7 +28,7 @@ function setGraphicsUnavailable(message) {
   $('#graphics-message').classList.add('error');
   text('#graphics-message', message);
   text('#render-mode', 'Timeline available');
-  text('#renderer-info', 'Sample timeline · no provider calls');
+  text('#renderer-info', run.source==='observed'?'Captured Lab timeline · graphics unavailable':'Demo timeline · no provider calls');
   $$('.camera-controls button').forEach(button => { button.disabled = true; });
   setView('inspect');
 }
@@ -126,6 +127,8 @@ function buildRecordedView() {
   text('.inspect-heading .eyebrow',run.source==='observed'?'Recorded lab run':'Recorded sample');
   text('.scene-footer>span:last-child',run.source==='observed'?'Illustrative geometry / observed activity':'Illustrative geometry / sample activity');
   text('.usage-detail p',run.source==='observed'?usage.available===false?'Recorder data unavailable. Token usage is unknown.':usage.unqualified?`† Provider-reported counts include ${usage.unqualifiedCalls} unsupported usage report(s). Accounting remains unqualified.${usage.unknownCalls?' Additional calls have unknown usage.':''} Latest totals, independent of replay.`:usage.unknownCalls?`${usage.completeCalls} completed reports; ${usage.unknownCalls} unresolved. Totals are the known subtotal.`:'Latest recorder totals, independent of replay position.':'Complete sample reports. Independent of playback position.');
+  if(run.missingCalls)$('.usage-detail p').append(` ${run.missingCalls} recorder call(s) have no captured timing.`);
+  text('#renderer-info',run.idle?'Three.js + GSAP · no captured traffic':run.source==='observed'?'Three.js + GSAP · actual Lab SDK observations':'Three.js + GSAP · scripted demo · no provider calls');
 }
 
 for (const selector of ['#provider-strip', '#tool-strip']) for (let i = 0; i < 27; i++) $(selector).append(document.createElement('i'));
@@ -145,7 +148,7 @@ function render() {
   text('#live-title', state.label);
   const past = eventsFor(run).filter(e => e.at <= state.time), latest = past[past.length - 1];
   text('#latest-event', latest ? latest.label + (latest.outcome === 'timed_out' ? ' · timed out' : '') : 'Waiting for sample start');
-  const outcomeLabels={completed:'Completed',waiting:'Waiting',failed:'Failed',timed_out:'Timed out',needs_resolution:'Resolve',ready:'Ready',running:'Running'};
+  const outcomeLabels={completed:'Completed',waiting:'Waiting',failed:'Failed',timed_out:'Timed out',needs_resolution:'Resolve',ready:'Ready',running:'Running',blocked:'Blocked',rejected:'Rejected',start_uncertain:'Reconcile',cancelled:'Cancelled'};
   text('#run-outcome',outcomeLabels[state.outcome]||state.outcome);
   $('#run-outcome').classList.toggle('is-error', state.toolFailed||state.providerFailed||['failed','timed_out'].includes(state.outcome));
   text('#play-icon', playing ? 'Ⅱ' : state.done ? '↺' : '▶');
@@ -165,12 +168,36 @@ function render() {
   }
   const phaseKey = state.active?.id || state.outcome;
   if (phaseKey !== currentPhase) { currentPhase = phaseKey; announce(state.label); }
+  text('#playback-mode',run.idle?'Monitor idle':run.source!=='observed'?'Demo replay · scripted sample':lab?.status().following?run.status==='running'?'Live · following current Lab events':'Monitor · latest captured events':'Replay · recorded Lab events');
+  for(const id of ['play','scrubber','speed'])$('#'+id).disabled=!!run.idle;
+  if(run.idle){
+    const label=monitorConnected?'Waiting for your Lab traffic':'Disconnected · no traffic';
+    text('#phase',label);text('#live-title',label);text('#latest-event','Send a message in Chat, use the Lab API, or start a test after connecting.');
+    text('.sample-tag',monitorConnected?'Connected · waiting':'Disconnected');
+    text('#generation-source','No captured traffic');text('#generation-age','No sample is playing. Select a demo explicitly to explore scripted events.');
+    text('#run-outcome','Idle');text('#clock','—');text('#elapsed','—');text('#calls','—');
+    text('#finding',label);text('#duration-total','—');text('.inspect-heading .eyebrow','Lab monitor');
+    text('.scene-footer>span:last-child','Illustrative geometry / no observed activity');
+    text('#play-label','Waiting');text('#play-icon','·');$('#play').setAttribute('aria-label','No captured run');
+  } else text('.sample-tag',run.source==='observed'?lab?.status().following&&run.status==='running'?'Live Lab traffic':'Captured Lab traffic':'DEMO · scripted traffic');
+  if(!run.idle&&run.captureUnavailable){
+    text('#phase','Trace unavailable');text('#live-title','Trace unavailable');
+    text('#finding','This process no longer holds this trace. It may have restarted or evicted the run. Recorder totals, when available, remain separate.');
+    text('#generation-age','No captured timing is available for this run. No activity has been reconstructed.');
+  }
+  if(monitorStale&&run.source==='observed'&&!run.idle)text('#playback-mode','Updates unavailable · retained trace');
   graphics?.update({...state,generation}, playing);
+}
+
+function showIdle(){
+  tween?.kill();tween=null;playing=false;run=idleRun();playhead.time=0;generationSpan=null;selectedSpan=null;
+  selectedComponent=null;buildRecordedView();render();
 }
 
 function pause() { tween?.kill(); tween = null; playing = false; render(); }
 function seek(value) { lab?.pauseFollowing(); pause(); playhead.time = Math.max(0, Math.min(run.duration, value)); render(); }
 function play() {
+  if(run.idle)return;
   if (!gsap) { announce('Animation library unavailable. Use the timeline to inspect the sample.'); return; }
   if (playhead.time >= run.duration) playhead.time = 0;
   tween?.kill(); playing = true; render();
@@ -183,7 +210,7 @@ function play() {
 $('#play').addEventListener('click', () => {lab?.pauseFollowing();playing ? pause() : play();});
 $('#scrubber').addEventListener('input', event => { const time = Number(event.target.value); seek(time); });
 $('#speed').addEventListener('click', () => { const speeds = [.5, 1, 2]; speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length]; text('#speed', speed + '×'); tween?.timeScale(speed); });
-$('#scenario').addEventListener('change', event => {if(event.target.value==='observed'){lab?.follow();return;}lab?.hide();pause();generationSpan=null;run=RUNS[event.target.value];playhead.time=0;currentPhase='';selectComponent(null);buildRecordedView();render();if(!reducedMotion)play();});
+$('#scenario').addEventListener('change', event => {if(event.target.value==='observed'){showIdle();lab?.follow();return;}lab?.hide();pause();generationSpan=null;run=RUNS[event.target.value];playhead.time=0;currentPhase='';selectComponent(null);buildRecordedView();render();if(!reducedMotion)play();});
 for (const name of ['live', 'inspect']) $('#' + name + '-tab').addEventListener('click', () => setView(name));
 $('.view-tabs').addEventListener('keydown', event => {
   if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -208,12 +235,29 @@ try {
   $('#scene-labels').hidden = false;
   $('#graphics-message').hidden = true;
   render();
-  if (!reducedMotion) play();
 } catch (error) {
   console.warn('Observatory graphics unavailable:', error.message);
   setGraphicsUnavailable('3D rendering needs WebGL 2. You can still explore every timing span, token report and event below.');
 }
-lab=connectLab({onStatus:message=>text('#lab-status',message),onModel:label=>{
+lab=connectLab({onStatus:message=>text('#lab-status',message),onConnection:connected=>{
+  monitorConnected=connected;
+  monitorStale=false;
+  $('#lab-auth-help').hidden=connected;
+  $('#lab-runs').disabled=!connected;
+  if($('#scenario').value==='observed')showIdle();
+  if(!connected)text('#lab-freshness','Disconnected · no traffic displayed');
+},onFreshness:state=>{
+  monitorStale=!state.ok;
+  text('#lab-freshness',state.ok?`Watching your runs · checked ${new Date(state.at).toLocaleTimeString()} · ${state.count} captured`:'Updates unavailable · displayed trace may be stale');
+  if(!state.ok&&run.source==='observed'){pause();text('#playback-mode','Updates unavailable · retained trace');}
+},onRuns:runs=>{
+  const select=$('#lab-runs'),state=lab?.status(),previous=state?.followLatest?'latest':state?.selected||select.value;
+  const options=[{value:'latest',label:'Follow latest activity'},...runs.map(item=>({value:item.kind+':'+item.runId,label:(item.kind==='conversation'?'Chat':'Workflow')+' · '+item.runId.slice(0,12)+(item.active?' · active':' · captured')}))];
+  if([...select.options].map(option=>option.value+option.textContent).join('|')!==options.map(option=>option.value+option.label).join('|')){
+    select.replaceChildren();for(const item of options){const option=document.createElement('option');option.value=item.value;option.textContent=item.label;select.append(option);}
+  }
+  select.value=options.some(option=>option.value===previous)?previous:'latest';
+},onModel:label=>{
   text('#lab-model',label);
   if(label.startsWith('Local Qwen')&&$('#lab-message').value==='Show generation')$('#lab-message').value='Count from 1 to 20, separated by commas. Output only the numbers, no explanation. /no_think';
 },onMessages:messages=>{
@@ -231,13 +275,10 @@ lab=connectLab({onStatus:message=>text('#lab-status',message),onModel:label=>{
   run=observedRun(feed,options);
   if(newRun)selectComponent(null);
   else if(selectedComponent==='tool'&&previousTool!==run.toolName)selectComponent('tool',false);
-  if(!$('#scenario option[value="observed"]')){const option=document.createElement('option');option.value='observed';option.textContent='Actual lab execution';$('#scenario').append(option);}
   $('#scenario').value='observed';
-  if(options.following){tween?.kill();tween=null;playhead.time=run.duration;playing=run.status==='running'&&!document.hidden;}
+  if(options.following){tween?.kill();tween=null;playhead.time=run.duration;playing=run.status==='running'&&!document.hidden&&!monitorStale;}
   else playhead.time=Math.min(previous,run.duration);
   buildRecordedView();render();
-  text('#playback-mode',options.following&&run.status==='running'?'Following lab execution':'Recorded lab run');
-  text('#renderer-info','Three.js + GSAP · actual Lab SDK observations');
 }});
 // Diagnostic surface for prototype verification, never a lab API.
 Object.defineProperty(window, 'prosaicObservatory', { value: Object.freeze({

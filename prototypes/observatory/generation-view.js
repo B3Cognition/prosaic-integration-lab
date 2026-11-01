@@ -66,16 +66,16 @@ export function createGenerationView(root, onSelect) {
     const usage=displayUsage(usageAt(run));
     put('#generation-tokens',reportedOutputText(usage));
     put('#generation-token-scope',usage.available===false?'Unavailable':usage.unknownCalls?'Known subtotal':'Reported total');
-    const nextFrame=[run.id,call?.spanId,model.chunks,model.phase,Math.floor(time*10),playing,reducedMotion,preferred].join('|');
+    const nextFrame=[run.id,call?.spanId,model.chunks,model.phase,Math.floor(time*10),playing,reducedMotion,preferred,run.missingCalls,run.captureUnavailable,run.idle,call?.previewWithheld].join('|');
     if(frameKey===nextFrame)return model;frameKey=nextFrame;
     root.dataset.phase=model.phase;root.dataset.motion=playing&&!reducedMotion?'on':'off';
     const phases={empty:'Awaiting a provider call',queued:'Provider call not started',waiting:'Waiting for first output',generating:'Output is arriving',complete:'Output stream finished',interrupted:'Stream interrupted',unavailable:'Generation timing unavailable'};
     put('#generation-state',!playing&&model.phase==='generating'?'Paused at recorded output':phases[model.phase]);
-    put('#generation-source',run.source==='observed'?'Observed output':'Scripted sample');
+    put('#generation-source',run.idle?'No captured traffic':run.source==='observed'?'Observed output':'Scripted sample');
     put('#generation-first',seconds(model.firstOutput));
     put('#generation-count',(model.partial?'≥':'')+number(model.chunks));
     put('#generation-gap',seconds(model.largestGap));
-    put('#generation-age',model.phase==='generating'&&model.sinceLastOutput>.5?
+    put('#generation-age',run.idle?'Monitor waiting for captured Lab traffic. No sample is playing.':run.captureUnavailable?'No captured timing is available in this process.':model.phase==='generating'&&model.sinceLastOutput>.5?
       seconds(model.sinceLastOutput)+' since the last output':model.phase==='waiting'?
       seconds(model.elapsed)+' elapsed · includes transport and model work':
       model.phase==='unavailable'?'The provider returned no visible text stream.':
@@ -96,7 +96,7 @@ export function createGenerationView(root, onSelect) {
     put('#generation-preview',model.preview || '');
     output.hidden=!model.preview;
     if(playing&&atBottom)output.scrollTop=output.scrollHeight;
-    put('#generation-evidence',model.uncorrelated?'Some output could not be safely attributed. Only identified chunks are shown.':
+    put('#generation-evidence',run.missingCalls?`${run.missingCalls} recorder call(s) have no captured stream timing. Only captured output is shown.`:call?.previewWithheld?'Workflow output text withheld · arrival timings and character counts only.':model.uncorrelated?'Some output could not be safely attributed. Only identified chunks are shown.':
       model.truncated?'Capture limit reached. Counts remain cumulative; hatched timing intervals are unknown.':
       model.phase==='interrupted'?'Partial output is provisional. Completion was not confirmed.':
       'Provisional text · committed messages remain in conversation history.');
