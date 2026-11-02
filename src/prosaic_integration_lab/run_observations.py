@@ -68,6 +68,7 @@ class RunObservations:
                 self.runs[run_id] = {'start': now, 'events': deque(maxlen=self.max_events),
                     'open': set(), 'count': 0, 'truncated': False, 'generation':GenerationTrace()}
             run = self.runs[run_id]
+            run['updated'] = now
             self.runs.move_to_end(run_id)
             run['count'] += 1
             if len(run['events']) == self.max_events:
@@ -81,13 +82,23 @@ class RunObservations:
             run['events'].append(safe)
             run['generation'].observe(safe)
 
-    def output(self, run_id, event):
+    def output(self, run_id, event, *, capture_text=True):
         """Accept only public Harness provisional events for an existing run."""
         with self.lock:
             run = self.runs.get(run_id)
             if run is not None:
+                run['updated'] = self.clock()
+                self.runs.move_to_end(run_id)
                 at = round(max(0,self.clock()-run['start']),6)
-                run['generation'].output(event,at)
+                run['generation'].output(event,at,capture_text=capture_text)
+
+    def recent(self):
+        """Bounded identifiers only; callers must recheck host authorization."""
+        with self.lock:
+            now = self.clock()
+            return [{'runId': key, 'active': bool(run['open']),
+                     'ageSeconds': round(max(0, now-run['updated']), 3)}
+                    for key, run in reversed(self.runs.items())]
 
     def snapshot(self, run_id):
         with self.lock:
@@ -139,6 +150,69 @@ def usage_projection(rows):
 def install_observation_routes(app, observations):
     from fastapi import HTTPException, Request
     from fastapi.responses import JSONResponse
+
+    def workflow_owned(execution, principal, run_id):
+        row = execution.metadata.owned(principal, run_id) if execution.metadata is not None else None
+        if row is None:
+            raise HTTPException(404, 'not_found')
+        execution.check_scope(row)
+        if row['workflow'] == 'native':
+            if execution.native is None:
+                raise HTTPException(404, 'not_found')
+            execution.native.workflow(principal, row['request']['proposal_id'])
+        return row
+
+    def catalog(execution, principal):
+        result = []
+        for item in observations.recent():
+            kind = None
+            if execution.conversation is not None:
+                try:
+                    execution.conversation._owned(principal, item['runId'])
+                    kind = 'conversation'
+                except HTTPException as error:
+                    if error.status_code not in {403, 404, 409}:
+                        raise
+            if kind is None:
+                try:
+                    workflow_owned(execution, principal, item['runId'])
+                    kind = 'workflow'
+                except HTTPException as error:
+                    if error.status_code not in {403, 404, 409}:
+                        raise
+            if kind is not None:
+                result.append({**item, 'kind': kind})
+        return {'runs': result, 'maxRuns': observations.max_runs,
+                'scope': 'authenticated-user-in-this-process'}
+
+    @app.get('/observations/runs')
+    def recent_runs(request: Request):
+        execution = request.app.state.execution
+        return JSONResponse(execution.read(catalog, execution, request.state.principal),
+                            headers={'Cache-Control': 'no-store'})
+
+    def workflow_snapshot(execution, principal, run_id):
+        row = workflow_owned(execution, principal, run_id)
+        status = execution.status(row)
+        try:
+            rows = execution.recorder.calls(application_id='integration-lab',
+                tenant_id=row['tenant_id'], actor_id=row['actor_id'],
+                billing_account_id=row['billing_account_id'], run_id=run_id)
+        except Exception:
+            rows = None
+        snapshot=observations.snapshot(run_id)
+        for call in snapshot['generation']['calls']:
+            call['preview']=''
+            call['previewWithheld']=True
+        return {**snapshot, 'kind':'workflow', 'recoveryStatus':status.get('recovery_status'),
+                'usage': usage_projection(rows),
+                'sessionStatus': status.get('status'), 'waiting': status.get('status') == 'waiting'}
+
+    @app.get('/observations/runs/{run_id}')
+    def workflow_observations(run_id: str, request: Request):
+        execution = request.app.state.execution
+        return JSONResponse(execution.read(workflow_snapshot, execution,
+            request.state.principal, run_id), headers={'Cache-Control': 'no-store'})
 
     @app.get('/conversations/{session_id}/observations')
     def conversation_observations(session_id: str, request: Request):

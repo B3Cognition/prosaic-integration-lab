@@ -111,4 +111,6 @@ test('paused replay refreshes recorder totals and qualification without moving t
   view.render({...known,observedUsage:{...known.observedUsage,totalCalls:2,unknownCalls:1}},.5,null,false,false);
   assert.equal(nodes.get('#generation-tokens').textContent,'≥25');
   assert.equal(nodes.get('#generation-token-scope').textContent,'Known subtotal');
+  view.render({...known,missingCalls:2},.5,null,false,false);
+  assert.match(nodes.get('#generation-evidence').textContent,/2 recorder call/);
 });

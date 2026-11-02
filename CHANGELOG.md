@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.9.1 — 2026-11-02
+
+- Start Observatory as an idle authenticated monitor, discover your captured
+  Chat/API and standalone workflow runs automatically, and keep watching after
+  completion. Make demos explicit, pin replay until Follow live, and distinguish
+  disconnected, stale, unavailable, live and retained events.
+- Restore manually authenticated Safari/browser sessions with the exact verified
+  Lab principal. Explain why oMLX keys cannot authenticate Lab, serialize browser
+  handshakes, and preserve workflow output visibility by capturing timing/counts
+  without raw agent text. Identify recorder calls whose timing was not captured.
+- Preserve real-model token usage in both Observatory views by translating the
+  local oMLX provider's exact empty prefill heartbeat into an SSE comment. Keep
+  real model conflicts, usage payloads and recorder accounting qualification intact.
+
 ## 0.9.0 — 2026-11-01
 
 - Enable streaming by default in Lab conversations, native workflow bindings,

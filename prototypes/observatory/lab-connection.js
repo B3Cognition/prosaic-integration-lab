@@ -1,26 +1,53 @@
 // Same-origin Lab client. The fixture API credential lives only in this closure.
-export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
+export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{},onConnection=()=>{},onRuns=()=>{},onFreshness=()=>{}}) {
   const $=selector=>document.querySelector(selector);
-  let token='',context=null,timer=null,generation=0;
+  let token='',context=null,timer=null,discoveryTimer=null,generation=0,discovering=false;
+  let visible=true,followLatest=true,runs=[],starting=false,authenticating=false;
   const hosted=location.pathname.startsWith('/observatory/');
   function disconnected() {
-    token='';clearInterval(timer);
-    if(context)context.following=false;
+    token='';generation++;clearInterval(timer);clearInterval(discoveryTimer);context=null;runs=[];
     $('#lab-start').disabled=true;$('#lab-run').hidden=true;$('#lab-connect').hidden=false;
+    onRuns([]);onMessages([]);onConnection(false);
+    onStatus('Disconnected. Use this Lab instance’s API token or a fresh launcher link.');
   }
   async function api(path,options={}) {
+    const own=generation;
     const response=await fetch(path,{...options,credentials:'same-origin',cache:'no-store',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,...options.headers}});
     if(!response.ok){
-      const error=Error(response.status===401?'Connection rejected. Reconnect with a valid Lab API token or a fresh launcher link.':'Lab request returned HTTP '+response.status+'.');
+      const error=Error(response.status===401?'Lab connection rejected. Use a Lab API token, not an oMLX/provider key, or a fresh launcher link.':'Lab request returned HTTP '+response.status+'.');
       error.authentication=response.status===401;
-      if(error.authentication)disconnected();
+      if(error.authentication&&own===generation)disconnected();
       throw error;
     }
     return response.json();
   }
   function emit() {
-    if(context?.feed&&context.visible)onRun(context.feed,{following:context.following,requestPending:context.inFlight});
+    if(context?.feed&&visible)onRun(context.feed,{following:context.following,requestPending:context.inFlight});
+  }
+  async function choose(item) {
+    if(starting||context?.inFlight)return;
+    if(!item)return;
+    clearInterval(timer);onMessages([]);
+    context={id:item.runId,kind:item.kind,inFlight:false,settlement:0,following:true,polling:false};
+    await poll(context);
+    if(context?.kind==='conversation')await readMessages(context);
+  }
+  async function discover() {
+    if(!token||discovering)return;
+    discovering=true;const own=generation;
+    try {
+      const result=await api('/observations/runs');
+      if(own!==generation)return;
+      runs=result.runs||[];onRuns(runs);onFreshness({ok:true,at:Date.now(),count:runs.length,maxRuns:result.maxRuns});
+      if(starting||context?.inFlight)return;
+      const latest=runs[0];
+      if(followLatest&&latest&&latest.runId!==context?.id)await choose(latest);
+      else if(context)await poll(context);
+    } catch(error) {
+      if(own!==generation)return;
+      onFreshness({ok:false});onStatus(error.message+' Monitoring will reconnect automatically; no run was dispatched.');
+    } finally {discovering=false;}
   }
   async function poll(current,afterSettlement=false) {
     if(current!==context)return;
@@ -30,22 +57,24 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
     current.pollingDone=new Promise(resolve=>finished=resolve);
     const settlement=current.settlement;
     try {
-      const feed=await api('/conversations/'+current.id+'/observations');
+      const feed=await api(current.kind==='workflow'?'/observations/runs/'+current.id:'/conversations/'+current.id+'/observations');
       if(current!==context||settlement!==current.settlement)return;
       current.feed=feed;emit();
+      if(!feed.active&&!current.inFlight&&current.kind==='conversation')await readMessages(current);
       const cadence=current.inFlight||feed.active?500:2000;
       if(current.cadence!==cadence){clearInterval(timer);current.cadence=cadence;timer=setInterval(()=>poll(current),cadence);}
       if(!current.inFlight&&!feed.active&&!feed.waiting)clearInterval(timer);
     } catch(error) {
       if(current!==context||settlement!==current.settlement)return;
-      current.following=false;
+      onFreshness({ok:false});
       onStatus(error.authentication?error.message:'Trace update unavailable. Retained history is still available; no request was repeated.');
     } finally {current.polling=false;finished();}
   }
   async function start(event) {
     event.preventDefault();
-    if(!token||context?.inFlight)return;
-    clearInterval(timer);generation++;context=null;
+    if(!token||starting||context?.inFlight)return;
+    starting=true;
+    clearInterval(timer);context=null;visible=true;followLatest=true;
     const own=generation;
     $('#lab-start').disabled=true;
     onMessages([]);
@@ -53,7 +82,7 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
     try {
       const session=await api('/conversations',{method:'POST',headers:{'Idempotency-Key':'observatory-'+crypto.randomUUID()},body:'{}'});
       if(own!==generation)return;
-      context={id:session.sessionId,inFlight:true,settling:false,settlement:0,following:true,visible:true,polling:false,cadence:500,
+      context={id:session.sessionId,kind:'conversation',inFlight:true,settling:false,settlement:0,following:true,polling:false,cadence:500,
         feed:{runId:session.sessionId,elapsed:0,active:false,events:[],usage:{input:null,output:null,available:false}}};
       emit();
       timer=setInterval(()=>poll(context),500);
@@ -70,7 +99,7 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
       if(context){context.inFlight=false;context.settling=true;context.settlement++;}
       onStatus(error.message+(error.authentication?' No request was repeated.':' Inspect the retained trace before deciding what to do next.'));
       if(context&&token)await poll(context,true);
-    } finally {if(context){context.inFlight=false;context.settling=false;}$('#lab-start').disabled=!token;}
+    } finally {starting=false;if(context){context.inFlight=false;context.settling=false;}$('#lab-start').disabled=!token;}
   }
   async function readMessages(current) {
     try {
@@ -80,21 +109,36 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
   }
   function connected(label) {
     $('#lab-connect').hidden=true;$('#lab-run').hidden=false;
-    $('#lab-start').disabled=false;onModel(label);onStatus('Connected · '+label);
+    $('#lab-start').disabled=false;onModel(label);onConnection(true);onStatus('Connected · monitoring your Lab runs, including Chat and API traffic.');
+    clearInterval(discoveryTimer);discoveryTimer=setInterval(discover,2000);discover();
   }
   $('#lab-run').addEventListener('submit',start);
   $('#lab-connect').addEventListener('submit',async event=>{
-    event.preventDefault();if(context?.inFlight)return;
+    event.preventDefault();if(authenticating||starting||context?.inFlight)return;
     const candidate=$('#lab-token').value.trim();$('#lab-token').value='';
     if(!candidate)return;
     disconnected();
-    try{await api('/chat/connection',{headers:{Authorization:'Bearer '+candidate}});
-      token=candidate;context=null;connected('Lab API credential verified');}
-    catch(error){onStatus(error.message);}
+    const own=generation;authenticating=true;$('#lab-connect button').disabled=true;
+    onStatus('Verifying Lab credential…');
+    try{
+      const response=await fetch('/chat/session',{method:'POST',credentials:'same-origin',cache:'no-store',
+        headers:{'X-Chat-Session':'connect','Authorization':'Bearer '+candidate}});
+      if(!response.ok)throw Error('Lab connection rejected. Enter the Lab API token from this launcher’s chat-service.json, not your oMLX/provider key.');
+      const result=await response.json();if(own!==generation)return;
+      token=result.token;context=null;connected(result.label);}
+    catch(error){if(own===generation)onStatus(error.message);}
+    finally{authenticating=false;$('#lab-connect button').disabled=false;}
   });
-  $('#lab-follow').addEventListener('click',()=>{if(context){context.following=true;context.visible=true;emit();}});
+  function follow(){visible=true;followLatest=true;onRuns(runs);if(context){context.following=true;emit();}discover();}
+  $('#lab-follow').addEventListener('click',follow);
+  $('#lab-runs').addEventListener('change',event=>{
+    visible=true;followLatest=event.target.value==='latest';
+    if(followLatest){follow();return;}
+    choose(runs.find(item=>item.kind+':'+item.runId===event.target.value));
+  });
   async function bootstrap() {
     if(!hosted)return;
+    const own=generation;authenticating=true;$('#lab-connect button').disabled=true;
     $('#lab-controls').hidden=false;
     const code=new URLSearchParams(location.hash.slice(1)).get('connect');
     history.replaceState(null,'',location.pathname);
@@ -102,13 +146,15 @@ export function connectLab({onRun,onStatus,onMessages=()=>{},onModel=()=>{}}) {
       const response=await fetch(code?'/chat/bootstrap':'/chat/session',{method:'POST',credentials:'same-origin',
         headers:code?{'X-Chat-Launch':code}:{'X-Chat-Session':'restore'}});
       if(!response.ok)throw Error(code?'Launch link expired or already used.':'No active launcher session.');
-      const result=await response.json();token=result.token;connected(result.label);
-    } catch(error){onStatus(error.message+' Use a fresh launch link or connect below.');}
+      const result=await response.json();if(own!==generation)return;
+      token=result.token;connected(result.label);
+    } catch(error){if(own===generation)onStatus(error.message+' Use a fresh launch link or connect below.');}
+    finally{authenticating=false;$('#lab-connect button').disabled=false;}
   }
   bootstrap();
-  return {pauseFollowing(){if(context)context.following=false;},
-    hide(){if(context){context.visible=false;context.following=false;}},
-    follow(){if(context){context.visible=true;context.following=true;emit();}},
-    status:()=>({connected:!!token,inFlight:!!(context?.inFlight||context?.settling),following:!!context?.following,runId:context?.id||null}),
+  return {pauseFollowing(){followLatest=false;if(context)context.following=false;onRuns(runs);},
+    hide(){visible=false;if(context)context.following=false;},
+    follow,
+    status:()=>({connected:!!token,inFlight:!!(starting||context?.inFlight||context?.settling),following:!!context?.following,followLatest,selected:context?context.kind+':'+context.id:null,runId:context?.id||null}),
   };
 }

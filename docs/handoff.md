@@ -1,5 +1,50 @@
 # Codex handoff
 
+## Authorized Lab 0.9.1 release — 2026-11-02
+
+The maintainer explicitly requested checking all four PR #41 cells, fixing any
+failures, merging and publishing a new version once green. All four implementation
+head cells passed at `f0398df87e0490ca96f51745da2305a6eccfc158` in run41343271503.
+Prepare 0.9.1 metadata/notes and qualify its final source separately before merge.
+Follow the [release plan](superpowers/plans/2026-11-02-observatory-monitor-release.md).
+Publish original CI bytes with safe receipts and provenance, verify anonymous
+downloads and isolated consumers, and preserve all earlier release artifacts.
+This authorization supersedes the earlier unreleased-only scope below; no further
+merge/release confirmation is required. No new inference is needed.
+
+## Authenticated Observatory monitoring — 2026-11-01
+
+The maintainer confirmed automatic monitoring of all their Integration Lab runs.
+The hosted page now defaults to idle monitoring, discovers owned captured
+Chat/API and standalone workflow runs, keeps watching after completion, and
+requires explicit selection of demos/replay. Safari restores the exact verified
+Lab identity; provider keys are clearly distinguished. Capture remains optional,
+process-local and bounded; workflow raw text is withheld and missing callback
+timing is explicit. See the [plan](superpowers/plans/2026-11-01-observatory-monitor.md)
+and [verification ledger](verification/observatory-monitor-2026-11-01.md).
+One external real-model API request was automatically observed in Safari:
+533 input / 111 output / 644 provider-reported tokens in both views. Keep the
+unqualified accounting marker, immutable published artifacts and SDK pins.
+The source-only preview is retained for the maintainer; this follow-up is not
+merged or released.
+
+Final regressions: 2,077 Python + 32 Node passed. Owned PostgreSQL16 observability
+acceptance: 26 passed with cleanup verified; focused review has no blockers.
+
+## Real-model usage compatibility fix — 2026-11-01
+
+The maintainer requested actual token counts in both Observatory views after
+the released 0.9.0 real-model preview showed unknown usage. On
+`codex/observatory-token-usage`, the local gateway translates only the exact
+empty oMLX prefill heartbeat into a transport comment. Its fake model name had
+caused correct recorder quarantine of otherwise present counts. Live verification
+now shows 533 input / 98 output / 631 total provider-reported tokens in both views, with
+the existing unqualified marker; accounting qualification is unchanged. See the
+[verification ledger](verification/observatory-token-usage-2026-11-01.md).
+All 2,072 Python tests and 25 frontend tests passed, along with a focused review.
+Keep published 0.9.0 artifacts/tags, older previews, SDK pins and model-server
+settings unchanged. This fix has not been released.
+
 ## Authorized Lab 0.9.0 release — 2026-11-01
 
 The maintainer now explicitly authorizes the version bump, release notes, PR,

@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import ipaddress
 import json
+import re
 import os
 import secrets
 import socket
@@ -27,8 +28,19 @@ class Bootstrap:
         self.expires = time.monotonic() + 600
         self.lock = threading.Lock()
         self.cookie_name='prosaic-chat-'+hashlib.sha256(origin.encode()).hexdigest()[:12]
-        self.session=secrets.token_urlsafe(32)
-        self.session_expires=0
+        self.sessions={}
+
+    async def verified(self, scope, receive, token):
+        """Validate the exact credential through the ordinary host auth boundary."""
+        status=0
+        async def capture(message):
+            nonlocal status
+            if message['type']=='http.response.start':status=message['status']
+        child={**scope,'method':'GET','path':'/chat/connection',
+            'raw_path':b'/chat/connection','query_string':b'', 'state':{},
+            'headers':[(b'authorization',('Bearer '+token).encode('ascii'))]}
+        await self.app(child,receive,capture)
+        return status==200
 
     async def __call__(self, scope, receive, send):
         if (scope['type'] != 'http' or scope['path'] not in {'/chat/bootstrap','/chat/session'}
@@ -38,30 +50,90 @@ class Bootstrap:
         headers = scope.get('headers', [])
         codes = [value for key, value in headers if key.lower() == b'x-chat-launch']
         origins = [value for key, value in headers if key.lower() == b'origin']
+        markers=[value for key,value in headers if key.lower()==b'x-chat-session']
+        same_origin=len(origins)==1 and origins[0]==self.origin.encode()
+        manual=None
+        if scope['path']=='/chat/session' and same_origin and markers==[b'connect']:
+            authorization=[value for key,value in headers if key.lower()==b'authorization']
+            if len(authorization)==1 and authorization[0].startswith(b'Bearer ') and 7<len(authorization[0])<=8192:
+                try:
+                    candidate=authorization[0][7:].decode('ascii')
+                    if await self.verified(scope,receive,candidate):manual=candidate
+                except UnicodeError:pass
+        session=None
+        record=None
         with self.lock:
-            same_origin=len(origins)==1 and origins[0]==self.origin.encode()
+            now=time.monotonic()
+            self.sessions={key:value for key,value in self.sessions.items() if now<value['expires']}
             if scope['path']=='/chat/bootstrap':
-                valid = (same_origin and time.monotonic() < self.expires and len(codes)==1 and
+                valid = (same_origin and now < self.expires and len(codes)==1 and
                     self.code and secrets.compare_digest(codes[0], self.code.encode()))
-                if valid:
-                    self.code = ''
-                    self.session_expires=time.monotonic()+8*3600
+                if valid and len(self.sessions)<32:
+                    self.code=''
+                    record={'token':self.token,'label':self.label,'expires':now+8*3600}
+            elif manual is not None:
+                if len(self.sessions)<32:
+                    record={'token':manual,'label':'Lab API credential verified','expires':now+8*3600}
             else:
                 cookies=[value for key,value in headers if key.lower()==b'cookie']
-                markers=[value for key,value in headers if key.lower()==b'x-chat-session']
                 cookie=SimpleCookie()
                 try:
                     if len(cookies)==1 and len(cookies[0])<=8192:cookie.load(cookies[0].decode('ascii'))
                 except (CookieError,UnicodeError):pass
                 entry=cookie.get(self.cookie_name)
-                valid=(same_origin and markers==[b'restore'] and time.monotonic()<self.session_expires
-                    and entry is not None and secrets.compare_digest(entry.value.encode(),self.session.encode()))
-        response = JSONResponse({'token': self.token, 'label': self.label} if valid else
-            {'detail': 'launch_link_unavailable'}, status_code=200 if valid else 403,
+                if same_origin and markers==[b'restore'] and entry is not None:
+                    record=self.sessions.get(entry.value)
+            if record is not None and markers!=[b'restore']:
+                session=secrets.token_urlsafe(32)
+                self.sessions[session]=record
+        response = JSONResponse({key:record[key] for key in ('token','label')} if record is not None else
+            {'detail': 'launch_link_unavailable'}, status_code=200 if record is not None else 403,
             headers={'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer'})
-        if valid and scope['path']=='/chat/bootstrap':
-            response.set_cookie(self.cookie_name,self.session,path='/chat',httponly=True,samesite='strict')
+        if session is not None:
+            response.set_cookie(self.cookie_name,session,path='/chat',httponly=True,samesite='strict',max_age=8*3600)
         await response(scope, receive, send)
+
+
+def _local_sse_chunks(chunks):
+    """Translate only oMLX's empty prefill sentinel; preserve real wire evidence."""
+    def unique(items):
+        value={}
+        for key,item in items:
+            if key in value:raise ValueError('duplicate heartbeat key')
+            value[key]=item
+        return value
+
+    def frame(raw):
+        if len(raw)>4096:return raw
+        lines=[line for line in raw.splitlines() if line]
+        if len(lines)!=1 or not lines[0].startswith(b'data:'):return raw
+        try:
+            value=json.loads(lines[0][5:].decode('utf-8'),object_pairs_hook=unique)
+        except (ValueError,UnicodeError,RecursionError):return raw
+        if (type(value) is not dict or set(value)!={'id','object','created','model','choices'} or
+                value['model']!='keepalive' or value['object']!='chat.completion.chunk' or
+                type(value['created']) is not int or value['created']!=0 or
+                type(value['id']) is not str or
+                re.fullmatch(r'chatcmpl-(?:[0-9a-f]{8}|keepalive)',value['id']) is None or
+                type(value['choices']) is not list or len(value['choices'])!=1):return raw
+        choice=value['choices'][0]
+        if (type(choice) is not dict or set(choice)!={'index','delta','finish_reason'} or
+                type(choice['index']) is not int or choice['index']!=0 or
+                choice['finish_reason'] is not None or
+                choice['delta']!={'role':'assistant','content':''}):return raw
+        return b': keep-alive\n\n'
+
+    boundary=re.compile(rb'\r?\n\r?\n')
+    pending=bytearray();search=0
+    for chunk in chunks:
+        pending.extend(chunk);start=0
+        while match:=boundary.search(pending,search):
+            end=match.end()
+            yield frame(bytes(pending[start:end]))
+            start=search=end
+        if start:del pending[:start]
+        search=max(0,len(pending)-3)
+    if pending:yield bytes(pending)
 
 
 class ModelGateway:
@@ -136,12 +208,14 @@ class ModelGateway:
                             self.send_header('Content-Type','text/event-stream')
                             self.send_header('Cache-Control','no-store')
                             self.end_headers();streaming_started=True
-                            total=0;deadline=time.monotonic()+30
-                            for chunk in result.iter_bytes():
-                                total+=len(chunk)
-                                if total>8*1024*1024 or time.monotonic()>deadline:
-                                    self.close_connection=True
-                                    return
+                            def bounded_chunks():
+                                total=0;deadline=time.monotonic()+30
+                                for chunk in result.iter_bytes():
+                                    total+=len(chunk)
+                                    if total>8*1024*1024 or time.monotonic()>deadline:
+                                        raise ValueError('local response limit')
+                                    yield chunk
+                            for chunk in _local_sse_chunks(bounded_chunks()):
                                 self.wfile.write(chunk);self.wfile.flush()
                             return
                         content = bytearray()

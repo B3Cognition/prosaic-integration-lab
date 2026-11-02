@@ -11,7 +11,7 @@ from prosaic_runtime import EndpointConfig, ExecutionContext, ProsaicArtifact, R
 
 from .bundles import BundleRegistry
 from .identity import Principal
-from .observability import bind_run
+from .observability import bind_run,scoped_observer,scoped_output
 from .proposals import (ProposalStore, bounded_text, canonical_proposal,
     proposal_transport_schema, validate_proposal_transport)
 from .views import public_native_interaction, public_run, uncertain_run
@@ -283,8 +283,8 @@ class NativeExecution:
         context = ExecutionContext(application_id='integration-lab',tenant_id=reservation['tenant_id'],
             actor_id=reservation['actor_id'],billing_account_id=reservation['billing_account_id'],request_id=reservation['run_id'])
         return Harness(workflow,store=self.host.store,run_id=reservation['run_id'],context=context,
-            accounting=self.host.recorder,observer=self.host.observer,
-            on_event=self.host.fixture_event if self.host.config.get('fixture_events_url') else None)
+            accounting=self.host.recorder,observer=scoped_observer(self.host,reservation['run_id']),
+            on_event=scoped_output(self.host,reservation['run_id']))
 
     def status(self, reservation):
         bind_run(reservation)

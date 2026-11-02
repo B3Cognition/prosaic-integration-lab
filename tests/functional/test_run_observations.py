@@ -3,6 +3,32 @@ from tests.functional.test_conversation_journey import create, send, HEADERS
 from tests.functional.test_conversation_journey import stats
 
 
+def test_monitor_discovers_external_chat_traffic_for_its_owner_only(chat_client):
+    sink = RunObservations()
+    chat_client.host.observations = sink
+    install_observation_routes(chat_client.client.app, sink)
+    client = chat_client.client
+    assert client.get('/observations/runs').status_code == 401
+    assert client.get('/observations/runs', headers=HEADERS).json()['runs'] == []
+    # This is an ordinary Chat/API turn, not an Observatory-started request.
+    session = create(chat_client, 'external-chat')
+    send(chat_client, session, 'find', 'Find players')
+    response = client.get('/observations/runs', headers=HEADERS)
+    assert response.headers['cache-control'] == 'no-store'
+    catalog = response.json()
+    assert catalog['scope'] == 'authenticated-user-in-this-process'
+    assert catalog['maxRuns'] == 32
+    assert catalog['runs'][0]['runId'] == session['sessionId']
+    assert catalog['runs'][0]['kind'] == 'conversation'
+    assert 'Find players' not in response.text and 'alice-token' not in response.text
+    for token in ('bob-token', 'other-token'):
+        assert client.get('/observations/runs', headers={'Authorization':'Bearer '+token}).json()['runs'] == []
+    # Reopening the monitor reads the same captured run, without inference.
+    before = stats(chat_client)
+    assert client.get('/observations/runs', headers=HEADERS).json()['runs'][0]['runId'] == session['sessionId']
+    assert stats(chat_client) == before
+
+
 def test_actual_sdk_events_are_owner_filtered_and_never_expose_chat_content(chat_client):
     sink = RunObservations()
     chat_client.host.observations = sink

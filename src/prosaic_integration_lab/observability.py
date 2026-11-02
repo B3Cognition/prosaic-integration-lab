@@ -154,6 +154,22 @@ def scoped_observer(host, run_id):
     return observed
 
 
+def scoped_output(host, run_id):
+    """Forward public provisional events without changing fixture delivery."""
+    sink = getattr(host, 'observations', None)
+    fixture = host.fixture_event if host.config.get('fixture_events_url') else None
+    if sink is None:
+        return fixture
+    def output(event):
+        try:
+            sink.output(run_id, event, capture_text=False)
+        except Exception:
+            pass  # Optional display capture cannot fail execution.
+        if fixture is not None:
+            fixture(event)
+    return output
+
+
 class Observability:
     def __init__(self,app,*,metrics,operator_token=None):
         self.app,self.metrics,self.operator_token=app,metrics,operator_token
