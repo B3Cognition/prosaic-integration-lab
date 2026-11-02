@@ -1,5 +1,20 @@
 # Current delivery status
 
+## Lab 0.9.1 release candidate — 2026-11-02
+
+[Lab 0.9.1](release-0.9.1.md) makes the Observatory an authenticated monitor,
+with automatic owned-run discovery, honest idle/demo/replay states and local oMLX
+usage compatibility. PR #41's implementation head passed all four Linux
+AMD64/ARM64 × PostgreSQL 16/18 cells. The maintainer authorized the version bump,
+fresh exact-source qualification, merge and release once green. Publication must
+use the original versioned CI archives with checksums/provenance; the release
+notes and verification asset record the final merge/publication result.
+
+Capture stays optional, process-local and bounded to 32 recent runs. Workflow
+text is withheld, missing callback timing is explicit, and provider counts retain
+their existing accounting qualification. SDK pins and earlier releases are
+unchanged. The recorded real-model demonstration is distinct from synthetic CI.
+
 ## Lab 0.7.0 published and verified — 2026-10-25
 
 [Lab 0.7.0](release-0.7.0.md) is published from qualified source `9a7542c`,

@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Authorized Lab 0.9.1 release — 2026-11-02
+
+The maintainer explicitly requested checking all four PR #41 cells, fixing any
+failures, merging and publishing a new version once green. All four implementation
+head cells passed at `f0398df87e0490ca96f51745da2305a6eccfc158` in run41343271503.
+Prepare 0.9.1 metadata/notes and qualify its final source separately before merge.
+Follow the [release plan](superpowers/plans/2026-11-02-observatory-monitor-release.md).
+Publish original CI bytes with safe receipts and provenance, verify anonymous
+downloads and isolated consumers, and preserve all earlier release artifacts.
+This authorization supersedes the earlier unreleased-only scope below; no further
+merge/release confirmation is required. No new inference is needed.
+
 ## Authenticated Observatory monitoring — 2026-11-01
 
 The maintainer confirmed automatic monitoring of all their Integration Lab runs.

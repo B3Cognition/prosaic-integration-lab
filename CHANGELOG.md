@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.1 — 2026-11-02
+
 - Start Observatory as an idle authenticated monitor, discover your captured
   Chat/API and standalone workflow runs automatically, and keep watching after
   completion. Make demos explicit, pin replay until Follow live, and distinguish

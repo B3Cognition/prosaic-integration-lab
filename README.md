@@ -41,8 +41,8 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-This checkout targets **[Lab 0.9.0](docs/release-0.9.0.md)**, adding actual streamed
-generation in the Observatory and streaming defaults across Lab/chat while retaining
+This checkout targets **[Lab 0.9.1](docs/release-0.9.1.md)**, making Observatory an
+authenticated monitor with automatic run discovery and real-model usage reporting while retaining
 **Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4,
 Runtime recorder 0.3.0 and Harness store 0.4.0. Explorer, guided onboarding and
 the first-workflow example remain available. Earlier release artifacts retain
@@ -82,10 +82,12 @@ small studies do not establish general model quality rankings.
 ## Troubleshooting and deeper examples
 
 The source-only [execution Observatory](prototypes/observatory/README.md) adds a
-3D Live view and an Inspect timeline for actual conversation/provider/tool events.
+3D Flow view and an Inspect timeline for actual conversation/provider/tool events.
 Use its owned-stack launcher from a checkout or complete source archive. The
 Observatory was introduced in 0.8.0; 0.9.0 adds actual output arrivals, generation
-charts and pause/replay in both views. Published earlier artifacts remain unchanged.
+charts and pause/replay in both views. Version 0.9.1 starts idle, discovers your
+captured Lab runs automatically, restores the exact browser principal, and makes
+scripted demos explicit. Published earlier artifacts remain unchanged.
 
 Start with [common first-run problems](docs/quickstart.md#when-something-goes-wrong).
 Then use the [consumer guide](docs/consume-native-workflows.md),
