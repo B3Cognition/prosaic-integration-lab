@@ -5,7 +5,7 @@ by the maintainer. The approved scope is one detailed execution scene first,
 with Flow and Inspect views and an authenticated Integration Lab monitor.
 
 Version 0.9.0 added actual streamed output arrivals in both views. The current
-unreleased follow-up makes monitoring the default, fixes local oMLX usage
+0.9.1 release makes monitoring the default, fixes local oMLX usage
 reporting, and discovers owned runs started from Chat or the API. See the
 [monitor verification](../../docs/verification/observatory-monitor-2026-11-01.md)
 and [generation verification](../../docs/verification/observatory-generation-2026-10-31.md)
