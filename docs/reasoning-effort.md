@@ -92,6 +92,12 @@ switch. Local ThinkingCap Qwen supports none/low/medium/xhigh; ultra is Codex-on
 The earlier server called "Gemma 4.1" advertised the Gemma **4** model ID
 `gemma-4-31B-it-oQ4e-mtp`; do not infer capabilities from a server nickname.
 
+Lab 0.9.3 removes an ambiguous reasoning prohibition from all seven agents.
+Their JSON restrictions govern the returned answer; native thinking is selected
+by effort and provider capabilities. A bounded prompt comparison found wording
+sensitivity without an arithmetic accuracy improvement from this deletion.
+Keep control compliance, JSON format and answer correctness separate.
+
 ## Opt in to bounded real-provider runs
 
 Edit the copied API config for the actual server/model, including a separate

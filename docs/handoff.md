@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Authorized Lab 0.9.3 prompt cleanup and release — 2026-11-03
+
+The maintainer explicitly requested removing the ambiguous reasoning prohibition
+from all blueprints, running tests and releasing a new Lab version. Follow the
+[0.9.3 plan](superpowers/plans/2026-11-03-reasoning-prompt-cleanup-release.md).
+Remove only the phrase from the seven effort-agent bodies. Preserve strict JSON,
+native mappings, both SDK manifests and previous evidence/releases. The preceding
+12-call prompt comparison found no arithmetic accuracy improvement from removing
+the phrase. No additional inference or SDK publication is needed. Qualify the
+exact versioned source in both workflows, merge on green CI, publish original CI
+archives and verify fresh public consumers without further confirmation.
+
 ## Authorized Lab 0.9.2 and four-PR closure — 2026-11-03
 
 The maintainer explicitly authorized getting CI green, fixing failures, merging

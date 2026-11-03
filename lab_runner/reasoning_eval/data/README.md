@@ -59,3 +59,7 @@ For bounded multi-effort runs and sanitized receipts, follow the Integration Lab
 A correct arithmetic response alone does not establish that a server honored its
 thinking setting. Gemma has no distinct positive effort budgets; model quality
 and request-control verification must be evaluated separately.
+
+The agents constrain the returned JSON without prohibiting native thinking.
+Lab 0.9.3 clarifies this wording; the change is not an established accuracy fix.
+Validate task correctness independently of response shape and effort settings.
