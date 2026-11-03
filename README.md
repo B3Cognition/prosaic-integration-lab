@@ -4,6 +4,11 @@ Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
+Lab **0.9.2** adds the separate [reasoning-effort lane](docs/reasoning-effort.md),
+packaged provider/workflow blueprints and bounded live receipts. See
+[release scope and qualification](docs/release-0.9.2.md); the ordinary SDK pins
+and earlier releases remain preserved.
+
 **Start here: [the guided quickstart](docs/quickstart.md).** Your first result
 needs Python 3.12 and internet access for installation. It needs no model
 account, API key, local model or Docker.

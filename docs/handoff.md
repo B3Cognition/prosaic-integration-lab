@@ -1,5 +1,15 @@
 # Codex handoff
 
+## Authorized Lab 0.9.2 and four-PR closure — 2026-11-03
+
+The maintainer explicitly authorized getting CI green, fixing failures, merging
+Lab42/Core3/Runtime15/Harness10 and releasing a new Integration Lab version.
+Follow the [0.9.2 release plan](superpowers/plans/2026-11-03-reasoning-lab-release.md).
+This authorization supersedes the earlier no-publication scope below. Both SDK
+manifests and prior release evidence remain unchanged; no live inference or new
+SDK release is required. Publish original qualified CI archives and verify their
+public downloads and installed consumers before claiming completion.
+
 ## Reasoning-effort integration — 2026-11-03
 
 The maintainer requested adding the reasoning integration and blueprints and

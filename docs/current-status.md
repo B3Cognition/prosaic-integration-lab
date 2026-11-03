@@ -1,5 +1,14 @@
 # Current delivery status
 
+## Lab 0.9.2 — reasoning controls and blueprints
+
+[Release scope](release-0.9.2.md) adds the separate reasoning lane, packaged
+blueprints and atomic bounded live receipts. Final qualification requires both
+reasoning architectures and all four ordinary service/database cells at the exact
+versioned source. The [GitHub release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.2)
+and attached run-specific verification record provide publication status and
+original archive hashes. Ordinary SDK pins and historical releases are unchanged.
+
 ## Reasoning-effort integration lane — 2026-11-03
 
 The separate [reasoning lane](reasoning-effort.md) selects published Runtime
