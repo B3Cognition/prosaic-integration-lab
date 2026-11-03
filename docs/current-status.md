@@ -1,5 +1,14 @@
 # Current delivery status
 
+## Lab 0.9.3 — reasoning prompt clarification
+
+[Release scope](release-0.9.3.md) removes the ambiguous reasoning prohibition
+from all seven effort agents. Strict JSON output, native mappings and both SDK
+manifests are unchanged. The preceding prompt comparison did not establish an
+arithmetic accuracy improvement. Final publication is gated on both reasoning
+architectures and all four ordinary service/database CI cells at the exact source;
+the release's verification assets retain the actual qualification/publication proof.
+
 ## Lab 0.9.2 — reasoning controls and blueprints
 
 [Release scope](release-0.9.2.md) adds the separate reasoning lane, packaged

@@ -4,10 +4,10 @@ Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.2** adds the separate [reasoning-effort lane](docs/reasoning-effort.md),
-packaged provider/workflow blueprints and bounded live receipts. See
-[release scope and qualification](docs/release-0.9.2.md); the ordinary SDK pins
-and earlier releases remain preserved.
+Lab **0.9.3** clarifies the packaged [reasoning-effort blueprints](docs/reasoning-effort.md)
+by removing an ambiguous prohibition on native reasoning. Strict JSON output,
+effort mappings and SDK pins remain unchanged. See
+[release scope and qualification](docs/release-0.9.3.md).
 
 **Start here: [the guided quickstart](docs/quickstart.md).** Your first result
 needs Python 3.12 and internet access for installation. It needs no model
@@ -47,12 +47,11 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-This checkout targets **[Lab 0.9.1](docs/release-0.9.1.md)**, making Observatory an
-authenticated monitor with automatic run discovery and real-model usage reporting while retaining
-**Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4,
-Runtime recorder 0.3.0 and Harness store 0.4.0. Explorer, guided onboarding and
-the first-workflow example remain available. Earlier release artifacts retain
-their original bytes.
+This checkout targets **[Lab 0.9.3](docs/release-0.9.3.md)**. The ordinary train
+retains **Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4, Runtime recorder 0.3.0 and
+Harness store 0.4.0; the separate reasoning lane selects Runtime 0.9.12.
+Observatory monitoring, Explorer, guided onboarding and the first-workflow
+example remain available. Earlier release artifacts retain their original bytes.
 
 After the [quickstart installation](docs/quickstart.md#setup-once), open the
 visual guide with `python -m lab_runner.explore`. The default launches documentation

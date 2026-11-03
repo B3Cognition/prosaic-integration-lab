@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.9.3 — 2026-11-03
+
+- Remove the ambiguous hidden-reasoning prohibition from all seven packaged
+  reasoning-effort agents while preserving their strict JSON output rules,
+  effort metadata, provider mappings and both SDK manifests.
+- Clarify that the wording cleanup does not establish an arithmetic accuracy
+  improvement; native control verification and answer grading remain separate.
+
 ## 0.9.2 — 2026-11-03
 
 - Add a separate checksum-pinned Runtime 0.9.12 reasoning lane with installed-SDK
