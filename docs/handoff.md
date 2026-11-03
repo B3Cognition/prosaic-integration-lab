@@ -1,5 +1,15 @@
 # Codex handoff
 
+## Reasoning-effort integration — 2026-11-03
+
+The maintainer requested adding the reasoning integration and blueprints and
+reviewing documentation across the Prosaic packages. Use the separate
+[reasoning lane](reasoning-effort.md), installed Runtime 0.9.12 and
+`dependencies/releases-reasoning.json`. The ordinary manifest retains its
+original pins. Fixtures and opt-in live runs have distinct evidence contracts;
+this update does not authorize inference or a new Lab/SDK publication.
+Historical ledgers and dirty sibling checkouts are preserved.
+
 ## Authorized Lab 0.9.1 release — 2026-11-02
 
 The maintainer explicitly requested checking all four PR #41 cells, fixing any

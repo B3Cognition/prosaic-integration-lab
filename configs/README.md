@@ -1,5 +1,11 @@
 # Optional local inference
 
+For reasoning tiers and binary thinking controls, use the separate
+[reasoning-effort lane](../docs/reasoning-effort.md) and its packaged
+[API/native/workflow blueprints](../lab_runner/reasoning_eval/data/README.md).
+They require Runtime 0.9.12 and a dedicated environment; this directory's ordinary
+Lab runtime configs and release manifest retain their existing version pins.
+
 For released Runtime 0.9.8 unified pools, start with the
 [guided model setup](../docs/quickstart.md#4-connect-real-models-explicit-opt-in).
 Copy `unified-runtime.example.yml`,
