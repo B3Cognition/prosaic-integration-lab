@@ -73,6 +73,13 @@ tests. These checks retain the ordinary SDK provenance guard and original pins.
 
 ## Remote CI and qualification limits
 
+Implementation commit `eed24295773781bad0ad32ef1d993ece2a999d90` passed
+[run 41590668895](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/41590668895)
+on Linux AMD64 and ARM64. Both downloaded reports contain all **58 passing
+control cases**, `controlsVerified: true` and zero live invocations; the installed
+pytest lane also passed on each architecture. The separate ordinary four-cell
+service/database acceptance workflow has its own status and receipts.
+
 The new [reasoning workflow](https://github.com/B3Cognition/prosaic-integration-lab/actions/workflows/reasoning-effort.yml)
 produces separate installed-SDK reports on Linux AMD64/ARM64 for its selected
 commit. Consult those run-specific checks and receipts for remote results;

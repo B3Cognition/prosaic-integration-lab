@@ -39,12 +39,16 @@ prosaic-runtime subagents/medium.md --source . --config api.yml --profile gemma
 prosaic-runtime subagents/none.md --source . --config api.yml --profile qwen-local
 prosaic-runtime subagents/high.md --source . --config native.yml --profile claude
 prosaic-runtime subagents/xhigh.md --source . --config native.yml --profile codex
-prosaic-harness run workflow.yml --run-dir ./reasoning-run --input '{}'
+prosaic-harness run workflow.yml --run-dir ./.lab/reasoning-run --input '{}'
 ```
 
 Native permissions remain vendor-owned. Read-only mode is not an exact path
 sandbox or a cap on vendor-internal model requests/subagents. Do not grant prose
 extra tools just to enable effort. Keep ultra out of API/Claude profiles.
+
+Keep `.lab/` ignored in the consuming project's Git configuration before running
+the workflow; run state is private host data. The Integration Lab already ignores
+that directory. Use a fresh run directory when changing admitted prose/config.
 
 Omitting `effort` uses the profile default. Explicit prose overrides that default;
 unavailable efforts fail rather than being silently lowered. Unknown aliases may
