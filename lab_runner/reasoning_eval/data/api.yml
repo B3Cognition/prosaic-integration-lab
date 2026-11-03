@@ -1,0 +1,40 @@
+# Runtime 0.9.12+. Edit model/URL to match each operator-approved server.
+# No supported_efforts declaration is needed for these exact known models.
+default_profile: gemma
+allowed_tools: []
+profiles:
+  gemma:
+    base_url: http://127.0.0.1:8000/v1
+    model: gemma-4-31B-it-oQ4e-mtp
+    api_key_env: REASONING_API_KEY
+    temperature: 0
+    max_tokens: 4096
+    features: {streaming: false}
+  qwen-local:
+    base_url: http://127.0.0.1:8000/v1
+    model: ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ
+    api_key_env: REASONING_API_KEY
+    temperature: 0
+    max_tokens: 4096
+    features: {streaming: false}
+  qwen:
+    base_url: http://127.0.0.1:8000/v1
+    model: qwen3.8-max
+    api_key_env: REASONING_API_KEY
+    temperature: 0
+    max_tokens: 4096
+    features: {streaming: false}
+  deepseek:
+    base_url: http://127.0.0.1:8000/v1
+    model: deepseek-v4-pro
+    api_key_env: REASONING_API_KEY
+    temperature: 0
+    max_tokens: 4096
+    features: {streaming: false}
+  nemotron:
+    base_url: http://127.0.0.1:8000/v1
+    model: nvidia/nemotron-3.5-super-vl-120b-a12b
+    api_key_env: REASONING_API_KEY
+    temperature: 0
+    max_tokens: 4096
+    features: {streaming: false}

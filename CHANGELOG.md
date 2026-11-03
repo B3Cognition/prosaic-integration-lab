@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+## 0.9.2 — 2026-11-03
+
+- Add a separate checksum-pinned Runtime 0.9.12 reasoning lane with installed-SDK
+  HTTP/Claude/Codex control checks on Linux AMD64 and ARM64, preserving the ordinary
+  Lab release manifest and closed SDK provenance guards.
+- Include seven neutral effort agents, API/native configurations, an answer
+  schema and a one-call Harness workflow in the wheel and source archive.
+- Add explicit bounded live runs with atomic shared batch reservations, private
+  receipts, retained partial observations and conservative unknown outcomes.
+  Separate fixture control verification, live observations and answer grading;
+  keep Gemma's positive efforts binary and ultra Codex-only.
+- Refresh current installation/ownership documentation and preserve historical
+  Qwen/Gemma live evidence. No new live inference or SDK publication is required.
+
 ## 0.9.1 — 2026-11-02
 
 - Start Observatory as an idle authenticated monitor, discover your captured

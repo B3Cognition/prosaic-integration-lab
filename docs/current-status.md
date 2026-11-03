@@ -1,14 +1,32 @@
 # Current delivery status
 
-## Lab 0.9.1 release candidate — 2026-11-02
+## Lab 0.9.2 — reasoning controls and blueprints
+
+[Release scope](release-0.9.2.md) adds the separate reasoning lane, packaged
+blueprints and atomic bounded live receipts. Final qualification requires both
+reasoning architectures and all four ordinary service/database cells at the exact
+versioned source. The [GitHub release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.2)
+and attached run-specific verification record provide publication status and
+original archive hashes. Ordinary SDK pins and historical releases are unchanged.
+
+## Reasoning-effort integration lane — 2026-11-03
+
+The separate [reasoning lane](reasoning-effort.md) selects published Runtime
+0.9.12 with a checksum-pinned manifest. It adds installed-SDK API/native control
+fixtures, seven effort agents, profile configs, a Harness workflow and an opt-in
+live runner. It preserves the ordinary release manifest and historical live
+results. Its verification ledger distinguishes local fixtures, package checks
+and remote CI; no new live-provider certification is implied.
+
+## Lab 0.9.1 published — 2026-11-02
 
 [Lab 0.9.1](release-0.9.1.md) makes the Observatory an authenticated monitor,
 with automatic owned-run discovery, honest idle/demo/replay states and local oMLX
 usage compatibility. PR #41's implementation head passed all four Linux
-AMD64/ARM64 × PostgreSQL 16/18 cells. The maintainer authorized the version bump,
-fresh exact-source qualification, merge and release once green. Publication must
-use the original versioned CI archives with checksums/provenance; the release
-notes and verification asset record the final merge/publication result.
+AMD64/ARM64 × PostgreSQL 16/18 cells. The
+[public release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.1)
+is available with versioned archives, checksums and provenance. Its release notes
+and verification asset retain the final merge/publication evidence.
 
 Capture stays optional, process-local and bounded to 32 recent runs. Workflow
 text is withheld, missing callback timing is explicit, and provider counts retain
