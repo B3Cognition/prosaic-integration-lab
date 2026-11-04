@@ -79,7 +79,8 @@ prosaic inspect subagents/medium.md --source ./my-reasoning --json
 prosaic-harness validate ./my-reasoning/workflow.yml
 ```
 
-There are seven `subagents/*.md` effort variants, API/native configurations,
+There are seven shared effort agents, an explicit `subagents/gemma-medium.md`
+variant, API/native configurations,
 a strict answer schema and a one-call API-backed Harness workflow. Their README
 contains direct Runtime/Harness recipes and an effort support table. Inspection
 and validation above are offline; the README's execution commands make real calls.
@@ -97,6 +98,51 @@ Their JSON restrictions govern the returned answer; native thinking is selected
 by effort and provider capabilities. A bounded prompt comparison found wording
 sensitivity without an arithmetic accuracy improvement from this deletion.
 Keep control compliance, JSON format and answer correctness separate.
+
+The shared effort agents selected for Lab 0.9.4 supply a constructive Chinese
+Remainder Theorem formula for the smallest-positive solution of pairwise-coprime
+congruences, with the modular-inverse condition and positive zero handling.
+It positively specifies one valid JSON object, with an integer
+`answer` key, whose first and last characters are `{` and `}`. The restrictions
+apply to the final response and do not prohibit native thinking. No expected
+answer, API response-format control, extra tool or effort-mapping change is added.
+The compact body removes the general check/correct loop and duplicate checks,
+shortening the earlier candidate from 169 to 95 words. Prompt instructions remain
+separate from host-side validation; shorter input does not guarantee completion.
+The [earlier candidate qualification](verification/reasoning-answer-validation-2026-11-03.md)
+records the longer candidate's paired regression results. It recovered two fenced Gemma answers, but
+three additional capped outputs reduced usable correct JSON from 10/18 to 9/18.
+That longer candidate was not qualified as an overall Gemma reliability improvement at
+the fixed 4,096-token limit.
+
+The compact revision also failed the Gemma cap-reduction target: its completed
+36-request comparison had 13/18 compact caps versus 7/18 for the fresh baseline,
+and usable correct JSON fell from 8/18 to 5/18. All five completed compact
+responses were correct strict JSON; the remaining thirteen capped. See the
+[compact qualification](verification/reasoning-prompt-compaction-2026-11-04.md)
+for the frozen protocol and the separate Qwen comparison. These source prompts
+are not qualified as a Gemma reliability improvement; use the separate Gemma file below.
+Qwen's completed compact comparison improved usable correct JSON from 9/18 to
+15/18: original CRT and knapsack were each correct in all three compact trials.
+Both prompts capped on all three digit-counting attempts. All 72 requests across
+both models passed the native-control and rendered prompt-count checks; these
+reused regression questions do not establish general accuracy.
+
+The source also includes a separate minimal Gemma medium agent, with only the
+task, the same positive JSON and brace-boundary rules, explicit no fences, and the tool
+prohibition. It omits the shared CRT method advice. The default Gemma workflow
+explicitly selects `subagents/gemma-medium.md`; to run Qwen through that workflow,
+select the Qwen API default profile and `subagents/xhigh.md` instead. Runtime
+profiles and the Lab multi-effort `live` command do not automatically substitute
+prompts. The [Gemma-specific qualification](verification/reasoning-gemma-minimal-2026-11-04.md)
+records its separate experiment; shared-prompt results above do not qualify it.
+That completed Gemma-only comparison improved usable correct JSON from 9/18 to
+12/18, recovering all three fenced baseline answers. All twelve completed
+candidate responses were correct strict JSON. Both prompts had six caps,
+matching fresh 0.9.3 and below historical shared C3's thirteen. The earlier
+positive-only attempt failed formatting and was stopped after 16 known calls;
+the final variant restores the full tested JSON wording. These are reused
+regression tasks, not a general accuracy or completion guarantee.
 
 ## Opt in to bounded real-provider runs
 

@@ -4,10 +4,11 @@ Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.3** clarifies the packaged [reasoning-effort blueprints](docs/reasoning-effort.md)
-by removing an ambiguous prohibition on native reasoning. Strict JSON output,
-effort mappings and SDK pins remain unchanged. See
-[release scope and qualification](docs/release-0.9.3.md).
+Lab **0.9.4** keeps the compact Qwen/shared
+[reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
+simpler Gemma prompt with the tested JSON rules. The example Gemma workflow
+selects that file explicitly; native effort mappings and SDK pins are unchanged.
+See [release scope and qualification](docs/release-0.9.4.md).
 
 **Start here: [the guided quickstart](docs/quickstart.md).** Your first result
 needs Python 3.12 and internet access for installation. It needs no model
@@ -47,7 +48,7 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-This checkout targets **[Lab 0.9.3](docs/release-0.9.3.md)**. The ordinary train
+This checkout targets **[Lab 0.9.4](docs/release-0.9.4.md)**. The ordinary train
 retains **Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4, Runtime recorder 0.3.0 and
 Harness store 0.4.0; the separate reasoning lane selects Runtime 0.9.12.
 Observatory monitoring, Explorer, guided onboarding and the first-workflow
