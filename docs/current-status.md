@@ -1,5 +1,16 @@
 # Current delivery status
 
+## Lab 0.9.4 — separate Qwen and Gemma prompts
+
+[Release scope](release-0.9.4.md) keeps the compact Qwen/shared agents and selects
+a simpler explicit Gemma agent in the default API workflow. The retained live
+studies distinguish strict JSON, correct integers, caps and native controls.
+Gemma recovered three fenced answers without extra caps relative to fresh
+0.9.3; historical shared-prompt cap counts are not a simultaneous control.
+Both SDK manifests and Python implementation remain unchanged. Publication
+requires both reasoning architectures and all four ordinary CI cells on the
+exact versioned source; release verification assets record actual completion.
+
 ## Lab 0.9.3 — reasoning prompt clarification
 
 [Release scope](release-0.9.3.md) removes the ambiguous reasoning prohibition

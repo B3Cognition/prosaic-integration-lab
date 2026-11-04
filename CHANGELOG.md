@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+## 0.9.4 — 2026-11-04
+
+- Keep the compact constructive CRT prompt in all seven shared effort agents;
+  add an explicit Gemma medium agent with the same complete JSON contract and
+  no CRT procedure. Select it in the default Gemma example workflow.
+- Document explicit prompt/profile selection, bounded native-control evidence,
+  retained failed attempts and the limits of reused regression questions.
+- In the retained studies, Qwen usable correct JSON improved from 9/18 to 15/18.
+  The final Gemma comparison recovered three fenced answers (9/18 to 12/18
+  usable correct JSON), with six caps for both it and fresh 0.9.3. These are
+  task-specific observations, not general accuracy guarantees.
+- Preserve effort metadata, native mappings, tools, Python implementation and
+  both checksum-pinned SDK manifests. No SDK release or new live inference is
+  required to qualify this package.
+
 ## 0.9.3 — 2026-11-03
 
 - Remove the ambiguous hidden-reasoning prohibition from all seven packaged

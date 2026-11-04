@@ -1,5 +1,119 @@
 # Codex handoff
 
+## Lab 0.9.4 merge and release authorized — 2026-11-04
+
+The maintainer explicitly requested keeping the tested Qwen and Gemma prompts,
+getting CI green, fixing failures, merging and releasing the next Lab version.
+This supersedes the experiments' earlier no-publication scope. Target 0.9.4
+from current main `0220109` (tree identical to 0.9.3 source `719fdb1`). Keep all
+selected prompt bytes and both SDK manifests unchanged; no new model calls or
+SDK release are needed. Follow the
+[release plan](superpowers/plans/2026-11-04-reasoning-model-prompts-release.md)
+and [release guide](release-0.9.4.md): six final-source CI jobs, fresh review,
+expected-head merge, equal qualified/merge trees, original CI archives and
+separate anonymous-download/fresh-consumer postpublication proof. Earlier
+checkpoints below retain their historical experimental state and limits.
+
+## Separate Gemma prompt comparison completed — 2026-11-04
+
+Keep all seven shared compact Qwen agents unchanged. The explicit new
+`subagents/gemma-medium.md` removes the CRT procedure while retaining the full
+tested JSON contract, including the no-fences line. Its 69-word body renders to
+111 tokens for the original CRT task versus shared C3's 192. The default Gemma
+workflow explicitly selects this file; Qwen workflows must select their Qwen
+profile and shared xhigh agent. Runtime profiles and the Lab multi-effort live
+command do not automatically substitute prompts.
+
+The first positive-only attempt was too aggressive: all three completed answers
+were fenced. It stopped safely after 16 known responses, cleanup verified,
+leaving 20 unused slots and no unknown reservation. The final revision restored
+the explicit no-fences line and completed a fresh 36-call paired comparison.
+Gemma usable correct JSON improved from 9/18 to 12/18; all three fenced baseline
+answers recovered. All twelve completed candidate responses were correct strict
+JSON. Both arms had six caps (knapsack and digit counting), below historical
+C3's thirteen but not a completion gain over fresh 0.9.3. Arithmetic correct
+returns remained 12/18 for both; token costs were task-dependent and censored.
+
+All 36 native-control/activation/generation-input checks passed; owned cleanup,
+all prior hashes and seven unchanged Qwen agents verified. Total follow-up
+inference was 52 requests, including the stopped prefix; no retries or Qwen
+inference occurred. Full source tests passed 2,077; reasoning tests passed 31;
+both five-wheel SDK audits and private builds passed. Python payloads, SDK pins
+and version 0.9.3 remain unchanged. The
+[Gemma qualification](verification/reasoning-gemma-minimal-2026-11-04.md) records
+both attempts and limits. This remains local adaptive regression development;
+no commit, PR, push or release was requested. Historical checkpoints below
+describe their own candidates and point-in-time state.
+
+## Compact prompt comparison completed — 2026-11-04
+
+The seven unreleased agent bodies are shortened from 169 to 95 words. They keep
+the constructive CRT formula, inverse condition and positive-zero handling,
+plus the exact first-`{`/last-`}` JSON boundary rule. Generic check/correct loops
+and duplicate verification instructions are removed. Original-CRT rendered
+input shrank 26.8% for Qwen and 28.6% for Gemma; shorter input did not reliably
+reduce generated reasoning or caps.
+
+The fresh 72-request comparison completed with all native-control, rendered
+activation and generation prompt-count checks passing, cleanup verified, no
+retries, no transport failures and zero unknown reservations. Qwen xhigh usable
+correct JSON improved from 9/18 to 15/18: CRT and knapsack were each correct in
+3/3 compact trials; both prompts capped on digit counting in 3/3. Gemma medium
+thinking-on regressed from 8/18 to 5/18 usable correct JSON, with caps rising
+from seven to thirteen (historical longer candidate: nine caps). All five
+completed compact Gemma responses were correct strict JSON, but only one of
+three fenced baseline pairs recovered; the other two capped. The Gemma
+cap-reduction target failed. Do not present this as a Gemma reliability fix.
+
+The full source suite passed 2,077 tests; the reasoning lane passed 31. Both
+five-wheel SDK audits and the private wheel/sdist build passed. SDK pins,
+Python payloads and version 0.9.3 remain unchanged. This is local adaptive prompt
+development on reused questions, not held-out qualification or a new release.
+See the [compact qualification](verification/reasoning-prompt-compaction-2026-11-04.md).
+Preserve prior failed/unknown reservations and historical C2 evidence. No push,
+merge, tag or publication was requested by this experiment. Older checkpoints
+below describe their own longer candidates and point-in-time state.
+
+## Gemma prompt comparison completed — 2026-11-04
+
+The restored Gemma endpoint completed all 36 remaining calls using the frozen
+candidate and existing shared allowance. Correct fenced answers fell from two
+to zero, and both affected pairs returned correct bare JSON with the candidate.
+Among normally completed responses, strict JSON improved from 10/12 to 9/9.
+However, capped outputs rose from six to nine, reducing usable correct JSON
+from 10/18 to 9/18. The candidate improves the observed wrapping behavior but
+regresses overall Gemma reliability at the fixed 4,096-token limit; do not
+describe it as a general Gemma reliability fix.
+
+The [qualification ledger](verification/reasoning-answer-validation-2026-11-03.md)
+records the complete 72-response Qwen/Gemma study. All native-control and prompt
+count checks passed, cleanup was verified, and the current allowance is fully
+consumed with zero unknowns. Earlier unknown reservations remain unchanged.
+The previous Qwen-only report is preserved separately. Prompts, SDK pins and
+published artifacts are unchanged by this continuation; the candidate remains
+local and unreleased.
+
+## Unreleased reasoning answer validation — 2026-11-03
+
+The maintainer requested improving the blueprints for Qwen's CRT failure and
+Gemma's JSON fences without restoring the removed reasoning prohibition, then
+repeating the comparison. The seven source agents now require condition checks,
+a constructive Chinese Remainder Theorem procedure with inverse/remainder
+verification, and explicit JSON boundaries. Generic checking alone failed the
+Qwen CRT target in two trials; the constructive candidate passed all three
+paired target trials. The completed 36-call Qwen comparison improved correct
+results from 9/18 to 12/18, entirely from CRT; the other five questions remained
+9/15 for both prompts. Gemma's 36-call new stage awaits endpoint availability;
+its TCP port and model-list API remain unreachable. Do not claim its JSON
+regression has been verified fixed. The existing unused allowance permits that
+authorized stage once the endpoint is restored, without retrying the prior timeout.
+Effort metadata, SDK pins, Python execution and released artifacts are unchanged.
+The [qualification ledger](verification/reasoning-answer-validation-2026-11-03.md)
+records offline checks and the bounded paired study. This is an unreleased
+source candidate; this follow-up does not authorize publication. Preserve prior
+studies and consumed/unknown allowances, and keep model quality, strict output
+format and native controls as separate measurements.
+
 ## Authorized Lab 0.9.3 prompt cleanup and release — 2026-11-03
 
 The maintainer explicitly requested removing the ambiguous reasoning prohibition
