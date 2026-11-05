@@ -7,20 +7,32 @@ Branch `feat/rule-admission-blueprint` is based on main `3cf2d64`. Its draft
 PR waits for prosaic-runtime#16. No version bump, no `release-x.md`, and the ordinary and
 reasoning manifests are unchanged.
 
-- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `4082e72` (PR #16 head).
+- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `65ba15d` (PR #16 head).
   Both are rebuilt from `git archive` with `setuptools==80.9.0`, no isolation
   and `SOURCE_DATE_EPOCH` set to the commit time. Two local builds produced
   identical bytes. Neither commit has a `Publish SDK` run; the draft PR asks the
   maintainer to dispatch one so action-built wheels can replace the local ones.
-- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow,
-  because Harness 0.9.7 and earlier reject `ruleViolation` after provider spend.
+- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow:
+  Harness 0.9.7 lacks `ruleViolation` in `_FAILURES` (it raises after provider
+  spend), and its conversation path drops `required_guards`, composed rules and
+  guards.
 - Review: an adversarial pass found 9 defects, each pinned by a test that
   failed first; all are fixed. The worst was a policy bypass: `"days": 28.0`
   skipped the loan-period guard. Coverage now takes its verdict from real
-  admission. The lane has 79 tests.
+  admission.
+- Re-pin 1: Runtime `4082e72` to `65ba15d` (review changes). No blueprint test
+  broke. One new variant pins the cross-file rule change: different settings at
+  one stage are now refused. Generic guard sources changed without a version
+  bump, so the rules fingerprint did not move; reported for #16's thread.
+- PR #45 review: 7 inline comments and 2 general points, all addressed
+  test-first. The floor now covers the custom guard; the id rule's wording
+  matches the guard; the companion moved to `companions/` (never distributed as
+  an agent); `fix` where the guard cannot repair is refused by the host; the
+  missed fee formats are strict expected failures; huge periods are repaired;
+  the blueprint checks the SDKs on import. The lane has 105 tests.
 - Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
-  CI (`rule-admission.yml`) has not run yet. It is not a required check until
-  the re-pin to releases.
+  CI (`rule-admission.yml`) rebuilds the candidates byte-identically on Linux
+  AMD64 and ARM64. It is not a required check until the re-pin to releases.
 - Next: after Core releases `parse_rules` and #16 merges and releases, follow
   the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
 

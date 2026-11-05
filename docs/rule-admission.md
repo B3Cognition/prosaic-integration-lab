@@ -12,7 +12,7 @@ The lane consumes **unreleased** SDK code:
 | SDK | Source | Why |
 | --- | --- | --- |
 | Core | `B3Cognition/prosaic` main `9d5a02f` (PR #4) | Enforcement tag grammar: `parse_rules`, `strip_tags`, inspection `rules` |
-| Runtime | `B3Cognition/prosaic-runtime` PR #16 head `4082e72` | Rule admission for conversation turns |
+| Runtime | `B3Cognition/prosaic-runtime` PR #16 head `65ba15d` | Rule admission for conversation turns |
 | Runtime recorder, Harness, Harness store | Published 0.3.0, 0.9.4 and 0.4.0 | Unchanged from the reasoning lane |
 
 Both candidates keep their released version numbers (Core 0.4.1, Runtime
@@ -87,7 +87,8 @@ cp -R "$LAB_RULES_BLUEPRINT" src/yourapp/catalogue_desk
 | 6 | The coverage report and command, agreement with `ProsaicRuntime.rule_coverage` and unregistered guards named | `test_coverage.py` |
 | 7 | The tag-stripped agent sends identical request bytes with or without guards, and the same bytes as the tagged agent when no guard fires; the floor still refuses it | `test_untagged_identity.py` |
 | | Candidate provenance: exact commits, bytes differing from the published Core, payload audit and refusal of a Core without `parse_rules` | `test_candidate_install.py` |
-| | Review regressions: whole-number float loan periods repaired; `after_tool` fails closed on unreadable periods; coverage equals real admission across eight variants (malformed tag, path-setting guard, superseded cross-file binding, weaker floor, unregistered custom or required guard, stripped agent under the floor); duplicate companions refused | `test_review_regressions.py` |
+| | Review regressions: whole-number float loan periods repaired; `after_tool` fails closed on unreadable periods; coverage equals real admission across eleven variants (malformed tag, path-setting guard, superseded and conflicting cross-file bindings, raised loan limit, `fix` at `after_tool`, weaker floor, unregistered custom or required guard, stripped agent under the floor); duplicate companions refused | `test_review_regressions.py` |
+| | PR review: the floor protects the custom guard; the id rule says what the guard enforces; the companion is never distributed as an agent; `fix` where the guard cannot repair is refused before any request; fee formats (still-missed formats are strict expected failures against #16); enormous periods repaired; the blueprint refuses an SDK without rule admission | `test_pr_review.py` |
 | | Builder cache: dangling or live symlinks refused and never written through; bytes that differ from the manifest refused; a missing build backend refused before any fetch | `test_candidate_builder.py` |
 
 Turns that are compared byte for byte use a fixed public `InvocationScope`,
@@ -97,10 +98,21 @@ golden capture does the same.
 ## Re-pin after release
 
 This lane is the integration test for prosaic-runtime#16 in review. If the PR
-head moves, re-pin, and expect failures that show what changed.
+head moves, re-pin, and expect failures that show what changed. Report each
+broken test's API change on #16 before adapting the blueprint.
+
+The first re-pin, from `4082e72` to `65ba15d`, broke no blueprint test. It
+pinned one behaviour change: the same guard at the same stage in two files with
+different settings is now refused, whatever the actions; previously the
+stronger action's binding silently replaced the other. A same-settings stronger
+binding still supersedes, and `coverage` reports the weaker one as
+`superseded`. If Runtime changes that rule again, the
+`superseded-cross-file` and `conflicting-settings-cross-file` variants will
+fail on re-pin by design. The three fee formats Runtime does not yet read are
+strict expected failures, so they fail on re-pin as soon as Runtime reads them.
 
 1. **Before release, optionally:** a maintainer dispatches `Publish SDK` on
-   Core `9d5a02f` and Runtime `4082e72`, or later heads. The resulting
+   Core `9d5a02f` and Runtime `65ba15d`, or later heads. The resulting
    action-built wheels and receipts can replace the local candidates through
    `scripts/prepare_sdk_candidates.py`. That script's version table would need
    an entry for this train.
@@ -114,11 +126,13 @@ head moves, re-pin, and expect failures that show what changed.
 ## Limits
 
 - Rule hooks exist only for conversation turns. `run()`, `NativeRuntime` and
-  `UnifiedRuntime` refuse enforce-tagged prose. No Harness workflow is included:
-  Harness 0.9.7 and earlier reject the `ruleViolation` failure code after
-  provider spend.
+  `UnifiedRuntime` refuse enforce-tagged prose. No Harness workflow is included.
+  Harness 0.9.7 and earlier do not have `ruleViolation` in their receipt
+  `_FAILURES` set, so they raise after provider spend. Their conversation path
+  also drops `required_guards` and composed rules, and builds the runtime
+  without guards. A companion Harness release is needed.
 - The synthetic provider checks that hooks are wired to the real
   OpenAI-compatible request and response path. It does not qualify a live
   model's compliance with retry feedback.
-- The candidate wheels were built reproducibly on macOS arm64. Byte-identical
-  rebuilds on Linux are proven by the CI workflow, not locally.
+- The candidate wheels rebuild byte-identically on macOS arm64 locally and on
+  Linux AMD64 and ARM64 in CI.

@@ -11,9 +11,11 @@ qualification, a Linux qualification or live-provider certification.
   (main, PR #4 merged), wheel `b3_prosaic-0.4.1-py3-none-any.whl`, SHA-256
   `c42efc9fc9deae68417ac2cabfc769b81db229c85220ac7fb971cef97a061c74`.
 - Runtime candidate: `B3Cognition/prosaic-runtime`
-  `4082e723a20eda25a31fcd67283b5f67ea53decd` (PR #16 head, open, under review),
-  wheel `b3_prosaic_runtime-0.9.12-py3-none-any.whl`, SHA-256
-  `4079b60169a8fbfc365a539d7bff3fe7fff2385ffb16949ca73cf24e0f8dfa6f`.
+  `65ba15d7e93ee058e22bececdb2e528cef2a474a` (PR #16 head after review changes,
+  open), wheel `b3_prosaic_runtime-0.9.12-py3-none-any.whl`, SHA-256
+  `121604f7516d54122f4f3d89e0fe53956745d5767c1f8126201bf18bb813c300`.
+  The first pin was `4082e72` (SHA-256 `4079b601…`); results below up to the
+  re-pin section were recorded against it.
 - Recorder 0.3.0, Harness 0.9.4 and Harness store 0.4.0: published bytes
   copied unchanged from `releases-reasoning.json`.
 - Neither candidate commit had a `Publish SDK` Actions run when checked; each
@@ -59,15 +61,57 @@ Each defect is pinned by a test in `test_review_regressions.py` or
 The guard keeps version `loan-period-v1`: its behaviour changed before any
 release or stored fingerprint existed. Bump it on any change after release.
 
+## Re-pin 1: Runtime `4082e72` to `65ba15d`
+
+| Check | Result |
+| --- | --- |
+| Reproducible build of `65ba15d`, twice | Identical SHA-256 `121604f7…` |
+| Verified build, prepare, install, payload audit, `pip check` | Pass |
+| Unchanged lane (79) on `65ba15d` | 77 passed; the 2 failures were the test's own expected Runtime commit, not an API change |
+| New `conflicting-settings-cross-file` variant | Passes on `65ba15d`; fails on `4082e72`, which kept the stronger binding |
+
+API observations for #16's review thread (none broke a blueprint test):
+
+1. `no_wrapped_links`, `args_reference_seen_ids` and `value_in_tool_output`
+   changed behaviour but kept their `-v1` versions, so `rules_fingerprint` is
+   identical across both heads (`141cdb82…` for this blueprint). A host folding
+   the fingerprint into workflow identity cannot see the change.
+2. `tool_results` entries are now projected facts without the
+   `{status, result}` envelope, while `tool_result` at `after_tool` is still the
+   raw envelope (documented). A guard reading both handles two shapes.
+3. Cross-file bindings with different settings at one stage are now refused
+   whatever the actions (previously the stronger action's binding replaced the
+   other, settings included).
+4. `value_in_tool_output` now reads `€1,20` and `eur 1.20`; `1.20 EUR`,
+   `1.20 euros` and `120 cents` still pass with an invented fee.
+
+## PR #45 review
+
+Each comment became a test in `test_pr_review.py` or a new coverage variant,
+observed failing (34 failures) before the fixes.
+
+| Comment | Fix |
+| --- | --- |
+| P1: the floor did not cover the custom guard; prose could raise `max_days` or drop it | `runtime.yml` pins `loan_period_within_policy` (`fix`, `max_days: 21`, no stage) |
+| P2: the id rule promised search results only; the guard also accepts ids from the message | The rule text names both sources; the borrower-named and search-query laundering cases are tests |
+| P2: `prosaic apply` distributed the companion as a standalone agent | The companion moved to `companions/` as plain rules without frontmatter, read with `parse_rules` |
+| P2: `fix` at `after_tool` was admitted and then faulted | `REPAIR_STAGES` declares where the guard repairs; `host.compose` refuses others before any request; coverage reports `hostPolicy` |
+| P2: invented fees in common formats passed | Caught formats asserted; missed formats are strict expected failures against #16; README limits line |
+| P3: an enormous integer `days` faulted | `isfinite` only on floats; refused values bounded for delivery; 401- and 3001-digit cases repaired |
+| P3: `superseded` relied on behaviour under review | Re-pin 1 changed it as predicted; the variants pin both outcomes; re-pin note added |
+| General: `require_sdk()` only ran in tests | The blueprint package checks the SDKs on import with a clear message |
+| General: the 21-day limit in four places could drift | Admission refuses tag settings that differ from the floor; a test ties the prose text and `LOAN_TERMS` to it |
+
 ## Limits
 
-- Linux reproducibility of the candidate wheel bytes was not checked locally
-  (no Docker). The `Rule admission integration` workflow rebuilds them on Linux
-  AMD64 and ARM64 and fails on any digest mismatch.
+- Linux reproducibility was not checked locally (no Docker); the
+  `Rule admission integration` workflow rebuilt both candidates on Linux AMD64
+  and ARM64 with matching digests.
 - The synthetic provider proves hook wiring on the actual OpenAI-compatible
   request and response path. It does not show that a live model follows retry
   feedback.
-- No Harness workflow: Harness 0.9.7 and earlier reject `ruleViolation` after
-  provider spend.
+- No Harness workflow: Harness 0.9.7 lacks `ruleViolation` in `_FAILURES`
+  (it raises after provider spend), and its conversation path drops
+  `required_guards`, composed rules and guards.
 - The Runtime pin goes stale if PR #16 changes in review. That is expected: the
   lane is the integration test for the review.

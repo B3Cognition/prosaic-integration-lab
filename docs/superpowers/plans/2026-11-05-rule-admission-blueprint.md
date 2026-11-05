@@ -5,7 +5,7 @@ admission end to end, with acceptance tests, so a team can copy the folder,
 rename the agent and register its own guards.
 
 **Architecture:** A separate candidate lane, like the reasoning lane. Core
-`9d5a02f` and Runtime PR #16 `4082e72` are rebuilt reproducibly from exact
+`9d5a02f` and Runtime PR #16 `65ba15d` are rebuilt reproducibly from exact
 commits and pinned by SHA-256 as local offline candidates. The blueprint is a
 packaged Python folder holding prose under `.prosaic/`, `guards.py`, `host.py`,
 `runtime.yml` and `coverage.py`. The tests drive real conversation turns against
@@ -40,7 +40,12 @@ and Markdown.
 - [x] Lane guide, README row, CHANGELOG (Unreleased), handoff, progress and
   verification ledger.
 - [x] Adversarial review: a regression test for each defect found, observed
-  failing (22 failures) before each fix. The lane now has 79 tests.
-- [ ] CI on the draft PR. A maintainer dispatches `Publish SDK` on the pinned
-  commits, if wanted.
+  failing (22 failures) before each fix.
+- [x] CI on the draft PR: candidates rebuild byte-identically on Linux AMD64
+  and ARM64.
+- [x] Re-pin 1 to Runtime `65ba15d`: no blueprint test broke; the cross-file
+  settings change is pinned by a new variant.
+- [x] PR #45 review comments addressed test-first (34 failures observed before
+  the fixes). The lane has 105 tests, 3 of them strict expected failures.
+- [ ] A maintainer dispatches `Publish SDK` on the pinned commits, if wanted.
 - [ ] Re-pin to released Core and Runtime after #16 merges; see the lane guide.

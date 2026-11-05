@@ -7,10 +7,11 @@
   rule, a two-file per-(file, stage) composition, a custom
   `loan_period_within_policy` guard and a `required_guards` floor in both forms.
 - Pin fix, retry and fail; the rules fingerprint; coverage; and the byte-identical
-  untagged guarantee with 79 synthetic acceptance tests, including regressions
-  from an adversarial review. The tests sit outside the default collection and
+  untagged guarantee with 105 synthetic acceptance tests (3 strict expected
+  failures track fee formats Runtime does not yet read), including regressions
+  from an adversarial review and from PR review. The tests sit outside the default collection and
   need no credentials or live calls.
-- Rebuild Core `9d5a02f` and Runtime PR #16 head `4082e72` reproducibly from
+- Rebuild Core `9d5a02f` and Runtime PR #16 head `65ba15d` reproducibly from
   exact commits into `dependencies/rule-admission-candidate.json`, qualified as
   a local offline candidate rather than a published release. The ordinary and
   reasoning manifests are unchanged.
