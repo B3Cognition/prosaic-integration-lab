@@ -11,7 +11,10 @@ USAGE = {'prompt_tokens': 2, 'completion_tokens': 3, 'total_tokens': 5}
 class ScriptedProvider:
     """Replies in queue order and records each raw request body; an empty queue is a 500."""
 
-    def __init__(self):
+    def __init__(self, provider='openai-compatible'):
+        if provider not in {'openai-compatible', 'anthropic'}:
+            raise ValueError('unsupported synthetic provider wire')
+        self.provider = provider
         self.raw_requests, self._replies, self._lock = [], [], Lock()
         self.url = None
 
@@ -20,6 +23,11 @@ class ScriptedProvider:
         return [json.loads(raw) for raw in self.raw_requests]
 
     def queue_text(self, text):
+        if self.provider == 'anthropic':
+            self._replies.append({'id': 'synthetic', 'type': 'message', 'role': 'assistant',
+                'model': 'synthetic-model', 'content': [{'type': 'text', 'text': text}],
+                'stop_reason': 'end_turn', 'usage': {'input_tokens': 2, 'output_tokens': 3}})
+            return
         self._replies.append(
             {
                 'model': 'synthetic-model',
@@ -30,6 +38,13 @@ class ScriptedProvider:
 
     def queue_calls(self, *calls):
         """Queue one assistant message calling tools; each call is (call_id, name, arguments)."""
+        if self.provider == 'anthropic':
+            self._replies.append({'id': 'synthetic', 'type': 'message', 'role': 'assistant',
+                'model': 'synthetic-model', 'content': [
+                    {'type': 'tool_use', 'id': call_id, 'name': name, 'input': arguments}
+                    for call_id, name, arguments in calls],
+                'stop_reason': 'tool_use', 'usage': {'input_tokens': 2, 'output_tokens': 3}})
+            return
         wire = [
             {'id': call_id, 'type': 'function', 'function': {'name': name, 'arguments': json.dumps(arguments)}}
             for call_id, name, arguments in calls
@@ -51,8 +66,8 @@ class ScriptedProvider:
 
 
 @contextmanager
-def scripted_provider():
-    provider = ScriptedProvider()
+def scripted_provider(provider='openai-compatible'):
+    provider = ScriptedProvider(provider)
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):

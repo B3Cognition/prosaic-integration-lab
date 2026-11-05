@@ -6,11 +6,12 @@ them, and a floor in operator config says which checks prose may never drop.
 The domain is an invented lending library; every record, title and fee is
 synthetic.
 
-> **Candidate status.** This blueprint needs Prosaic Core `9d5a02f` or later
-> (enforcement tags) and the rule admission in Runtime from
+> **Candidate status.** This blueprint uses published Prosaic Core 0.5.0
+> and the rule admission in Runtime from
 > [prosaic-runtime#16](https://github.com/B3Cognition/prosaic-runtime/pull/16),
-> which is still in review. Both are installed by the Lab from exact-commit
-> candidate wheels until they are released. Interfaces can change before release.
+> at `498ffc7`, which is still in review. `harness.py` additionally needs the
+> Harness companion `5b3f0f2`. These two exact-commit candidate wheels are distinct
+> from the published Runtime 0.9.13/Harness 0.9.8 packages.
 
 ## What is in the folder
 
@@ -20,6 +21,7 @@ synthetic.
 | `companions/loan-desk.md` | A companion rule file: plain Markdown, no frontmatter, outside `.prosaic/`. It binds the same custom guard at `after_tool`. |
 | `guards.py` | One custom domain guard, `loan_period_within_policy`, and `registry()`: the four generic Runtime guards plus that one. |
 | `host.py` | Host wiring: synthetic tools, two-file composition, config loading and `build_runtime()`. |
+| `harness.py` | Graph-free Harness bindings with the same composition, floor, tools and host guards. |
 | `runtime.yml` | Operator config: the endpoint and the `required_guards` floor in both forms, covering the custom guard too. |
 | `coverage.py` | Answers "which of this agent's rules are enforced, and by what?" |
 
@@ -253,26 +255,45 @@ does not change when you edit text above a rule.
 A real turn calls the endpoint in `runtime.yml`. Put models and endpoints in
 that file; read credentials from the environment, never from Markdown.
 
+## Run through Harness
+
+```python
+from yourapp.catalogue_desk.harness import build_bindings
+from prosaic_harness import Conversation, ConversationScope, FileSessionStore
+
+scope = ConversationScope('library', 'production', 'catalogue', 'tenant', 'actor')
+store = FileSessionStore('/host-owned/sessions', namespace=scope.namespace)
+store.initialize()  # Provision once; workers can use check_ready().
+conversation = Conversation(build_bindings(), store=store, scope=scope)
+session = conversation.create()
+reply = conversation.send(session.session_id, message_id='borrow-1',
+    message='Borrow CAT-0001 for 14 days.', expected_revision=session.revision)
+```
+
+Derive scope and storage paths from trusted host context. A fresh worker supplies
+the same binding version, guards and logical project identity. Guarded failures
+persist as `ruleViolation`; saved receipts retain rule IDs and the fingerprint,
+and recovery/replay does not repeat model or tool calls. Guard version, stage,
+settings-contract or policy drift changes binding identity and refuses resume.
+The host passes an explicit rule project so path-setting guards never use worker
+CWD. Replace synthetic tools before using this in an application.
+
 ## Limits
 
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Do not run this agent inside Harness yet; guarded conversations need a
-  companion Harness release. Harness 0.9.7 and earlier:
-  - reject the `ruleViolation` failure code after the provider call has been
-    made, because it is not in their receipt `_FAILURES` set;
-  - drop `required_guards` and composed rules on their conversation path;
-  - build the runtime without guards.
+- Harness support is qualified only with the exact companion candidate; published
+  Harness 0.9.8 and earlier still lack that support. Legacy graph `run()` remains
+  outside the rule-hook contract. Upgrade all shared-session readers together.
 - `value_in_tool_output` reads a currency code or symbol before the number, in
   any case (`EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`), and a symbol after it
   (`1.20 €`). It does not yet read a code or word after the number (`1.20 EUR`,
   `1.20 euros`) or minor units (`120 cents`). An invented fee written that way
   passes. The Lab tracks these as expected failures against prosaic-runtime#16.
-- The import check confirms `rule_admission_v1`, but every #16 candidate so far
-  reports the same version and capability. It cannot tell whether the installed
-  Runtime refuses conflicting cross-file settings (added in `65ba15d`). Until
-  Runtime advertises that, pin the exact build, as the Lab does.
+- The Runtime capability check cannot distinguish every #16 candidate. Pin the
+  exact build, as the Lab does, and run its install audit; a version string alone
+  cannot distinguish the released package from these candidates.
 - An agent with every tag stripped runs byte-identically to the tagged one when
   no guard fires, with or without guards registered. It is still refused by a
   runtime whose floor requires guards.

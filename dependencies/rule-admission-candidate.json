@@ -2,21 +2,21 @@
   "artifacts": [
     {
       "distribution": "b3-prosaic",
-      "filename": "b3_prosaic-0.4.1-py3-none-any.whl",
-      "qualification": "local-offline-candidate; not a published release",
-      "sha256": "c42efc9fc9deae68417ac2cabfc769b81db229c85220ac7fb971cef97a061c74",
-      "source_commit": "9d5a02f87469da373ba35e1e599b456b45459cd2",
-      "source_repository": "B3Cognition/prosaic",
-      "version": "0.4.1"
+      "filename": "b3_prosaic-0.5.0-py3-none-any.whl",
+      "checksum_url": "https://github.com/B3Cognition/prosaic/releases/download/v0.5.0/SHA256SUMS",
+      "sha256": "e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81",
+      "source_commit": "67b3807281ed0cdfd345fff84c56b236ec82cfb1",
+      "url": "https://files.pythonhosted.org/packages/15/28/be27f03fa86b5936fc1810b75b09e57bb40727b48c72a1f46664dd8493ae/b3_prosaic-0.5.0-py3-none-any.whl",
+      "version": "0.5.0"
     },
     {
       "distribution": "b3-prosaic-runtime",
-      "filename": "b3_prosaic_runtime-0.9.12-py3-none-any.whl",
+      "filename": "b3_prosaic_runtime-0.9.13-py3-none-any.whl",
       "qualification": "local-offline-candidate; not a published release",
-      "sha256": "121604f7516d54122f4f3d89e0fe53956745d5767c1f8126201bf18bb813c300",
-      "source_commit": "65ba15d7e93ee058e22bececdb2e528cef2a474a",
+      "sha256": "6b96cfe0e74f061a016c95e1398c020ada899840a15fe08584c9bbbead39cfc2",
+      "source_commit": "498ffc78c6b215bc425847c8fbc645c20e9b2d05",
       "source_repository": "B3Cognition/prosaic-runtime",
-      "version": "0.9.12"
+      "version": "0.9.13"
     },
     {
       "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.0/SHA256SUMS",
@@ -28,13 +28,13 @@
       "version": "0.3.0"
     },
     {
-      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.4/SHA256SUMS",
       "distribution": "b3-prosaic-harness",
-      "filename": "b3_prosaic_harness-0.9.4-py3-none-any.whl",
-      "sha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b",
-      "source_commit": "7861459f2452f1ad66717cfb45f62be4ed5caf23",
-      "url": "https://files.pythonhosted.org/packages/3b/1c/7dc4f3a41873173cab2e9650623b237fbc41915f46fa07d50f77a7b45305/b3_prosaic_harness-0.9.4-py3-none-any.whl",
-      "version": "0.9.4"
+      "filename": "b3_prosaic_harness-0.9.8-py3-none-any.whl",
+      "qualification": "local-offline-candidate; not a published release",
+      "sha256": "f993cf192bdd2274ff8bdc229799cbaf19a926ff6d9d7fe3118ca328572b2228",
+      "source_commit": "5b3f0f2e2899b29c4f2b457875af2cb522140c03",
+      "source_repository": "B3Cognition/prosaic-harness",
+      "version": "0.9.8"
     },
     {
       "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.0/SHA256SUMS",
@@ -46,5 +46,5 @@
       "version": "0.4.0"
     }
   ],
-  "qualification": "local-offline-candidate; not a published release. Core main 9d5a02f (enforcement tags) and Runtime PR #16 head 65ba15d (rule admission), rebuilt by scripts/build_rule_admission_candidates.py; the other three are the published reasoning-lane wheels."
+  "qualification": "local-offline-candidate; not a published release. Released Core 0.5.0, exact Runtime PR #16 head 498ffc7 and Harness companion 5b3f0f2. Runtime and Harness are rebuilt by scripts/build_rule_admission_candidates.py; adapters remain published reasoning-lane wheels."
 }

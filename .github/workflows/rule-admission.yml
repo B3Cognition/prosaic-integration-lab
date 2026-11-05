@@ -1,6 +1,6 @@
 name: Rule admission integration
 # Candidate lane for prosaic-runtime#16. Not a required check until the
-# candidate manifest is re-pinned to published Core and Runtime releases.
+# candidate manifest is re-pinned to published Runtime and Harness releases.
 on:
   pull_request:
   push:
@@ -14,8 +14,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: ['16', '18']
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_PASSWORD: synthetic-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -34,13 +44,16 @@ jobs:
           .venv/bin/python scripts/audit_install.py --manifest dependencies/rule-admission-candidate.json
           .venv/bin/python -m pip check
       - name: Check the blueprint against the synthetic provider and report coverage
+        env:
+          PROSAIC_RULE_POSTGRES_DSN: postgresql://postgres:synthetic-only@127.0.0.1:5432/postgres
         run: |
           mkdir reports
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_acceptance -q --junitxml=reports/rule-admission.xml
+          .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_postgres -q --junitxml=reports/rule-postgres.xml
           .venv/bin/python -I -m lab_runner.rule_admission.blueprint.coverage --json > reports/coverage.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
-          name: rule-admission-${{ matrix.os }}
+          name: rule-admission-${{ matrix.os }}-pg${{ matrix.postgres }}
           path: reports/
           if-no-files-found: error

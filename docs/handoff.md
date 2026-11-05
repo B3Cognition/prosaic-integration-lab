@@ -1,5 +1,32 @@
 # Codex handoff
 
+## Guarded Harness companion — 2026-11-05
+
+The maintainer authorized implementing the remaining Harness and Lab gaps.
+This follow-up branch starts at PR #45 `44539fd`. The guarded lane now uses
+released Core 0.5.0, fixed Runtime #16 `498ffc7`, and local Harness companion
+`5b3f0f2` (branch `codex/harness-rule-admission`). It owns policy and composed
+inspection rules, registers guards at every phase, seals explicit guard project
+roots, and persists bounded rule receipts and ruleViolation failures.
+
+The copyable `blueprint/harness.py` and both-wire acceptance cover before-tool
+repair, composed after-tool failure, retry exhaustion and file-store recovery.
+Independent value-source regressions now pass through Harness; three strict
+expected failures still document the upstream fee grammar limits. A separate
+required PostgreSQL lane covers receipt recovery with installed SDKs.
+
+Both candidate wheels were rebuilt twice with identical recorded hashes and
+both five-wheel train audits pass. The Harness source suite passed 1,035 with
+real PostgreSQL 18; its saved compatibility regressions pass all four cases.
+Final installed/default/PG qualification is recorded in
+[the companion ledger](verification/guarded-harness-2026-11-05.md).
+
+No release or author-branch modification is included. Before remote CI can
+build this lane, push the exact Harness companion commit. For local rebuilding,
+the builder accepts an explicit `--local-repository` checkout and still archives
+only that commit and verifies its hash. Ordinary/reasoning manifests are unchanged.
+Earlier checkpoints below describe their historical candidates.
+
 ## Rule-admission blueprint, draft only — 2026-11-05
 
 The maintainer asked for an adoption example of Prosaic rule admission.

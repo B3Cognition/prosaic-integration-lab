@@ -17,8 +17,8 @@ def require_sdk():
         raise ValueError('rule admission lane requires Core with parse_rules and strip_tags (9d5a02f or later)')
     import prosaic_runtime as sdk
 
-    if not Version('0.9.12') <= Version(version('b3-prosaic-runtime')) < Version('0.10'):
-        raise ValueError('rule admission lane requires installed Runtime 0.9.12..<0.10')
+    if not Version('0.9.13') <= Version(version('b3-prosaic-runtime')) < Version('0.10'):
+        raise ValueError('rule admission lane requires installed Runtime 0.9.13..<0.10')
     if 'rule_admission_v1' not in sdk.ProsaicRuntime.capabilities:
         raise ValueError('rule admission lane requires the rule_admission_v1 Runtime capability')
     if 'site-packages' not in Path(sdk.__file__).resolve().parts:

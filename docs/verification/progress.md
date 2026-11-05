@@ -1,5 +1,15 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Guarded Harness integration follow-up — 2026-11-05
+
+Exact candidate train: Core 0.5.0 / Runtime #16 `498ffc7` / Harness `5b3f0f2`.
+The copyable Harness host and acceptance close registration, floor/composed-rule
+preservation and receipt/recovery gaps. Both provider wires are synthetic.
+Ordinary/reasoning manifests remain unchanged; candidate provenance, installed
+payload audits and PostgreSQL 16/18 checks are separate qualification gates.
+See [the companion ledger](guarded-harness-2026-11-05.md). Historical checkpoints
+below retain the limitations that existed at those commits.
+
 ## Rule-admission blueprint candidate lane — 2026-11-05
 
 [Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk

@@ -7,17 +7,18 @@ may never weaken. It contains one copyable agent and an acceptance suite that
 pins the whole mechanism against an owned synthetic provider. It makes no live
 model calls and needs no credentials.
 
-The lane consumes **unreleased** SDK code:
+The lane consumes released Core and two exact, **unreleased** SDK candidates:
 
 | SDK | Source | Why |
 | --- | --- | --- |
-| Core | `B3Cognition/prosaic` main `9d5a02f` (PR #4) | Enforcement tag grammar: `parse_rules`, `strip_tags`, inspection `rules` |
-| Runtime | `B3Cognition/prosaic-runtime` PR #16 head `65ba15d` | Rule admission for conversation turns |
-| Runtime recorder, Harness, Harness store | Published 0.3.0, 0.9.4 and 0.4.0 | Unchanged from the reasoning lane |
+| Core | Published 0.5.0, `67b3807` | Enforcement tag grammar: `parse_rules`, `strip_tags`, inspection `rules` |
+| Runtime | `B3Cognition/prosaic-runtime` PR #16 `498ffc7` | Fixed value-source boundaries and signed multiples |
+| Harness | Companion `5b3f0f2` | Guards, owned policy/composed rules, ruleViolation and private rule receipts |
+| Runtime recorder, Harness store | Published 0.3.0 and 0.4.0 | Unchanged from the reasoning lane |
 
-Both candidates keep their released version numbers (Core 0.4.1, Runtime
-0.9.12), so only their bytes distinguish them from the published wheels. The
-published Core 0.4.1 has no `parse_rules`. The ordinary `releases.json` train,
+Both candidates keep their base version numbers (Runtime 0.9.13, Harness
+0.9.8), so only their pinned bytes identify these feature builds. Installing
+the published versions alone does not enable this lane. The ordinary `releases.json` train,
 the reasoning lane and all historical evidence are unchanged.
 
 ## Install the exact lane
@@ -36,6 +37,13 @@ LAB_RULES_PY="$PWD/.venv-rules/bin/python"
 "$LAB_RULES_PY" scripts/audit_install.py --manifest dependencies/rule-admission-candidate.json
 "$LAB_RULES_PY" -m pip check
 ```
+
+Before the Harness companion commit is pushed, build it from its explicit local
+Git checkout with the same command plus
+`--local-repository B3Cognition/prosaic-harness=/absolute/path/to/harness`.
+The builder fetches and archives only the manifest commit, ignores working
+changes, and still verifies the wheel hash. CI uses the remote commit, so that
+commit must be pushed before this lane can run on another machine.
 
 `build_rule_admission_candidates.py` builds each candidate in four steps:
 
@@ -90,6 +98,8 @@ cp -R "$LAB_RULES_BLUEPRINT" src/yourapp/catalogue_desk
 | | Review regressions: whole-number float loan periods repaired; `after_tool` fails closed on unreadable periods; coverage equals real admission across eleven variants (malformed tag, path-setting guard, superseded and conflicting cross-file bindings, raised loan limit, `fix` at `after_tool`, weaker floor, unregistered custom or required guard, stripped agent under the floor); duplicate companions refused | `test_review_regressions.py` |
 | | PR review: the floor protects the custom guard; the id rule says what the guard enforces; the companion is never distributed as an agent; `fix` where the guard cannot repair is refused before any request; fee formats (still-missed formats are strict expected failures against #16); enormous periods repaired; the blueprint refuses an SDK without rule admission | `test_pr_review.py` |
 | | Builder cache: dangling or live symlinks refused and never written through; bytes that differ from the manifest refused; a missing build backend refused before any fetch | `test_candidate_builder.py` |
+| | Harness: the floor, host registrations, before-tool repair, composed after-tool failure, retry exhaustion, private rule receipts, reopen/replay and saved-receipt recovery on both wires | `test_harness.py` |
+| | Independent malformed-source and strict-sign regressions through Harness, plus three explicit magnitude controls | `test_value_source_regressions.py` |
 
 Turns that are compared byte for byte use a fixed public `InvocationScope`,
 because Runtime derives opaque tool-call ids from it. Runtime's own untagged
@@ -111,12 +121,10 @@ binding still supersedes, and `coverage` reports the weaker one as
 fail on re-pin by design. The three fee formats Runtime does not yet read are
 strict expected failures, so they fail on re-pin as soon as Runtime reads them.
 
-1. **Before release, optionally:** a maintainer dispatches `Publish SDK` on
-   Core `9d5a02f` and Runtime `65ba15d`, or later heads. The resulting
-   action-built wheels and receipts can replace the local candidates through
-   `scripts/prepare_sdk_candidates.py`. That script's version table would need
-   an entry for this train.
-2. **After Core releases `parse_rules` and #16 merges and releases:** replace
+1. Runtime `498ffc7` resolves the two value-source bugs reproduced at `65ba15d`.
+   Harness `5b3f0f2` closes its policy/rule/registration/receipt gaps. Keep those
+   commits exact until successor candidates have passed this lane.
+2. **After Runtime #16 and the Harness companion merge and release:** replace
    both candidate entries with the published `url`, `checksum_url`, `sha256`,
    `source_commit` and versions. Drop the `qualification` field, the build step
    and `rule-admission-build.lock`, and update `test_candidate_install.py` and
@@ -126,13 +134,13 @@ strict expected failures, so they fail on re-pin as soon as Runtime reads them.
 ## Limits
 
 - Rule hooks exist only for conversation turns. `run()`, `NativeRuntime` and
-  `UnifiedRuntime` refuse enforce-tagged prose. No Harness workflow is included.
-  Harness 0.9.7 and earlier do not have `ruleViolation` in their receipt
-  `_FAILURES` set, so they raise after provider spend. Their conversation path
-  also drops `required_guards` and composed rules, and builds the runtime
-  without guards. A companion Harness release is needed.
+  `UnifiedRuntime` refuse enforce-tagged prose. The copyable `blueprint/harness.py`
+  uses graph-free Harness conversations with the exact companion candidate.
+  Published Harness 0.9.8 and earlier do not support guarded conversations;
+  upgrade every worker sharing these sessions before using the new receipts.
 - The synthetic provider checks that hooks are wired to the real
   OpenAI-compatible request and response path. It does not qualify a live
   model's compliance with retry feedback.
-- The candidate wheels rebuild byte-identically on macOS arm64 locally and on
-  Linux AMD64 and ARM64 in CI.
+- These exact candidate wheels rebuilt byte-identically twice on macOS arm64.
+  Linux AMD64/ARM64 CI is configured and awaits pushing the Harness companion;
+  earlier Linux results belong to the historical candidate train.

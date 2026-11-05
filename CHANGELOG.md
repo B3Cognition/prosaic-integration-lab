@@ -7,14 +7,17 @@
   rule, a two-file per-(file, stage) composition, a custom
   `loan_period_within_policy` guard and a `required_guards` floor in both forms.
 - Pin fix, retry and fail; the rules fingerprint; coverage; and the byte-identical
-  untagged guarantee with 123 synthetic acceptance tests (3 strict expected
+  untagged guarantee with synthetic acceptance tests (3 strict expected
   failures track fee formats Runtime does not yet read), including regressions
   from an adversarial review and from two PR review rounds. The tests sit outside the default collection and
   need no credentials or live calls.
-- Rebuild Core `9d5a02f` and Runtime PR #16 head `65ba15d` reproducibly from
-  exact commits into `dependencies/rule-admission-candidate.json`, qualified as
-  a local offline candidate rather than a published release. The ordinary and
-  reasoning manifests are unchanged.
+- Use published Core 0.5.0, fixed Runtime #16 `498ffc7` and the guarded Harness
+  companion `5b3f0f2`, with exact source commits and verified wheel hashes.
+  Add a copyable Harness host and both-wire acceptance for policy preservation,
+  tool repair, composed after-tool checks, durable failures and file-store recovery.
+  The two reviewed value-guard gaps have independent passing Harness regressions.
+  Runtime/Harness remain explicitly local candidates; ordinary/reasoning manifests
+  are unchanged. The builder can archive an unpublished local exact commit.
 
 ## 0.9.4 — 2026-11-04
 

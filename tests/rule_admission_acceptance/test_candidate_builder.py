@@ -78,3 +78,50 @@ def test_missing_build_backend_is_a_clear_refusal_before_any_fetch(builder, tmp_
     monkeypatch.setattr(builder, 'run', lambda *args, **kwargs: pytest.fail('fetched before checking the backend'))
     with pytest.raises(ValueError, match='rule-admission-build.lock'):
         builder.build({'source_commit': '0' * 40, 'source_repository': 'B3Cognition/prosaic'}, tmp_path)
+
+
+def test_published_core_is_not_rebuilt_and_harness_candidate_is_required(builder, tmp_path):
+    import json
+    items = [
+        {'distribution': 'b3-prosaic', 'version': '0.5.0', 'filename': 'b3_prosaic-0.5.0-py3-none-any.whl',
+         'url': 'https://example.invalid/core.whl', 'sha256': '1'*64},
+        *[{'distribution': dist, 'version': version, 'filename': filename, 'sha256': '2'*64,
+            'qualification': builder.QUALIFICATION, 'source_repository': repo, 'source_commit': 'a'*40}
+          for dist, version, filename, repo in (
+            ('b3-prosaic-runtime', '0.9.13', 'b3_prosaic_runtime-0.9.13-py3-none-any.whl', 'B3Cognition/prosaic-runtime'),
+            ('b3-prosaic-harness', '0.9.8', 'b3_prosaic_harness-0.9.8-py3-none-any.whl', 'B3Cognition/prosaic-harness'))],
+    ]
+    # Start with the real five-distribution manifest so its ordinary validation also runs.
+    data = json.loads((ROOT / 'dependencies/rule-admission-candidate.json').read_text())
+    replacements = {item['distribution']: item for item in items}
+    data['artifacts'] = [replacements.get(item['distribution'], item) for item in data['artifacts']]
+    manifest = tmp_path / 'candidate.json'
+    manifest.write_text(json.dumps(data))
+    selected = builder.candidates(manifest)
+    assert {item['distribution'] for item in selected} == {'b3-prosaic-runtime', 'b3-prosaic-harness'}
+
+
+def test_local_candidate_archives_exact_commit_and_ignores_working_changes(builder, tmp_path):
+    import subprocess
+    import zipfile
+    repo = tmp_path / 'repo'
+    repo.mkdir()
+    (repo / 'pyproject.toml').write_text('[build-system]\nrequires=["setuptools==80.9.0"]\nbuild-backend="setuptools.build_meta"\n'
+        '[project]\nname="b3-prosaic-harness"\nversion="0.9.8"\n')
+    package = repo / 'fixture_package'
+    package.mkdir()
+    (package / '__init__.py').write_text('VALUE = "sealed"\n')
+    def git(*args):
+        return subprocess.check_output(['git', '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null',
+            '-c', 'user.name=Synthetic fixture', '-c', 'user.email=fixture@example.invalid', *args], cwd=repo, text=True)
+    git('init', '--quiet')
+    git('add', '.')
+    git('commit', '--quiet', '-m', 'Synthetic candidate')
+    commit = git('rev-parse', 'HEAD').strip()
+    (package / '__init__.py').write_text('VALUE = "uncommitted"\n')
+    work = tmp_path / 'build'
+    work.mkdir()
+    wheel = builder.build({'source_commit': commit, 'source_repository': 'B3Cognition/prosaic-harness',
+        'filename': 'b3_prosaic_harness-0.9.8-py3-none-any.whl'}, work, local_repository=repo)
+    with zipfile.ZipFile(wheel) as archive:
+        assert archive.read('fixture_package/__init__.py') == b'VALUE = "sealed"\n'

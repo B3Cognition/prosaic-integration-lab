@@ -7,8 +7,9 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[2]
-CORE_COMMIT = '9d5a02f87469da373ba35e1e599b456b45459cd2'
-RUNTIME_COMMIT = '65ba15d7e93ee058e22bececdb2e528cef2a474a'
+CORE_COMMIT = '67b3807281ed0cdfd345fff84c56b236ec82cfb1'
+RUNTIME_COMMIT = '498ffc78c6b215bc425847c8fbc645c20e9b2d05'
+HARNESS_COMMIT = '5b3f0f2e2899b29c4f2b457875af2cb522140c03'
 QUALIFICATION = 'local-offline-candidate; not a published release'
 
 
@@ -16,17 +17,19 @@ def artifacts(name):
     return {item['distribution']: item for item in json.loads((ROOT / name).read_text())['artifacts']}
 
 
-def test_manifest_pins_exact_commits_and_differs_from_the_published_core():
+def test_manifest_pins_released_core_and_exact_runtime_harness_candidates():
     candidate = artifacts('dependencies/rule-admission-candidate.json')
     published = artifacts('dependencies/releases-reasoning.json')
     core, runtime = candidate['b3-prosaic'], candidate['b3-prosaic-runtime']
     assert (core['source_commit'], runtime['source_commit']) == (CORE_COMMIT, RUNTIME_COMMIT)
-    assert core['qualification'] == runtime['qualification'] == QUALIFICATION
-    assert 'url' not in core and 'url' not in runtime
-    # Same version and filename as the release that lacks parse_rules: only the bytes tell them apart.
-    assert core['filename'] == published['b3-prosaic']['filename']
+    harness = candidate['b3-prosaic-harness']
+    assert harness['source_commit'] == HARNESS_COMMIT
+    assert runtime['qualification'] == harness['qualification'] == QUALIFICATION
+    assert 'qualification' not in core and core['version'] == '0.5.0' and 'url' in core
+    assert 'url' not in runtime and 'url' not in harness
+    assert core['filename'] != published['b3-prosaic']['filename']
     assert core['sha256'] != published['b3-prosaic']['sha256']
-    for name in ('b3-prosaic-runtime-postgres', 'b3-prosaic-harness', 'b3-prosaic-harness-postgres'):
+    for name in ('b3-prosaic-runtime-postgres', 'b3-prosaic-harness-postgres'):
         assert candidate[name] == published[name]
 
 
@@ -66,7 +69,7 @@ def test_require_sdk_accepts_the_installed_candidate():
     assert 'rule_admission_v1' in sdk.ProsaicRuntime.capabilities
 
 
-def test_candidate_builder_selects_exactly_core_and_runtime():
+def test_candidate_builder_selects_exactly_runtime_and_harness():
     sys.path.insert(0, str(ROOT / 'scripts'))
     try:
         from build_rule_admission_candidates import candidates
@@ -74,6 +77,6 @@ def test_candidate_builder_selects_exactly_core_and_runtime():
         sys.path.remove(str(ROOT / 'scripts'))
     selected = candidates(ROOT / 'dependencies/rule-admission-candidate.json')
     assert {item['source_repository']: item['source_commit'] for item in selected} == {
-        'B3Cognition/prosaic': CORE_COMMIT,
         'B3Cognition/prosaic-runtime': RUNTIME_COMMIT,
+        'B3Cognition/prosaic-harness': HARNESS_COMMIT,
     }

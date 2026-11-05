@@ -1,6 +1,6 @@
 """Rebuild the rule-admission candidate wheels from exact upstream commits.
 
-The candidate manifest records unreleased Core and Runtime wheels built from
+The candidate manifest records unreleased Runtime and Harness wheels built from
 ``git archive`` of an exact 40-character commit. This script fetches only that
 commit, builds it with the hashed backend in ``rule-admission-build.lock``
 (no build isolation, ``SOURCE_DATE_EPOCH`` set to the commit time) and refuses
@@ -31,18 +31,19 @@ from prosaic_integration_lab.dependencies import cache_directory, file_digest, s
 MANIFEST = ROOT / 'dependencies/rule-admission-candidate.json'
 QUALIFICATION = 'local-offline-candidate; not a published release'
 BACKEND = ('setuptools', '80.9.0')
-REPOSITORIES = {'b3-prosaic': 'B3Cognition/prosaic', 'b3-prosaic-runtime': 'B3Cognition/prosaic-runtime'}
+REPOSITORIES = {'b3-prosaic-runtime': 'B3Cognition/prosaic-runtime',
+    'b3-prosaic-harness': 'B3Cognition/prosaic-harness'}
 RELEASED = {ROOT / 'dependencies/releases.json', ROOT / 'dependencies/releases-reasoning.json'}
 
 
 def candidates(manifest):
-    """Return the locally built entries; exactly Core and Runtime, each at an exact commit."""
+    """Return Runtime and Harness candidates; Core is the released 0.5.0 wheel."""
     if Path(manifest).resolve() in {path.resolve() for path in RELEASED}:
         raise ValueError('candidate builds never use a release manifest')
     data = sdk_manifest(manifest)
     selected = [item for item in data['artifacts'] if item.get('qualification') == QUALIFICATION]
-    if {item['distribution'] for item in selected} != set(REPOSITORIES):
-        raise ValueError('candidate manifest must build exactly Core and Runtime')
+    if len(selected) != 2 or {item['distribution'] for item in selected} != set(REPOSITORIES):
+        raise ValueError('candidate manifest must build exactly Runtime and Harness')
     for item in selected:
         if (
             item.get('source_repository') != REPOSITORIES[item['distribution']]
@@ -57,7 +58,7 @@ def run(*command, cwd=None, env=None):
     return subprocess.run(command, cwd=cwd, env=env, check=True, capture_output=True, text=True, timeout=600).stdout
 
 
-def build(item, work):
+def build(item, work, *, local_repository=None):
     """Fetch one exact commit, archive it and build its wheel; returns the wheel path."""
     try:
         installed = version(BACKEND[0])
@@ -68,7 +69,13 @@ def build(item, work):
     commit = item['source_commit']
     repository = work / 'repository.git'
     run('git', 'init', '--quiet', '--bare', str(repository))
-    url = f'https://github.com/{item["source_repository"]}'
+    if local_repository is None:
+        url = f'https://github.com/{item["source_repository"]}'
+    else:
+        checkout = Path(local_repository)
+        if not checkout.is_absolute() or not checkout.is_dir():
+            raise ValueError('local repository must be an absolute Git checkout')
+        url = str(checkout)
     run('git', '-C', str(repository), 'fetch', '--quiet', '--depth', '1', url, commit)
     if run('git', '-C', str(repository), 'rev-parse', 'FETCH_HEAD').strip() != commit:
         raise ValueError('fetched commit differs from the manifest')
@@ -116,13 +123,21 @@ def main():
     parser.add_argument('--manifest', type=Path, default=MANIFEST)
     parser.add_argument('--cache-root', type=Path, default=ROOT / '.cache/wheels')
     parser.add_argument('--report', action='store_true', help='print digests; do not verify or cache')
+    parser.add_argument('--local-repository', action='append', default=[], metavar='REPOSITORY=PATH',
+        help='explicit local Git source for an unpublished exact commit; hashes are still mandatory')
     args = parser.parse_args()
     selected = candidates(args.manifest)
+    local = {}
+    for value in args.local_repository:
+        name, separator, path = value.partition('=')
+        if not separator or name not in REPOSITORIES.values() or name in local:
+            raise ValueError('local repository must name one distinct candidate repository')
+        local[name] = path
     cache = cache_directory(args.manifest, args.cache_root)
     report = []
     for item in selected:
         with tempfile.TemporaryDirectory(prefix='rule-candidate-') as temporary:
-            wheel = build(item, Path(temporary))
+            wheel = build(item, Path(temporary), local_repository=local.get(item['source_repository']))
             digest = file_digest(wheel)
             report.append({'distribution': item['distribution'], 'filename': wheel.name, 'sha256': digest})
             if not args.report:
