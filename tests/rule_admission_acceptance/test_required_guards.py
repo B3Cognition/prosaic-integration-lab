@@ -12,6 +12,7 @@ def test_runtime_yml_declares_the_action_form_and_the_pinned_form():
     assert host.load_config().required_guards == {
         'value_in_tool_output': 'retry',
         'args_reference_seen_ids': {'action': 'fail', 'stage': 'before_tool', 'settings': {'keys': ['recordId']}},
+        'loan_period_within_policy': {'action': 'fix', 'settings': {'max_days': 21}},
     }
 
 

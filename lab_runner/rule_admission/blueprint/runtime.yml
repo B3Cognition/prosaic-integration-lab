@@ -21,3 +21,9 @@ required_guards:
     action: fail
     stage: before_tool
     settings: {keys: [recordId]}
+  # The domain policy is protected too: prose cannot raise the limit or drop
+  # the guard. No stage pin, because the agent binds it at before_tool and the
+  # companion at after_tool; the pinned settings apply to both bindings.
+  loan_period_within_policy:
+    action: fix
+    settings: {max_days: 21}

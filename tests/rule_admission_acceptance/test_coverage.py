@@ -25,7 +25,7 @@ def expected_rows(lab, *, custom_registered=True):
             'stage': 'before_tool',
             'action': 'fix',
             'status': custom[1],
-            'floor': None,
+            'floor': 'pinned',
         },
         {
             'id': lab.ids.links,
@@ -61,7 +61,7 @@ def expected_rows(lab, *, custom_registered=True):
             'stage': 'after_tool',
             'action': 'fail',
             'status': custom[1],
-            'floor': None,
+            'floor': 'pinned',
         },
     ]
 

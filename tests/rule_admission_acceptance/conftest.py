@@ -7,17 +7,28 @@ from types import SimpleNamespace
 import pytest
 
 AGENT = 'subagents/catalogue-desk.md'
-COMPANION = 'subagents/loan-desk.md'
+# Companions live outside the Core source directory, so Core never distributes them as agents.
+COMPANION = 'companions/loan-desk.md'
 IDS = SimpleNamespace(
     seen_ids=f'{AGENT}:9:args_reference_seen_ids',
     loan_before=f'{AGENT}:10:loan_period_within_policy',
     links=f'{AGENT}:11:no_wrapped_links',
     values=f'{AGENT}:12:value_in_tool_output',
     prose_only=f'{AGENT}:13:prose-only',
-    loan_after=f'{COMPANION}:8:loan_period_within_policy',
+    loan_after=f'{COMPANION}:3:loan_period_within_policy',
 )
 HAPPY_MESSAGE = 'Please borrow the Atlas of Invented Rivers for 14 days.'
 HAPPY_ANSWER = 'Your loan of [Atlas of Invented Rivers](/catalogue/CAT-0001) is due back in 14 days.'
+# The generic part of runtime.yml's floor: isolates checks of the custom guard's own schema and stages.
+GENERIC_FLOOR = {
+    'value_in_tool_output': 'retry',
+    'args_reference_seen_ids': {'action': 'fail', 'stage': 'before_tool', 'settings': {'keys': ['recordId']}},
+}
+
+
+def prose_path(project, relative):
+    """Agents live under .prosaic/; companions sit beside it at the project root."""
+    return project / '.prosaic' / relative if relative.startswith('subagents/') else project / relative
 
 
 def failure(turn):
@@ -40,7 +51,7 @@ def copy_project(tmp_path, edits=None, *, strip=False):
     target = tmp_path / 'project'
     shutil.copytree(BLUEPRINT, target, ignore=shutil.ignore_patterns('__pycache__'))
     for relative, changes in (edits or {}).items():
-        path = target / '.prosaic' / relative
+        path = prose_path(target, relative)
         text = path.read_text()
         for old, new in changes:
             assert text.count(old) == 1, f'edit anchor not unique in {relative}: {old!r}'
@@ -48,7 +59,7 @@ def copy_project(tmp_path, edits=None, *, strip=False):
         path.write_text(text)
     if strip:
         for relative in (AGENT, COMPANION):
-            path = target / '.prosaic' / relative
+            path = prose_path(target, relative)
             path.write_text(strip_tags(path.read_text()))
     return target
 
@@ -98,4 +109,6 @@ def lab():
         queue_happy=queue_happy,
         copy_project=copy_project,
         run_turn=run_turn,
+        path=prose_path,
+        generic_floor=GENERIC_FLOOR,
     )

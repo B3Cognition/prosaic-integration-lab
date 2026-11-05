@@ -9,15 +9,16 @@ small in-memory synthetic fixture: replace ``library_tools`` with your own.
 from dataclasses import replace
 from pathlib import Path
 
-from prosaic import inspect_artifact, strip_tags
+from prosaic import inspect_artifact, parse_rules, strip_tags
 from prosaic_runtime import CustomTool, ProsaicArtifact, ProsaicRuntime, RunPolicy, RuntimeConfig
 
-from .guards import registry
+from .guards import REPAIR_STAGES, registry
 
 BLUEPRINT = Path(__file__).parent
 CONFIG = BLUEPRINT / 'runtime.yml'
 AGENT = 'subagents/catalogue-desk.md'
-COMPANIONS = ('subagents/loan-desk.md',)
+# Companions are plain rule files beside .prosaic/, never agents: Core does not distribute them.
+COMPANIONS = ('companions/loan-desk.md',)
 TOOLS = ('catalogue_search', 'loan_terms', 'place_loan')
 
 CATALOGUE = {
@@ -105,15 +106,41 @@ def _inspect(project, artifact_id):
     return inspected['data']
 
 
-def compose(project=BLUEPRINT, *, agent=AGENT, companions=COMPANIONS):
-    """One turn's artifact from an agent and its companion files.
+def repair_problems(rules):
+    """Rule ids bound with ``fix`` at a stage where their guard returns no repair (see ``REPAIR_STAGES``)."""
+    return [
+        f'{entry["id"]}: {entry["guard"]} cannot repair at {entry["stage"]}'
+        for entry in rules
+        if entry.get('kind') == 'enforce'
+        and entry.get('action') == 'fix'
+        and entry.get('guard') in REPAIR_STAGES
+        and entry.get('stage') not in REPAIR_STAGES[entry['guard']]
+    ]
+
+
+def _companion(project, name):
+    """A companion: plain Markdown rules, no frontmatter, read and parsed with Core's own functions."""
+    path = Path(project) / name
+    if path.is_symlink() or not path.is_file():
+        raise ValueError(f'companion {name} is not a regular file')
+    text = path.read_text(encoding='utf-8')
+    if text.startswith('---'):
+        raise ValueError(f'companion {name} has frontmatter; companions are rules, never agents')
+    return text, parse_rules(text, name)
+
+
+def compose(project=BLUEPRINT, *, agent=AGENT, companions=COMPANIONS, check=True):
+    """One turn's artifact from an agent and its companion rule files.
 
     The agent's body stays the primary body. Each companion reaches the model as
-    a Markdown resource with Core's ``strip_tags`` applied, and its inspection
-    rules are supplied with the agent's, so every binding keeps its own source
-    file. Core allows one binding per guard per file; a companion is how the same
-    guard is bound at another stage. Files must be distinct, and a companion
-    with bundled resources is refused rather than composed partially.
+    a Markdown resource with Core's ``strip_tags`` applied, and its rules come
+    from Core's ``parse_rules``, so every binding keeps its own source file. Core
+    allows one binding per guard per file; a companion is how the same guard is
+    bound at another stage. Companions live outside ``.prosaic/`` without
+    frontmatter, so ``prosaic apply`` never distributes one as an agent.
+
+    Files must be distinct. With ``check`` (the default), a ``fix`` binding at a
+    stage where its guard returns no repair is refused here, before any request.
     """
     names = [agent, *companions]
     if len(set(names)) != len(names):
@@ -123,12 +150,12 @@ def compose(project=BLUEPRINT, *, agent=AGENT, companions=COMPANIONS):
     document['resources'] = list(primary.get('resources', []))
     rules, issues = list(primary.get('rules', [])), list(primary.get('ruleIssues', []))
     for name in companions:
-        companion = _inspect(project, name)
-        if companion.get('resources'):
-            raise ValueError(f'companion {name} has bundled resources; compose its resources explicitly')
-        document['resources'].append({'relPath': name, 'content': strip_tags(companion['body'])})
-        rules += companion.get('rules', [])
-        issues += companion.get('ruleIssues', [])
+        text, parsed = _companion(project, name)
+        document['resources'].append({'relPath': name, 'content': strip_tags(text)})
+        rules += parsed['rules']
+        issues += parsed['issues']
+    if check and (problems := repair_problems(rules)):
+        raise ValueError('; '.join(problems))
     if rules or issues:  # No tag, no keys: an untagged composition is unchanged.
         document.update(rules=rules, ruleIssues=issues)
     return ProsaicArtifact.from_inspection(document)

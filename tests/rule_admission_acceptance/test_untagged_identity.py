@@ -9,14 +9,14 @@ def happy(lab, provider, **options):
 
 
 def test_stripped_copy_is_cores_strip_tags_and_inspects_without_rules(lab, tmp_path):
-    from prosaic import inspect_artifact
+    from prosaic import inspect_artifact, parse_rules
 
     project = lab.copy_project(tmp_path, strip=True)
     for name in (lab.agent, lab.companion):
-        text = (project / '.prosaic' / name).read_text()
-        assert '<!--' not in text
-        data = inspect_artifact(project, name)['data']
-        assert 'rules' not in data and 'ruleIssues' not in data
+        assert '<!--' not in lab.path(project, name).read_text()
+    data = inspect_artifact(project, lab.agent)['data']
+    assert 'rules' not in data and 'ruleIssues' not in data
+    assert parse_rules(lab.path(project, lab.companion).read_text(), lab.companion) == {'rules': [], 'issues': []}
 
 
 def test_stripped_agent_sends_identical_bytes_with_or_without_guards_registered(lab, tmp_path):

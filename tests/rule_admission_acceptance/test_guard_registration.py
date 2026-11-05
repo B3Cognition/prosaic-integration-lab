@@ -43,14 +43,14 @@ def test_custom_guard_settings_are_validated_before_any_request(lab, provider, t
 
     project = lab.copy_project(tmp_path, {lab.agent: [(LOAN_TAG, replacement)]})
     with pytest.raises(TurnAdmissionError) as refused:
-        lab.run_turn(provider, lab.happy_message, project=project)
+        lab.run_turn(provider, lab.happy_message, project=project, required_guards=lab.generic_floor)
     assert refused.value.code == 'invalidArtifact' and provider.raw_requests == []
 
 
 @pytest.mark.parametrize(
     'replacement',
     [
-        'loan_period_within_policy(max_days=21, stage=final, on_violation=fix)',
+        'loan_period_within_policy(max_days=21, stage=final, on_violation=fail)',
         'strict_json(stage=before_tool, on_violation=retry)',
     ],
     ids=['custom-guard-unsupported-stage', 'generic-guard-unsupported-stage'],
@@ -60,7 +60,7 @@ def test_a_stage_the_guard_does_not_declare_is_refused(lab, provider, tmp_path, 
 
     project = lab.copy_project(tmp_path, {lab.agent: [(LOAN_TAG, replacement)]})
     with pytest.raises(TurnAdmissionError) as refused:
-        lab.run_turn(provider, lab.happy_message, project=project)
+        lab.run_turn(provider, lab.happy_message, project=project, required_guards=lab.generic_floor)
     assert refused.value.code == 'invalidArtifact' and provider.raw_requests == []
 
 
@@ -84,5 +84,5 @@ def test_prose_naming_an_unregistered_guard_is_refused_never_run_unenforced(lab,
     from prosaic_runtime import TurnAdmissionError, generic_guards
 
     with pytest.raises(TurnAdmissionError) as refused:
-        lab.run_turn(provider, lab.happy_message, guards=generic_guards())
+        lab.run_turn(provider, lab.happy_message, guards=generic_guards(), required_guards=lab.generic_floor)
     assert refused.value.code == 'invalidArtifact' and provider.raw_requests == []

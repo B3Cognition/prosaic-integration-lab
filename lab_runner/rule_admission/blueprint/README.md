@@ -16,23 +16,34 @@ synthetic.
 
 | File | What it shows |
 | --- | --- |
+| File | What it shows |
+| --- | --- |
 | `.prosaic/subagents/catalogue-desk.md` | The agent. Tags at `before_tool`, `before_answer` and `final`, plus one `prose-only` rule. |
-| `.prosaic/subagents/loan-desk.md` | A companion file. It binds the same custom guard at `after_tool`. |
+| `companions/loan-desk.md` | A companion rule file: plain Markdown, no frontmatter, outside `.prosaic/`. It binds the same custom guard at `after_tool`. |
 | `guards.py` | One custom domain guard, `loan_period_within_policy`, and `registry()`: the four generic Runtime guards plus that one. |
 | `host.py` | Host wiring: synthetic tools, two-file composition, config loading and `build_runtime()`. |
-| `runtime.yml` | Operator config: the endpoint and the `required_guards` floor in both forms. |
+| `runtime.yml` | Operator config: the endpoint and the `required_guards` floor in both forms, covering the custom guard too. |
 | `coverage.py` | Answers "which of this agent's rules are enforced, and by what?" |
+
+Importing the package checks the installed SDKs first. A Core without
+`parse_rules` or a Runtime without rule admission is refused with a clear
+message.
 
 The agent's rules, and what enforces each one:
 
 | Rule (prose) | Guard | Stage | Action |
 | --- | --- | --- | --- |
-| Only place loans on records the search returned | `args_reference_seen_ids` (generic) | `before_tool` | `fail`, pinned by the floor |
-| Never request a loan longer than 21 days | `loan_period_within_policy` (custom) | `before_tool` | `fix`: rewrite `days` to the limit |
+| Only place loans on records the borrower named or the search returned | `args_reference_seen_ids` (generic) | `before_tool` | `fail`, pinned by the floor |
+| Never request a loan longer than 21 days | `loan_period_within_policy` (custom) | `before_tool` | `fix`: rewrite `days` to the limit; `max_days` pinned by the floor |
 | Plain Markdown links, never wrapped | `no_wrapped_links` (generic) | `before_answer` | `fix`: unwrap |
 | State only fees the lookup returned | `value_in_tool_output` (generic) | `final` | `retry`; the floor's minimum |
 | Be patient with first-time borrowers | none (`prose-only`) | n/a | left to the model, by design |
-| Stop on a loan period the desk reports above policy (companion) | `loan_period_within_policy` (custom) | `after_tool` | `fail` |
+| Stop on a loan period the desk reports above policy (companion) | `loan_period_within_policy` (custom) | `after_tool` | `fail`; `max_days` pinned by the floor |
+
+`args_reference_seen_ids` accepts an id the borrower typed in their message as
+well as ids from this turn's tool results. The rule text says so, because the
+model is told what is enforced. A search *query* that contains an id is not
+evidence; only the search *results* are.
 
 ## Look before you run
 
@@ -51,15 +62,21 @@ stage, effective action and floor. The status is one of:
 - `enforced`;
 - `unregistered`;
 - `prose-only`;
-- `superseded`: a same-stage binding of the same guard in another file has a
-  stronger action and replaces this one.
+- `superseded`: a same-stage binding of the same guard, with the same settings,
+  in another file has a stronger action and replaces this one. Different
+  settings at the same stage are refused by admission.
 
 It then reports whether admission accepts the agent, any cross-file binding
-warnings and the rules fingerprint. The verdict comes from Runtime's own
-admission, so it can't disagree with a real turn: the runtime is constructed,
-then `prepare_turn` runs, which makes no provider request. The command exits
-non-zero when admission refuses, including for a malformed tag or a required
-guard the host did not register (`startup`).
+warnings and the rules fingerprint. The verdict comes from the same steps a
+turn takes, so it can't disagree with a real turn:
+
+1. The runtime is constructed. A required guard the host did not register is
+   refused here as `startup`.
+2. The host's composition checks run (`hostPolicy`).
+3. `prepare_turn` runs, which makes no provider request.
+
+The command exits non-zero whenever admission refuses, including for a
+malformed tag.
 
 ## Copy it into your project
 
@@ -76,7 +93,8 @@ python -m yourapp.catalogue_desk.coverage
 
 Rename `.prosaic/subagents/catalogue-desk.md` and change `name`, `description`
 and `tools` in its frontmatter. Update `AGENT`, `COMPANIONS` and `TOOLS` in
-`host.py`. Replace `library_tools()` with your own `CustomTool` registrations;
+`host.py`, and move or rename the companion files under `companions/`. Replace
+`library_tools()` with your own `CustomTool` registrations;
 the catalogue in `host.py` is synthetic fixture data. Rule ids are
 `file:line:guard`, so renaming changes ids. The fingerprint uses the file name
 too, so it changes once; later edits above a rule do not change it.
@@ -106,11 +124,15 @@ Put the tag on the rule's own line, or on a tag-only line directly below it:
   model again once per turn, with feedback quoting the rule) or `fail` (stop with
   a safe result and failure code `ruleViolation`). The default is `retry`.
 - Core allows **one binding per guard per file**. To bind the same guard at a
-  second stage, put that rule in a companion file, as `loan-desk.md` does, and
-  compose both files in the host (`host.compose`). Each binding keeps its own
-  file, so the companion's rule is reported and fingerprinted separately.
-  `compose` refuses a file listed twice and a companion with bundled resources,
-  rather than composing it silently or partially.
+  second stage, put that rule in a companion file, as `companions/loan-desk.md`
+  does, and compose both files in the host (`host.compose`).
+  - **Keep companions outside `.prosaic/` and without frontmatter.** A file
+    under `.prosaic/subagents/` with frontmatter is an agent: `prosaic apply`
+    would distribute it on its own, with its tools and none of its guards.
+  - `compose` reads a companion with Core's `parse_rules`. It refuses a
+    companion with frontmatter, and a file listed twice.
+  - Each binding keeps its own file, so the companion's rule is reported and
+    fingerprinted separately.
 - Settings are data checked against the guard's schema at admission, never
   code. A tag never grants a tool, a file or budget.
 
@@ -133,6 +155,12 @@ Guard('loan_period_within_policy', 'loan-period-v1', ('before_tool', 'after_tool
   refused at admission.
 - `fixes=True` only if `check` returns a repair in `Verdict(fixed=...)`. `fix`
   on any other guard is refused at admission, not at run time.
+  - Runtime's `fixes` covers the whole guard, though. This guard repairs only at
+    `before_tool`; at `after_tool` the loan already exists.
+  - List such limits in `REPAIR_STAGES` in `guards.py`. `host.compose` then
+    refuses `fix` at any other stage before any request, and `coverage` reports
+    it as `hostPolicy`.
+  - Without this, Runtime would admit the binding and fault it at run time.
 - `echo_values=True` only if refused values cannot carry instructions. The
   generic `value_in_tool_output` opts in because its values are figures such as
   `EUR 1.20`. This guard's values are integers, but tool-stage feedback always
@@ -143,6 +171,9 @@ Guard('loan_period_within_policy', 'loan-period-v1', ('before_tool', 'after_tool
 - Compare numbers by value, never by Python type. JSON Schema's `integer`
   accepts whole-number floats, so a model can send `"days": 28.0`; a check that
   only looks at `int` would let that through. Bools are not numbers.
+- Don't call `math.isfinite` on an int: it converts to float and overflows for
+  an int such as `10**400`. Keep refused values small enough to deliver as
+  feedback; Runtime faults a guard whose values it cannot deliver.
 - Fail closed on effects you cannot confirm. At `after_tool`, this guard treats
   a placed loan with a missing or unreadable `loanDays` as a violation. A tool
   error, or a result with no loan placed, passes.
@@ -162,6 +193,9 @@ required_guards:
     action: fail
     stage: before_tool
     settings: {keys: [recordId]}
+  loan_period_within_policy:                  # the domain guard is protected too
+    action: fix
+    settings: {max_days: 21}
 ```
 
 The agent is refused with `invalidPolicy`, before any request, if it:
@@ -170,6 +204,16 @@ The agent is refused with `invalidPolicy`, before any request, if it:
 - binds one with a weaker action;
 - changes a pinned stage;
 - adds or changes pinned settings.
+
+Put your own domain guard under the floor, or prose can raise its limit or drop
+it. Leave its `stage` unpinned when it is bound at more than one stage: a pinned
+stage applies to every binding, and would refuse the companion's `after_tool`
+rule. A required guard must be bound **at least once**, so dropping only the
+companion's tag is still admitted. `coverage` shows which bindings remain.
+
+The 21-day limit appears in the prose text, both tags, the floor and the
+synthetic `LOAN_TERMS`. Admission refuses tag settings that differ from the
+floor. A Lab test checks that the prose text and `LOAN_TERMS` agree with it.
 
 The refusal detail names the guard and the pin, never the prose values. The
 floor applies to every agent this runtime admits; give an agent with a
@@ -202,9 +246,17 @@ that file; read credentials from the environment, never from Markdown.
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Do not run this agent inside Harness yet. Harness 0.9.7 and earlier reject the
-  `ruleViolation` failure code after the provider call has been made. Wait for a
-  Harness release that accepts it.
+- Do not run this agent inside Harness yet; guarded conversations need a
+  companion Harness release. Harness 0.9.7 and earlier:
+  - reject the `ruleViolation` failure code after the provider call has been
+    made, because it is not in their receipt `_FAILURES` set;
+  - drop `required_guards` and composed rules on their conversation path;
+  - build the runtime without guards.
+- `value_in_tool_output` reads amounts with a currency marker **before** the
+  number, in any case: `EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`. It does not
+  yet read a marker after the number (`1.20 EUR`, `1.20 euros`) or minor units
+  (`120 cents`). An invented fee written that way passes. The Lab tracks these
+  as expected failures against prosaic-runtime#16.
 - An agent with every tag stripped runs byte-identically to the tagged one when
   no guard fires, with or without guards registered. It is still refused by a
   runtime whose floor requires guards.

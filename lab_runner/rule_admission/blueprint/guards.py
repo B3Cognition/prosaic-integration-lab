@@ -9,6 +9,8 @@ import math
 from prosaic_runtime import Guard, Verdict, generic_guards
 
 LOAN_TOOL = 'place_loan'
+# Feedback carries refused values; Runtime refuses (as a guard fault) any it cannot deliver.
+_REFUSABLE = 10**15
 
 
 def _number(value):
@@ -16,8 +18,17 @@ def _number(value):
 
     JSON Schema's ``integer`` admits whole-number floats such as ``28.0``, so a
     policy check must never assume ``int``: checking the type would wave them through.
+    ``isfinite`` is applied to floats only: it converts ints to float, which
+    overflows for very large ints such as ``10**400``.
     """
-    return value if type(value) in (int, float) and math.isfinite(value) else None
+    if type(value) is int or (type(value) is float and math.isfinite(value)):
+        return value
+    return None
+
+
+def _refused(days):
+    """Report a refused period only when it is small enough to deliver as feedback."""
+    return (days,) if abs(days) < _REFUSABLE else ()
 
 
 def _loan_period(stage, context):
@@ -40,7 +51,7 @@ def _loan_period(stage, context):
         if days is None or days <= limit:
             return Verdict(True)  # The tool schema owns type checks; this guard owns policy.
         return Verdict(
-            False, reason='loan period above policy', refused_values=(days,), fixed={**arguments, 'days': limit}
+            False, reason='loan period above policy', refused_values=_refused(days), fixed={**arguments, 'days': limit}
         )
     outcome = context.tool_result
     if not isinstance(outcome, dict) or outcome.get('status') != 'ok':
@@ -52,7 +63,7 @@ def _loan_period(stage, context):
     if days is None:
         return Verdict(False, reason='loan desk reported no readable loan period')
     if days > limit:
-        return Verdict(False, reason='loan desk reported a period above policy', refused_values=(days,))
+        return Verdict(False, reason='loan desk reported a period above policy', refused_values=_refused(days))
     return Verdict(True)
 
 
@@ -69,6 +80,12 @@ LOAN_PERIOD = Guard(
         'properties': {'max_days': {'type': 'integer', 'minimum': 1, 'maximum': 365}},
     },
 )
+
+
+# Runtime's ``fixes=True`` covers a whole guard, so it would admit ``fix`` at
+# after_tool, where this guard never returns a repair. The host narrows it per
+# stage: ``host.compose`` refuses ``fix`` anywhere else, before any request.
+REPAIR_STAGES = {LOAN_PERIOD.name: ('before_tool',)}
 
 
 def registry():

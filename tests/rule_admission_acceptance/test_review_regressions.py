@@ -47,7 +47,7 @@ def test_whole_number_float_loan_days_are_repaired_not_waved_through(lab, provid
     assert [arguments for name, arguments in calls if name == 'place_loan'] == [{'recordId': 'CAT-0001', 'days': 21}]
 
 
-@pytest.mark.parametrize('days', [28.0, 22, 365])
+@pytest.mark.parametrize('days', [28.0, 22, 365, 10**400])
 def test_before_tool_repairs_every_numeric_period_above_policy(days):
     from lab_runner.rule_admission.blueprint.guards import LOAN_PERIOD
 
@@ -128,10 +128,29 @@ def path_setting(lab, tmp_path):
 
 def superseded(lab, tmp_path):
     project = lab.copy_project(tmp_path)
-    companion = project / '.prosaic' / lab.companion
+    companion = lab.path(project, lab.companion)
     tag = '<!-- enforce: value_in_tool_output(stage=final, on_violation=fail) -->'
     companion.write_text(companion.read_text() + f'- Never quote an unlisted fee. {tag}\n')
     return project
+
+
+def conflicting_settings(lab, tmp_path):
+    """Same guard and stage in two files, different settings and actions (Runtime 65ba15d: refused)."""
+    project = lab.copy_project(tmp_path)
+    companion = lab.path(project, lab.companion)
+    tag = '<!-- enforce: value_in_tool_output(currencies=[GBP], stage=final, on_violation=fail) -->'
+    companion.write_text(companion.read_text() + f'- Quote fees only as the desk lists them. {tag}\n')
+    return project
+
+
+def loan_limit_raised(lab, tmp_path):
+    tag = 'loan_period_within_policy(max_days=21, stage=before_tool, on_violation=fix)'
+    return lab.copy_project(tmp_path, {lab.agent: [(tag, tag.replace('21', '365'))]})
+
+
+def fix_at_after_tool(lab, tmp_path):
+    tag = 'loan_period_within_policy(max_days=21, stage=after_tool, on_violation=fail)'
+    return lab.copy_project(tmp_path, {lab.companion: [(tag, tag.replace('fail', 'fix'))]})
 
 
 def weaker_than_floor(lab, tmp_path):
@@ -178,8 +197,11 @@ VARIANTS = {
     'malformed-tag': (malformed, None, False, 'invalidArtifact'),
     'path-setting-guard': (path_setting, registry_plus_shelf, True, None),
     'superseded-cross-file': (superseded, None, True, None),
+    'conflicting-settings-cross-file': (conflicting_settings, None, False, 'invalidArtifact'),
+    'loan-limit-raised': (loan_limit_raised, None, False, 'invalidPolicy'),
+    'fix-at-after-tool': (fix_at_after_tool, None, False, 'hostPolicy'),
     'weaker-than-floor': (weaker_than_floor, None, False, 'invalidPolicy'),
-    'custom-guard-unregistered': (None, generic_only, False, 'invalidArtifact'),
+    'custom-guard-unregistered': (None, generic_only, False, 'startup'),
     'required-guard-unregistered': (None, without_required_guard, False, 'startup'),
     'stripped-under-floor': ('strip', None, False, 'invalidPolicy'),
 }
@@ -195,9 +217,13 @@ def real_admission(project, guards):
     except ValueError:
         return 'startup'
     try:
+        artifact = host.compose(project)
+    except ValueError:
+        return 'hostPolicy'
+    try:
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
-            runtime.prepare_turn(host.compose(project), message='coverage check', policy=host.policy())
+            runtime.prepare_turn(artifact, message='coverage check', policy=host.policy())
     except TurnAdmissionError as error:
         return error.code
     return None
@@ -241,7 +267,7 @@ def test_coverage_marks_a_binding_superseded_by_a_stronger_one_in_another_file(l
     report = coverage.report(superseded(lab, tmp_path))
     rows = {row['id']: row for row in report['rules'] if row['guard'] == 'value_in_tool_output'}
     assert rows[lab.ids.values]['status'] == 'superseded'
-    stronger = rows[f'{lab.companion}:9:value_in_tool_output']
+    stronger = rows[f'{lab.companion}:4:value_in_tool_output']
     assert (stronger['status'], stronger['action']) == ('enforced', 'fail')
     assert len(report['warnings']) == 1 and 'final' in report['warnings'][0]
 
@@ -259,7 +285,7 @@ def test_coverage_fingerprint_matches_the_turn_fingerprint_with_path_settings(la
 # Bug 8: compose accepted the agent or one companion twice, duplicating prose and rules silently.
 @pytest.mark.parametrize(
     'companions',
-    [('subagents/loan-desk.md', 'subagents/loan-desk.md'), ('subagents/catalogue-desk.md',)],
+    [('companions/loan-desk.md', 'companions/loan-desk.md'), ('subagents/catalogue-desk.md',)],
     ids=['companion-twice', 'agent-as-companion'],
 )
 def test_compose_refuses_duplicate_files(companions):

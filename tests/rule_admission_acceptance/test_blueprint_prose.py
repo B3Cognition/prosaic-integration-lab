@@ -50,7 +50,8 @@ def test_both_files_bindings_run_in_one_turn_and_the_model_sees_only_stripped_pr
     turn = lab.run_turn(provider, lab.happy_message)
     assert turn.result.exit_code == 0 and turn.result.stdout == lab.happy_answer
     assert {lab.ids.loan_before, lab.ids.loan_after} <= set(turn.rules_evaluated)
-    agent, companion = (inspect_artifact(BLUEPRINT, name)['data']['body'] for name in (lab.agent, lab.companion))
+    agent = inspect_artifact(BLUEPRINT, lab.agent)['data']['body']
+    companion = lab.path(BLUEPRINT, lab.companion).read_text()
     expected = f'{strip_tags(agent)}\n\n## Bundled resource: {lab.companion}\n{strip_tags(companion)}'
     for request in provider.requests:
         assert request['messages'][0] == {'role': 'system', 'content': expected}
@@ -68,7 +69,7 @@ def test_blueprint_folder_ships_complete_with_the_lab():
         'host.py',
         'coverage.py',
         '.prosaic/subagents/catalogue-desk.md',
-        '.prosaic/subagents/loan-desk.md',
+        'companions/loan-desk.md',
     ]
     assert all((BLUEPRINT / name).is_file() for name in expected)
     readme = (BLUEPRINT / 'README.md').read_text()

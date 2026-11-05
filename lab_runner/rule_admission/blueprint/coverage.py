@@ -2,14 +2,16 @@
 
     python -m lab_runner.rule_admission.blueprint.coverage [--project DIR] [--config FILE] [--json]
 
-Reads Core inspection of the agent and its companions (the same ``rules`` that
-``prosaic inspect --json`` prints) and joins each rule to the guard registry.
-The admitted/refused verdict comes from Runtime's own admission (constructing
-the runtime, then ``prepare_turn``, which makes no provider request), so this
-report can never disagree with what a turn would do.
+Reads Core's rules for the agent (the same ``rules`` that ``prosaic inspect
+--json`` prints) and its companion rule files, and joins each rule to the guard
+registry. The admitted/refused verdict comes from the same steps a turn takes:
+constructing the runtime (``startup``), the host's own composition checks
+(``hostPolicy``), then Runtime's ``prepare_turn``, which makes no provider
+request. So this report can never disagree with what a turn would do.
 
 Statuses: ``enforced``, ``unregistered``, ``prose-only``, or ``superseded`` (a
-same-stage binding in another file with a stronger action replaces it).
+same-stage binding of the same guard and settings in another file with a
+stronger action replaces it; different settings are refused by admission).
 """
 
 import argparse
@@ -22,7 +24,7 @@ import warnings
 from prosaic_runtime import RuleBindingWarning, TurnAdmissionError, compile_rules
 
 from .guards import registry
-from .host import AGENT, BLUEPRINT, COMPANIONS, build_runtime, compose, load_config, policy
+from .host import AGENT, BLUEPRINT, COMPANIONS, build_runtime, compose, load_config, policy, repair_problems
 
 COLUMNS = ('id', 'status', 'guard', 'version', 'stage', 'action', 'floor')
 
@@ -38,6 +40,8 @@ def _admission(project, config, guards, artifact):
         runtime = build_runtime(config, project=project, guards=guards)
     except ValueError:
         return 'startup', None, []  # e.g. a required guard the host did not register.
+    if repair_problems(artifact.rules or ()):
+        return 'hostPolicy', None, []  # compose() refuses these before any turn.
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter('always', RuleBindingWarning)
         try:
@@ -60,7 +64,7 @@ def report(project=BLUEPRINT, *, config_path=None, guards=None):
     project = Path(project)
     config = load_config(config_path or project / 'runtime.yml')
     guards = registry() if guards is None else list(guards)
-    artifact = compose(project)
+    artifact = compose(project, check=False)  # Admission below reports host refusals as hostPolicy.
     # Coverage itself ignores the floor; admission applies it.
     official = build_runtime(replace(config, required_guards={}), project=project, guards=guards).rule_coverage(
         artifact
