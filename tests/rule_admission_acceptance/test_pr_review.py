@@ -161,7 +161,7 @@ def test_fix_where_the_guard_cannot_repair_is_refused_before_any_request(lab, pr
 
 
 # [P2] Fee formats: assert what value_in_tool_output catches; strict xfail marks what it still misses.
-RUNTIME_GAP = 'prosaic-runtime#16: value_in_tool_output reads only currency markers written before the number'
+RUNTIME_GAP = 'prosaic-runtime#16: value_in_tool_output misses codes, words or minor units after the number'
 
 
 @pytest.mark.parametrize(

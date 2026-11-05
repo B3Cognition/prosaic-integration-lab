@@ -12,7 +12,7 @@ from pathlib import Path
 from prosaic import inspect_artifact, parse_rules, strip_tags
 from prosaic_runtime import CustomTool, ProsaicArtifact, ProsaicRuntime, RunPolicy, RuntimeConfig
 
-from .guards import REPAIR_STAGES, registry
+from .guards import REPAIR_STAGES, REQUIRED_STAGES, registry
 
 BLUEPRINT = Path(__file__).parent
 CONFIG = BLUEPRINT / 'runtime.yml'
@@ -76,6 +76,8 @@ def library_tools(on_call=None):
     def place(arguments):
         if arguments['recordId'] not in CATALOGUE:
             return {'error': 'unknown record'}
+        if arguments['days'] > LOAN_TERMS['loanDays']:  # The desk enforces its own policy too: never rely on prose.
+            return {'error': 'loan period above policy'}
         return {'recordId': arguments['recordId'], 'loanDays': arguments['days']}
 
     return {
@@ -118,13 +120,35 @@ def repair_problems(rules):
     ]
 
 
+def stage_problems(rules):
+    """Guards bound somewhere but missing a stage the host requires (see ``REQUIRED_STAGES``).
+
+    A guard with no binding at all is left to the floor, so an untagged agent still composes.
+    """
+    bound = {}
+    for entry in rules:
+        if entry.get('kind') == 'enforce' and entry.get('guard') in REQUIRED_STAGES:
+            bound.setdefault(entry['guard'], set()).add(entry.get('stage'))
+    return [
+        f'{guard} must be bound at {stage}'
+        for guard, stages in bound.items()
+        for stage in REQUIRED_STAGES[guard]
+        if stage not in stages
+    ]
+
+
+def host_problems(rules):
+    """Every host-policy refusal: ``fix`` where the guard cannot repair, and missing required stages."""
+    return repair_problems(rules) + stage_problems(rules)
+
+
 def _companion(project, name):
     """A companion: plain Markdown rules, no frontmatter, read and parsed with Core's own functions."""
     path = Path(project) / name
     if path.is_symlink() or not path.is_file():
         raise ValueError(f'companion {name} is not a regular file')
     text = path.read_text(encoding='utf-8')
-    if text.startswith('---'):
+    if text.lstrip('\ufeff \t\r\n').startswith('---'):  # A BOM or blank lines do not hide frontmatter.
         raise ValueError(f'companion {name} has frontmatter; companions are rules, never agents')
     return text, parse_rules(text, name)
 
@@ -139,8 +163,9 @@ def compose(project=BLUEPRINT, *, agent=AGENT, companions=COMPANIONS, check=True
     bound at another stage. Companions live outside ``.prosaic/`` without
     frontmatter, so ``prosaic apply`` never distributes one as an agent.
 
-    Files must be distinct. With ``check`` (the default), a ``fix`` binding at a
-    stage where its guard returns no repair is refused here, before any request.
+    Files must be distinct. With ``check`` (the default), host policy is applied
+    here, before any request: ``fix`` at a stage where its guard returns no
+    repair, or a bound guard missing a stage in ``REQUIRED_STAGES``, is refused.
     """
     names = [agent, *companions]
     if len(set(names)) != len(names):
@@ -154,7 +179,7 @@ def compose(project=BLUEPRINT, *, agent=AGENT, companions=COMPANIONS, check=True
         document['resources'].append({'relPath': name, 'content': strip_tags(text)})
         rules += parsed['rules']
         issues += parsed['issues']
-    if check and (problems := repair_problems(rules)):
+    if check and (problems := host_problems(rules)):
         raise ValueError('; '.join(problems))
     if rules or issues:  # No tag, no keys: an untagged composition is unchanged.
         document.update(rules=rules, ruleIssues=issues)

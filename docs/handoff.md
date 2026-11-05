@@ -29,7 +29,15 @@ reasoning manifests are unchanged.
   matches the guard; the companion moved to `companions/` (never distributed as
   an agent); `fix` where the guard cannot repair is refused by the host; the
   missed fee formats are strict expected failures; huge periods are repaired;
-  the blueprint checks the SDKs on import. The lane has 105 tests.
+  the blueprint checks the SDKs on import.
+- PR #45 re-review: the floor needs a guard bound only once, so prose could drop
+  the loan check's `before_tool` tag (or move it to `after_tool`) and a 300-day
+  loan was placed before the turn failed. The host now declares
+  `REQUIRED_STAGES` and `compose` refuses a bound guard missing one (coverage:
+  `hostPolicy`). `place_loan` also refuses over-policy periods itself. Smaller
+  points fixed: trailing `€` is read by Runtime (docs corrected), duplicate
+  README header, frontmatter behind a BOM or blank lines. The lane has 123
+  tests.
 - Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
   CI (`rule-admission.yml`) rebuilds the candidates byte-identically on Linux
   AMD64 and ARM64. It is not a required check until the re-pin to releases.

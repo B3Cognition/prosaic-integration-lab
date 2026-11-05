@@ -4,11 +4,11 @@
 
 [Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk
 blueprint on candidate Core `9d5a02f` and Runtime PR #16 `65ba15d`, both rebuilt
-reproducibly from exact commits. 105 synthetic acceptance tests pin tagged
+reproducibly from exact commits. 123 synthetic acceptance tests pin tagged
 prose, guard registration, both `required_guards` forms, fix, retry and fail,
 the fingerprint, coverage and the byte-identical untagged guarantee. They
 include regressions for 9 defects an adversarial review found and for every
-PR #45 review comment, all fixed; the worst was a float loan-period policy
+PR #45 review comment across two rounds, all fixed; the worst was a float loan-period policy
 bypass. Three strict expected failures track fee formats Runtime does not read
 yet. The tests pass from source and from the installed Lab wheel on macOS
 arm64, and CI rebuilds the candidates byte-identically on Linux AMD64 and

@@ -24,7 +24,7 @@ import warnings
 from prosaic_runtime import RuleBindingWarning, TurnAdmissionError, compile_rules
 
 from .guards import registry
-from .host import AGENT, BLUEPRINT, COMPANIONS, build_runtime, compose, load_config, policy, repair_problems
+from .host import AGENT, BLUEPRINT, COMPANIONS, build_runtime, compose, host_problems, load_config, policy
 
 COLUMNS = ('id', 'status', 'guard', 'version', 'stage', 'action', 'floor')
 
@@ -40,7 +40,7 @@ def _admission(project, config, guards, artifact):
         runtime = build_runtime(config, project=project, guards=guards)
     except ValueError:
         return 'startup', None, []  # e.g. a required guard the host did not register.
-    if repair_problems(artifact.rules or ()):
+    if host_problems(artifact.rules or ()):
         return 'hostPolicy', None, []  # compose() refuses these before any turn.
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter('always', RuleBindingWarning)

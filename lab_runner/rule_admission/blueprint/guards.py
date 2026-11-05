@@ -87,6 +87,13 @@ LOAN_PERIOD = Guard(
 # stage: ``host.compose`` refuses ``fix`` anywhere else, before any request.
 REPAIR_STAGES = {LOAN_PERIOD.name: ('before_tool',)}
 
+# The floor in runtime.yml requires the guard to be bound at least once, at any
+# stage. That would admit prose that drops the before_tool check and keeps only
+# after_tool, which runs once the loan already exists. So once the guard is bound,
+# ``host.compose`` requires it at every stage listed here, before any request.
+# Whether it is bound at all stays the floor's job.
+REQUIRED_STAGES = {LOAN_PERIOD.name: ('before_tool', 'after_tool')}
+
 
 def registry():
     """Fresh registrations: the four generic Runtime guards plus this blueprint's domain guard."""

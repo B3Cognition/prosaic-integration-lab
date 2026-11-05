@@ -59,8 +59,9 @@ def test_a_stage_the_guard_does_not_declare_is_refused(lab, provider, tmp_path, 
     from prosaic_runtime import TurnAdmissionError
 
     project = lab.copy_project(tmp_path, {lab.agent: [(LOAN_TAG, replacement)]})
+    # Replacing the before_tool tag also trips the host's REQUIRED_STAGES; skip it to test Runtime's own check.
     with pytest.raises(TurnAdmissionError) as refused:
-        lab.run_turn(provider, lab.happy_message, project=project, required_guards=lab.generic_floor)
+        lab.run_turn(provider, lab.happy_message, project=project, required_guards=lab.generic_floor, host_check=False)
     assert refused.value.code == 'invalidArtifact' and provider.raw_requests == []
 
 

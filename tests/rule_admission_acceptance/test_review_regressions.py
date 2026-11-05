@@ -153,6 +153,18 @@ def fix_at_after_tool(lab, tmp_path):
     return lab.copy_project(tmp_path, {lab.companion: [(tag, tag.replace('fail', 'fix'))]})
 
 
+def loan_check_moved_after_tool(lab, tmp_path):
+    tag = 'loan_period_within_policy(max_days=21, stage=before_tool, on_violation=fix)'
+    return lab.copy_project(
+        tmp_path, {lab.agent: [(tag, tag.replace('before_tool', 'after_tool').replace('fix)', 'fail)'))]}
+    )
+
+
+def loan_companion_dropped(lab, tmp_path):
+    tag = ' <!-- enforce: loan_period_within_policy(max_days=21, stage=after_tool, on_violation=fail) -->'
+    return lab.copy_project(tmp_path, {lab.companion: [(tag, '')]})
+
+
 def weaker_than_floor(lab, tmp_path):
     seen = 'args_reference_seen_ids(keys=[recordId], stage=before_tool, on_violation='
     return lab.copy_project(tmp_path, {lab.agent: [(seen + 'fail)', seen + 'retry)')]})
@@ -200,6 +212,8 @@ VARIANTS = {
     'conflicting-settings-cross-file': (conflicting_settings, None, False, 'invalidArtifact'),
     'loan-limit-raised': (loan_limit_raised, None, False, 'invalidPolicy'),
     'fix-at-after-tool': (fix_at_after_tool, None, False, 'hostPolicy'),
+    'loan-check-moved-after-tool': (loan_check_moved_after_tool, None, False, 'hostPolicy'),
+    'loan-companion-dropped': (loan_companion_dropped, None, False, 'hostPolicy'),
     'weaker-than-floor': (weaker_than_floor, None, False, 'invalidPolicy'),
     'custom-guard-unregistered': (None, generic_only, False, 'startup'),
     'required-guard-unregistered': (None, without_required_guard, False, 'startup'),

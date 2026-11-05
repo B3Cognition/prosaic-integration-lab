@@ -64,12 +64,15 @@ def copy_project(tmp_path, edits=None, *, strip=False):
     return target
 
 
-def run_turn(provider, message, *, project=None, config=None, guards=None, tools=None, required_guards='file'):
+def run_turn(
+    provider, message, *, project=None, config=None, guards=None, tools=None, required_guards='file', host_check=True
+):
     """One conversation turn of the composed agent against the scripted provider.
 
     guards=None registers the blueprint registry; guards=() registers nothing. A fixed
     public InvocationScope makes Runtime's opaque tool-call ids repeatable, as in
     Runtime's own untagged golden capture, so turns compare as raw request bytes.
+    host_check=False skips the host's own composition policy, to isolate Runtime's checks.
     """
     from prosaic_runtime import InvocationScope
 
@@ -82,7 +85,7 @@ def run_turn(provider, message, *, project=None, config=None, guards=None, tools
         config = replace(config, required_guards=required_guards)
     runtime = host.build_runtime(config, project=project, guards=guards, tools=tools)
     return runtime.turn(
-        host.compose(project),
+        host.compose(project, check=host_check),
         message=message,
         policy=host.policy(),
         operation_context=InvocationScope('blueprint-turn'),

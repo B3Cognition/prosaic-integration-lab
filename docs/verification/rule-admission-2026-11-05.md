@@ -82,8 +82,13 @@ API observations for #16's review thread (none broke a blueprint test):
 3. Cross-file bindings with different settings at one stage are now refused
    whatever the actions (previously the stronger action's binding replaced the
    other, settings included).
-4. `value_in_tool_output` now reads `€1,20` and `eur 1.20`; `1.20 EUR`,
-   `1.20 euros` and `120 cents` still pass with an invented fee.
+4. `value_in_tool_output` now reads `€1,20` and `eur 1.20`, and a symbol after
+   the number (`1.20 €`); `1.20 EUR`, `1.20 euros` and `120 cents` still pass
+   with an invented fee.
+5. `4082e72` and `65ba15d` both build as 0.9.12 and advertise only
+   `rule_admission_v1`, so a host cannot detect the cross-file settings
+   refusal it relies on. Ask #16 for a capability bump or a distinct
+   pre-release version.
 
 ## PR #45 review
 
@@ -101,6 +106,28 @@ observed failing (34 failures) before the fixes.
 | P3: `superseded` relied on behaviour under review | Re-pin 1 changed it as predicted; the variants pin both outcomes; re-pin note added |
 | General: `require_sdk()` only ran in tests | The blueprint package checks the SDKs on import with a clear message |
 | General: the 21-day limit in four places could drift | Admission refuses tag settings that differ from the floor; a test ties the prose text and `LOAN_TERMS` to it |
+
+## PR #45 re-review
+
+Each point became a test in `test_pr_rereview.py` or a coverage variant,
+observed failing (15 failures) before the fixes. The reviewer's probe
+reproduced on `e1f413b`: both edits were admitted and `place_loan` ran with
+`days: 300`.
+
+| Point | Fix |
+| --- | --- |
+| P1: the floor needs the loan guard bound only once, so dropping the `before_tool` tag or moving it to `after_tool` was admitted, and the loan was placed before the turn failed | `REQUIRED_STAGES` in `guards.py`: once bound, `host.compose` requires the guard at `before_tool` and `after_tool`, before any request; coverage reports `hostPolicy`. Dropping the companion's tag is refused by the same check |
+| Belt and braces | `place_loan` refuses a period above `LOAN_TERMS` itself; the guard still repairs first |
+| Import check cannot tell #16 candidates apart | Documented in the README limits; observation 5 above, for #16's thread |
+| Trailing `€` is read | README limits line and the expected-failure reason name only codes, words and minor units after the number; `1.20 €` is asserted |
+| README table header appeared twice | Removed; a test checks each table has one header |
+| Frontmatter behind a BOM or blank lines slipped past | `_companion` strips leading whitespace and a BOM before the check |
+| The id rule now accepts a borrower-typed id without a search | Policy change left for a maintainer's explicit OK; unchanged |
+
+An agent with no loan binding at all still composes: whether the guard is bound
+is the floor's job, so the untagged guarantee is unchanged. The unsupported-stage
+tests now skip the host check (`host_check=False`) to keep testing Runtime's own
+refusal.
 
 ## Limits
 

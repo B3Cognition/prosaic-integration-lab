@@ -46,6 +46,10 @@ and Markdown.
 - [x] Re-pin 1 to Runtime `65ba15d`: no blueprint test broke; the cross-file
   settings change is pinned by a new variant.
 - [x] PR #45 review comments addressed test-first (34 failures observed before
-  the fixes). The lane has 105 tests, 3 of them strict expected failures.
+  the fixes).
+- [x] PR #45 re-review addressed test-first (15 failures observed before the
+  fixes): required loan-check stages, desk-side limit, fee wording, README
+  header, companion frontmatter. The lane has 123 tests, 3 of them strict
+  expected failures.
 - [ ] A maintainer dispatches `Publish SDK` on the pinned commits, if wanted.
 - [ ] Re-pin to released Core and Runtime after #16 merges; see the lane guide.

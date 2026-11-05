@@ -16,8 +16,6 @@ synthetic.
 
 | File | What it shows |
 | --- | --- |
-| File | What it shows |
-| --- | --- |
 | `.prosaic/subagents/catalogue-desk.md` | The agent. Tags at `before_tool`, `before_answer` and `final`, plus one `prose-only` rule. |
 | `companions/loan-desk.md` | A companion rule file: plain Markdown, no frontmatter, outside `.prosaic/`. It binds the same custom guard at `after_tool`. |
 | `guards.py` | One custom domain guard, `loan_period_within_policy`, and `registry()`: the four generic Runtime guards plus that one. |
@@ -130,7 +128,8 @@ Put the tag on the rule's own line, or on a tag-only line directly below it:
     under `.prosaic/subagents/` with frontmatter is an agent: `prosaic apply`
     would distribute it on its own, with its tools and none of its guards.
   - `compose` reads a companion with Core's `parse_rules`. It refuses a
-    companion with frontmatter, and a file listed twice.
+    companion with frontmatter (even after a BOM or blank lines), and a file
+    listed twice.
   - Each binding keeps its own file, so the companion's rule is reported and
     fingerprinted separately.
 - Settings are data checked against the guard's schema at admission, never
@@ -161,6 +160,18 @@ Guard('loan_period_within_policy', 'loan-period-v1', ('before_tool', 'after_tool
     refuses `fix` at any other stage before any request, and `coverage` reports
     it as `hostPolicy`.
   - Without this, Runtime would admit the binding and fault it at run time.
+- Say where the guard must run, too. The floor only requires a guard to be
+  bound *somewhere*. Without a stage check, prose could drop the `before_tool`
+  tag and keep only `after_tool`, so a 300-day loan would be placed before the
+  turn failed.
+  - List the stages in `REQUIRED_STAGES` in `guards.py`. Once the guard is
+    bound, `host.compose` refuses it unless it is bound at every listed stage.
+    `coverage` reports that as `hostPolicy`.
+  - Whether the guard is bound at all stays the floor's job, so the untagged
+    agent still composes.
+- Enforce the policy in the tool as well. `place_loan` in `host.py` refuses a
+  period above `LOAN_TERMS` itself. The guard repairs the request first, so the
+  desk's refusal is only reached when no guard runs.
 - `echo_values=True` only if refused values cannot carry instructions. The
   generic `value_in_tool_output` opts in because its values are figures such as
   `EUR 1.20`. This guard's values are integers, but tool-stage feedback always
@@ -208,8 +219,9 @@ The agent is refused with `invalidPolicy`, before any request, if it:
 Put your own domain guard under the floor, or prose can raise its limit or drop
 it. Leave its `stage` unpinned when it is bound at more than one stage: a pinned
 stage applies to every binding, and would refuse the companion's `after_tool`
-rule. A required guard must be bound **at least once**, so dropping only the
-companion's tag is still admitted. `coverage` shows which bindings remain.
+rule. The floor only requires a guard to be bound **at least once**, so the
+host's `REQUIRED_STAGES` check (step 4) refuses prose that drops or moves one of
+the guard's stages.
 
 The 21-day limit appears in the prose text, both tags, the floor and the
 synthetic `LOAN_TERMS`. Admission refuses tag settings that differ from the
@@ -252,11 +264,15 @@ that file; read credentials from the environment, never from Markdown.
     made, because it is not in their receipt `_FAILURES` set;
   - drop `required_guards` and composed rules on their conversation path;
   - build the runtime without guards.
-- `value_in_tool_output` reads amounts with a currency marker **before** the
-  number, in any case: `EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`. It does not
-  yet read a marker after the number (`1.20 EUR`, `1.20 euros`) or minor units
-  (`120 cents`). An invented fee written that way passes. The Lab tracks these
-  as expected failures against prosaic-runtime#16.
+- `value_in_tool_output` reads a currency code or symbol before the number, in
+  any case (`EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`), and a symbol after it
+  (`1.20 €`). It does not yet read a code or word after the number (`1.20 EUR`,
+  `1.20 euros`) or minor units (`120 cents`). An invented fee written that way
+  passes. The Lab tracks these as expected failures against prosaic-runtime#16.
+- The import check confirms `rule_admission_v1`, but every #16 candidate so far
+  reports the same version and capability. It cannot tell whether the installed
+  Runtime refuses conflicting cross-file settings (added in `65ba15d`). Until
+  Runtime advertises that, pin the exact build, as the Lab does.
 - An agent with every tag stripped runs byte-identically to the tagged one when
   no guard fires, with or without guards registered. It is still refused by a
   runtime whose floor requires guards.
