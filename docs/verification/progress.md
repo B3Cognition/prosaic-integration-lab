@@ -1,5 +1,18 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Rule-admission blueprint candidate lane — 2026-11-05
+
+[Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk
+blueprint on candidate Core `9d5a02f` and Runtime PR #16 `4082e72`, both rebuilt
+reproducibly from exact commits. 79 synthetic acceptance tests pin tagged
+prose, guard registration, both `required_guards` forms, fix, retry and fail,
+the fingerprint, coverage and the byte-identical untagged guarantee. They
+include regressions for 9 defects an adversarial review found, all fixed;
+the worst was a float loan-period policy bypass. The tests
+pass from source and from the installed Lab wheel on macOS arm64. Linux CI has
+not run yet, and the lane is not a required check. It is a draft until #16
+merges. There is no Harness workflow and no live-model qualification.
+
 ## Sandboxed CLI consumer blueprint — 2026-10-20
 
 Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes

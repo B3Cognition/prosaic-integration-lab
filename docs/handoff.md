@@ -1,5 +1,29 @@
 # Codex handoff
 
+## Rule-admission blueprint, draft only — 2026-11-05
+
+The maintainer asked for an adoption example of Prosaic rule admission.
+Branch `feat/rule-admission-blueprint` is based on main `3cf2d64`. Its draft
+PR waits for prosaic-runtime#16. No version bump, no `release-x.md`, and the ordinary and
+reasoning manifests are unchanged.
+
+- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `4082e72` (PR #16 head).
+  Both are rebuilt from `git archive` with `setuptools==80.9.0`, no isolation
+  and `SOURCE_DATE_EPOCH` set to the commit time. Two local builds produced
+  identical bytes. Neither commit has a `Publish SDK` run; the draft PR asks the
+  maintainer to dispatch one so action-built wheels can replace the local ones.
+- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow,
+  because Harness 0.9.7 and earlier reject `ruleViolation` after provider spend.
+- Review: an adversarial pass found 9 defects, each pinned by a test that
+  failed first; all are fixed. The worst was a policy bypass: `"days": 28.0`
+  skipped the loan-period guard. Coverage now takes its verdict from real
+  admission. The lane has 79 tests.
+- Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
+  CI (`rule-admission.yml`) has not run yet. It is not a required check until
+  the re-pin to releases.
+- Next: after Core releases `parse_rules` and #16 merges and releases, follow
+  the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
+
 ## Lab 0.9.4 merge and release authorized — 2026-11-04
 
 The maintainer explicitly requested keeping the tested Qwen and Gemma prompts,

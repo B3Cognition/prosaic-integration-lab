@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Add a separate rule-admission candidate lane and a copyable catalogue-desk
+  blueprint. The blueprint has tagged prose at all four stages, a `prose-only`
+  rule, a two-file per-(file, stage) composition, a custom
+  `loan_period_within_policy` guard and a `required_guards` floor in both forms.
+- Pin fix, retry and fail; the rules fingerprint; coverage; and the byte-identical
+  untagged guarantee with 79 synthetic acceptance tests, including regressions
+  from an adversarial review. The tests sit outside the default collection and
+  need no credentials or live calls.
+- Rebuild Core `9d5a02f` and Runtime PR #16 head `4082e72` reproducibly from
+  exact commits into `dependencies/rule-admission-candidate.json`, qualified as
+  a local offline candidate rather than a published release. The ordinary and
+  reasoning manifests are unchanged.
+
 ## 0.9.4 — 2026-11-04
 
 - Keep the compact constructive CRT prompt in all seven shared effort agents;
