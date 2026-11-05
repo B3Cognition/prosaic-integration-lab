@@ -8,7 +8,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 CORE_COMMIT = '9d5a02f87469da373ba35e1e599b456b45459cd2'
-RUNTIME_COMMIT = '4082e723a20eda25a31fcd67283b5f67ea53decd'
+RUNTIME_COMMIT = '65ba15d7e93ee058e22bececdb2e528cef2a474a'
 QUALIFICATION = 'local-offline-candidate; not a published release'
 
 
