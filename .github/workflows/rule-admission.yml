@@ -22,7 +22,7 @@ jobs:
         image: postgres:${{ matrix.postgres }}
         env:
           POSTGRES_PASSWORD: synthetic-only
-        ports: ['5432:5432']
+        ports: ['127.0.0.1:5432:5432']
         options: >-
           --health-cmd pg_isready --health-interval 5s
           --health-timeout 5s --health-retries 12
@@ -45,9 +45,14 @@ jobs:
           .venv/bin/python -m pip check
       - name: Check the blueprint against the synthetic provider and report coverage
         env:
-          PROSAIC_RULE_POSTGRES_DSN: postgresql://postgres:synthetic-only@127.0.0.1:5432/postgres
+          PGHOST: 127.0.0.1
+          PGPORT: '5432'
+          PGUSER: postgres
+          PGDATABASE: postgres
+          PGPASSWORD: synthetic-only
         run: |
           mkdir reports
+          export PROSAIC_RULE_POSTGRES_DSN="$(.venv/bin/python -c 'import os; from psycopg.conninfo import make_conninfo; print(make_conninfo(host=os.environ["PGHOST"], port=os.environ["PGPORT"], user=os.environ["PGUSER"], dbname=os.environ["PGDATABASE"], password=os.environ["PGPASSWORD"]))')"
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_acceptance -q --junitxml=reports/rule-admission.xml
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_postgres -q --junitxml=reports/rule-postgres.xml
           .venv/bin/python -I -m lab_runner.rule_admission.blueprint.coverage --json > reports/coverage.json
