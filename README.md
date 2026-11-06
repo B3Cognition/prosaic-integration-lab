@@ -4,10 +4,15 @@ Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
+Lab **0.9.6** pins **Prosaic 0.5.0, Runtime 0.9.14 and Harness 0.9.9** in both
+active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
+See [release scope and qualification](docs/release-0.9.6.md) and
+[guarded SDK adoption verification](docs/verification/guarded-sdk-release-2026-11-06.md).
+
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
 simpler Gemma prompt with the tested JSON rules. The example Gemma workflow
-selects that file explicitly; native effort mappings and SDK pins are unchanged.
+selects that file explicitly; native effort mappings and prompt bytes are unchanged.
 See [release scope and qualification](docs/release-0.9.4.md).
 
 **Start here: [the guided quickstart](docs/quickstart.md).** Your first result
@@ -18,8 +23,8 @@ account, API key, local model or Docker.
 
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate Runtime 0.9.12 manifest; fixtures need no key; bounded live calls require opt-in |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0 plus exact Runtime #16 and Harness companion candidates; both synthetic provider wires, no live calls |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.14; fixtures need no key; bounded live calls require opt-in |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.14 and Harness 0.9.9; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -49,9 +54,13 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-This checkout targets **[Lab 0.9.4](docs/release-0.9.4.md)**. The ordinary train
-retains **Runtime 0.9.8**, Core 0.4.1, Harness 0.9.4, Runtime recorder 0.3.0 and
-Harness store 0.4.0; the separate reasoning lane selects Runtime 0.9.12.
+Lab **[0.9.6](docs/release-0.9.6.md)** adopts the guarded SDK family. Both active
+SDK manifests now select Core **0.5.0**, Runtime **0.9.14**, Harness **0.9.9**,
+Runtime recorder **0.3.0** and Harness store **0.4.1**. Downloads retain exact
+public URLs, SHA256 hashes and release-source commits. Former ordinary and
+reasoning manifests are preserved as dated snapshots; mixed trains still fail
+admission and all nine real-stack gates remain required. The four additional
+rule-admission cells cover both provider wires and PostgreSQL receipt recovery.
 Observatory monitoring, Explorer, guided onboarding and the first-workflow
 example remain available. Earlier release artifacts retain their original bytes.
 

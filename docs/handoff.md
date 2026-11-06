@@ -1,5 +1,48 @@
 # Codex handoff
 
+## Guarded ecosystem release authorized — 2026-11-06
+
+The maintainer explicitly authorized updating, merging and releasing Runtime,
+Harness and Lab after the independent Lab 0.9.5 release completed. That release
+is now published and verified. This isolated follow-up combines its main tree
+with the #45 blueprint and #46 guarded Harness companion. Preserve both sets of
+changes and all historical manifests, prompts and verification evidence.
+
+Runtime 0.9.14 and Harness 0.9.9 are published and publicly verified. Both active
+Lab manifests now select their exact public wheel bytes with Core 0.5.0 and the
+unchanged recorder 0.3.0/store 0.4.1. Current provenance/freezes have advanced;
+all five prior snapshots remain byte-identical. Final Lab hosted qualification
+must consume these published bytes; local candidates are not release evidence.
+No new live inference is authorized.
+Follow the [0.9.6 release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md). The isolated
+merge with Lab 0.9.5 preserves both the author blueprint and guarded companion;
+its pre-guarded snapshots must never be overwritten. Require all ten final-head
+hosted jobs, equal qualified/merged trees and original CI archive/public-consumer
+proof before marking Lab complete.
+
+## Lab 0.9.5 merge and release authorized — 2026-11-06
+
+The maintainer explicitly requested merging, pushing and releasing the tested SDK
+adoption. This supersedes the earlier source-only scope below. Prepare 0.9.5 from
+main `3cf2d6416f822acde27bf721982571deaa38fe6b`, preserve the exact five public
+SDK pins and historical snapshots, and follow the
+[release plan](superpowers/plans/2026-11-06-core050-lab-release.md) and
+[release guide](release-0.9.5.md). Require four native Linux acceptance cells and
+both installed-reasoning jobs on the final source, expected-head merge with equal
+trees, original CI archives and fresh anonymous-download/installed-consumer proof.
+No new live inference or upstream SDK publication is needed.
+
+## Core 0.5.0 SDK adoption — 2026-11-05
+
+The current request updates both active manifests to Core 0.5.0, Runtime 0.9.13,
+Harness 0.9.8, recorder 0.3.0 and store 0.4.1. It supersedes prior requests to
+keep those active pins unchanged. Historical manifests, benchmark profiles and
+freeze records are archived verbatim; corpus, prompts and scoring are unchanged.
+Read the [adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) for
+current verification results. Work is isolated from the original experiment
+checkout; no Lab version bump, commit, push or publication was requested.
+
 ## Guarded Harness companion — 2026-11-05
 
 The maintainer authorized implementing the remaining Harness and Lab gaps.

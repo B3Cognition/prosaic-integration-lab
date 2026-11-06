@@ -12,7 +12,7 @@ from . import host
 from .guards import registry
 
 if not {'guards', 'rule_project', 'rule_project_identity'} <= signature(ConversationBindings).parameters.keys():
-    raise ImportError('guarded catalogue conversations need the Harness rule-admission companion candidate')
+    raise ImportError('guarded catalogue conversations need Harness 0.9.9 or later with guard registration and project roots')
 
 
 def build_bindings(*, project=host.BLUEPRINT, config=None, guards=None, tools=None,

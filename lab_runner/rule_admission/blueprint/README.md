@@ -6,12 +6,11 @@ them, and a floor in operator config says which checks prose may never drop.
 The domain is an invented lending library; every record, title and fee is
 synthetic.
 
-> **Candidate status.** This blueprint uses published Prosaic Core 0.5.0
-> and the rule admission in Runtime from
-> [prosaic-runtime#16](https://github.com/B3Cognition/prosaic-runtime/pull/16),
-> at `498ffc7`, which is still in review. `harness.py` additionally needs the
-> Harness companion `5b3f0f2`. These two exact-commit candidate wheels are distinct
-> from the published Runtime 0.9.13/Harness 0.9.8 packages.
+> **Released SDK family.** Use checksum-pinned Core 0.5.0, Runtime 0.9.14
+> and Harness 0.9.9 from the Lab's active release manifest. Runtime 0.9.13 and
+> Harness 0.9.8 lack these guarded-conversation contracts. Historical candidate
+> commits and receipts are retained separately; no git candidate override is
+> needed for the released example.
 
 ## What is in the folder
 
@@ -283,17 +282,17 @@ CWD. Replace synthetic tools before using this in an application.
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Harness support is qualified only with the exact companion candidate; published
-  Harness 0.9.8 and earlier still lack that support. Legacy graph `run()` remains
+- Harness support requires the checksum-pinned Harness 0.9.9 release;
+  Harness 0.9.8 and earlier lack that support. Legacy graph `run()` remains
   outside the rule-hook contract. Upgrade all shared-session readers together.
 - `value_in_tool_output` reads a currency code or symbol before the number, in
   any case (`EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`), and a symbol after it
   (`1.20 €`). It does not yet read a code or word after the number (`1.20 EUR`,
   `1.20 euros`) or minor units (`120 cents`). An invented fee written that way
   passes. The Lab tracks these as expected failures against prosaic-runtime#16.
-- The Runtime capability check cannot distinguish every #16 candidate. Pin the
-  exact build, as the Lab does, and run its install audit; a version string alone
-  cannot distinguish the released package from these candidates.
+- The Runtime capability check does not establish artifact provenance. Pin the
+  exact released wheels, as the Lab does, and run its install audit. Historical
+  candidates reused older version strings, so version metadata alone is not proof.
 - An agent with every tag stripped runs byte-identically to the tagged one when
   no guard fires, with or without guards registered. It is still refused by a
   runtime whose floor requires guards.

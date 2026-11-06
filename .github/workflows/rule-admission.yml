@@ -1,6 +1,5 @@
 name: Rule admission integration
-# Candidate lane for prosaic-runtime#16. Not a required check until the
-# candidate manifest is re-pinned to published Runtime and Harness releases.
+# Released guarded-conversation lane. All four cells are required for Lab release.
 on:
   pull_request:
   push:
@@ -10,16 +9,22 @@ permissions:
   contents: read
 jobs:
   candidate-blueprint:
+    name: rule-admission-${{ matrix.os }}-pg${{ matrix.postgres }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
         postgres: ['16', '18']
+        include:
+          - postgres: '16'
+            postgres_image: postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d
+          - postgres: '18'
+            postgres_image: postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     services:
       postgres:
-        image: postgres:${{ matrix.postgres }}
+        image: ${{ matrix.postgres_image }}
         env:
           POSTGRES_PASSWORD: synthetic-only
         ports: ['127.0.0.1:5432:5432']
@@ -31,17 +36,16 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.12'
-      - name: Rebuild candidate wheels from exact commits and install the Lab wheel
+      - name: Install checksum-pinned released SDKs and the Lab wheel
         run: |
           python -m venv .venv
           .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
           .venv/bin/python -m pip install --require-hashes -r dependencies/rule-admission-build.lock
-          .venv/bin/python scripts/build_rule_admission_candidates.py --manifest dependencies/rule-admission-candidate.json
-          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/rule-admission-candidate.json
-          .venv/bin/python scripts/install_dependencies.py --manifest dependencies/rule-admission-candidate.json
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases.json
+          .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
           .venv/bin/python -m build --wheel
           .venv/bin/python -m pip install --no-deps dist/*.whl
-          .venv/bin/python scripts/audit_install.py --manifest dependencies/rule-admission-candidate.json
+          .venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
           .venv/bin/python -m pip check
       - name: Check the blueprint against the synthetic provider and report coverage
         env:

@@ -1,5 +1,15 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Released guarded SDK adoption — 2026-11-06
+
+Lab 0.9.6 combines the blueprint/guarded companion with released Core 0.5.0,
+Runtime 0.9.14 and Harness 0.9.9. Both SDK publications and public verification
+are complete; final Lab qualification remains in progress. Preserve
+the preceding manifests, SDK provenance and memory freezes as named snapshots.
+The [current ledger](guarded-sdk-release-2026-11-06.md) records the observed
+red/green host checks and pending final train, ten hosted jobs, merge equality
+and public-consumer proof. Historical candidate results below remain unchanged.
+
 ## Guarded Harness integration follow-up — 2026-11-05
 
 Exact candidate train: Core 0.5.0 / Runtime #16 `498ffc7` / Harness `5b3f0f2`.

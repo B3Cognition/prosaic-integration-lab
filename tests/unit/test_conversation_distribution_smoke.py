@@ -32,9 +32,9 @@ def test_wheel_identity_requires_current_source_version_instead_of_historical_re
     with pytest.raises(ValueError):module.wheel_identity(wheel('0.0.0'))
 
 
-@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified'])
+@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified', 'core050'])
 def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, train):
-    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN
+    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN, CORE050_TRAIN
     module = implementation()
     calls = []
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
@@ -53,7 +53,7 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
     monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
     versions = {'context': CONTEXT_TRAIN, 'blueprints': CONSUMER_BLUEPRINT_TRAIN,
-                'unified': UNIFIED_POOL_TRAIN}[train]
+                'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN}[train]
     manifest.write_text(json.dumps({'artifacts': [{'distribution': key, 'version': value}
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
@@ -67,7 +67,7 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
         if train != 'context':
             assert '-I' in selected[0] and '--source-root' in selected[0]
     installed = [call for call in calls if 'lab_runner.native_eval' in call]
-    assert len(installed) == (4 if train == 'unified' else 0)
+    assert len(installed) == (4 if train in {'unified', 'core050'} else 0)
     if installed:
         assert [call[call.index('lab_runner.native_eval') + 1] for call in installed] == [
             'test', 'unified-test', 'unified-cli-test', 'unified-fallback-test']
@@ -75,8 +75,9 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
 
 
 @pytest.mark.parametrize('defect', ['failed', 'wrong-count', 'live-call', 'unclean'])
-def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(tmp_path, monkeypatch, defect):
-    from lab_runner.gates import UNIFIED_POOL_TRAIN
+@pytest.mark.parametrize('train', ['unified', 'core050'])
+def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(tmp_path, monkeypatch, defect, train):
+    from lab_runner.gates import UNIFIED_POOL_TRAIN, CORE050_TRAIN
     module = implementation()
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
     monkeypatch.setattr(module, 'wheel_identity', lambda path: {'name': 'lab', 'version': '0.6.0', 'files': {}})
@@ -93,7 +94,7 @@ def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(t
     monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
     manifest.write_text(json.dumps({'artifacts': [{'distribution': k, 'version': v}
-        for k, v in UNIFIED_POOL_TRAIN.items()]}))
+        for k, v in {'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN}[train].items()]}))
     with pytest.raises(ValueError, match='installed evaluation qualification incomplete'):
         module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
             wheels=tmp_path, lock=tmp_path / 'lock', environment={})

@@ -11,16 +11,16 @@ def test_active_manifest_selects_only_the_verified_conversation_sdk_family():
     data = sdk_manifest(manifest)
     assert {(item['distribution'], item['version'], item['source_commit'], item['sha256'])
             for item in data['artifacts']} == {
-        ('b3-prosaic', '0.4.1', '6ac6cfdfd47dc70ecf68e441aa004f07c3be3822',
-         '07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51'),
-        ('b3-prosaic-runtime', '0.9.8', 'a9433a68f60eeecf1946a398267f749c7ff89d8e',
-         'd9d416baf9a7f4b87328532d41b281a2f6dbc9bafc744f973661a5cf6015a540'),
+        ('b3-prosaic', '0.5.0', '67b3807281ed0cdfd345fff84c56b236ec82cfb1',
+         'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81'),
+        ('b3-prosaic-runtime', '0.9.14', '58b6aeba941ef20702c6cd8e6584e11699a9803c',
+         '301c14af43070baa7fa810e36190e8a973c7c5980511951acee03c82dbe594c4'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
-        ('b3-prosaic-harness', '0.9.4', '7861459f2452f1ad66717cfb45f62be4ed5caf23',
-         '4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b'),
-        ('b3-prosaic-harness-postgres', '0.4.0', '1db61abf1b648affe1d67a5069f15ce9c9b4c9d3',
-         '35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a'),
+        ('b3-prosaic-harness', '0.9.9', '580d56bf005e653e6066c872dbdf333311d1763f',
+         '7e87b00b5001cb472f6b31d905ea3023757854ad40651e0b50c3247938eec5be'),
+        ('b3-prosaic-harness-postgres', '0.4.1', 'a3fa45027509c2b5a75a9ed174cca51c77a42912',
+         'd33936fe82b41d5154c4527cc4aee82c190b787e27da04bbce3e1e34dd8f0beb'),
     }
 
 

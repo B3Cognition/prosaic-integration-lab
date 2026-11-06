@@ -1,5 +1,14 @@
 # Required release gates
 
+The current released family is Core 0.5.0, Runtime 0.9.14, Harness 0.9.9,
+Runtime recorder 0.3.0 and Harness store 0.4.1. It retains all nine required
+lanes and all 103 conversation/context cases. Prior exact trains and their
+receipts remain preserved; unknown mixtures still fail admission.
+Four additional installed rule-admission cells on Linux AMD64/ARM64 × PostgreSQL
+16/18 and both installed-reasoning jobs are mandatory for Lab 0.9.6 release.
+The rule lane installs only the active released SDK manifest and uses the same
+immutable PostgreSQL image digests as the ordinary acceptance inventory.
+
 CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
 `native-persistence`, `native`, `legacy-upgrade`, `qualification` and `conversation` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
@@ -48,15 +57,13 @@ The HTTP surface uses saved JSON views; transient SDK streaming deltas are not a
 Lab client protocol in this MVP. Every new case joins the exact count contract;
 the historical eight-lane receipts remain unchanged.
 
-Staged activation is explicit. The exact currently published SDK train has no
-Conversation capability and retains the original eight released gates. Its
-source job excludes only the three new installed conversation functional files;
-all older functional tests and new pure host units still run. Explicit candidate
-dispatch requires the coherent new five-package train, public capability, all
-nine lanes, full source tests and distribution/demo checks. Once active released
-pins point at that exact new train, released CI automatically requires the same
-nine lanes and full conversation checks. Unknown/mixed versions fail admission;
-the old train never emits a passing conversation receipt.
+Staged activation remains explicit for historical reproduction. Earlier trains
+without Conversation capability retain their original eight gates; their source
+job excludes only the three installed conversation functional files. The active
+released five-package train requires all nine lanes, full source tests and
+distribution/demo checks. Explicit candidate dispatch requires equally complete
+lineage and capability evidence. Unknown/mixed versions fail admission; an old
+train never emits a passing conversation receipt.
 
 The separate distribution smoke installs both the Lab wheel and a wheel rebuilt
 from its exact sdist in neutral environments, audits all five SDK payloads and
@@ -74,7 +81,7 @@ import ownership, CLI startup, `pip check` and public workflow construction. Its
 sanitized receipt is exported separately; unpublished candidates cannot pass a
 public-index adoption check by substituting their local artifacts.
 
-The current collection contracts are audit88, identity20, ingress5, Lago25,
+The historical eight-lane collection contracts were audit88, identity20, ingress5, Lago25,
 native-persistence26, native53, legacy-upgrade10 and qualification3 (230 per cell).
 The Lab 0.3.0 released evidence below retains its original 216-case contract;
 the added cases require fresh qualification of this source. Counts must
