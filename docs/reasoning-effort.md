@@ -1,6 +1,6 @@
 # Reasoning-effort integration lab
 
-This separate lane consumes published Runtime 0.9.12 and checks canonical prose
+This separate lane consumes published Runtime 0.9.13 and checks canonical prose
 through actual SDK HTTP requests and owned Claude/Codex CLI fixtures. It supplies
 copyable blueprints and an optional bounded live runner. The ordinary
 `dependencies/releases.json`, quality benchmarks, PostgreSQL/service gates and
@@ -12,10 +12,11 @@ they do not require `prosaic apply` or copies in Claude/Codex directories.
 
 ## Install the exact lane
 
-Use a fresh environment. `releases-reasoning.json` selects Core 0.4.1, Runtime
-0.9.12, recorder 0.3.0, Harness 0.9.4 and store 0.4.0. It changes only Runtime
-relative to the ordinary Lab manifest. Newer Harness 0.9.6/store 0.4.1 releases
-are not silently adopted or certified by this lane.
+Use a fresh environment. `releases-reasoning.json` selects Core 0.5.0, Runtime
+0.9.13, recorder 0.3.0, Harness 0.9.8 and store 0.4.1, matching the ordinary
+Lab manifest. The control-test lane remains separate from service acceptance.
+Its former SDK pins are preserved in
+`dependencies/releases-reasoning-pre-core050-2026-11-05.json`.
 
 From the Lab repository root:
 
@@ -36,10 +37,10 @@ Preparation downloads the exact public wheel URLs and checks SHA256 values.
 The payload audit verifies all five installed SDKs. No editable SDK installs,
 private SDK APIs, vendor authentication or inference are needed for fixtures.
 
-Run the ordinary Lab suite in its original environment. Its quality/provenance
-guards intentionally admit only their recorded SDK trains; installing Runtime
-0.9.12 there does not qualify that train or replace those guards. The reasoning
-tests live outside the default unit/functional collection for this reason.
+Run both the ordinary Lab suite and this separate reasoning collection. The
+quality/provenance guards admit the exact new family and retained historical
+trains; arbitrary mixtures remain rejected. Control fixtures do not substitute
+for real-stack acceptance or change historical live-study results.
 
 ## Run credential-free control checks
 

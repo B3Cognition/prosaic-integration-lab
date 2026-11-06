@@ -18,7 +18,8 @@ def artifacts(name):
 
 def test_manifest_pins_exact_commits_and_differs_from_the_published_core():
     candidate = artifacts('dependencies/rule-admission-candidate.json')
-    published = artifacts('dependencies/releases-reasoning.json')
+    # The reasoning-lane train these entries were copied from; main keeps it verbatim after Lab 0.9.5.
+    published = artifacts('dependencies/releases-reasoning-pre-core050-2026-11-05.json')
     core, runtime = candidate['b3-prosaic'], candidate['b3-prosaic-runtime']
     assert (core['source_commit'], runtime['source_commit']) == (CORE_COMMIT, RUNTIME_COMMIT)
     assert core['qualification'] == runtime['qualification'] == QUALIFICATION

@@ -16,6 +16,19 @@
   a local offline candidate rather than a published release. The ordinary and
   reasoning manifests are unchanged.
 
+## 0.9.5 — 2026-11-06
+
+- Adopt checksum-pinned Prosaic 0.5.0, Runtime 0.9.13 and Harness 0.9.8 in both
+  active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
+- Retain all nine real-stack gates, context assembly and installed native/unified
+  examples for the exact new train; unknown or mixed trains remain rejected.
+- Preserve former manifests, public benchmark provenance and memory freeze bytes
+  as named snapshots. Corpus, agent prompts, scoring and historical evidence stay
+  unchanged; current freezes bind the new SDK provenance.
+- Update current installation guides and Explorer SDK badges. Verify omitted and
+  explicit artifact effort against Runtime's explicit-effort precedence.
+- See [release scope and qualification](docs/release-0.9.5.md).
+
 ## 0.9.4 — 2026-11-04
 
 - Keep the compact constructive CRT prompt in all seven shared effort agents;

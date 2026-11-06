@@ -1,5 +1,12 @@
 # Current delivery status
 
+The current source adopts Core 0.5.0, Runtime 0.9.13 and Harness 0.9.8 with
+recorder 0.3.0 and store 0.4.1 in both active manifests. The
+[SDK adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) records
+the new source verification separately from the historical release results below.
+Lab 0.9.5 packages this SDK update. The [release guide](release-0.9.5.md)
+requires final-source hosted qualification and immutable release artifacts.
+
 ## Lab 0.9.4 — separate Qwen and Gemma prompts
 
 [Release scope](release-0.9.4.md) keeps the compact Qwen/shared agents and selects

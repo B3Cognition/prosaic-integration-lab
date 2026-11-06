@@ -92,7 +92,7 @@ def test_report_does_not_echo_arbitrary_identity_or_recovery_data():
 
 
 @pytest.mark.parametrize('runtime,filename',[
-    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases.json'),
+    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases-pre-core050-2026-11-05.json'),
     ('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
 def test_provenance_binds_the_selected_sdk_manifest(monkeypatch,runtime,filename):
     from lab_runner.quality import runner

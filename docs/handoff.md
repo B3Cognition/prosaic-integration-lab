@@ -44,6 +44,28 @@ reasoning manifests are unchanged.
 - Next: after Core releases `parse_rules` and #16 merges and releases, follow
   the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
 
+## Lab 0.9.5 merge and release authorized — 2026-11-06
+
+The maintainer explicitly requested merging, pushing and releasing the tested SDK
+adoption. This supersedes the earlier source-only scope below. Prepare 0.9.5 from
+main `3cf2d6416f822acde27bf721982571deaa38fe6b`, preserve the exact five public
+SDK pins and historical snapshots, and follow the
+[release plan](superpowers/plans/2026-11-06-core050-lab-release.md) and
+[release guide](release-0.9.5.md). Require four native Linux acceptance cells and
+both installed-reasoning jobs on the final source, expected-head merge with equal
+trees, original CI archives and fresh anonymous-download/installed-consumer proof.
+No new live inference or upstream SDK publication is needed.
+
+## Core 0.5.0 SDK adoption — 2026-11-05
+
+The current request updates both active manifests to Core 0.5.0, Runtime 0.9.13,
+Harness 0.9.8, recorder 0.3.0 and store 0.4.1. It supersedes prior requests to
+keep those active pins unchanged. Historical manifests, benchmark profiles and
+freeze records are archived verbatim; corpus, prompts and scoring are unchanged.
+Read the [adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) for
+current verification results. Work is isolated from the original experiment
+checkout; no Lab version bump, commit, push or publication was requested.
+
 ## Lab 0.9.4 merge and release authorized — 2026-11-04
 
 The maintainer explicitly requested keeping the tested Qwen and Gemma prompts,
