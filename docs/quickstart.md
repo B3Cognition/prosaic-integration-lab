@@ -41,7 +41,7 @@ The `pip install --no-deps .` step installs the Lab consumer from this checkout;
 it does not install editable or sibling SDK sources. Preparation downloads
 checksummed public SDK wheels; the audit verifies their
 installed payloads. Expected versions: Core 0.5.0, Runtime 0.9.14, recorder 0.3.0,
-Harness 0.9.9, store 0.4.1. `pip check` should report no broken requirements.
+Harness 0.9.10, store 0.4.1. `pip check` should report no broken requirements.
 If any command fails, stop and use [troubleshooting](#when-something-goes-wrong).
 No model server is contacted by these install/audit commands.
 

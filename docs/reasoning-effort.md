@@ -13,7 +13,7 @@ they do not require `prosaic apply` or copies in Claude/Codex directories.
 ## Install the exact lane
 
 Use a fresh environment. `releases-reasoning.json` selects Core 0.5.0, Runtime
-0.9.14, recorder 0.3.0, Harness 0.9.9 and store 0.4.1, matching the ordinary
+0.9.14, recorder 0.3.0, Harness 0.9.10 and store 0.4.1, matching the ordinary
 Lab manifest. The control-test lane remains separate from service acceptance.
 Its former SDK pins are preserved in
 `dependencies/releases-reasoning-pre-core050-2026-11-05.json`.

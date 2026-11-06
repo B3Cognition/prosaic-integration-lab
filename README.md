@@ -4,10 +4,10 @@ Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.6** pins **Prosaic 0.5.0, Runtime 0.9.14 and Harness 0.9.9** in both
+Lab **0.9.7** pins **Prosaic 0.5.0, Runtime 0.9.14 and Harness 0.9.10** in both
 active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
-See [release scope and qualification](docs/release-0.9.6.md) and
-[guarded SDK adoption verification](docs/verification/guarded-sdk-release-2026-11-06.md).
+See [release scope and qualification](docs/release-0.9.7.md) and
+[Harness adoption verification](docs/verification/harness0910-sdk-release-2026-11-06.md).
 
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
@@ -24,7 +24,7 @@ account, API key, local model or Docker.
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.14; fixtures need no key; bounded live calls require opt-in |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.14 and Harness 0.9.9; both synthetic provider wires, no live calls |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.14 and Harness 0.9.10; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -54,8 +54,9 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.6](docs/release-0.9.6.md)** adopts the guarded SDK family. Both active
-SDK manifests now select Core **0.5.0**, Runtime **0.9.14**, Harness **0.9.9**,
+Lab **[0.9.7](docs/release-0.9.7.md)** adopts Harness input-cap visibility on the
+guarded SDK family. Both active SDK manifests now select Core **0.5.0**,
+Runtime **0.9.14**, Harness **0.9.10**,
 Runtime recorder **0.3.0** and Harness store **0.4.1**. Downloads retain exact
 public URLs, SHA256 hashes and release-source commits. Former ordinary and
 reasoning manifests are preserved as dated snapshots; mixed trains still fail

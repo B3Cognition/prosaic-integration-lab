@@ -13,16 +13,17 @@ UNIFIED_POOL_TRAIN={**CONSUMER_BLUEPRINT_TRAIN,'b3-prosaic-runtime':'0.9.8'}
 CORE050_TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.13','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.8','b3-prosaic-harness-postgres':'0.4.1'}
 GUARDED_RULE_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.14','b3-prosaic-harness':'0.9.9'}
+HARNESS0910_TRAIN={**GUARDED_RULE_TRAIN,'b3-prosaic-harness':'0.9.10'}
 
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -39,7 +40,7 @@ def supports_conversation(manifest):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False

@@ -13,7 +13,7 @@ URLs, source commits and checksums for this complete family:
 | --- | --- | --- |
 | Core | 0.5.0 | `parse_rules`, `strip_tags` and composed inspection rules |
 | Runtime | 0.9.14 | Guard admission/enforcement, corrected value-source boundaries and signed multiples |
-| Harness | 0.9.9 | Host policy/guard preservation and durable rule receipts |
+| Harness | 0.9.10 | Host policy/guard preservation and durable rule receipts |
 | Runtime recorder / Harness store | 0.3.0 / 0.4.1 | Published persistence adapters |
 
 Runtime 0.9.13 and Harness 0.9.8 do not provide these guarded-conversation
