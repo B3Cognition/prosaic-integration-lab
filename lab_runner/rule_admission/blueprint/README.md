@@ -7,7 +7,7 @@ The domain is an invented lending library; every record, title and fee is
 synthetic.
 
 > **Released SDK family.** Use checksum-pinned Core 0.5.0, Runtime 0.9.14
-> and Harness 0.9.9 from the Lab's active release manifest. Runtime 0.9.13 and
+> and Harness 0.9.10 from the Lab's active release manifest. Runtime 0.9.13 and
 > Harness 0.9.8 lack these guarded-conversation contracts. Historical candidate
 > commits and receipts are retained separately; no git candidate override is
 > needed for the released example.
@@ -282,7 +282,7 @@ CWD. Replace synthetic tools before using this in an application.
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Harness support requires the checksum-pinned Harness 0.9.9 release;
+- Harness support requires the checksum-pinned Harness 0.9.10 release;
   Harness 0.9.8 and earlier lack that support. Legacy graph `run()` remains
   outside the rule-hook contract. Upgrade all shared-session readers together.
 - `value_in_tool_output` reads a currency code or symbol before the number, in

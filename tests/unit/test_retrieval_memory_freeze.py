@@ -19,7 +19,7 @@ def test_ordered_freeze_binds_corpus_code_and_evaluation_without_live_calls():
 
 
 @pytest.mark.parametrize('profile',['sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json',
-                                    'sdk-provenance-pre-guarded.json'])
+                                    'sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json'])
 def test_archived_sdk_profile_tampering_invalidates_current_development_freeze(tmp_path,monkeypatch,profile):
     import shutil
     import lab_runner.memory.freeze as freeze
@@ -130,13 +130,44 @@ def test_guarded_freeze_preserves_preceding_bytes_and_all_benchmark_inputs():
     assert hashlib.sha256(old_dev_bytes).hexdigest()=='fdae5bd3101694050ac5d2ce4606b2f89c8bfdfcc4cbc86f7d24f88f7d8d5ce4'
     assert hashlib.sha256(old_eval_bytes).hexdigest()=='cd566112dca44d9b04371bd42986f1a4e5a8e25933ca37b0f1cb04985f2106f9'
     old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
+    dev=decode(root.joinpath('development-freeze-pre-harness0910.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze-pre-harness0910.json').read_bytes())
+    assert evaluation['suiteDigest']==old_eval['suiteDigest']
+    assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
+    assert set(dev['implementation'])==set(old_dev['implementation'])
+    assert {k for k in dev['implementation'] if dev['implementation'][k]!=old_dev['implementation'][k]}=={'freeze.py'}
+    added={'data/sdk-provenance-pre-guarded.json'}
+    assert set(dev['qualityDependencies'])==set(old_dev['qualityDependencies'])|added
+    changed={k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old_dev['qualityDependencies'].get(k)}
+    assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
+    assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={
+        k:v for k,v in old_dev.items() if k not in ('implementation','qualityDependencies')}
+    frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
+    frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
+        historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))
+    with pytest.raises(ValueError,match='development freeze drift'):
+        verify(frozen,dev,evaluation)
+
+
+def test_harness0910_freeze_preserves_preceding_bytes_and_all_benchmark_inputs():
+    import hashlib
+    from importlib.resources import files
+    from lab_runner.quality.contracts import decode
+    from lab_runner.memory.freeze import verify
+
+    root=files('lab_runner.memory').joinpath('data')
+    old_dev_bytes=root.joinpath('development-freeze-pre-harness0910.json').read_bytes()
+    old_eval_bytes=root.joinpath('evaluation-freeze-pre-harness0910.json').read_bytes()
+    assert hashlib.sha256(old_dev_bytes).hexdigest()=='82ad02c6d5315904eac5eabdbbbe3fea19072f2c64d67a7335bc96b2036b6b00'
+    assert hashlib.sha256(old_eval_bytes).hexdigest()=='8d477767cede8c9ec9fff9096c6518832ea7f239887792f57bf03aeed886b927'
+    old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
     dev=decode(root.joinpath('development-freeze.json').read_bytes())
     evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
     assert set(dev['implementation'])==set(old_dev['implementation'])
     assert {k for k in dev['implementation'] if dev['implementation'][k]!=old_dev['implementation'][k]}=={'freeze.py'}
-    added={'data/sdk-provenance-pre-guarded.json'}
+    added={'data/sdk-provenance-pre-harness0910.json'}
     assert set(dev['qualityDependencies'])==set(old_dev['qualityDependencies'])|added
     changed={k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old_dev['qualityDependencies'].get(k)}
     assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}

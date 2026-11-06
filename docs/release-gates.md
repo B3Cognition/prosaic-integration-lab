@@ -1,11 +1,11 @@
 # Required release gates
 
-The current released family is Core 0.5.0, Runtime 0.9.14, Harness 0.9.9,
+The current released family is Core 0.5.0, Runtime 0.9.14, Harness 0.9.10,
 Runtime recorder 0.3.0 and Harness store 0.4.1. It retains all nine required
 lanes and all 103 conversation/context cases. Prior exact trains and their
 receipts remain preserved; unknown mixtures still fail admission.
 Four additional installed rule-admission cells on Linux AMD64/ARM64 × PostgreSQL
-16/18 and both installed-reasoning jobs are mandatory for Lab 0.9.6 release.
+16/18 and both installed-reasoning jobs are mandatory for Lab 0.9.7 release.
 The rule lane installs only the active released SDK manifest and uses the same
 immutable PostgreSQL image digests as the ordinary acceptance inventory.
 

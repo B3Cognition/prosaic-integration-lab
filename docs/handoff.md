@@ -1,5 +1,17 @@
 # Codex handoff
 
+## Harness 0.9.10 SDK adoption — 2026-11-06
+
+The maintainer authorized Lab 0.9.7 with Harness 0.9.10, Runtime 0.9.14 and
+Core 0.5.0, retaining recorder 0.3.0/store 0.4.1 public bytes. Both active
+manifests and current provenance/freezes advance; previous records are archived
+verbatim. No session migration or live calls. Follow the
+[release plan](superpowers/plans/2026-11-06-harness0910-lab-release.md),
+[release guide](release-0.9.7.md) and
+[verification ledger](verification/harness0910-sdk-release-2026-11-06.md).
+Require all ten final-head hosted jobs, equal qualified/merged trees and original
+CI archive/public-consumer proof. Earlier checkpoints below retain their scope.
+
 ## Guarded ecosystem release authorized — 2026-11-06
 
 The maintainer explicitly authorized updating, merging and releasing Runtime,
