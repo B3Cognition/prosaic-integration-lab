@@ -3,7 +3,10 @@
 Start with the [current README](../README.md) and [guided quickstart](quickstart.md).
 This page preserves the previous long-form README, including historical release
 checkpoints and advanced operator recipes. Version/publication statements below
-belong to their recorded checkpoints. Run shell recipes from the repository root.
+belong to their recorded checkpoints. Current installation recipes use Core
+0.5.0, Runtime 0.9.13 and Harness 0.9.8; see the
+[SDK adoption ledger](verification/core050-sdk-adoption-2026-11-05.md).
+Run shell recipes from the repository root.
 
 The opt-in [unified Runtime pool lab](../docs/unified-runtime-pools.md) tests Claude
 Code, Codex CLI and local/API selection with explicit policies and pre-work-only
@@ -64,7 +67,7 @@ note records the incomplete results. Released Lab 0.5.0 remains unchanged.
 The [conversation adoption guide](../docs/conversations.md) documents the new
 authenticated host boundary, public SDK memory/durable examples, exact workflow
 replies and bounded full history. The active manifest now uses published Runtime
-0.9.8/recorder 0.3.0 and Harness 0.9.4/store 0.4.0 with Core 0.4.1.
+0.9.13/recorder 0.3.0 and Harness 0.9.8/store 0.4.1 with Core 0.5.0.
 Lab 0.5.0's earlier candidate passed installed Linux
 AMD64/ARM64 × PostgreSQL 16/18 qualification. See the separate
 [verification evidence](../docs/verification/conversation-adoption-2026-10-11.md#final-source-platform-qualification--2026-10-12)
@@ -90,9 +93,9 @@ family:
 ```sh
 python3.12 -m venv .venv-public
 .venv-public/bin/python -m pip install --index-url https://pypi.org/simple \
-  'b3-prosaic==0.4.1' \
-  'b3-prosaic-runtime==0.9.8' 'b3-prosaic-runtime-postgres==0.3.0' \
-  'b3-prosaic-harness==0.9.4' 'b3-prosaic-harness-postgres==0.4.0'
+  'b3-prosaic==0.5.0' \
+  'b3-prosaic-runtime==0.9.13' 'b3-prosaic-runtime-postgres==0.3.0' \
+  'b3-prosaic-harness==0.9.8' 'b3-prosaic-harness-postgres==0.4.1'
 .venv-public/bin/python -m pip check
 .venv-public/bin/prosaic --version
 .venv-public/bin/prosaic-runtime --help
@@ -165,11 +168,11 @@ The active manifest selects these exact published artifacts:
 
 | Distribution | Version |
 | --- | --- |
-| `b3-prosaic` | 0.4.1 |
-| `b3-prosaic-runtime` | 0.9.8 |
+| `b3-prosaic` | 0.5.0 |
+| `b3-prosaic-runtime` | 0.9.13 |
 | `b3-prosaic-runtime-postgres` | 0.3.0 |
-| `b3-prosaic-harness` | 0.9.4 |
-| `b3-prosaic-harness-postgres` | 0.4.0 |
+| `b3-prosaic-harness` | 0.9.8 |
+| `b3-prosaic-harness-postgres` | 0.4.1 |
 
 Preparation downloads the actual pinned public URLs and verifies the original
 wheel hashes. Installation uses only those five wheels after the locked

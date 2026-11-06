@@ -22,7 +22,7 @@ def test_archived_public_train_remains_selectable_after_active_release_advances(
 
 
 @pytest.mark.parametrize('runtime,manifest',[
-    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases.json'),
+    ('0.9.7','releases-pre-unified-2026-10-24.json'),('0.9.8','releases-pre-core050-2026-11-05.json'),
     ('0.9.8+diagnostics.1','response-diagnostics-candidate.json')])
 def test_qualified_public_and_private_trains_keep_distinct_manifest_bindings(runtime,manifest):
     from lab_runner.quality.sdk_provenance import qualified_sdk
@@ -39,6 +39,17 @@ def test_unqualified_sdk_mixtures_fail_closed(change):
     from lab_runner.quality.sdk_provenance import qualified_sdk
     installed={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.7','b3-prosaic-harness':'0.9.4'}|change
     with pytest.raises(ValueError):qualified_sdk(installed)
+
+
+def test_current_public_train_binds_the_new_installed_sdk_versions_and_hashes():
+    from lab_runner.quality.sdk_provenance import qualified_sdk
+    manifest=ROOT/'dependencies/releases.json'
+    data=json.loads(manifest.read_bytes())
+    installed={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.13','b3-prosaic-harness':'0.9.8'}
+    profile=qualified_sdk(installed)
+    assert profile['manifestDigest']==hashlib.sha256(manifest.read_bytes()).hexdigest()
+    assert profile['artifacts']==[{key:item[key] for key in ('distribution','sha256','version')}
+                                  for item in data['artifacts']]
 
 
 def test_public_blueprint_train_admits_context_but_rejects_mixed_harness():

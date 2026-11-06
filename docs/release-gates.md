@@ -1,5 +1,10 @@
 # Required release gates
 
+The current released family is Core 0.5.0, Runtime 0.9.13, Harness 0.9.8,
+Runtime recorder 0.3.0 and Harness store 0.4.1. It retains all nine required
+lanes and all 103 conversation/context cases. Prior exact trains and their
+receipts remain preserved; unknown mixtures still fail admission.
+
 CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
 `native-persistence`, `native`, `legacy-upgrade`, `qualification` and `conversation` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
