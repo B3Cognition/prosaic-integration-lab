@@ -2,6 +2,7 @@
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import threading
+import pytest
 
 
 def test_local_adapter_counts_real_requests_and_matches_native_inputs(tmp_path):
@@ -120,7 +121,8 @@ def test_local_agent_requires_final_confirmation_after_valid_write(tmp_path):
         server.shutdown();server.server_close();thread.join(timeout=5)
 
 
-def test_benchmark_codex_profile_pins_effort_over_artifact_default(tmp_path):
+@pytest.mark.parametrize('artifact_effort,expected',[(None,'low'),('high','high')])
+def test_benchmark_codex_profile_default_yields_to_explicit_artifact_effort(tmp_path,artifact_effort,expected):
     from dataclasses import replace
     from pathlib import Path
     import sys
@@ -139,10 +141,11 @@ print(json.dumps({'type':'turn.completed','usage':{'input_tokens':5,'output_toke
     profile=replace(config.profiles['codex-main'],executable=str(script),model='synthetic')
     runtime=NativeRuntime(replace(config,profiles={**config.profiles,'codex-main':profile},
                                  capacity_file=str(tmp_path/'capacity.json')))
-    result=runtime.run(ProsaicArtifact('profile-test','subagent',{'effort':'high'},'Return the selected effort.'),
+    metadata={} if artifact_effort is None else {'effort':artifact_effort}
+    result=runtime.run(ProsaicArtifact('profile-test','subagent',metadata,'Return the selected effort.'),
                        cwd=tmp_path,profile='codex-main',policy=NativePolicy(timeout_s=5))
     assert result.exit_code==0
-    assert result.stdout=='low'
+    assert result.stdout==expected
 
 
 def test_native_timing_retains_terminal_event_without_claiming_process_completion(tmp_path):

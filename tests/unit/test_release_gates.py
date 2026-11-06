@@ -6,6 +6,22 @@ import pytest
 from lab_runner.gates import validate,export
 
 
+def test_core050_train_retains_all_required_capabilities_and_rejects_mixtures():
+    from lab_runner.gates import supports_conversation, supports_context_assembly, supports_consumer_blueprints, required_modes
+    versions={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.13',
+        'b3-prosaic-runtime-postgres':'0.3.0','b3-prosaic-harness':'0.9.8',
+        'b3-prosaic-harness-postgres':'0.4.1'}
+    train={'artifacts':[{'distribution':name,'version':version} for name,version in versions.items()]}
+    assert supports_conversation(train) and supports_context_assembly(train) and supports_consumer_blueprints(train)
+    assert set(required_modes(candidate=False,manifest=train))=={
+        'audit','identity','ingress','lago','native-persistence','native','legacy-upgrade','qualification','conversation'}
+    for name,old in [('b3-prosaic','0.4.1'),('b3-prosaic-runtime','0.9.12'),
+                     ('b3-prosaic-harness','0.9.7'),('b3-prosaic-harness-postgres','0.4.0')]:
+        mixed=copy.deepcopy(train)
+        next(item for item in mixed['artifacts'] if item['distribution']==name)['version']=old
+        with pytest.raises(ValueError):required_modes(candidate=False,manifest=mixed)
+
+
 def test_context_train_requires_context_cases_and_preserves_archived_baseline():
     from lab_runner.gates import supports_context_assembly, supports_conversation
     root=Path(__file__).resolve().parents[2]
@@ -23,7 +39,7 @@ def test_context_train_requires_context_cases_and_preserves_archived_baseline():
 
 def test_unified_release_keeps_every_existing_consumer_and_context_gate():
     from lab_runner.gates import supports_consumer_blueprints, supports_context_assembly, required_modes
-    train=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    train=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases-pre-core050-2026-11-05.json').read_text())
     next(a for a in train['artifacts'] if a['distribution']=='b3-prosaic-runtime')['version']='0.9.8'
     assert supports_consumer_blueprints(train) and supports_context_assembly(train)
     assert set(required_modes(candidate=False,manifest=train))=={

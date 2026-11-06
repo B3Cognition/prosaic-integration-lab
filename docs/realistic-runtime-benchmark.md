@@ -73,7 +73,8 @@ Readiness checks versions and authenticated local catalogue availability without
 inference. Live execution requires explicit `--live`. Timeouts, malformed results
 and interruption retain elapsed time and uncertain allowances; the runner stops
 without automatically retrying an uncertain assignment. Native Codex effort is
-an explicit operator profile choice; the recorded study used `low`.
+an operator profile default; explicit agent effort overrides it in the current
+Runtime. Benchmark agents omit effort, and the recorded study used `low`.
 
 For ThinkingCap/oMLX, the recorded profile disables extended thinking to allow
 normal tool use and final-response completion within the selected deadline. Prepare a new

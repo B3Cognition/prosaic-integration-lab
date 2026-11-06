@@ -12,7 +12,7 @@ profiles:
     model: your-accessible-codex-model
     quota_key: codex-account
     permission_mode: workspace-write
-    # Pin latency-sensitive assignments instead of inheriting desktop high effort.
+    # Default low when agent prose omits effort; explicit prose effort overrides it.
     effort: low
 pools:
   coding:
