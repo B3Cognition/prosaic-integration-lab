@@ -1,5 +1,40 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Released guarded SDK adoption — 2026-11-06
+
+Lab 0.9.6 combines the blueprint/guarded companion with released Core 0.5.0,
+Runtime 0.9.14 and Harness 0.9.9. Both SDK publications and public verification
+are complete; final Lab qualification remains in progress. Preserve
+the preceding manifests, SDK provenance and memory freezes as named snapshots.
+The [current ledger](guarded-sdk-release-2026-11-06.md) records the observed
+red/green host checks and pending final train, ten hosted jobs, merge equality
+and public-consumer proof. Historical candidate results below remain unchanged.
+
+## Guarded Harness integration follow-up — 2026-11-05
+
+Exact candidate train: Core 0.5.0 / Runtime #16 `498ffc7` / Harness `5b3f0f2`.
+The copyable Harness host and acceptance close registration, floor/composed-rule
+preservation and receipt/recovery gaps. Both provider wires are synthetic.
+Ordinary/reasoning manifests remain unchanged; candidate provenance, installed
+payload audits and PostgreSQL 16/18 checks are separate qualification gates.
+See [the companion ledger](guarded-harness-2026-11-05.md). Historical checkpoints
+below retain the limitations that existed at those commits.
+
+## Rule-admission blueprint candidate lane — 2026-11-05
+
+[Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk
+blueprint on candidate Core `9d5a02f` and Runtime PR #16 `65ba15d`, both rebuilt
+reproducibly from exact commits. 123 synthetic acceptance tests pin tagged
+prose, guard registration, both `required_guards` forms, fix, retry and fail,
+the fingerprint, coverage and the byte-identical untagged guarantee. They
+include regressions for 9 defects an adversarial review found and for every
+PR #45 review comment across two rounds, all fixed; the worst was a float loan-period policy
+bypass. Three strict expected failures track fee formats Runtime does not read
+yet. The tests pass from source and from the installed Lab wheel on macOS
+arm64, and CI rebuilds the candidates byte-identically on Linux AMD64 and
+ARM64. The lane is not a required check. It is a draft until #16
+merges. There is no Harness workflow and no live-model qualification.
+
 ## Sandboxed CLI consumer blueprint — 2026-10-20
 
 Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes

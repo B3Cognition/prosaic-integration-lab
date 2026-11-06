@@ -18,7 +18,8 @@ def test_ordered_freeze_binds_corpus_code_and_evaluation_without_live_calls():
     with pytest.raises(ValueError):verify(b,changed,evaluation)
 
 
-@pytest.mark.parametrize('profile',['sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json'])
+@pytest.mark.parametrize('profile',['sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json',
+                                    'sdk-provenance-pre-guarded.json'])
 def test_archived_sdk_profile_tampering_invalidates_current_development_freeze(tmp_path,monkeypatch,profile):
     import shutil
     import lab_runner.memory.freeze as freeze
@@ -99,12 +100,43 @@ def test_core050_freeze_changes_only_sdk_provenance_and_preserves_original_linea
     assert hashlib.sha256(old_dev_bytes).hexdigest()=='9caf6d007c286534d15bd7feb582d9a129ed1b6e44af4f9eb7207f9191b0e700'
     assert hashlib.sha256(old_eval_bytes).hexdigest()=='0044815167bf1f482c4c6f12571b60ca6f4371b89a46e18026cf4dc42d56eaaa'
     old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
-    dev=decode(root.joinpath('development-freeze.json').read_bytes())
-    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    dev=decode(root.joinpath('development-freeze-pre-guarded.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze-pre-guarded.json').read_bytes())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
     assert {k for k in dev['implementation'] if dev['implementation'][k]!=old_dev['implementation'][k]}=={'freeze.py'}
     added={'data/sdk-provenance-pre-core050.json'}
+    assert set(dev['qualityDependencies'])==set(old_dev['qualityDependencies'])|added
+    changed={k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old_dev['qualityDependencies'].get(k)}
+    assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
+    assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={
+        k:v for k,v in old_dev.items() if k not in ('implementation','qualityDependencies')}
+    frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
+    frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
+        historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))
+    with pytest.raises(ValueError,match='development freeze drift'):
+        verify(frozen,dev,evaluation)
+
+
+def test_guarded_freeze_preserves_preceding_bytes_and_all_benchmark_inputs():
+    import hashlib
+    from importlib.resources import files
+    from lab_runner.quality.contracts import decode
+    from lab_runner.memory.freeze import verify
+
+    root=files('lab_runner.memory').joinpath('data')
+    old_dev_bytes=root.joinpath('development-freeze-pre-guarded.json').read_bytes()
+    old_eval_bytes=root.joinpath('evaluation-freeze-pre-guarded.json').read_bytes()
+    assert hashlib.sha256(old_dev_bytes).hexdigest()=='fdae5bd3101694050ac5d2ce4606b2f89c8bfdfcc4cbc86f7d24f88f7d8d5ce4'
+    assert hashlib.sha256(old_eval_bytes).hexdigest()=='cd566112dca44d9b04371bd42986f1a4e5a8e25933ca37b0f1cb04985f2106f9'
+    old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
+    dev=decode(root.joinpath('development-freeze.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    assert evaluation['suiteDigest']==old_eval['suiteDigest']
+    assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
+    assert set(dev['implementation'])==set(old_dev['implementation'])
+    assert {k for k in dev['implementation'] if dev['implementation'][k]!=old_dev['implementation'][k]}=={'freeze.py'}
+    added={'data/sdk-provenance-pre-guarded.json'}
     assert set(dev['qualityDependencies'])==set(old_dev['qualityDependencies'])|added
     changed={k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old_dev['qualityDependencies'].get(k)}
     assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}

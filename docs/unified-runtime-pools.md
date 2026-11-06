@@ -107,8 +107,8 @@ members or automatic recovery of partially executed work.
 
 ## Released-wheel validation
 
-The active `dependencies/releases.json` pins Runtime 0.9.13 with Core 0.5.0,
-Harness 0.9.8, recorder 0.3.0 and store 0.4.1. Use a fresh environment;
+The active `dependencies/releases.json` pins Runtime 0.9.14 with Core 0.5.0,
+Harness 0.9.9, recorder 0.3.0 and store 0.4.1. Use a fresh environment;
 download and audit those exact public wheels before running the same fixture
 checks. No native credentials, paid models or external inference are used:
 

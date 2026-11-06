@@ -1,5 +1,26 @@
 # Codex handoff
 
+## Guarded ecosystem release authorized — 2026-11-06
+
+The maintainer explicitly authorized updating, merging and releasing Runtime,
+Harness and Lab after the independent Lab 0.9.5 release completed. That release
+is now published and verified. This isolated follow-up combines its main tree
+with the #45 blueprint and #46 guarded Harness companion. Preserve both sets of
+changes and all historical manifests, prompts and verification evidence.
+
+Runtime 0.9.14 and Harness 0.9.9 are published and publicly verified. Both active
+Lab manifests now select their exact public wheel bytes with Core 0.5.0 and the
+unchanged recorder 0.3.0/store 0.4.1. Current provenance/freezes have advanced;
+all five prior snapshots remain byte-identical. Final Lab hosted qualification
+must consume these published bytes; local candidates are not release evidence.
+No new live inference is authorized.
+Follow the [0.9.6 release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md). The isolated
+merge with Lab 0.9.5 preserves both the author blueprint and guarded companion;
+its pre-guarded snapshots must never be overwritten. Require all ten final-head
+hosted jobs, equal qualified/merged trees and original CI archive/public-consumer
+proof before marking Lab complete.
+
 ## Lab 0.9.5 merge and release authorized — 2026-11-06
 
 The maintainer explicitly requested merging, pushing and releasing the tested SDK
@@ -21,6 +42,77 @@ freeze records are archived verbatim; corpus, prompts and scoring are unchanged.
 Read the [adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) for
 current verification results. Work is isolated from the original experiment
 checkout; no Lab version bump, commit, push or publication was requested.
+
+## Guarded Harness companion — 2026-11-05
+
+The maintainer authorized implementing the remaining Harness and Lab gaps.
+This follow-up branch starts at PR #45 `44539fd`. The guarded lane now uses
+released Core 0.5.0, fixed Runtime #16 `498ffc7`, and local Harness companion
+`5b3f0f2` (branch `codex/harness-rule-admission`). It owns policy and composed
+inspection rules, registers guards at every phase, seals explicit guard project
+roots, and persists bounded rule receipts and ruleViolation failures.
+
+The copyable `blueprint/harness.py` and both-wire acceptance cover before-tool
+repair, composed after-tool failure, retry exhaustion and file-store recovery.
+Independent value-source regressions now pass through Harness; three strict
+expected failures still document the upstream fee grammar limits. A separate
+required PostgreSQL lane covers receipt recovery with installed SDKs.
+
+Both candidate wheels were rebuilt twice with identical recorded hashes and
+both five-wheel train audits pass. The Harness source suite passed 1,035 with
+real PostgreSQL 18; its saved compatibility regressions pass all four cases.
+Final installed/default/PG qualification is recorded in
+[the companion ledger](verification/guarded-harness-2026-11-05.md).
+
+No release or author-branch modification is included. Before remote CI can
+build this lane, push the exact Harness companion commit. For local rebuilding,
+the builder accepts an explicit `--local-repository` checkout and still archives
+only that commit and verifies its hash. Ordinary/reasoning manifests are unchanged.
+Earlier checkpoints below describe their historical candidates.
+
+## Rule-admission blueprint, draft only — 2026-11-05
+
+The maintainer asked for an adoption example of Prosaic rule admission.
+Branch `feat/rule-admission-blueprint` is based on main `3cf2d64`. Its draft
+PR waits for prosaic-runtime#16. No version bump, no `release-x.md`, and the ordinary and
+reasoning manifests are unchanged.
+
+- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `65ba15d` (PR #16 head).
+  Both are rebuilt from `git archive` with `setuptools==80.9.0`, no isolation
+  and `SOURCE_DATE_EPOCH` set to the commit time. Two local builds produced
+  identical bytes. Neither commit has a `Publish SDK` run; the draft PR asks the
+  maintainer to dispatch one so action-built wheels can replace the local ones.
+- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow:
+  Harness 0.9.7 lacks `ruleViolation` in `_FAILURES` (it raises after provider
+  spend), and its conversation path drops `required_guards`, composed rules and
+  guards.
+- Review: an adversarial pass found 9 defects, each pinned by a test that
+  failed first; all are fixed. The worst was a policy bypass: `"days": 28.0`
+  skipped the loan-period guard. Coverage now takes its verdict from real
+  admission.
+- Re-pin 1: Runtime `4082e72` to `65ba15d` (review changes). No blueprint test
+  broke. One new variant pins the cross-file rule change: different settings at
+  one stage are now refused. Generic guard sources changed without a version
+  bump, so the rules fingerprint did not move; reported for #16's thread.
+- PR #45 review: 7 inline comments and 2 general points, all addressed
+  test-first. The floor now covers the custom guard; the id rule's wording
+  matches the guard; the companion moved to `companions/` (never distributed as
+  an agent); `fix` where the guard cannot repair is refused by the host; the
+  missed fee formats are strict expected failures; huge periods are repaired;
+  the blueprint checks the SDKs on import.
+- PR #45 re-review: the floor needs a guard bound only once, so prose could drop
+  the loan check's `before_tool` tag (or move it to `after_tool`) and a 300-day
+  loan was placed before the turn failed. The host now declares
+  `REQUIRED_STAGES` and `compose` refuses a bound guard missing one (coverage:
+  `hostPolicy`). `place_loan` also refuses over-policy periods itself. Smaller
+  points fixed: trailing `€` is read by Runtime (docs corrected), duplicate
+  README header, frontmatter behind a BOM or blank lines. The lane has 123
+  tests.
+- Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
+  CI (`rule-admission.yml`) rebuilds the candidates byte-identically on Linux
+  AMD64 and ARM64. It is not a required check until the re-pin to releases.
+- Next: after Core releases `parse_rules` and #16 merges and releases, follow
+  the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
 
 ## Lab 0.9.4 merge and release authorized — 2026-11-04
 

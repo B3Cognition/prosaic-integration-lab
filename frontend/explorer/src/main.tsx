@@ -372,9 +372,9 @@ function App() {
         <div className="sidebar-foot">
           <strong>Local learning workspace</strong>
           <p>
-            Core 0.5.0 · Runtime 0.9.13
+            Core 0.5.0 · Runtime 0.9.14
             <br />
-            Harness 0.9.8
+            Harness 0.9.9
           </p>
           <a
             href="https://github.com/B3Cognition/prosaic-integration-lab/blob/main/docs/quickstart.md"

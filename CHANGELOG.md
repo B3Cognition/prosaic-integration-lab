@@ -1,6 +1,27 @@
 # Changelog
 
-## Unreleased
+## 0.9.6 — 2026-11-06
+
+- Add a released-SDK rule-admission lane and a copyable catalogue-desk
+  blueprint. The blueprint has tagged prose at all four stages, a `prose-only`
+  rule, a two-file per-(file, stage) composition, a custom
+  `loan_period_within_policy` guard and a `required_guards` floor in both forms.
+- Pin fix, retry and fail; the rules fingerprint; coverage; and the byte-identical
+  untagged guarantee with synthetic acceptance tests (3 strict expected
+  failures track fee formats Runtime does not yet read), including regressions
+  from an adversarial review and from two PR review rounds. The tests sit outside the default collection and
+  need no credentials or live calls.
+- Adopt published Core 0.5.0, Runtime 0.9.14 and Harness 0.9.9 in both active
+  manifests, with exact source commits and verified public wheel hashes.
+  Add a copyable Harness host and both-wire acceptance for policy preservation,
+  tool repair, composed after-tool checks, durable failures and file-store recovery.
+  The two reviewed value-guard gaps have independent passing Harness regressions.
+- Preserve the preceding manifests, SDK provenance and memory freezes verbatim.
+  Historical candidate manifests/builders remain available for reproduction;
+  ordinary release qualification never rebuilds a candidate implicitly.
+- Require all four rule-admission architecture/PostgreSQL cells alongside the
+  four ordinary stack cells and both installed-reasoning jobs. See
+  [release scope and qualification](docs/release-0.9.6.md).
 
 ## 0.9.5 — 2026-11-06
 

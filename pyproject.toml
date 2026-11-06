@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prosaic-integration-lab"
-version = "0.9.5"
+version = "0.9.6"
 description = "Synthetic acceptance consumer for installed Prosaic releases"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx", "psycopg[binary]>=3.2,<4", "psycopg-pool>=3.2,<4", "PyYAML", "jsonschema", "pyuca", "PyJWT[crypto]>=2.15,<3", "packaging"]
@@ -20,6 +20,7 @@ include = ["prosaic_integration_lab*", "lab_runner*"]
 [tool.setuptools.package-data]
 "lab_runner.reasoning_eval" = ["data/subagents/*.md", "data/*.yml", "data/*.json", "data/*.md"]
 "lab_runner.native_eval" = ["data/subagents/*.md"]
+"lab_runner.rule_admission.blueprint" = ["README.md", "runtime.yml", ".prosaic/subagents/*.md", "companions/*.md"]
 "lab_runner.quality" = ["data/*.json", "data/*.md"]
 "lab_runner.memory" = ["data/*.json"]
 "lab_runner.explore" = ["web/*", "web/assets/*", "web/font-licenses/*"]

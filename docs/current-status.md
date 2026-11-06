@@ -1,5 +1,14 @@
 # Current delivery status
 
+Lab 0.9.6 preparation targets the released guarded family: Core 0.5.0, Runtime
+0.9.14 and Harness 0.9.9, with recorder 0.3.0 and store 0.4.1. Runtime is publicly
+verified, as is Harness. Both active manifests and current freezes now bind the
+verified public bytes; final Lab hosted qualification remains required. See the
+[release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md).
+
+## Lab 0.9.5 — Core 0.5 SDK adoption
+
 The current source adopts Core 0.5.0, Runtime 0.9.13 and Harness 0.9.8 with
 recorder 0.3.0 and store 0.4.1 in both active manifests. The
 [SDK adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) records
