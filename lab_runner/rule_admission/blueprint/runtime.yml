@@ -1,0 +1,29 @@
+# Operator configuration for the catalogue-desk blueprint. Models, endpoints and
+# credentials belong here, never in Markdown. The endpoint below is a loopback
+# placeholder; the Lab's acceptance tests replace it with an owned synthetic
+# provider. Point it at your own OpenAI-compatible server to run for real.
+default_profile: library
+allowed_tools: [catalogue_search, loan_terms, place_loan]
+profiles:
+  library:
+    base_url: http://127.0.0.1:8080/v1
+    model: your-model-id
+    features:
+      streaming: false
+
+# The floor: host policy that prose can tighten but never weaken. Python-host
+# only (guards are registered in Python); keep it out of configs the CLI reads.
+required_guards:
+  # Minimum-action form: the prose must bind this guard at retry or stronger.
+  value_in_tool_output: retry
+  # Pinned form: action is a minimum; stage and settings are authoritative.
+  args_reference_seen_ids:
+    action: fail
+    stage: before_tool
+    settings: {keys: [recordId]}
+  # The domain policy is protected too: prose cannot raise the limit or drop
+  # the guard. No stage pin, because the agent binds it at before_tool and the
+  # companion at after_tool; the pinned settings apply to both bindings.
+  loan_period_within_policy:
+    action: fix
+    settings: {max_days: 21}

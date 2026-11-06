@@ -1,5 +1,49 @@
 # Codex handoff
 
+## Rule-admission blueprint, draft only — 2026-11-05
+
+The maintainer asked for an adoption example of Prosaic rule admission.
+Branch `feat/rule-admission-blueprint` is based on main `3cf2d64`. Its draft
+PR waits for prosaic-runtime#16. No version bump, no `release-x.md`, and the ordinary and
+reasoning manifests are unchanged.
+
+- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `65ba15d` (PR #16 head).
+  Both are rebuilt from `git archive` with `setuptools==80.9.0`, no isolation
+  and `SOURCE_DATE_EPOCH` set to the commit time. Two local builds produced
+  identical bytes. Neither commit has a `Publish SDK` run; the draft PR asks the
+  maintainer to dispatch one so action-built wheels can replace the local ones.
+- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow:
+  Harness 0.9.7 lacks `ruleViolation` in `_FAILURES` (it raises after provider
+  spend), and its conversation path drops `required_guards`, composed rules and
+  guards.
+- Review: an adversarial pass found 9 defects, each pinned by a test that
+  failed first; all are fixed. The worst was a policy bypass: `"days": 28.0`
+  skipped the loan-period guard. Coverage now takes its verdict from real
+  admission.
+- Re-pin 1: Runtime `4082e72` to `65ba15d` (review changes). No blueprint test
+  broke. One new variant pins the cross-file rule change: different settings at
+  one stage are now refused. Generic guard sources changed without a version
+  bump, so the rules fingerprint did not move; reported for #16's thread.
+- PR #45 review: 7 inline comments and 2 general points, all addressed
+  test-first. The floor now covers the custom guard; the id rule's wording
+  matches the guard; the companion moved to `companions/` (never distributed as
+  an agent); `fix` where the guard cannot repair is refused by the host; the
+  missed fee formats are strict expected failures; huge periods are repaired;
+  the blueprint checks the SDKs on import.
+- PR #45 re-review: the floor needs a guard bound only once, so prose could drop
+  the loan check's `before_tool` tag (or move it to `after_tool`) and a 300-day
+  loan was placed before the turn failed. The host now declares
+  `REQUIRED_STAGES` and `compose` refuses a bound guard missing one (coverage:
+  `hostPolicy`). `place_loan` also refuses over-policy periods itself. Smaller
+  points fixed: trailing `€` is read by Runtime (docs corrected), duplicate
+  README header, frontmatter behind a BOM or blank lines. The lane has 123
+  tests.
+- Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
+  CI (`rule-admission.yml`) rebuilds the candidates byte-identically on Linux
+  AMD64 and ARM64. It is not a required check until the re-pin to releases.
+- Next: after Core releases `parse_rules` and #16 merges and releases, follow
+  the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
+
 ## Lab 0.9.5 merge and release authorized — 2026-11-06
 
 The maintainer explicitly requested merging, pushing and releasing the tested SDK
