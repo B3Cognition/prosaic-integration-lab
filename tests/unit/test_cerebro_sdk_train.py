@@ -49,7 +49,7 @@ def test_old_and_new_profiles_resolve_to_distinct_verified_manifests():
     old = qualified_sdk({'b3-prosaic': '0.5.0', 'b3-prosaic-runtime': '0.9.14', 'b3-prosaic-harness': '0.9.10'})
     assert old['manifestDigest'] == '8801f698db7bee4680dc9c934dce4010138680d6a0f7e380f53c0b0ac826ecd7'
     assert old == json.loads((ROOT / 'lab_runner/quality/data/sdk-provenance-pre-cerebro.json').read_bytes())
-    active = ROOT / 'dependencies/releases.json'
+    active = ROOT / 'dependencies/releases-pre-workflow-enforcement-2026-11-07.json'
     assert new['manifestDigest'] == hashlib.sha256(active.read_bytes()).hexdigest() != old['manifestDigest']
     expected = {item['distribution']: item for item in new['artifacts']}
     assert expected['b3-prosaic-runtime']['sha256'] == 'd2c569a1bfe233497518519f79f673023f8238ab25e053006b1e781d726db1af'

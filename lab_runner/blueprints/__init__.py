@@ -4,6 +4,7 @@ import shutil
 
 ROOT = Path(__file__).parent
 BLUEPRINTS = {
+    'workflow-enforcement': ROOT / 'workflow_enforcement',
     'request-headers': ROOT / 'request_headers',
     'revision-review': ROOT / 'revision_review',
     'conversation-caps': ROOT / 'conversation_caps',

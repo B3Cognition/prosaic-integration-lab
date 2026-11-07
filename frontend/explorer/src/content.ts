@@ -68,7 +68,7 @@ const runtime = node(
 const harness = node(
   "harness",
   "Durable workflow",
-  "Harness 0.9.11",
+  "Harness 0.9.12",
   "Harness keeps workflow state, pauses and exact human decisions across workers.",
   "Admitted workflow + trusted owner",
   "Paused or completed workflow",

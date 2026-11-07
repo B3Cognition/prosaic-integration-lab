@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prosaic-integration-lab"
-version = "0.9.8"
+version = "0.9.9"
 description = "Synthetic acceptance consumer for installed Prosaic releases"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx", "psycopg[binary]>=3.2,<4", "psycopg-pool>=3.2,<4", "PyYAML", "jsonschema", "pyuca", "PyJWT[crypto]>=2.15,<3", "packaging"]
@@ -24,6 +24,7 @@ include = ["prosaic_integration_lab*", "lab_runner*"]
 "lab_runner.blueprints.request_headers" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.conversation_caps" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.revision_review" = ["README.md", "LICENSE", "NOTICE", "*.json", "*.yml", "schemas/*.json", ".prosaic/subagents/*.md"]
+"lab_runner.blueprints.workflow_enforcement" = ["README.md", "LICENSE", "NOTICE", "*.json", "*.yml", "schemas/*.json", ".prosaic/subagents/*.md"]
 "lab_runner.quality" = ["data/*.json", "data/*.md"]
 "lab_runner.memory" = ["data/*.json"]
 "lab_runner.explore" = ["web/*", "web/assets/*", "web/font-licenses/*"]
