@@ -1,8 +1,10 @@
 """Explicitly opt-in example; configure a copied blueprint before real model calls."""
 import argparse
 import json
+import os
 from pathlib import Path
 import runpy
+import sys
 
 from prosaic_harness import Harness, Workflow
 
@@ -18,7 +20,8 @@ def main():
     checks = runpy.run_path(str(Path(__file__).with_name('checks.py')))
     request = json.loads(args.request.read_text())
     checks['_index'](request, 'insights', 'id')  # Owned host input validation before reserving a run.
-    harness = Harness(Workflow.load(Path(__file__).with_name('workflow.yml')),
+    executable = Path(sys.executable).with_name('prosaic.exe' if os.name == 'nt' else 'prosaic')
+    harness = Harness(Workflow.load(Path(__file__).with_name('workflow.yml'), executable=str(executable)),
                       args.run_dir, validators=checks['validators']())
     print(json.dumps(harness.run(request), indent=2))
 

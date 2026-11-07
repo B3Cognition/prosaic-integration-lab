@@ -39,6 +39,10 @@ operator JSON can contain private inputs, outputs and state: never commit or
 expose them as an application API. Synthetic installed acceptance uses no model
 accounts and does not certify a live provider.
 
+Invoke the Python environment containing the released SDKs. The runner selects
+that environment's Core CLI explicitly, so it also works without activating the
+environment or putting `prosaic` on ambient `PATH`.
+
 Provenance: the workflow and checks come from the Apache-2.0
 [Harness 0.9.11 source example](https://github.com/B3Cognition/prosaic-harness/tree/v0.9.11/examples/revision-review),
 source `294e935f70e2cfcce2c4ca80dbed5d8aa3977b83`. The Lab adapts only the runner

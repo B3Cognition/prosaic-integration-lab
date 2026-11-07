@@ -72,6 +72,16 @@ Lab design and [release plan](../superpowers/plans/2026-11-07-latest-sdk-bluepri
 - Complete corrected source suite: 2,122 passed, zero failures or skips, in
   575.78 seconds; one existing Starlette/httpx deprecation warning. The two
   SDK-only subprocess assertions passed unchanged in this run.
+- Initial hosted rule run `42398553681` passed all 141 rules in each cell,
+  then exposed one copied-runner defect in each feature lane: `Workflow.load`
+  tried ambient `prosaic` instead of the explicitly invoked Python environment's
+  CLI. No PG continuation pass is claimed for that failed run. A strengthened
+  local test with no ambient executables reproduced the same failure. Selecting
+  the sibling Core CLI fixed it; all 29 source feature cases then passed. This
+  is a Lab-owned host example fix; SDK engines and assertions remain intact.
+  All 29 isolated installed-wheel feature cases and the complete fresh wheel/
+  rebuilt-source distribution gate passed after the fix, including the new
+  no-ambient-PATH condition, payload/ownership audits and cleanup.
 
 ## Required remaining evidence
 

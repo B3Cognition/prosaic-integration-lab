@@ -229,12 +229,14 @@ def test_replaced_first_review_makes_the_earlier_revision_stale(tmp_path):
         assert 'revised_review' not in state['outputs'] and len(provider.requests) == 3
 
 
-def test_revision_runner_works_from_an_isolated_copied_directory(tmp_path):
+def test_revision_runner_works_from_an_isolated_copied_directory(tmp_path, monkeypatch):
     import subprocess
     project = copied(tmp_path, 'revision-review')
     with scripted_provider() as provider:
         workflow(project, provider);first_two(provider);provider.queue_text('{"findings": []}')
         request = tmp_path / 'request.json';request.write_text(json.dumps(ORIGINAL))
+        # An explicit Python invocation must use its installed Core CLI, not ambient PATH.
+        monkeypatch.setenv('PATH', str(tmp_path / 'no-ambient-executables'))
         args = [sys.executable, '-I', str(project / 'run.py'), '--run-dir', str(tmp_path / 'run'), '--request', str(request)]
         refused = subprocess.run(args, cwd=tmp_path, capture_output=True, text=True, timeout=30)
         assert refused.returncode == 2 and provider.requests == [], refused.stderr
