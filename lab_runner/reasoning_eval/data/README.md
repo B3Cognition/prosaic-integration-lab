@@ -1,5 +1,7 @@
 # Reasoning-effort blueprints
 
+Current published release: **0.9.7**. See [release notes and compatible SDK versions](../../../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+
 Lab 0.9.4 keeps the compact shared Qwen agents and the separate Gemma medium
 variant described here. The live comparisons below retain their original
 0.9.3 runner/private-candidate identity; package qualification is separate.
@@ -9,8 +11,8 @@ an explicit Gemma medium variant,
 an API configuration, a native configuration and an API-backed Harness workflow.
 Models and credentials belong in operator configuration, never agent Markdown.
 
-The pinned SDK family uses Runtime 0.9.13 and Core 0.5.0 to inspect and run
-the source. Harness 0.9.8 can admit the workflow. Prose runs directly
+The Lab 0.9.7 pinned SDK family uses Runtime 0.9.14 and Core 0.5.0 to inspect
+and run the source. Harness 0.9.10 admits the workflow. Prose runs directly
 through Runtime; these examples do not copy files into Claude/Codex directories.
 
 | Profile | Efforts supported by the exact example model |

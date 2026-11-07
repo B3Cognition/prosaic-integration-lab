@@ -1,5 +1,7 @@
 # Changelog
 
+See [published release notes and compatibility](docs/releases.md), including backfilled historical release notes. Documentation refreshed on 2026-11-07; package versions and release archives are unchanged.
+
 ## 0.9.6 — 2026-11-06
 
 - Add a released-SDK rule-admission lane and a copyable catalogue-desk

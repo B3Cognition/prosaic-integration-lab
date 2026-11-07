@@ -1,5 +1,7 @@
 # Prosaic integration lab
 
+Current published release: **0.9.7**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+
 Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
@@ -8,6 +10,14 @@ Lab **0.9.7** pins **Prosaic 0.5.0, Runtime 0.9.14 and Harness 0.9.10** in both
 active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
 See [release scope and qualification](docs/release-0.9.7.md) and
 [Harness adoption verification](docs/verification/harness0910-sdk-release-2026-11-06.md).
+
+Newer SDK releases are available separately: Runtime **0.9.16** adds per-call
+headers and includes the 0.9.15 fee-guard fixes; Harness **0.9.11** supplies the
+versioned cross-step review blueprint V1. They are not yet this Lab’s qualified
+train. See [the compatibility matrix and release history](docs/releases.md);
+keep the active manifests, provenance and freezes intact until a separately
+qualified adoption. The three historical fee-format xfails describe Runtime
+0.9.14, not a remaining defect in Runtime 0.9.16.
 
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
