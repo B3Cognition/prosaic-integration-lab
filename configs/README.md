@@ -5,8 +5,9 @@ Current release: **0.9.8**. See [release notes and compatible SDK versions](../d
 For reasoning tiers and binary thinking controls, use the separate
 [reasoning-effort lane](../docs/reasoning-effort.md) and its packaged
 [API/native/workflow blueprints](../lab_runner/reasoning_eval/data/README.md).
-They require Runtime 0.9.12 or later; Lab 0.9.7 pins Runtime 0.9.16 in its dedicated environment; this directory's ordinary
-Lab runtime configs and release manifest retain their existing version pins.
+They require Runtime 0.9.12 or later; Lab 0.9.8 pins Runtime 0.9.16 in both
+the ordinary and dedicated reasoning manifests. Example configurations remain
+inert until the host explicitly opts in to provider calls.
 
 For released Runtime 0.9.8 unified pools, start with the
 [guided model setup](../docs/quickstart.md#4-connect-real-models-explicit-opt-in).

@@ -60,11 +60,22 @@ Lab design and [release plan](../superpowers/plans/2026-11-07-latest-sdk-bluepri
 - Frontend: 16 tests passed and the committed offline asset build succeeded.
   Local Docker preflight was unavailable before engine mutation; no local
   image, real PostgreSQL or live-provider pass is claimed.
+- Final rebuilt-wheel acceptance passed all 141 rule cases with zero xfails or
+  skips, and all 29 copied feature cases. Installed native/unified and reasoning
+  acceptance passed 46 cases. Pip check passed.
+- Fresh wheel and rebuilt-source distribution qualification passed public-index
+  verification, exact payload/ownership audits, isolated imports, copied feature
+  execution, native/unified controls, sandbox controls and temporary cleanup.
+  Its local receipt explicitly records `stack_executed=false`.
+- Fresh whole-branch review found no implementation defects. Its one README
+  version mismatch was corrected with a watched consistency failure/pass.
+- Complete corrected source suite: 2,122 passed, zero failures or skips, in
+  575.78 seconds; one existing Starlette/httpx deprecation warning. The two
+  SDK-only subprocess assertions passed unchanged in this run.
 
 ## Required remaining evidence
 
-Full final source, installed wheel/rebuilt-source and both-wire suites; owned
-consumer image and real PostgreSQL matrix; final branch review and exact-head
-ten-job CI; original qualified archive hashes and equal merged trees; publication
-and actual public-download/fresh-consumer proof remain pending at this checkpoint.
+Hosted consumer image and real PostgreSQL matrix; exact-head ten-job CI;
+original qualified archive hashes and equal merged trees; publication and actual
+public-download/fresh-consumer proof remain pending at this checkpoint.
 No local Docker or live-provider pass is claimed. No live calls are authorized.
