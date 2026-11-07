@@ -11,9 +11,13 @@ Value-guard v2 requires explicit readmission from the old train. Header options
 add no persistent identity fields. Session migration and workflow enforcement
 tags remain separate work. Existing tags and release archives stay immutable.
 
-## Published history
+## Publication and previous releases
 
-Every published version is linked below. Backfilled notes explain changes using that version’s source, without attributing newer features or modern validation results to it. Candidate tags without a published release are not listed as releases.
+The [Lab 0.9.8 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.8)
+is the authority for its publication status, original archives and attached
+qualification. A source version or tag alone is not proof of publication.
+
+Earlier published versions are linked below. Backfilled notes explain changes using that version’s source, without attributing newer features or modern validation results to it. Candidate tags without a published release are not listed as releases.
 
 | Release | Published (UTC) | Notes |
 | --- | --- | --- |
