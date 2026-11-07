@@ -1,11 +1,12 @@
 # Prosaic Observatory prototype
 
+Current published release: **0.9.7**. See [release notes and compatible SDK versions](../../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+
 An interactive visual prototype inspired by the plant-cell reference supplied
 by the maintainer. The approved scope is one detailed execution scene first,
 with Flow and Inspect views and an authenticated Integration Lab monitor.
 
-Version 0.9.0 added actual streamed output arrivals in both views. The current
-0.9.1 release makes monitoring the default, fixes local oMLX usage
+Version 0.9.0 added actual streamed output arrivals in both views. The 0.9.1 release made monitoring the default, fixes local oMLX usage
 reporting, and discovers owned runs started from Chat or the API. See the
 [monitor verification](../../docs/verification/observatory-monitor-2026-11-01.md)
 and [generation verification](../../docs/verification/observatory-generation-2026-10-31.md)

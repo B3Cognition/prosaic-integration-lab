@@ -1,5 +1,7 @@
 # Reasoning-effort blueprints
 
+Current published release: **0.9.7**. See [release notes and compatible SDK versions](../../../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+
 Lab 0.9.4 keeps the compact shared Qwen agents and the separate Gemma medium
 variant described here. The live comparisons below retain their original
 0.9.3 runner/private-candidate identity; package qualification is separate.

@@ -24,3 +24,13 @@ Publish original successful CI archives only after an expected-head merge with
 the same tree. Verify anonymous downloads and fresh wheel/rebuilt-source
 consumers; attach separate postpublication proof. Synthetic qualification does
 not establish live-provider or deployment certification. No live calls are made.
+
+## Published status and newer SDKs
+
+Lab 0.9.7 is published; completed qualification and public-consumer proof are
+linked from the verification ledger above. Runtime 0.9.16 and Harness 0.9.11
+are newer releases, not a retroactive change to this release’s qualified train.
+See [releases and compatibility](releases.md). The historical three fee-format
+xfails apply to pinned Runtime 0.9.14; Runtime 0.9.15 fixes them and requires
+explicit readmission of affected value-guard bindings. This documentation update
+changes no manifest, freeze, prompt, qualification record or release archive.

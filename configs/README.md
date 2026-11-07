@@ -1,9 +1,11 @@
 # Optional local inference
 
+Current published release: **0.9.7**. See [release notes and compatible SDK versions](../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+
 For reasoning tiers and binary thinking controls, use the separate
 [reasoning-effort lane](../docs/reasoning-effort.md) and its packaged
 [API/native/workflow blueprints](../lab_runner/reasoning_eval/data/README.md).
-They require Runtime 0.9.12 and a dedicated environment; this directory's ordinary
+They require Runtime 0.9.12 or later; Lab 0.9.7 pins Runtime 0.9.14 in its dedicated environment; this directory's ordinary
 Lab runtime configs and release manifest retain their existing version pins.
 
 For released Runtime 0.9.8 unified pools, start with the
