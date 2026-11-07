@@ -30,6 +30,6 @@ def test_prior_guarded_profile_remains_bound_to_its_original_manifest():
     archive = ROOT / 'dependencies/releases-pre-harness0910-2026-11-06.json'
     assert prior['manifestDigest'] == hashlib.sha256(archive.read_bytes()).hexdigest()
     assert prior == json.loads((ROOT / 'lab_runner/quality/data/sdk-provenance-pre-harness0910.json').read_bytes())
-    current = json.loads((ROOT / 'dependencies/releases.json').read_bytes())
+    current = json.loads((ROOT / 'dependencies/releases-pre-cerebro-2026-11-07.json').read_bytes())
     old = json.loads(archive.read_bytes())
     assert [a for a in old['artifacts'] if a['distribution'] != 'b3-prosaic-harness'] == [a for a in current['artifacts'] if a['distribution'] != 'b3-prosaic-harness']

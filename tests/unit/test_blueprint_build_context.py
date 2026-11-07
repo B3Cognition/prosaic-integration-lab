@@ -1,0 +1,35 @@
+"""The safe public image snapshot must retain usable copy-out examples."""
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+
+def test_public_container_snapshot_can_copy_and_admit_all_feature_blueprints(tmp_path):
+    root=Path(__file__).resolve().parents[2]
+    snapshot=tmp_path/'public';snapshot.mkdir()
+    for name in json.loads((root/'dependencies/public-build-inputs.json').read_text())['files']:
+        target=snapshot/name;target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(root/name,target)
+    script='''import sys,runpy
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+from lab_runner.blueprints import copy_blueprint
+import lab_runner.blueprints as blueprints
+assert Path(blueprints.__file__).resolve().is_relative_to(Path(sys.argv[1]).resolve())
+destination=Path(sys.argv[2])
+for name in ('request-headers','revision-review','conversation-caps','rule-admission'):
+    project=copy_blueprint(name,destination/name)
+    assert (project/'README.md').is_file()
+    assert (project/'.prosaic/subagents').is_dir()
+header=runpy.run_path(str(destination/'request-headers/host.py'))
+assert header['load_agent'](destination/'request-headers').type=='subagent'
+from prosaic_harness import Workflow
+Workflow.load(destination/'revision-review/workflow.yml',executable=str(Path(sys.executable).with_name('prosaic')))
+caps=runpy.run_path(str(destination/'conversation-caps/host.py'))
+assert caps['limits'](caps['build_bindings'](project=destination/'conversation-caps'))=={'ordinary':8192,'interpretation':8192}
+'''
+    result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied')],
+        cwd=tmp_path,capture_output=True,text=True,timeout=30)
+    assert result.returncode==0,result.stderr

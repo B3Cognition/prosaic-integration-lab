@@ -161,8 +161,8 @@ def test_harness0910_freeze_preserves_preceding_bytes_and_all_benchmark_inputs()
     assert hashlib.sha256(old_dev_bytes).hexdigest()=='82ad02c6d5315904eac5eabdbbbe3fea19072f2c64d67a7335bc96b2036b6b00'
     assert hashlib.sha256(old_eval_bytes).hexdigest()=='8d477767cede8c9ec9fff9096c6518832ea7f239887792f57bf03aeed886b927'
     old_dev,old_eval=decode(old_dev_bytes),decode(old_eval_bytes)
-    dev=decode(root.joinpath('development-freeze.json').read_bytes())
-    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    dev=decode(root.joinpath('development-freeze-pre-cerebro.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze-pre-cerebro.json').read_bytes())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old_dev)
     assert set(dev['implementation'])==set(old_dev['implementation'])
@@ -173,6 +173,33 @@ def test_harness0910_freeze_preserves_preceding_bytes_and_all_benchmark_inputs()
     assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
     assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={
         k:v for k,v in old_dev.items() if k not in ('implementation','qualityDependencies')}
+    frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
+    frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
+        historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))
+    with pytest.raises(ValueError,match='development freeze drift'):
+        verify(frozen,dev,evaluation)
+
+
+def test_cerebro_freeze_keeps_benchmark_inputs_and_archived_lineage():
+    from importlib.resources import files
+    from lab_runner.quality.contracts import decode
+    from lab_runner.memory.freeze import verify
+
+    root=files('lab_runner.memory').joinpath('data')
+    old=decode(root.joinpath('development-freeze-pre-cerebro.json').read_bytes())
+    old_eval=decode(root.joinpath('evaluation-freeze-pre-cerebro.json').read_bytes())
+    dev=decode(root.joinpath('development-freeze.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    assert evaluation['suiteDigest']==old_eval['suiteDigest']
+    assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old)
+    assert set(dev['implementation'])==set(old['implementation'])
+    assert {k for k in dev['implementation'] if dev['implementation'][k]!=old['implementation'][k]}=={'freeze.py'}
+    added={'data/sdk-provenance-pre-cerebro.json'}
+    assert set(dev['qualityDependencies'])==set(old['qualityDependencies'])|added
+    changed={k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old['qualityDependencies'].get(k)}
+    assert changed==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
+    assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={
+        k:v for k,v in old.items() if k not in ('implementation','qualityDependencies')}
     frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
     frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
         historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))

@@ -1,6 +1,6 @@
 # Rule-admission blueprint: catalogue desk
 
-Current published release: **0.9.7**. See [release notes and compatible SDK versions](../../../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+Current release: **0.9.8**. See [release notes and compatible SDK versions](https://github.com/B3Cognition/prosaic-integration-lab/blob/v0.9.8/docs/releases.md). Lab 0.9.8 selects Runtime 0.9.16 and Harness 0.9.11 with copyable feature blueprints.
 
 A small, copyable agent that uses the whole rule-admission mechanism: prose
 declares which rules a host may check, the host registers the guards that check
@@ -8,11 +8,15 @@ them, and a floor in operator config says which checks prose may never drop.
 The domain is an invented lending library; every record, title and fee is
 synthetic.
 
-> **Released SDK family.** Use checksum-pinned Core 0.5.0, Runtime 0.9.14
-> and Harness 0.9.10 from the Lab's active release manifest. Runtime 0.9.13 and
+> **Released SDK family.** Use checksum-pinned Core 0.5.0, Runtime 0.9.16
+> and Harness 0.9.11 from the Lab's active release manifest. Runtime 0.9.13 and
 > Harness 0.9.8 lack these guarded-conversation contracts. Historical candidate
 > commits and receipts are retained separately; no git candidate override is
 > needed for the released example.
+
+The original blueprint qualified the rule-admission implementation from
+`prosaic-runtime#16`; its candidate manifests and review evidence remain
+historical records. The current lane uses the released SDK family above.
 
 ## What is in the folder
 
@@ -284,14 +288,16 @@ CWD. Replace synthetic tools before using this in an application.
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Harness support requires the checksum-pinned Harness 0.9.10 release;
+- Harness support requires the checksum-pinned Harness 0.9.11 release;
   Harness 0.9.8 and earlier lack that support. Legacy graph `run()` remains
   outside the rule-hook contract. Upgrade all shared-session readers together.
 - `value_in_tool_output` reads a currency code or symbol before the number, in
   any case (`EUR 1.20`, `eur 1.20`, `€1.20`, `€1,20`), and a symbol after it
-  (`1.20 €`). It does not yet read a code or word after the number (`1.20 EUR`,
-  `1.20 euros`) or minor units (`120 cents`). An invented fee written that way
-  passes. The Lab tracks these as expected failures against prosaic-runtime#16.
+  (`1.20 €`). Runtime 0.9.16 also catches suffix amounts such as `1.20 EUR`,
+  `1.20 euros` and `120 cents`. All formerly missed cases require passes on both
+  wires. Upgrading from Runtime 0.9.14 requires explicit readmission of
+  `value-in-tool-output-v2` bindings; old receipts never silently acquire a
+  changed guard implementation.
 - The Runtime capability check does not establish artifact provenance. Pin the
   exact released wheels, as the Lab does, and run its install audit. Historical
   candidates reused older version strings, so version metadata alone is not proof.

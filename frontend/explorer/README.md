@@ -1,6 +1,6 @@
 # Explorer frontend verification
 
-Current published release: **0.9.7**. See [release notes and compatible SDK versions](../../docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+Current release: **0.9.8**. See [release notes and compatible SDK versions](../../docs/releases.md). Lab 0.9.8 selects Runtime 0.9.16 and Harness 0.9.11 with copyable feature blueprints.
 
 From this directory, with the repository's Python dependencies installed:
 

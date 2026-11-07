@@ -58,6 +58,7 @@ jobs:
           mkdir reports
           export PROSAIC_RULE_POSTGRES_DSN="$(.venv/bin/python -c 'import os; from psycopg.conninfo import make_conninfo; print(make_conninfo(host=os.environ["PGHOST"], port=os.environ["PGPORT"], user=os.environ["PGUSER"], dbname=os.environ["PGDATABASE"], password=os.environ["PGPASSWORD"]))')"
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_acceptance -q --junitxml=reports/rule-admission.xml
+          PROSAIC_BLUEPRINT_INSTALLED=1 .venv/bin/python -I -m pytest -o pythonpath= tests/blueprint_acceptance -q --junitxml=reports/feature-blueprints.xml
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_postgres -q --junitxml=reports/rule-postgres.xml
           .venv/bin/python -I -m lab_runner.rule_admission.blueprint.coverage --json > reports/coverage.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

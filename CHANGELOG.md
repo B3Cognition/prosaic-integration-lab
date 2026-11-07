@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.8 — 2026-11-07
+
+- Adopt public Runtime 0.9.16 and Harness 0.9.11 with exact public hashes; retain Core 0.5.0 and unchanged PostgreSQL adapters.
+- Ship copyable header, versioned cross-step review V1 and input-cap hosts. Require all three fixed fee formats on both wires in the guarded example.
+- Require a blueprint, installed acceptance and linked guide for each added capability. Wheel/source include copy-out resources and provenance notices.
+- Archive the old manifests/profile/freezes verbatim, retain closed historical families and preserve benchmark inputs. Value guard v2 needs explicit readmission from the old train; headers add no persistent identity fields.
+- See [release scope and qualification](docs/release-0.9.8.md). Synthetic controls do not certify live providers.
+
 See [published release notes and compatibility](docs/releases.md), including backfilled historical release notes. Documentation refreshed on 2026-11-07; package versions and release archives are unchanged.
 
 ## 0.9.6 — 2026-11-06

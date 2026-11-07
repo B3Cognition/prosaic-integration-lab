@@ -1,5 +1,18 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Latest SDK blueprints and Lab 0.9.8 — 2026-11-07
+
+The maintainer authorized a new Lab release adopting Runtime 0.9.16 and Harness
+0.9.11, with a copyable blueprint, installed acceptance and guide per added
+capability. Core 0.5.0/recorder 0.3.0/store 0.4.1 retain their public bytes.
+Previous active records are archived as pre-cerebro; benchmark inputs are unchanged.
+Follow the [feature map](../feature-blueprints.md) and
+[qualification ledger](cerebro-sdk-blueprints-2026-11-07.md). Full source,
+installed consumers, final native matrix, review, merge equality and original
+archive/public-consumer proof remain required before publication. No live calls
+or upstream SDK publication. Older checkpoints retain their historical scope.
+
+
 ## Released guarded SDK adoption — 2026-11-06
 
 Lab 0.9.6 combines the blueprint/guarded companion with released Core 0.5.0,

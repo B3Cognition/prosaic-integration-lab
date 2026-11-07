@@ -160,8 +160,7 @@ def test_fix_where_the_guard_cannot_repair_is_refused_before_any_request(lab, pr
     assert completed.returncode == 1 and json.loads(completed.stdout)['refusal'] == 'hostPolicy'
 
 
-# [P2] Fee formats: assert what value_in_tool_output catches; strict xfail marks what it still misses.
-RUNTIME_GAP = 'prosaic-runtime#16: value_in_tool_output misses codes, words or minor units after the number'
+# Runtime 0.9.15 fixed suffix fees; the active 0.9.16 lane requires ordinary passes.
 
 
 @pytest.mark.parametrize(
@@ -171,9 +170,9 @@ RUNTIME_GAP = 'prosaic-runtime#16: value_in_tool_output misses codes, words or m
         '€1.20',
         '€1,20',
         'eur 1.20',
-        pytest.param('1.20 EUR', marks=pytest.mark.xfail(strict=True, reason=RUNTIME_GAP)),
-        pytest.param('1.20 euros', marks=pytest.mark.xfail(strict=True, reason=RUNTIME_GAP)),
-        pytest.param('120 cents', marks=pytest.mark.xfail(strict=True, reason=RUNTIME_GAP)),
+        '1.20 EUR',
+        '1.20 euros',
+        '120 cents',
     ],
 )
 def test_an_invented_fee_is_retried_in_every_common_format(lab, provider, draft):

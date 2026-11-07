@@ -1,0 +1,31 @@
+{
+  "artifacts": [
+    {
+      "distribution": "b3-prosaic",
+      "sha256": "e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81",
+      "version": "0.5.0"
+    },
+    {
+      "distribution": "b3-prosaic-runtime",
+      "sha256": "301c14af43070baa7fa810e36190e8a973c7c5980511951acee03c82dbe594c4",
+      "version": "0.9.14"
+    },
+    {
+      "distribution": "b3-prosaic-runtime-postgres",
+      "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca",
+      "version": "0.3.0"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "sha256": "762d40f78d5aca0d7b2c893a3afa6a594a81264537bf94baa87efc58e2ff28b4",
+      "version": "0.9.10"
+    },
+    {
+      "distribution": "b3-prosaic-harness-postgres",
+      "sha256": "d33936fe82b41d5154c4527cc4aee82c190b787e27da04bbce3e1e34dd8f0beb",
+      "version": "0.4.1"
+    }
+  ],
+  "manifestDigest": "8801f698db7bee4680dc9c934dce4010138680d6a0f7e380f53c0b0ac826ecd7",
+  "version": 1
+}
