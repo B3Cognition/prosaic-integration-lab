@@ -12,8 +12,8 @@ URLs, source commits and checksums for this complete family:
 | SDK | Release | Purpose |
 | --- | --- | --- |
 | Core | 0.5.0 | `parse_rules`, `strip_tags` and composed inspection rules |
-| Runtime | 0.9.14 | Guard admission/enforcement, corrected value-source boundaries and signed multiples |
-| Harness | 0.9.10 | Host policy/guard preservation and durable rule receipts |
+| Runtime | 0.9.16 | Guard admission/enforcement, corrected value-source boundaries and signed multiples |
+| Harness | 0.9.11 | Host policy/guard preservation and durable rule receipts |
 | Runtime recorder / Harness store | 0.3.0 / 0.4.1 | Published persistence adapters |
 
 Runtime 0.9.13 and Harness 0.9.8 do not provide these guarded-conversation
@@ -79,7 +79,7 @@ cp -R "$LAB_RULES_BLUEPRINT" src/yourapp/catalogue_desk
 | 7 | The tag-stripped agent sends identical request bytes with or without guards, and the same bytes as the tagged agent when no guard fires; the floor still refuses it | `test_untagged_identity.py` |
 | | Released provenance: exact versions/source/checksums, installed payload audit, refusal of a Core without `parse_rules`, and preserved historical candidate selection | `test_candidate_install.py` |
 | | Review regressions: whole-number float loan periods repaired; `after_tool` fails closed on unreadable periods; coverage equals real admission across eleven variants (malformed tag, path-setting guard, superseded and conflicting cross-file bindings, raised loan limit, `fix` at `after_tool`, weaker floor, unregistered custom or required guard, stripped agent under the floor); duplicate companions refused | `test_review_regressions.py` |
-| | PR review: the floor protects the custom guard; the id rule says what the guard enforces; the companion is never distributed as an agent; `fix` where the guard cannot repair is refused before any request; fee formats (still-missed formats are strict expected failures for documented Runtime grammar limits); enormous periods repaired; the blueprint refuses an SDK without rule admission | `test_pr_review.py` |
+| | PR review: the floor protects the custom guard; the id rule says what the guard enforces; the companion is never distributed as an agent; `fix` where the guard cannot repair is refused before any request; fee formats (all suffix/minor-unit cases require passes on the current Runtime); enormous periods repaired; the blueprint refuses an SDK without rule admission | `test_pr_review.py` |
 | | Builder cache: dangling or live symlinks refused and never written through; bytes that differ from the manifest refused; a missing build backend refused before any fetch | `test_candidate_builder.py` |
 | | Harness: the floor, host registrations, before-tool repair, composed after-tool failure, retry exhaustion, private rule receipts, reopen/replay and saved-receipt recovery on both wires | `test_harness.py` |
 | | Independent malformed-source and strict-sign regressions through Harness, plus three explicit magnitude controls | `test_value_source_regressions.py` |
@@ -115,7 +115,7 @@ rebuilds a candidate implicitly.
 - Both synthetic provider wires check that hooks are wired to real
   OpenAI-compatible and Anthropic request/response paths. It does not qualify a live
   model's compliance with retry feedback.
-- Fee formats `1.20 EUR`, `1.20 euros` and `120 cents` remain strict expected
-  failures documenting the generic Runtime value guard's grammar limits. A
-  passing synthetic suite does not qualify unsupported financial formats or a
-  live model's compliance.
+- Fee formats `1.20 EUR`, `1.20 euros` and `120 cents` require passes on both
+  wires. They use `value-in-tool-output-v2`; explicitly readmit affected bindings
+  when upgrading from the old Runtime 0.9.14 train. Synthetic controls do not
+  qualify arbitrary financial grammars or live-model compliance.

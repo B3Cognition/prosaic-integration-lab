@@ -13,12 +13,12 @@ def test_active_manifest_selects_only_the_verified_conversation_sdk_family():
             for item in data['artifacts']} == {
         ('b3-prosaic', '0.5.0', '67b3807281ed0cdfd345fff84c56b236ec82cfb1',
          'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81'),
-        ('b3-prosaic-runtime', '0.9.14', '58b6aeba941ef20702c6cd8e6584e11699a9803c',
-         '301c14af43070baa7fa810e36190e8a973c7c5980511951acee03c82dbe594c4'),
+        ('b3-prosaic-runtime', '0.9.16', 'f108405aea29ec894e0892222a00461b938a2e98',
+         'd2c569a1bfe233497518519f79f673023f8238ab25e053006b1e781d726db1af'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
-        ('b3-prosaic-harness', '0.9.10', '1f0886831e2156966e744a947a9406c1c4ac0533',
-         '762d40f78d5aca0d7b2c893a3afa6a594a81264537bf94baa87efc58e2ff28b4'),
+        ('b3-prosaic-harness', '0.9.11', '294e935f70e2cfcce2c4ca80dbed5d8aa3977b83',
+         '2d9482cae429bd04587c0d58f111906019de9f068834f04727088815c70ca62f'),
         ('b3-prosaic-harness-postgres', '0.4.1', 'a3fa45027509c2b5a75a9ed174cca51c77a42912',
          'd33936fe82b41d5154c4527cc4aee82c190b787e27da04bbce3e1e34dd8f0beb'),
     }

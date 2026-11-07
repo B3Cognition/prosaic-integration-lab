@@ -1,23 +1,18 @@
 # Prosaic integration lab
 
-Current published release: **0.9.7**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.7 qualifies Runtime 0.9.14 and Harness 0.9.10; newer SDK releases require separate Lab adoption.
+Current release: **0.9.8**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.8 selects Runtime 0.9.16 and Harness 0.9.11 with copyable feature blueprints.
 
 Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.7** pins **Prosaic 0.5.0, Runtime 0.9.14 and Harness 0.9.10** in both
-active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
-See [release scope and qualification](docs/release-0.9.7.md) and
-[Harness adoption verification](docs/verification/harness0910-sdk-release-2026-11-06.md).
-
-Newer SDK releases are available separately: Runtime **0.9.16** adds per-call
-headers and includes the 0.9.15 fee-guard fixes; Harness **0.9.11** supplies the
-versioned cross-step review blueprint V1. They are not yet this Lab’s qualified
-train. See [the compatibility matrix and release history](docs/releases.md);
-keep the active manifests, provenance and freezes intact until a separately
-qualified adoption. The three historical fee-format xfails describe Runtime
-0.9.14, not a remaining defect in Runtime 0.9.16.
+Lab **0.9.8** adopts **Core 0.5.0, Runtime 0.9.16 and Harness 0.9.11**,
+with the original recorder 0.3.0/store 0.4.1 public bytes. Every capability added
+by this adoption has a [copyable feature blueprint](docs/feature-blueprints.md)
+and installed acceptance: per-call headers, versioned cross-step review V1,
+value-guard v2 fees, and effective conversation input caps.
+See [release scope](docs/release-0.9.8.md) and
+[qualification](docs/verification/cerebro-sdk-blueprints-2026-11-07.md).
 
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
@@ -33,8 +28,9 @@ account, API key, local model or Docker.
 
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.14; fixtures need no key; bounded live calls require opt-in |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.14 and Harness 0.9.10; both synthetic provider wires, no live calls |
+| Copy headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.16; fixtures need no key; bounded live calls require opt-in |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.16 and Harness 0.9.11; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -64,16 +60,14 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.7](docs/release-0.9.7.md)** adopts Harness input-cap visibility on the
-guarded SDK family. Both active SDK manifests now select Core **0.5.0**,
-Runtime **0.9.14**, Harness **0.9.10**,
-Runtime recorder **0.3.0** and Harness store **0.4.1**. Downloads retain exact
-public URLs, SHA256 hashes and release-source commits. Former ordinary and
-reasoning manifests are preserved as dated snapshots; mixed trains still fail
-admission and all nine real-stack gates remain required. The four additional
-rule-admission cells cover both provider wires and PostgreSQL receipt recovery.
-Observatory monitoring, Explorer, guided onboarding and the first-workflow
-example remain available. Earlier release artifacts retain their original bytes.
+Lab **[0.9.8](docs/release-0.9.8.md)** supplies the current SDK train with
+a [feature-to-blueprint map](docs/feature-blueprints.md). Use
+`python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
+complete examples from an installed wheel. Both active manifests retain exact
+public URLs, SHA256 hashes and source commits. Prior manifests, provenance and
+freezes are archived unchanged; partial mixtures still refuse admission.
+The full ordinary, guarded/feature and reasoning matrix remains mandatory.
+Historical release artifacts and live evidence keep their original bytes.
 
 After the [quickstart installation](docs/quickstart.md#setup-once), open the
 visual guide with `python -m lab_runner.explore`. The default launches documentation

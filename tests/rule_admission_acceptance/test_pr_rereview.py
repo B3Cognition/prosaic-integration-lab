@@ -101,16 +101,21 @@ def test_an_invented_fee_with_a_trailing_symbol_is_retried(lab, provider):
     assert turn.rules_violated == (lab.ids.values,) and len(provider.raw_requests) == 3
 
 
-def test_documented_fee_gap_names_only_what_runtime_misses():
+def test_documented_fee_formats_are_required_passes_after_value_guard_v2():
+    import ast
     from pathlib import Path
 
     from lab_runner.rule_admission import BLUEPRINT
 
     review = (Path(__file__).parent / 'test_pr_review.py').read_text()
-    gap = next(line for line in review.splitlines() if line.startswith('RUNTIME_GAP'))
-    assert 'only currency markers written before' not in gap and 'codes, words or minor units' in gap
+    fee_case = next(node for node in ast.parse(review).body if isinstance(node, ast.FunctionDef)
+        and node.name == 'test_an_invented_fee_is_retried_in_every_common_format')
+    assert all('xfail' not in ast.unparse(mark) for mark in fee_case.decorator_list)
     readme = ' '.join((BLUEPRINT / 'README.md').read_text().split())
     assert '`1.20 €`' in readme and 'does not yet read a marker after the number' not in readme
+    for fee in ('1.20 EUR', '1.20 euros', '120 cents'):
+        assert fee in ast.unparse(fee_case) and '`' + fee + '`' in readme
+    assert 'value-in-tool-output-v2' in readme and 'require passes on both wires' in readme
 
 
 # Smaller point: frontmatter after a BOM or leading blank lines is still frontmatter.

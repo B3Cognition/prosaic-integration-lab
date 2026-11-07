@@ -10,7 +10,7 @@ AGENT_NAMES=('reviewer','critic','author','review-corrector')
 def resource(name):
     if name not in {'evidence-review-v1.json','answer.schema.json','review.schema.json',
                     'reviewer.md','critic.md','author.md','review-corrector.md','sdk-provenance.json','sdk-provenance-public.json',
-                    'sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json'}:
+                    'sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json','sdk-provenance-pre-cerebro.json'}:
         raise ValueError('unknown benchmark resource')
     return files(__package__).joinpath('data', name).read_text(encoding='utf-8')
 

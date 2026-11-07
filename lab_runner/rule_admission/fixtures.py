@@ -15,7 +15,7 @@ class ScriptedProvider:
         if provider not in {'openai-compatible', 'anthropic'}:
             raise ValueError('unsupported synthetic provider wire')
         self.provider = provider
-        self.raw_requests, self._replies, self._lock = [], [], Lock()
+        self.raw_requests, self.captured_headers, self._replies, self._lock = [], [], [], Lock()
         self.url = None
 
     @property
@@ -74,6 +74,7 @@ def scripted_provider(provider='openai-compatible'):
             pass
 
         def do_POST(self):
+            provider.captured_headers.append({key.lower(): value for key, value in self.headers.items()})
             status, document = provider._reply(self.rfile.read(int(self.headers['Content-Length'])))
             body = json.dumps(document).encode()
             self.send_response(status)

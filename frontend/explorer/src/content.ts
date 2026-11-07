@@ -57,7 +57,7 @@ const core = node(
 const runtime = node(
   "runtime",
   "Permitted execution",
-  "Runtime 0.9.14",
+  "Runtime 0.9.16",
   "Runtime chooses an eligible provider under the explicit host policy.",
   "Inspected agent + policy + workspace",
   "Execution result and provider observations",
@@ -68,7 +68,7 @@ const runtime = node(
 const harness = node(
   "harness",
   "Durable workflow",
-  "Harness 0.9.10",
+  "Harness 0.9.11",
   "Harness keeps workflow state, pauses and exact human decisions across workers.",
   "Admitted workflow + trusted owner",
   "Paused or completed workflow",
