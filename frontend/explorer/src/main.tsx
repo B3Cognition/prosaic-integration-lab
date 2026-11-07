@@ -374,7 +374,7 @@ function App() {
           <p>
             Core 0.5.0 · Runtime 0.9.16
             <br />
-            Harness 0.9.11
+            Harness 0.9.12
           </p>
           <a
             href="https://github.com/B3Cognition/prosaic-integration-lab/blob/main/docs/quickstart.md"

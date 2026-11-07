@@ -19,7 +19,7 @@ from lab_runner.blueprints import copy_blueprint
 import lab_runner.blueprints as blueprints
 assert Path(blueprints.__file__).resolve().is_relative_to(Path(sys.argv[1]).resolve())
 destination=Path(sys.argv[2])
-for name in ('request-headers','revision-review','conversation-caps','rule-admission'):
+for name in ('request-headers','revision-review','conversation-caps','rule-admission','workflow-enforcement'):
     project=copy_blueprint(name,destination/name)
     assert (project/'README.md').is_file()
     assert (project/'.prosaic/subagents').is_dir()
@@ -27,6 +27,9 @@ header=runpy.run_path(str(destination/'request-headers/host.py'))
 assert header['load_agent'](destination/'request-headers').type=='subagent'
 from prosaic_harness import Workflow
 Workflow.load(destination/'revision-review/workflow.yml',executable=str(Path(sys.executable).with_name('prosaic')))
+workflow_host=runpy.run_path(str(destination/'workflow-enforcement/host.py'))
+for mode in ('yaml','native'):
+    workflow_host['workflow'](mode=mode,executable=str(Path(sys.executable).with_name('prosaic')))
 caps=runpy.run_path(str(destination/'conversation-caps/host.py'))
 assert caps['limits'](caps['build_bindings'](project=destination/'conversation-caps'))=={'ordinary':8192,'interpretation':8192}
 '''

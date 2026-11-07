@@ -1,6 +1,6 @@
 # Rule-admission blueprint: catalogue desk
 
-Current release: **0.9.8**. See [release notes and compatible SDK versions](https://github.com/B3Cognition/prosaic-integration-lab/blob/v0.9.8/docs/releases.md). Lab 0.9.8 selects Runtime 0.9.16 and Harness 0.9.11 with copyable feature blueprints.
+Current release: **0.9.9**. See [release notes and compatible SDK versions](https://github.com/B3Cognition/prosaic-integration-lab/blob/v0.9.9/docs/releases.md). Lab 0.9.9 selects Runtime 0.9.16 and Harness 0.9.12 with copyable feature blueprints.
 
 A small, copyable agent that uses the whole rule-admission mechanism: prose
 declares which rules a host may check, the host registers the guards that check
@@ -9,7 +9,7 @@ The domain is an invented lending library; every record, title and fee is
 synthetic.
 
 > **Released SDK family.** Use checksum-pinned Core 0.5.0, Runtime 0.9.16
-> and Harness 0.9.11 from the Lab's active release manifest. Runtime 0.9.13 and
+> and Harness 0.9.12 from the Lab's active release manifest. Runtime 0.9.13 and
 > Harness 0.9.8 lack these guarded-conversation contracts. Historical candidate
 > commits and receipts are retained separately; no git candidate override is
 > needed for the released example.
@@ -288,7 +288,7 @@ CWD. Replace synthetic tools before using this in an application.
 - Rule hooks run in conversation turns only (`ProsaicRuntime.turn`). `run()`,
   `NativeRuntime` and `UnifiedRuntime` refuse enforce-tagged prose instead of
   running it unenforced.
-- Harness support requires the checksum-pinned Harness 0.9.11 release;
+- Harness support requires the checksum-pinned Harness 0.9.12 release;
   Harness 0.9.8 and earlier lack that support. Legacy graph `run()` remains
   outside the rule-hook contract. Upgrade all shared-session readers together.
 - `value_in_tool_output` reads a currency code or symbol before the number, in

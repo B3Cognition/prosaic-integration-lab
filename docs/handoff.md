@@ -1,5 +1,21 @@
 # Codex handoff
 
+## Workflow enforcement V2 and Lab0.9.9 — 2026-11-07
+
+The maintainer authorized workflow enforcement tags with accepted earlier outputs,
+implementation/testing/merge/release and a new Lab blueprint/release notes.
+Harness0.9.12 PR16 merged816436b and is published/verified; retain released
+Runtime0.9.16/Core0.5.0 and both adapters. Active manifests now adopt its exact
+public wheel SHAfb07797c3e42ab2e7e8f0a727b7bd25229e9b223cf15309716f10ff9d1f1147b. Existing
+V1 resources and all historical manifests/profile/freezes stay unchanged; prior
+active records are preserved as pre-workflow-enforcement. No live calls.
+Follow the [release guide](release-0.9.9.md), [feature map](feature-blueprints.md) and [current ledger](verification/workflow-enforcement-2026-11-07.md).
+Require the complete four native ordinary cells, four rule/feature cells and
+both reasoning jobs, final review, exact merge tree, original archives, public
+wheel/rebuilt-source consumers and all post-merge checks. Older checkpoints
+below retain their historical limits.
+
+
 ## Latest SDK blueprints and Lab 0.9.8 — 2026-11-07
 
 The maintainer authorized a new Lab release adopting Runtime 0.9.16 and Harness

@@ -17,8 +17,8 @@
     },
     {
       "distribution": "b3-prosaic-harness",
-      "sha256": "2d9482cae429bd04587c0d58f111906019de9f068834f04727088815c70ca62f",
-      "version": "0.9.11"
+      "sha256": "fb07797c3e42ab2e7e8f0a727b7bd25229e9b223cf15309716f10ff9d1f1147b",
+      "version": "0.9.12"
     },
     {
       "distribution": "b3-prosaic-harness-postgres",
@@ -26,6 +26,6 @@
       "version": "0.4.1"
     }
   ],
-  "manifestDigest": "1acd2563d84c8dce6fe4a6e610ea82ee52760c60d58c1c6b7b296d8f8534dc5c",
+  "manifestDigest": "3f93bf5a6d9b570d14ba7280710e0844b81c64a8ba3a9f07a389decfca6236e3",
   "version": 1
 }

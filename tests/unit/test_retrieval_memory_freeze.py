@@ -188,8 +188,8 @@ def test_cerebro_freeze_keeps_benchmark_inputs_and_archived_lineage():
     root=files('lab_runner.memory').joinpath('data')
     old=decode(root.joinpath('development-freeze-pre-cerebro.json').read_bytes())
     old_eval=decode(root.joinpath('evaluation-freeze-pre-cerebro.json').read_bytes())
-    dev=decode(root.joinpath('development-freeze.json').read_bytes())
-    evaluation=decode(root.joinpath('evaluation-freeze.json').read_bytes())
+    dev=decode(root.joinpath('development-freeze-pre-workflow-enforcement.json').read_bytes())
+    evaluation=decode(root.joinpath('evaluation-freeze-pre-workflow-enforcement.json').read_bytes())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old)
     assert set(dev['implementation'])==set(old['implementation'])
@@ -203,4 +203,5 @@ def test_cerebro_freeze_keeps_benchmark_inputs_and_archived_lineage():
     frozen=decode(root.joinpath('retrieval-memory-v1.json').read_bytes())
     frozen.update(corpus=decode(root.joinpath('corpus.json').read_bytes()),
         historicalSources=decode(root.joinpath('historical-sources.json').read_bytes()))
-    verify(frozen,dev,evaluation)
+    with pytest.raises(ValueError,match='development freeze drift'):
+        verify(frozen,dev,evaluation)

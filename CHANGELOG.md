@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.9
+
+- Adopt the published Harness0.9.12 workflow-rule API with exact public artifact lineage; retain Core0.5.0/Runtime0.9.16/adapters.
+- Add a copyable workflow-enforcement V2 host, installed both-wire YAML/native acceptance and file/PG recovery while preserving Validator V1.
+- Preserve prior manifests/public profile/freezes verbatim, update only active provenance, and document identity/explicit budget limits.
+- Require all final native platform/PG, reasoning/distribution/public-consumer and post-merge proof; no live inference.
+
 ## 0.9.8 — 2026-11-07
 
 - Adopt public Runtime 0.9.16 and Harness 0.9.11 with exact public hashes; retain Core 0.5.0 and unchanged PostgreSQL adapters.
