@@ -1,5 +1,23 @@
 # Codex handoff
 
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The maintainer authorized Runtime accounting labels and a Lab blueprint, tests,
+merge/release and notes. Develop against an explicitly labeled candidate; advance
+active pins/freezes only after actual Runtime0.9.17 publication/public-byte proof.
+Core0.5.0/Harness0.9.12 and recorder0.3.0/store0.4.1 keep released bytes. Previous
+active profiles/manifests/freezes are preserved as pre-accounting-metadata; all
+five earlier blueprint resources/corpus/prompts/scoring remain unchanged.
+Trusted benchmark labels never replace actual run/tenant/payer authority. Saved
+Harness labels win on resume; same-call relabeling conflicts. Labeled contexts
+need >=0.9.17 readers; no DDL or adapter republish. No live calls.
+Follow the [guide](accounting-request-metadata.md),
+[release gates](release-0.9.10.md) and
+[ledger](verification/accounting-request-metadata-2026-11-08.md).
+Require all ten final-head hosted jobs, exact merge/tree and original qualified
+archives, public consumers and all post-merge CI before marking complete.
+
+
 ## Workflow enforcement V2 and Lab0.9.9 — 2026-11-07
 
 The maintainer authorized workflow enforcement tags with accepted earlier outputs,

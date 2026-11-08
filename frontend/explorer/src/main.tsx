@@ -372,7 +372,7 @@ function App() {
         <div className="sidebar-foot">
           <strong>Local learning workspace</strong>
           <p>
-            Core 0.5.0 · Runtime 0.9.16
+            Core 0.5.0 · Runtime 0.9.17
             <br />
             Harness 0.9.12
           </p>

@@ -1,19 +1,20 @@
 # Prosaic integration lab
 
-Current release: **0.9.9**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.9 selects Runtime 0.9.16 and Harness 0.9.12 with copyable feature blueprints.
+Current release: **0.9.10**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.10 selects Runtime 0.9.17 and Harness 0.9.12 with copyable feature blueprints.
 
 Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.9** adopts **Core 0.5.0, Runtime 0.9.16 and Harness 0.9.12**,
-with the original recorder 0.3.0/store 0.4.1 public bytes. Every capability added
-by this adoption has a [copyable feature blueprint](docs/feature-blueprints.md)
-and installed acceptance: workflow enforcement tags with earlier outputs,
-per-call headers, versioned cross-step review V1,
-value-guard v2 fees, and effective conversation input caps.
-See [release scope](docs/release-0.9.9.md) and
-[qualification](docs/verification/workflow-enforcement-2026-11-07.md).
+Lab **0.9.10** adopts **Core 0.5.0, Runtime 0.9.17 and Harness 0.9.12**,
+with the original recorder 0.3.0/store 0.4.1 public bytes. It adds a copyable
+[accounting metadata blueprint](docs/accounting-request-metadata.md): trusted run/
+variant labels reach `prepare(intent)` before dispatch and stay frozen across
+workflow resume. Existing workflow enforcement, per-call headers, versioned
+review V1, fee guards and conversation-cap blueprints are retained unchanged.
+See [all feature blueprints](docs/feature-blueprints.md),
+[release scope](docs/release-0.9.10.md) and
+[qualification](docs/verification/accounting-request-metadata-2026-11-08.md).
 
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
@@ -29,7 +30,7 @@ account, API key, local model or Docker.
 
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
-| Copy headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
+| Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
 | Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.16; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
 | Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.16 and Harness 0.9.12; both synthetic provider wires, no live calls |
