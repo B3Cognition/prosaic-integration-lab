@@ -104,9 +104,10 @@ def main():
     if not args.live:
         parser.error('--live is required to contact the configured endpoint')
     # Demonstration only. MemoryRecorder is non-durable and never a production ledger.
-    backend = MemoryRecorder()
+    config = RuntimeConfig.load(PROJECT/'runtime.yml')
+    backend = MemoryRecorder(provider_id=config.profiles[config.default_profile].provider)
     recorder = LabelingRecorder(backend, lambda labels: print('Prepared variant:', labels.get('variant')))
-    runtime = build_runtime(accounting=recorder)
+    runtime = ProsaicRuntime(config, source=PROJECT/'.prosaic', accounting=recorder)
     result = run_benchmark(runtime, load_agent(), context=trusted_context(
         tenant_id='operator-demo', billing_account_id='operator-demo', benchmark_run='demo-run', variant='baseline'))
     if result.exit_code: raise SystemExit(result.exit_code)

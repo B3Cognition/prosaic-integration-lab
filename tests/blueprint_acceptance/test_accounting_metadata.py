@@ -219,3 +219,18 @@ def test_copyable_cli_refuses_contact_without_explicit_live_opt_in(tmp_path):
     result = subprocess.run([sys.executable, str(project/'host.py')], cwd=project,
                             capture_output=True, text=True, timeout=15)
     assert result.returncode == 2 and '--live' in result.stderr
+
+
+def test_explicit_cli_uses_configured_provider_accounting_identity(tmp_path, wire):
+    import yaml
+    project, _ = copied(tmp_path)
+    with scripted_provider(wire) as provider:
+        config = yaml.safe_load((project/'runtime.yml').read_text())
+        config['profiles']['local'].update(base_url=provider.url, provider=wire)
+        (project/'runtime.yml').write_text(yaml.safe_dump(config))
+        provider.queue_text('done')
+        # --live is the example's explicit contact switch; endpoint is owned synthetic loopback.
+        result = subprocess.run([sys.executable, str(project/'host.py'), '--live'], cwd=project,
+                                capture_output=True, text=True, timeout=15)
+        assert result.returncode == 0, result.stderr
+        assert 'Prepared variant: baseline' in result.stdout and len(provider.requests) == 1
