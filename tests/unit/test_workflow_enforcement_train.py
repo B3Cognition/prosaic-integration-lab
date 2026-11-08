@@ -20,7 +20,7 @@ def test_complete_workflow_enforcement_train_keeps_all_required_lanes(gate):
     assert gate(manifest())
 
 
-@pytest.mark.parametrize('changes',[{'b3-prosaic-runtime':'0.9.15'},{'b3-prosaic-runtime':'0.9.18'},
+@pytest.mark.parametrize('changes',[{'b3-prosaic-runtime':'0.9.15'},{'b3-prosaic-runtime':'0.9.19'},
     {'b3-prosaic':'0.5.1'},{'b3-prosaic-harness-postgres':'0.4.0'},{'b3-prosaic-harness':'0.9.13'}])
 def test_partial_unqualified_workflow_train_refuses(changes):
     with pytest.raises(ValueError,match='unsupported or incoherent'):supports_conversation(manifest(changes))

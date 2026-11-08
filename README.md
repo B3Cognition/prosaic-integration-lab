@@ -1,20 +1,25 @@
 # Prosaic integration lab
 
-Current release: **0.9.10**. See [release notes and compatible SDK versions](docs/releases.md). Lab 0.9.10 selects Runtime 0.9.17 and Harness 0.9.12 with copyable feature blueprints.
+Current release: **0.9.11**. See [release notes and compatible SDK versions](docs/releases.md). Lab0.9.11 selects Runtime0.9.18 and Harness0.9.12 with copyable feature blueprints.
 
 Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.
 
-Lab **0.9.10** adopts **Core 0.5.0, Runtime 0.9.17 and Harness 0.9.12**,
-with the original recorder 0.3.0/store 0.4.1 public bytes. It adds a copyable
-[accounting metadata blueprint](docs/accounting-request-metadata.md): trusted run/
-variant labels reach `prepare(intent)` before dispatch and stay frozen across
-workflow resume. Existing workflow enforcement, per-call headers, versioned
-review V1, fee guards and conversation-cap blueprints are retained unchanged.
+Lab **0.9.11** adopts **Core0.5.0, Runtime0.9.18 and Harness0.9.12**,
+with the original recorder0.3.0/store0.4.1 public bytes. The copyable
+[sent-effort blueprint](docs/sent-reasoning-effort.md) reports exact encoded HTTP
+controls or launched native effort argv, separately from artifact requests and
+profile defaults. Retries and fallback keep bounded evidence; sent never proves
+provider compliance. Earlier blueprints and input identities stay unchanged.
 See [all feature blueprints](docs/feature-blueprints.md),
-[release scope](docs/release-0.9.10.md) and
-[qualification](docs/verification/accounting-request-metadata-2026-11-08.md).
+[release scope](docs/release-0.9.11.md) and
+[qualification](docs/verification/sent-effort-2026-11-08.md).
+
+Lab **0.9.10** added [accounting metadata](docs/accounting-request-metadata.md):
+trusted run/variant labels reach `prepare(intent)` before dispatch and remain
+frozen on resume. Existing workflow enforcement, per-call headers, versioned
+review V1, fee guards and conversation-cap blueprints remain available.
 
 Lab **0.9.4** keeps the compact Qwen/shared
 [reasoning-effort blueprints](docs/reasoning-effort.md) and adds a separate,
@@ -31,9 +36,9 @@ account, API key, local model or Docker.
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.17; fixtures need no key; bounded live calls require opt-in |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.18; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.17 and Harness 0.9.12 train; both synthetic provider wires, no live calls |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.18 and Harness 0.9.12 train; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -63,7 +68,7 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.10](docs/release-0.9.10.md)** supplies the current SDK train with
+Lab **[0.9.11](docs/release-0.9.11.md)** supplies the current SDK train with
 a [feature-to-blueprint map](docs/feature-blueprints.md). Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact

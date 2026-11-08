@@ -32,9 +32,9 @@ def test_wheel_identity_requires_current_source_version_instead_of_historical_re
     with pytest.raises(ValueError):module.wheel_identity(wheel('0.0.0'))
 
 
-@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified', 'core050', 'cerebro', 'workflow', 'metadata'])
+@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified', 'core050', 'cerebro', 'workflow', 'metadata', 'effort'])
 def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, train):
-    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN, CORE050_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN
+    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN, CORE050_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN
     module = implementation()
     calls = []
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
@@ -53,7 +53,7 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
     monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
     versions = {'context': CONTEXT_TRAIN, 'blueprints': CONSUMER_BLUEPRINT_TRAIN,
-                'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN, 'cerebro': CEREBRO_V1_TRAIN, 'workflow': WORKFLOW_RULE_TRAIN, 'metadata': ACCOUNTING_METADATA_TRAIN}[train]
+                'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN, 'cerebro': CEREBRO_V1_TRAIN, 'workflow': WORKFLOW_RULE_TRAIN, 'metadata': ACCOUNTING_METADATA_TRAIN, 'effort': SENT_EFFORT_TRAIN}[train]
     manifest.write_text(json.dumps({'artifacts': [{'distribution': key, 'version': value}
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
@@ -67,14 +67,16 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
         if train != 'context':
             assert '-I' in selected[0] and '--source-root' in selected[0]
     installed = [call for call in calls if 'lab_runner.native_eval' in call]
-    assert len(installed) == (4 if train in {'unified', 'core050', 'cerebro', 'workflow', 'metadata'} else 0)
+    assert len(installed) == (4 if train in {'unified', 'core050', 'cerebro', 'workflow', 'metadata', 'effort'} else 0)
     feature_calls = [call for call in calls if any(str(arg).endswith('tests/blueprint_acceptance/test_blueprints.py') for arg in call)]
-    assert len(feature_calls) == int(train in {'cerebro', 'workflow', 'metadata'})
-    if train == 'metadata':
+    assert len(feature_calls) == int(train in {'cerebro', 'workflow', 'metadata', 'effort'})
+    if train in {'metadata','effort'}:
         assert any(str(arg).endswith('tests/blueprint_acceptance/test_accounting_metadata.py') for arg in feature_calls[0])
         assert any(str(arg).endswith('tests/blueprint_acceptance/test_workflow_enforcement.py') for arg in feature_calls[0])
+    if train == 'effort':
+        assert any(str(arg).endswith('tests/blueprint_acceptance/test_sent_effort.py') for arg in feature_calls[0])
     workflow_calls = [call for call in calls if any(str(arg).endswith('test_workflow_enforcement.py') for arg in call)]
-    assert len(workflow_calls) == int(train in {'workflow', 'metadata'})
+    assert len(workflow_calls) == int(train in {'workflow', 'metadata', 'effort'})
     if installed:
         assert [call[call.index('lab_runner.native_eval') + 1] for call in installed] == [
             'test', 'unified-test', 'unified-cli-test', 'unified-fallback-test']

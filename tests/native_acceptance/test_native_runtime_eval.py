@@ -36,7 +36,7 @@ def test_fixture_benchmark_compares_same_tasks_per_selector():
 def test_fixture_benchmark_rejects_missing_native_sdk_instead_of_skipping():
     from lab_runner.native_eval.provenance import require_native
     sdk = require_native()
-    assert sdk.NativeRuntime.capabilities == frozenset({'native_profiles_v1', 'profile_pools_v1'})
+    assert {'native_profiles_v1', 'profile_pools_v1'} <= sdk.NativeRuntime.capabilities
     assert 'site-packages' in Path(sdk.__file__).parts
 
 

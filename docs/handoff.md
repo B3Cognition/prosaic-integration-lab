@@ -1,5 +1,19 @@
 # Codex handoff
 
+## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
+
+Runtime0.9.18 is published and publicly verified from source
+`d440d8664e0f307e01c62706976e485993b2e0a2`. The active manifests pin its exact
+public wheel hash with Core0.5.0/Harness0.9.12 and unchanged recorder0.3.0/store0.4.1.
+Fresh public installation passed132 sent-effort/metadata/durable cases, six smoke
+gates and pipcheck; no live inference. Lab0.9.11 final qualification is in progress.
+Previous active profiles/manifests/freezes are preserved as pre-sent-effort.
+Sent controls describe attempts, never provider receipt/compliance or retry consent.
+Old receipt absence stays unavailable; input identities and accounting/PG schemas
+stay unchanged. No live inference. Follow the guide, release0.9.11 gates and
+verification ledger; all ten final-head jobs, original CI archives/equal merge,
+public consumers and independent post-merge CI are mandatory before completion.
+
 ## Accounting request metadata and Lab0.9.10 — 2026-11-08
 
 The maintainer authorized Runtime accounting labels and a Lab blueprint, tests,
