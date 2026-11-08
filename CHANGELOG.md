@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.10
+
+- Adopt exact published Runtime0.9.17 with trusted accounting run/variant labels and public capability; keep Core0.5.0/Harness0.9.12/adapter bytes.
+- Add copyable accounting-metadata host, installed both-wire and file/PG recovery/failure/privacy tests with restricted runtime roles and exact-owned cleanup.
+- Preserve prior profiles/manifests/freezes and all five earlier blueprint resources; advance only current provenance, with explicit accounting hash and reader compatibility notes.
+- Require original qualified CI archives, all native/PG/reasoning/distribution/public-consumer and post-merge gates. No live inference.
+
 ## 0.9.9
 
 - Adopt the published Harness0.9.12 workflow-rule API with exact public artifact lineage; retain Core0.5.0/Runtime0.9.16/adapters.

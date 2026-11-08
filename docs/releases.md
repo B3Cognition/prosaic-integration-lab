@@ -1,9 +1,9 @@
 # Releases and compatibility
 
-Versions checked on 2026-11-07. Lab 0.9.9 adopts the complete public Core
-0.5.0 / Runtime 0.9.16 / Harness 0.9.12 train with original recorder 0.3.0/store
+Compatibility checkpoint: 2026-11-08. Lab0.9.10 adopts the complete public Core
+0.5.0 / Runtime0.9.17 / Harness0.9.12 train with original recorder0.3.0/store
 0.4.1 bytes. [Feature blueprints](feature-blueprints.md) cover every added
-capability; [release qualification](release-0.9.9.md) must finish before
+capability; [release qualification](release-0.9.10.md) must finish before
 publication. Lab 0.9.7 and its archived profiles retain Runtime 0.9.14 and
 Harness 0.9.10; older qualification is never retroactively applied to the upgrade.
 
@@ -12,9 +12,16 @@ add no persistent identity fields. Workflow tags now have a separate V2 blueprin
 and bounded receipt proof; existing Validator V1 remains available. Session
 migration remains separate work. Existing tags and release archives stay immutable.
 
+Runtime0.9.17 adds optional frozen accounting request labels, with a separate
+[copyable host](accounting-request-metadata.md). Empty labels preserve exact old
+accounting bytes/hashes; present labels intentionally change accounting hashes
+and private saved contexts/receipts. No artifact/rule or workflow identity fields
+move. Saved labels win on resume and new labeled contexts require >=0.9.17 readers.
+Published recorder0.3.0 keeps its schema/bytes; no old records are rewritten.
+
 ## Publication and previous releases
 
-The [Lab 0.9.9 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.9)
+The [Lab0.9.10 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.10)
 is the authority for its publication status, original archives and attached
 qualification. A source version or tag alone is not proof of publication.
 
@@ -22,6 +29,7 @@ Earlier published versions are linked below. Backfilled notes explain changes us
 
 | Release | Published (UTC) | Notes |
 | --- | --- | --- |
+| [v0.9.9](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.9) | 2026-11-07 | [Workflow enforcement notes](release-0.9.9.md) |
 | [v0.9.8](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.8) | 2026-11-07 | [Feature blueprint notes](release-0.9.8.md) |
 | [v0.9.7](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.7) | 2026-11-06 | Published notes |
 | [v0.9.6](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.6) | 2026-11-06 | Published notes |

@@ -4,6 +4,10 @@ Lab0.9.9 adds the `workflow-enforcement` copy-out blueprint using released
 Harness0.9.12, Runtime0.9.16 and Core0.5.0. The original recorder0.3.0/store0.4.1
 remain checksum-pinned. It uses public installed SDK APIs, not a copied engine.
 
+Lab0.9.10 retains those exact blueprint resource bytes and qualifies them with
+Runtime0.9.17. Its separate [accounting host](accounting-request-metadata.md)
+demonstrates frozen request labels; no enforcement or retry budget is broadened.
+
 ```sh
 python -m lab_runner.blueprints list
 python -m lab_runner.blueprints copy workflow-enforcement ./my-workflow-review

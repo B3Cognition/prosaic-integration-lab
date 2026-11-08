@@ -12,7 +12,7 @@ URLs, source commits and checksums for this complete family:
 | SDK | Release | Purpose |
 | --- | --- | --- |
 | Core | 0.5.0 | `parse_rules`, `strip_tags` and composed inspection rules |
-| Runtime | 0.9.16 | Guard admission/enforcement, corrected value-source boundaries and signed multiples |
+| Runtime | 0.9.17 | Guard admission/enforcement and corrected values retained; optional trusted accounting labels |
 | Harness | 0.9.11 | Host policy/guard preservation and durable rule receipts |
 | Runtime recorder / Harness store | 0.3.0 / 0.4.1 | Published persistence adapters |
 

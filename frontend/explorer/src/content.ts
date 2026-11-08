@@ -57,7 +57,7 @@ const core = node(
 const runtime = node(
   "runtime",
   "Permitted execution",
-  "Runtime 0.9.16",
+  "Runtime 0.9.17",
   "Runtime chooses an eligible provider under the explicit host policy.",
   "Inspected agent + policy + workspace",
   "Execution result and provider observations",
