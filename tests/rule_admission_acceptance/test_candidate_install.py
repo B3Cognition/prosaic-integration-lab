@@ -27,8 +27,8 @@ def test_current_manifest_pins_the_exact_released_guarded_train():
             for name, item in released.items()} == {
         ('b3-prosaic', '0.5.0', CORE_COMMIT,
          'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81'),
-        ('b3-prosaic-runtime', '0.9.16', 'f108405aea29ec894e0892222a00461b938a2e98',
-         'd2c569a1bfe233497518519f79f673023f8238ab25e053006b1e781d726db1af'),
+        ('b3-prosaic-runtime', '0.9.17', 'eb0735e7cc2e70fdcff2fccd0bc80b3ec2850f0b',
+         '6ec49b8f94bac7c025fb4231ca4b1f64bd1d07d10caa82b1c69c5b18d67f4f33'),
         ('b3-prosaic-harness', '0.9.12', '816436b53c4b62064c3016efe38a4e22a5763537',
          'fb07797c3e42ab2e7e8f0a727b7bd25229e9b223cf15309716f10ff9d1f1147b'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',

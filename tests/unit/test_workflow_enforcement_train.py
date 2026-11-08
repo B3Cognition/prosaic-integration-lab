@@ -20,7 +20,7 @@ def test_complete_workflow_enforcement_train_keeps_all_required_lanes(gate):
     assert gate(manifest())
 
 
-@pytest.mark.parametrize('changes',[{'b3-prosaic-runtime':'0.9.15'},{'b3-prosaic-runtime':'0.9.17'},
+@pytest.mark.parametrize('changes',[{'b3-prosaic-runtime':'0.9.15'},{'b3-prosaic-runtime':'0.9.18'},
     {'b3-prosaic':'0.5.1'},{'b3-prosaic-harness-postgres':'0.4.0'},{'b3-prosaic-harness':'0.9.13'}])
 def test_partial_unqualified_workflow_train_refuses(changes):
     with pytest.raises(ValueError,match='unsupported or incoherent'):supports_conversation(manifest(changes))
@@ -48,7 +48,7 @@ def test_previous_profile_resource_is_registered_and_selectable():
 def test_current_workflow_profile_pins_verified_release_and_keeps_previous_profile_distinct():
     from lab_runner.quality.sdk_provenance import qualified_sdk
     selected=qualified_sdk({name:VERSIONS[name] for name in ('b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness')})
-    active=ROOT/'dependencies/releases.json'
+    active=ROOT/'dependencies/releases-pre-accounting-metadata-2026-11-08.json'
     assert selected['manifestDigest']==hashlib.sha256(active.read_bytes()).hexdigest()
     assert selected['manifestDigest']!='1acd2563d84c8dce6fe4a6e610ea82ee52760c60d58c1c6b7b296d8f8534dc5c'
     harness=next(item for item in selected['artifacts'] if item['distribution']=='b3-prosaic-harness')
@@ -63,8 +63,8 @@ def test_workflow_freeze_keeps_benchmark_inputs_and_binds_only_new_provenance():
     root=ROOT/'lab_runner/memory/data'
     old=json.loads((root/'development-freeze-pre-workflow-enforcement.json').read_text())
     old_eval=json.loads((root/'evaluation-freeze-pre-workflow-enforcement.json').read_text())
-    dev=json.loads((root/'development-freeze.json').read_text())
-    evaluation=json.loads((root/'evaluation-freeze.json').read_text())
+    dev=json.loads((root/'development-freeze-pre-accounting-metadata.json').read_text())
+    evaluation=json.loads((root/'evaluation-freeze-pre-accounting-metadata.json').read_text())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old)
     assert set(dev['implementation'])==set(old['implementation'])
@@ -73,5 +73,6 @@ def test_workflow_freeze_keeps_benchmark_inputs_and_binds_only_new_provenance():
     assert set(dev['qualityDependencies'])==set(old['qualityDependencies'])|added
     assert {k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old['qualityDependencies'].get(k)}==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
     assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={k:v for k,v in old.items() if k not in ('implementation','qualityDependencies')}
-    frozen=load_suite();verify(frozen,dev,evaluation)
+    frozen=load_suite()
+    with pytest.raises(ValueError,match='development freeze drift'):verify(frozen,dev,evaluation)
     with pytest.raises(ValueError,match='development freeze drift'):verify(frozen,old,old_eval)
