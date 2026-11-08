@@ -1,5 +1,21 @@
 # Current delivery status
 
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The current train is Core0.5.0/Runtime0.9.17/Harness0.9.12 with the original
+recorder0.3.0/store0.4.1 bytes. A separate copyable accounting-metadata host
+labels prepare-time requests from trusted run/variant context, preserves saved
+labels through resume and excludes them from provider payloads. None/empty
+retains legacy accounting hashes; present labels intentionally enter accounting
+hashes/private receipts. Labeled runs require >=0.9.17 readers; no DDL or adapter
+republish. Prior profiles and all five earlier blueprint resources stay intact.
+
+See the [guide](accounting-request-metadata.md), [release gates](release-0.9.10.md)
+and [qualification ledger](verification/accounting-request-metadata-2026-11-08.md).
+The [release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.10)
+is the publication/proof authority; a version/tag or development test alone is
+insufficient. No live inference. Earlier checkpoints below retain their scope.
+
 ## Harness 0.9.10 SDK adoption — 2026-11-06
 
 The maintainer authorized Lab 0.9.7 with Harness 0.9.10, Runtime 0.9.14 and

@@ -31,9 +31,9 @@ account, API key, local model or Docker.
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.16; fixtures need no key; bounded live calls require opt-in |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.17; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Released Core 0.5.0, Runtime 0.9.16 and Harness 0.9.12; both synthetic provider wires, no live calls |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.17 and Harness 0.9.12 train; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -63,7 +63,7 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.9](docs/release-0.9.9.md)** supplies the current SDK train with
+Lab **[0.9.10](docs/release-0.9.10.md)** supplies the current SDK train with
 a [feature-to-blueprint map](docs/feature-blueprints.md). Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact
