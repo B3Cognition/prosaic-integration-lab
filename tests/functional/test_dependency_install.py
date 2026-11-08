@@ -318,3 +318,125 @@ def test_real_sdist_contains_all_public_build_inputs_and_builds_exact_snapshot(t
         return subprocess.CompletedProcess(argv,0)
     monkeypatch.setattr(module.subprocess,'run',external)
     assert module.build(manifest,cache,'sdist:dev','released')=='sha256:'+'4'*64
+
+
+def release_transport_fixture(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('prepare_release_transport', ROOT / 'scripts/prepare_dependencies.py')
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    manifest, cache, _ = wheel_family(tmp_path)
+    original = json.loads(manifest.read_bytes())
+    blobs = {item['filename']: (cache/item['filename']).read_bytes() for item in original['artifacts']}
+    first = original['artifacts'][0]
+    for item in original['artifacts']:item['url'] = 'https://example.invalid/'+item['filename']
+    first['url'] = 'https://github.com/B3Cognition/prosaic/releases/download/v0.3.1/'+first['filename']
+    manifest.write_text(json.dumps(original))
+    asset = 'https://api.github.com/repos/B3Cognition/prosaic/releases/assets/123'
+    metadata = {'tag_name':'v0.3.1','draft':False,'assets':[{'name':first['filename'],
+        'browser_download_url':first['url'],'url':asset,'size':len(blobs[first['filename']])}]}
+    return module, manifest, first, blobs, asset, metadata
+
+
+@pytest.mark.parametrize('status', [502, 503, 504])
+def test_historical_gateway_failure_uses_one_anonymous_exact_asset_fallback(tmp_path, monkeypatch, status):
+    import io
+    import urllib.error
+    module, manifest, first, blobs, asset, metadata = release_transport_fixture(tmp_path)
+    original = manifest.read_bytes(); calls=[]
+    def fetch(request, timeout):
+        url = request if isinstance(request,str) else request.full_url
+        calls.append(url)
+        assert 0 < timeout <= 30
+        if not isinstance(request,str):assert 'Authorization' not in request.headers
+        if url == first['url']:raise urllib.error.HTTPError(url,status,'gateway',{},None)
+        if url == 'https://api.github.com/repos/B3Cognition/prosaic/releases/tags/v0.3.1':
+            return io.BytesIO(json.dumps(metadata).encode())
+        if url == asset:
+            assert request.get_header('Accept') == 'application/octet-stream'
+            return io.BytesIO(blobs[first['filename']])
+        return io.BytesIO(blobs[url.rsplit('/',1)[-1]])
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    selected=module.prepare(manifest,tmp_path/'fallback-cache')
+    assert manifest.read_bytes()==original
+    assert (selected/first['filename']).read_bytes()==blobs[first['filename']]
+    assert calls[:3]==[first['url'],'https://api.github.com/repos/B3Cognition/prosaic/releases/tags/v0.3.1',asset]
+    assert len(calls)==7
+
+
+@pytest.mark.parametrize('mutation', ['tag','draft','duplicate','browser_url','asset_origin'])
+def test_historical_fallback_refuses_mismatched_release_metadata(tmp_path, monkeypatch, mutation):
+    import io
+    import urllib.error
+    module, manifest, first, blobs, asset, metadata=release_transport_fixture(tmp_path)
+    if mutation=='tag':metadata['tag_name']='vOTHER'
+    if mutation=='draft':metadata['draft']=True
+    if mutation=='duplicate':metadata['assets'].append(dict(metadata['assets'][0]))
+    if mutation=='browser_url':metadata['assets'][0]['browser_download_url']='https://github.com/OTHER/file'
+    if mutation=='asset_origin':metadata['assets'][0]['url']='https://other.invalid/asset'
+    def fetch(request,timeout):
+        url=request if isinstance(request,str) else request.full_url
+        if url==first['url']:raise urllib.error.HTTPError(url,504,'gateway',{},None)
+        assert url=='https://api.github.com/repos/B3Cognition/prosaic/releases/tags/v0.3.1'
+        return io.BytesIO(json.dumps(metadata).encode())
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    with pytest.raises(ValueError,match='release asset'):
+        module.prepare(manifest,tmp_path/'fallback-cache')
+    assert not list((tmp_path/'fallback-cache').rglob('*.download'))
+    assert not list((tmp_path/'fallback-cache').rglob('*.whl'))
+
+
+@pytest.mark.parametrize('url,status', [('https://example.invalid/file.whl',504),
+    ('https://github.com/B3Cognition/prosaic/releases/download/v0.3.1/file.whl?other=1',504),
+    ('https://github.com/B3Cognition/prosaic/releases/download/v0.3.1/file.whl',404)])
+def test_download_fallback_does_not_reinterpret_unknown_routes_or_not_found(tmp_path,monkeypatch,url,status):
+    import urllib.error
+    module,manifest,first,blobs,asset,metadata=release_transport_fixture(tmp_path)
+    data=json.loads(manifest.read_bytes());data['artifacts'][0]['url']=url;manifest.write_text(json.dumps(data));calls=[]
+    def fetch(request,timeout):
+        uri=request if isinstance(request,str) else request.full_url;calls.append(uri)
+        raise urllib.error.HTTPError(uri,status,'not available',{},None)
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    with pytest.raises(urllib.error.HTTPError) as error:module.prepare(manifest,tmp_path/'fallback-cache')
+    assert error.value.code==status and calls==[url]
+
+
+def test_gateway_fallback_keeps_original_checksum_and_atomic_cleanup(tmp_path,monkeypatch):
+    import io
+    import urllib.error
+    module,manifest,first,blobs,asset,metadata=release_transport_fixture(tmp_path)
+    def fetch(request,timeout):
+        url=request if isinstance(request,str) else request.full_url
+        if url==first['url']:raise urllib.error.HTTPError(url,504,'gateway',{},None)
+        if url==asset:return io.BytesIO(b'wrong release bytes')
+        return io.BytesIO(json.dumps(metadata).encode())
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    with pytest.raises(ValueError,match='checksum mismatch'):module.prepare(manifest,tmp_path/'fallback-cache')
+    assert not list((tmp_path/'fallback-cache').rglob('*.download'))
+    assert not list((tmp_path/'fallback-cache').rglob('*.whl'))
+
+
+def test_release_api_failure_is_not_retried_or_replaced(tmp_path,monkeypatch):
+    import urllib.error
+    module,manifest,first,blobs,asset,metadata=release_transport_fixture(tmp_path);calls=[]
+    def fetch(request,timeout):
+        url=request if isinstance(request,str) else request.full_url;calls.append(url)
+        raise urllib.error.HTTPError(url,504,'gateway',{},None)
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    with pytest.raises(urllib.error.HTTPError):module.prepare(manifest,tmp_path/'fallback-cache')
+    assert calls==[first['url'],'https://api.github.com/repos/B3Cognition/prosaic/releases/tags/v0.3.1']
+    assert not list((tmp_path/'fallback-cache').rglob('*.download'))
+
+
+def test_oversized_release_metadata_is_refused_before_asset_download(tmp_path,monkeypatch):
+    import io
+    import urllib.error
+    module,manifest,first,blobs,asset,metadata=release_transport_fixture(tmp_path);calls=[]
+    def fetch(request,timeout):
+        url=request if isinstance(request,str) else request.full_url;calls.append(url)
+        if url==first['url']:raise urllib.error.HTTPError(url,504,'gateway',{},None)
+        assert url=='https://api.github.com/repos/B3Cognition/prosaic/releases/tags/v0.3.1'
+        return io.BytesIO(b' '*(1024*1024+1))
+    monkeypatch.setattr(module.urllib.request,'urlopen',fetch)
+    with pytest.raises(ValueError,match='release asset metadata exceeds size limit'):
+        module.prepare(manifest,tmp_path/'fallback-cache')
+    assert len(calls)==2 and not list((tmp_path/'fallback-cache').rglob('*.download'))

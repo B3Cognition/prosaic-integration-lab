@@ -35,3 +35,7 @@ verification, expected-head merge and equal tested/merged trees. Publish only
 original successful CI wheel/source archives with sanitized qualification evidence,
 then anonymous downloads, fresh installed wheel/rebuilt-source consumers and all
 post-merge CI. Preserve earlier package bytes/tags/assets. No live inference.
+
+Historical baseline downloads retain their exact manifests and checksums. A
+bounded anonymous GitHub asset API fallback handles a diagnosed canonical-route
+gateway failure; unavailable/mismatched/corrupt assets still fail qualification.

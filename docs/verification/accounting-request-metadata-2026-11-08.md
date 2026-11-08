@@ -67,3 +67,28 @@ pip check and temporary cleanup. It did not run the unavailable local stack.
 Eight required PG cases collect, including two new metadata cases; only hosted
 infrastructure can certify their execution. The final source archive/CI proofs
 must bind the exact final branch tree and retain the first stale-assertion failure.
+
+## Historical baseline transport failure
+
+The first final-head ordinary CI run passed source, native and distribution
+qualification, then three cells failed while downloading the unchanged Lab0.2.0
+baseline dependency: GitHub's canonical release URL returned HTTP504. A separate
+anonymous route comparison reproduced canonical504 while the public asset API
+returned the exact original Core0.3.1 wheel SHA276f22308d9477ad1bca7f876d06fedfa6d2c491625f51d2623a824941b66391.
+
+The downloader now permits one anonymous public asset API fallback only for
+502/503/504 on the three known B3Cognition SDK release repositories. Exact tag,
+asset name/canonical URL/API origin, bounded metadata/stream/deadline and the
+original manifest SHA256 remain mandatory. Unknown routes,404, mismatched
+metadata, corrupt bytes and a failed API route still fail with atomic cleanup.
+There is no retry loop, version substitution, authentication or changed baseline
+manifest. Fourteen added regressions had9watched failures/3passes before the
+implementation (two further bounding cases were added), then the complete
+focused downloader/candidate group passed45 with its actual source-build gate.
+A local sandbox-only source-build attempt lacked PyPI network access; it passed
+unchanged once run within the already authorized network boundary.
+All five original baseline wheels were then actually downloaded anonymously and
+matched the unchanged manifest digest
+`f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472`.
+Final qualification restarts on the new exact source; the failed run is retained
+and none of its incomplete ordinary gates counts as a pass.
