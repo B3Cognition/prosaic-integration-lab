@@ -2,6 +2,10 @@
 
 Current release: **0.9.11**. See [release notes and compatible SDK versions](docs/releases.md). Lab0.9.11 selects Runtime0.9.18 and Harness0.9.12 with copyable feature blueprints.
 
+The unpublished context-pack train has a separate required candidate lane:
+see [context-pack acceptance and evaluation plan](docs/context-packs.md).
+It consumes exact installed wheels and provisions only owned synthetic fixtures.
+
 Write an agent in Markdown, run it with a model, and put it inside a workflow
 that your application can authorize, pause for review and resume. This Lab shows
 how the Prosaic ecosystem fits together through runnable examples and tests.

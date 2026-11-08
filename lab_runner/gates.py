@@ -4,7 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97,'context-packs':12}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -54,11 +54,26 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Every explicit candidate must qualify the new lane. An unchanged released
     # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in COUNTS if mode!='conversation' or candidate or supports_conversation(manifest))
+    return tuple(mode for mode in COUNTS if (mode!='context-packs' or candidate) and
+        (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
+    'context-packs':{
+        'test_markdown_nodes_select_independent_contexts':'node_context',
+        'test_service_context_reopens_and_replays_without_provider_work':'accepted_records',
+        'test_reader_returns_only_declared_capture_and_records_citation':'reader',
+        'test_allowed_partial_context_retains_domain_completeness':'partial',
+        'test_required_partial_context_is_refused_without_provider':'partial_refusal',
+        'test_required_missing_context_is_refused_without_provider':'missing_refusal',
+        'test_contradictory_observations_are_preserved':'conflicts',
+        'test_retained_view_rechecks_current_permission':'retained_permission',
+        'test_foreign_scope_is_refused_before_dispatch':'scope',
+        'test_saved_receipt_is_adopted_by_fresh_controller':'recovery',
+        'test_large_captured_context_obeys_default_record_capacity':'capacity',
+        'test_runtime_role_cannot_migrate':'restricted_role',
+    },
     'conversation':{
         'test_context_quality_exposes_lost_history_and_preserves_current_authority':'context_quality',
         'test_context_report_replays_on_other_replica_without_provider_dispatch[context-full]':'context_replay',
