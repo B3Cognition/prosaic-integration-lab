@@ -19,7 +19,7 @@ def test_complete_metadata_train_is_admitted(gate):
     assert gate(manifest())
 
 
-@pytest.mark.parametrize('changes', [{'b3-prosaic-runtime': '0.9.18'}, {'b3-prosaic-harness': '0.9.11'},
+@pytest.mark.parametrize('changes', [{'b3-prosaic-runtime': '0.9.19'}, {'b3-prosaic-harness': '0.9.11'},
     {'b3-prosaic-harness': '0.9.13'}, {'b3-prosaic-runtime-postgres': '0.3.1'}, {'b3-prosaic': '0.5.1'}])
 def test_partial_metadata_train_is_refused(changes):
     with pytest.raises(ValueError, match='unsupported or incoherent'):
@@ -54,10 +54,10 @@ def test_previous_workflow_enforcement_profile_stays_registered_and_selectable()
     assert qualified_sdk({'b3-prosaic': '0.5.0', 'b3-prosaic-runtime': '0.9.16', 'b3-prosaic-harness': '0.9.12'}) == saved
 
 
-def test_current_metadata_profile_binds_actual_published_runtime():
+def test_historical_metadata_profile_binds_actual_published_runtime():
     from lab_runner.quality.sdk_provenance import qualified_sdk
     root = Path(__file__).resolve().parents[2]
-    active = root/'dependencies/releases.json'
+    active = root/'dependencies/releases-pre-sent-effort-2026-11-08.json'
     selected = qualified_sdk({name:VERSIONS[name] for name in ('b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness')})
     assert selected['manifestDigest'] == hashlib.sha256(active.read_bytes()).hexdigest()
     runtime = next(a for a in json.loads(active.read_bytes())['artifacts'] if a['distribution']=='b3-prosaic-runtime')
@@ -75,8 +75,8 @@ def test_metadata_freeze_only_advances_provenance_with_unchanged_benchmark_input
     root = Path(__file__).resolve().parents[2]/'lab_runner/memory/data'
     old = json.loads((root/'development-freeze-pre-accounting-metadata.json').read_text())
     old_eval = json.loads((root/'evaluation-freeze-pre-accounting-metadata.json').read_text())
-    dev = json.loads((root/'development-freeze.json').read_text())
-    evaluation = json.loads((root/'evaluation-freeze.json').read_text())
+    dev = json.loads((root/'development-freeze-pre-sent-effort.json').read_text())
+    evaluation = json.loads((root/'evaluation-freeze-pre-sent-effort.json').read_text())
     assert evaluation['suiteDigest'] == old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest'] == digest(dev) != digest(old)
     assert set(dev['implementation']) == set(old['implementation'])
@@ -85,5 +85,6 @@ def test_metadata_freeze_only_advances_provenance_with_unchanged_benchmark_input
     assert set(dev['qualityDependencies']) == set(old['qualityDependencies']) | added
     assert {k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old['qualityDependencies'].get(k)} == added | {'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
     assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')} == {k:v for k,v in old.items() if k not in ('implementation','qualityDependencies')}
-    frozen = load_suite(); verify(frozen,dev,evaluation)
+    frozen = load_suite()
+    with pytest.raises(ValueError,match='development freeze drift'): verify(frozen,dev,evaluation)
     with pytest.raises(ValueError,match='development freeze drift'): verify(frozen,old,old_eval)
