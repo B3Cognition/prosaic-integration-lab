@@ -5,7 +5,7 @@ import subprocess
 import sys
 from types import SimpleNamespace
 import pytest
-from lab_runner.gates import COUNTS,required_modes
+from lab_runner.gates import ALL_COUNTS as COUNTS,required_modes
 
 
 def test_native_persistence_candidate_requires_manifest_before_stack_allocation(monkeypatch):

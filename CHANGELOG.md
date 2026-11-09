@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.12 — 2026-11-09
+
+- Adopt Runtime 0.9.19, Harness 0.9.13 and Harness PostgreSQL 0.4.2; retain original Core 0.5.0 and recorder 0.3.0 bytes.
+- Require all 12 context-pack cases in every released architecture/database cell, alongside existing acceptance, installed blueprint and reasoning gates.
+- Cover per-node context, accepted-record sources, private validation inputs, bounded reads, revocation, recovery, capacity and restricted roles.
+- Preserve prior SDK profiles and benchmark inputs; document migrations and synthetic qualification limits. See [release notes](docs/release-0.9.12.md).
+
+## 0.9.11
+
+- Adopt Runtime 0.9.18 and add the sent-effort blueprint; preserve the prior published train and original adapter bytes.
+
 ## 0.9.10
 
 - Adopt exact published Runtime0.9.17 with trusted accounting run/variant labels and public capability; keep Core0.5.0/Harness0.9.12/adapter bytes.

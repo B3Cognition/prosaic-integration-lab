@@ -40,3 +40,22 @@ assert caps['limits'](caps['build_bindings'](project=destination/'conversation-c
     result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied')],
         cwd=tmp_path,capture_output=True,text=True,timeout=30)
     assert result.returncode==0,result.stderr
+
+
+def test_public_snapshot_retains_context_pack_history_and_current_freeze(tmp_path):
+    root=Path(__file__).resolve().parents[2]
+    snapshot=tmp_path/'public';snapshot.mkdir()
+    for name in json.loads((root/'dependencies/public-build-inputs.json').read_text())['files']:
+        target=snapshot/name;target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(root/name,target)
+    script='''import sys,json
+from pathlib import Path
+sys.path.insert(0,sys.argv[1])
+from lab_runner.quality.suite import resource
+saved=json.loads(resource('sdk-provenance-pre-context-packs.json'))
+assert {a['distribution']:a['version'] for a in saved['artifacts']}['b3-prosaic-runtime']=='0.9.18'
+from lab_runner.memory.suite import load_suite
+assert len(load_suite()['cases'])==12
+'''
+    result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot)],cwd=tmp_path,capture_output=True,text=True,timeout=30)
+    assert result.returncode==0,result.stderr

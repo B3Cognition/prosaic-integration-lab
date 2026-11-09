@@ -13,6 +13,10 @@ on:
         description: Qualify context SDK candidates and retain the original Runtime PostgreSQL wheel
         type: boolean
         default: false
+      context_packs:
+        description: Run required context-pack acceptance with the exact qualified SDK candidates
+        type: boolean
+        default: false
       core_run_id:
         description: Successful exact-source Core Publish SDK run
         type: string
@@ -41,6 +45,7 @@ permissions:
   contents: read
 jobs:
   acceptance:
+    if: ${{ !inputs.context_packs }}
     name: acceptance-${{ matrix.runner }}-pg${{ matrix.postgres }}
     strategy:
       fail-fast: false
@@ -221,3 +226,82 @@ jobs:
             reports/conversation-distribution-pg${{ matrix.postgres }}.json
           if-no-files-found: error
           retention-days: 14
+
+  context-packs:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.context_packs }}
+    name: context-packs-${{ matrix.runner }}-pg${{ matrix.postgres }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: [16, 18]
+    env:
+      CONTEXT_PACKS_REQUIRE_CANDIDATE: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Require explicitly requested candidate qualification
+        run: test '${{ inputs.candidate }}' = true
+      - name: Install locked third-party dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+      - name: Verify exact successful SDK runs and retain original recorder bytes
+        env:
+          GH_TOKEN: ${{ secrets.ECOSYSTEM_ARTIFACT_TOKEN || github.token }}
+          CORE_RUN: ${{ inputs.core_run_id }}
+          CORE_SOURCE: ${{ inputs.core_source }}
+          RUNTIME_RUN: ${{ inputs.runtime_run_id }}
+          RUNTIME_SOURCE: ${{ inputs.runtime_source }}
+          HARNESS_RUN: ${{ inputs.harness_run_id }}
+          HARNESS_SOURCE: ${{ inputs.harness_source }}
+        run: |
+          .venv/bin/python scripts/prepare_sdk_candidates.py --context-packs --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .cache/context-packs/manifest.json
+          .venv/bin/python scripts/install_dependencies.py --manifest .cache/context-packs/manifest.json
+          .venv/bin/python scripts/audit_install.py --manifest .cache/context-packs/manifest.json
+          .venv/bin/python -m pip check
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Required context-pack contracts without capability skips
+        run: |
+          mkdir -p reports
+          .venv/bin/python -m pytest tests/unit/test_context_pack_scenarios.py tests/unit/test_context_pack_hosted.py tests/unit/test_context_pack_diagnostics.py tests/unit/test_sdk_candidates.py tests/unit/test_release_gates.py -q --junitxml=reports/context-pack-contracts.xml
+          .venv/bin/python -c "import xml.etree.ElementTree as E; suites=list(E.parse('reports/context-pack-contracts.xml').getroot().iter('testsuite')); assert suites and all(int(s.get(k,'0'))==0 for s in suites for k in ('failures','errors','skipped'))"
+      - name: Build immutable candidate consumer and run owned database acceptance
+        run: |
+          .venv/bin/python scripts/build_consumer.py --manifest .cache/context-packs/manifest.json --dependency-mode candidate --tag prosaic-integration-lab:candidate
+          image="$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:candidate)"
+          .venv/bin/python -m lab_runner test --mode context-packs --candidate --candidate-manifest "$PWD/.cache/context-packs/manifest.json" --consumer-image "$image" --postgres-version '${{ matrix.postgres }}'
+      - name: Export bounded acceptance evidence even after failure
+        if: always()
+        run: |
+          .venv/bin/python - <<'PY'
+          import json
+          from pathlib import Path
+          from lab_runner.gates import export
+          paths=list(Path('.lab').glob('*/result.json'))
+          assert len(paths)==1, 'Owned acceptance result is missing'
+          result=json.loads(paths[0].read_text())
+          safe=export(result)
+          Path('reports').mkdir(exist_ok=True)
+          Path('reports/context-packs.json').write_text(json.dumps(safe,indent=2)+'\n')
+          print(json.dumps(safe))
+          assert safe['passed'] and safe['test_count']==12 and safe['skipped']==0 and safe['cleanup']=='verified'
+          PY
+      - name: Retain safe qualification summaries
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: context-packs-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,5 +1,21 @@
 # Current delivery status
 
+## Context packs and Lab 0.9.12 — 2026-11-09
+
+The current train selects Core 0.5.0, Runtime 0.9.19, Harness 0.9.13 and
+Harness PostgreSQL 0.4.2, retaining the original Runtime recorder 0.3.0 bytes.
+All twelve context-pack cases join normal released acceptance in each Linux
+architecture/PostgreSQL cell. Agent defaults, workflow-node overrides, accepted
+records, scoped reads and recovery use owned synthetic fixtures. Applications
+retain authorization and explicit migration responsibilities.
+
+See the [context-pack guide](context-packs.md) and
+[release scope](release-0.9.12.md). The
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12)
+is the publication and qualification authority. Prior manifests, profiles,
+benchmark freezes and published artifacts retain their original bytes.
+Earlier checkpoints below describe their historical SDK trains.
+
 ## Accounting request metadata and Lab0.9.10 — 2026-11-08
 
 The current train is Core0.5.0/Runtime0.9.17/Harness0.9.12 with the original

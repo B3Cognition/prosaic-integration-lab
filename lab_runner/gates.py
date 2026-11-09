@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
+ALL_COUNTS = {**COUNTS,'context-packs':12}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -18,20 +19,22 @@ CEREBRO_V1_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.16','b3-prosaic-harn
 WORKFLOW_RULE_TRAIN={**CEREBRO_V1_TRAIN,'b3-prosaic-harness':'0.9.12'}
 ACCOUNTING_METADATA_TRAIN={**WORKFLOW_RULE_TRAIN,'b3-prosaic-runtime':'0.9.17'}
 SENT_EFFORT_TRAIN={**ACCOUNTING_METADATA_TRAIN,'b3-prosaic-runtime':'0.9.18'}
+CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
+    'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}
 
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
-    return COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
+    return ALL_COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
 
 
 def supports_conversation(manifest):
@@ -44,7 +47,7 @@ def supports_conversation(manifest):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -52,13 +55,33 @@ def supports_conversation(manifest):
 
 
 def required_modes(*,candidate,manifest):
-    # Every explicit candidate must qualify the new lane. An unchanged released
-    # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in COUNTS if mode!='conversation' or candidate or supports_conversation(manifest))
+    # Coherent context-pack trains qualify the lane for public and candidate bytes.
+    # Historical published trains retain their original gates.
+    return tuple(mode for mode in ALL_COUNTS if (mode!='context-packs' or supports_context_packs(manifest)) and
+        (mode!='conversation' or candidate or supports_conversation(manifest)))
+
+
+def supports_context_packs(manifest):
+    supports_conversation(manifest)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}==CONTEXT_PACK_TRAIN
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 FAILURE_CASES={
+    'context-packs':{
+        'test_markdown_nodes_select_independent_contexts':'node_context',
+        'test_service_context_reopens_and_replays_without_provider_work':'accepted_records',
+        'test_reader_returns_only_declared_capture_and_records_citation':'reader',
+        'test_allowed_partial_context_retains_domain_completeness':'partial',
+        'test_required_partial_context_is_refused_without_provider':'partial_refusal',
+        'test_required_missing_context_is_refused_without_provider':'missing_refusal',
+        'test_contradictory_observations_are_preserved':'conflicts',
+        'test_retained_view_rechecks_current_permission':'retained_permission',
+        'test_foreign_scope_is_refused_before_dispatch':'scope',
+        'test_saved_receipt_is_adopted_by_fresh_controller':'recovery',
+        'test_large_captured_context_obeys_default_record_capacity':'capacity',
+        'test_runtime_role_cannot_migrate':'restricted_role',
+    },
     'conversation':{
         'test_context_quality_exposes_lost_history_and_preserves_current_authority':'context_quality',
         'test_context_report_replays_on_other_replica_without_provider_dispatch[context-full]':'context_replay',
@@ -207,7 +230,7 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineag
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
     if context_assembly and mode=='conversation' and item.get('context_assembly') is not True:
         raise ValueError('required context assembly evidence missing')
-    if (mode not in COUNTS or item.get('mode') != mode or
+    if (mode not in ALL_COUNTS or item.get('mode') != mode or
         item.get('passed') is not True or item.get('cleanup') != 'verified' or
         type(item.get('test_returncode')) is not int or item['test_returncode'] != 0 or type(item.get('test_count')) is not int or
         item['test_count'] != expected_test_count(mode,item.get('context_assembly')) or type(item.get('skipped')) is not int or item['skipped'] != 0 or
@@ -248,11 +271,11 @@ def export(item):
     if not isinstance(item,dict): item = {}
     result = {'passed':item.get('passed') is True and 'error' not in item and
         item.get('cleanup') == 'verified' and item.get('failed_tests') == [] and item.get('skipped') == 0 and
-        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
+        type(item.get('test_count')) is int and item.get('mode') in ALL_COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
     if item.get('context_assembly') is True:result['context_assembly']=True
     if item.get('error')=='TimeoutExpired':result['failure_code']='execution_timeout'
-    for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
+    for key,choices in {'mode':set(ALL_COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
         value = item.get(key)
         result[key] = value if isinstance(value,str) and value in choices else 'unknown'
@@ -269,6 +292,9 @@ def export(item):
     if item.get('mode')=='qualification' and 'capacity_diagnostic' in item:
         from .capacity_diagnostics import sanitize
         result['capacity_diagnostic']=sanitize(item['capacity_diagnostic'])
+    if item.get('mode')=='context-packs' and 'context_pack_diagnostic' in item:
+        from .context_packs import sanitize_capacity_diagnostic
+        result['context_pack_diagnostic']=sanitize_capacity_diagnostic(item['context_pack_diagnostic'])
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner

@@ -19,17 +19,22 @@ def main():
         conn.execute('CREATE DATABASE lab OWNER lab_migration')
     migration = f'host=database dbname=lab user=lab_migration password={config["roles"]["lab_migration"]}'
     env = {**os.environ, 'HARNESS_MIGRATION_DSN': migration}
-    result = subprocess.run(['prosaic-harness-postgres', 'init', '--dsn-env', 'HARNESS_MIGRATION_DSN'],
+    command=['prosaic-harness-postgres', 'init', '--dsn-env', 'HARNESS_MIGRATION_DSN']
+    result = subprocess.run(command,
                             env=env, capture_output=True)
     if result.returncode:
         raise RuntimeError('Harness explicit migration failed')
+    if config.get('context_packs') is True:
+        from prosaic_harness_postgres import PostgresRunStore
+        with PostgresRunStore(migration,namespace='provision') as store:
+            store.migrate_context_pack_storage()
     PostgresRecorder(migration, namespace='provision', environment='sandbox').initialize()
     migrate(migration,runtime_role='app_runtime')
     if 'conversation_runtime' in config['roles']:
         from prosaic_harness_postgres import PostgresSessionStore
         from prosaic_integration_lab.conversation_schema import initialize
         store=PostgresSessionStore(migration,namespace='provision')
-        try:store.initialize()
+        try:store.initialize(**({'context_packs':True} if config.get('context_packs') is True else {}))
         finally:store.close()
         initialize(migration,runtime_role='app_runtime')
     if 'billing_exporter' in config['roles']:

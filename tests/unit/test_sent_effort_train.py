@@ -31,10 +31,10 @@ def test_previous_accounting_metadata_profile_remains_registered():
     assert qualified_sdk({'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.17','b3-prosaic-harness':'0.9.12'})==saved
 
 
-def test_current_sent_effort_profile_requires_actual_public_runtime_pin():
+def test_historical_sent_effort_profile_requires_actual_public_runtime_pin():
     import json
     from lab_runner.quality.sdk_provenance import qualified_sdk
-    root=Path(__file__).resolve().parents[2];active=root/'dependencies/releases.json'
+    root=Path(__file__).resolve().parents[2];active=root/'dependencies/releases-pre-context-packs-2026-11-09.json'
     selected=qualified_sdk({name:VERSIONS[name] for name in ('b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness')})
     assert selected['manifestDigest']==hashlib.sha256(active.read_bytes()).hexdigest()
     current=json.loads(active.read_bytes())['artifacts'];runtime=next(a for a in current if a['distribution']=='b3-prosaic-runtime')
@@ -52,7 +52,7 @@ def test_sent_effort_freeze_advances_only_current_provenance():
     from lab_runner.quality.contracts import digest
     root=Path(__file__).resolve().parents[2]/'lab_runner/memory/data'
     old=json.loads((root/'development-freeze-pre-sent-effort.json').read_text());old_eval=json.loads((root/'evaluation-freeze-pre-sent-effort.json').read_text())
-    dev=json.loads((root/'development-freeze.json').read_text());evaluation=json.loads((root/'evaluation-freeze.json').read_text())
+    dev=json.loads((root/'development-freeze-pre-context-packs.json').read_text());evaluation=json.loads((root/'evaluation-freeze-pre-context-packs.json').read_text())
     assert evaluation['suiteDigest']==old_eval['suiteDigest']
     assert evaluation['developmentFreezeDigest']==digest(dev)!=digest(old)
     assert set(dev['implementation'])==set(old['implementation'])
@@ -61,5 +61,6 @@ def test_sent_effort_freeze_advances_only_current_provenance():
     assert set(dev['qualityDependencies'])==set(old['qualityDependencies'])|added
     assert {k for k in dev['qualityDependencies'] if dev['qualityDependencies'][k]!=old['qualityDependencies'].get(k)}==added|{'sdk_provenance.py','suite.py','data/sdk-provenance-public.json'}
     assert {k:v for k,v in dev.items() if k not in ('implementation','qualityDependencies')}=={k:v for k,v in old.items() if k not in ('implementation','qualityDependencies')}
-    frozen=load_suite();verify(frozen,dev,evaluation)
+    frozen=load_suite()
+    with pytest.raises(ValueError,match='development freeze drift'):verify(frozen,dev,evaluation)
     with pytest.raises(ValueError,match='development freeze drift'):verify(frozen,old,old_eval)

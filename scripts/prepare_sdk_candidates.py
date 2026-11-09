@@ -23,6 +23,10 @@ EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
 CONTEXT_EXPECTED={**EXPECTED,
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0'},
     'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}}
+CONTEXT_PACK_EXPECTED={
+    'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
+    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.19','b3-prosaic-runtime-postgres':'0.3.0'},
+    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
@@ -58,9 +62,10 @@ def retained_runtime_postgres(cache_root):
     return dict(item),cache/item['filename']
 
 
-def curate(candidates,manifest,cache_root,*,context_assembly=False):
+def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False):
+    if context_assembly and context_packs:raise ValueError('candidate feature modes are mutually exclusive')
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
-    expected_train=CONTEXT_EXPECTED if context_assembly else EXPECTED
+    expected_train=CONTEXT_PACK_EXPECTED if context_packs else CONTEXT_EXPECTED if context_assembly else EXPECTED
     evidence=[];artifacts=[];sources={};seen=set()
     for repository,run_id,commit,directory in candidates:
         if repository not in EXPECTED or repository in seen or not re.fullmatch('[1-9][0-9]*',run_id):
@@ -101,7 +106,7 @@ def curate(candidates,manifest,cache_root,*,context_assembly=False):
                               'qualified_run_id':run_id,'release_receipt_sha256':candidate['receipt_sha256']})
             sources[filename]=directory/filename
     lineage={'version':1,'candidates':evidence}
-    if context_assembly:
+    if context_assembly or context_packs:
         retained,path=retained_runtime_postgres(cache_root)
         if path.is_symlink() or not path.is_file() or file_digest(path)!=retained['sha256']:
             raise ValueError('retained Runtime PostgreSQL bytes differ')
@@ -156,7 +161,9 @@ def main(argv=None):
         parser.add_argument('--'+prefix+'-source')
     parser.add_argument('--manifest',type=Path,required=True)
     parser.add_argument('--cache-root',type=Path,default=ROOT/'.cache/wheels')
-    parser.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
+    features=parser.add_mutually_exclusive_group()
+    features.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
+    features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
     args=parser.parse_args(argv)
     manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
             for field in ('run_id','source')]
@@ -181,7 +188,7 @@ def main(argv=None):
                 subprocess.run(['gh','run','download',run_id,'--repo',repository,'--name','qualified-release',
                     '--dir',str(directory)],capture_output=True,check=True,timeout=120)
                 candidates.append((repository,run_id,commit,directory))
-            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly)
+            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,context_packs=args.context_packs)
         print(json.dumps({'event':'candidate_sdk_bytes_verified','candidate_manifest_sha256':digest(args.manifest.read_bytes()),
             'candidate_lineage_sha256':digest(serialized(data['candidate_lineage'])),'wheel_count':5}))
         return 0
