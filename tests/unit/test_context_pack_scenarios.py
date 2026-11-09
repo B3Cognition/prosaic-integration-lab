@@ -72,7 +72,7 @@ def test_context_pack_runner_selects_required_tests_and_cleans_owned_stack(tmp_p
     from types import SimpleNamespace
     from lab_runner import __main__ as cli
     import lab_runner.context_packs as driver
-    from lab_runner.gates import FAILURE_CASES,COUNTS
+    from lab_runner.gates import FAILURE_CASES,ALL_COUNTS
     selected=[]
     class Stack:
         def __init__(self,*args,**kwargs):
@@ -94,5 +94,5 @@ def test_context_pack_runner_selects_required_tests_and_cleans_owned_stack(tmp_p
     monkeypatch.setattr(sys,'argv',['lab_runner','test','--mode','context-packs','--candidate','--candidate-manifest',str(tmp_path/'manifest.json')])
     assert cli.main()==0
     assert selected[0]['context_packs'] is True and selected[0]['conversation'] is True and selected[-1]=='cleanup'
-    assert COUNTS['context-packs']==12
+    assert ALL_COUNTS['context-packs']==12
     assert json.loads((tmp_path/'result.json').read_text())['qualification']=='qualified'

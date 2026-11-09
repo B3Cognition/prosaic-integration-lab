@@ -336,7 +336,7 @@ def main():
             result['passed'] = False
             if operational:result.update(qualified=False,qualification='not_qualified',reason='cleanup_failed')
         result['seconds'] = round(time.monotonic() - started, 2)
-        from .gates import COUNTS
+        from .gates import ALL_COUNTS as COUNTS
         from .gates import expected_test_count
         if args.command == 'test' and args.mode in COUNTS and result.get('test_count')!=expected_test_count(args.mode,args.context_assembly):result['passed']=False
         if args.command == 'test' and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs'} and result['passed']:

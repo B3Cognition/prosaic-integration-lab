@@ -4,7 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
-COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97,'context-packs':12}
+COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
+ALL_COUNTS = {**COUNTS,'context-packs':12}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -33,7 +34,7 @@ def supports_context_assembly(manifest):
 
 
 def expected_test_count(mode,context_assembly=False):
-    return COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
+    return ALL_COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
 
 
 def supports_conversation(manifest):
@@ -56,7 +57,7 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Every explicit candidate must qualify the new lane. An unchanged released
     # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in COUNTS if (mode!='context-packs' or candidate and supports_context_packs(manifest)) and
+    return tuple(mode for mode in ALL_COUNTS if (mode!='context-packs' or candidate and supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 
@@ -229,7 +230,7 @@ def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineag
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
     if context_assembly and mode=='conversation' and item.get('context_assembly') is not True:
         raise ValueError('required context assembly evidence missing')
-    if (mode not in COUNTS or item.get('mode') != mode or
+    if (mode not in ALL_COUNTS or item.get('mode') != mode or
         item.get('passed') is not True or item.get('cleanup') != 'verified' or
         type(item.get('test_returncode')) is not int or item['test_returncode'] != 0 or type(item.get('test_count')) is not int or
         item['test_count'] != expected_test_count(mode,item.get('context_assembly')) or type(item.get('skipped')) is not int or item['skipped'] != 0 or
@@ -270,11 +271,11 @@ def export(item):
     if not isinstance(item,dict): item = {}
     result = {'passed':item.get('passed') is True and 'error' not in item and
         item.get('cleanup') == 'verified' and item.get('failed_tests') == [] and item.get('skipped') == 0 and
-        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
+        type(item.get('test_count')) is int and item.get('mode') in ALL_COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
     if item.get('context_assembly') is True:result['context_assembly']=True
     if item.get('error')=='TimeoutExpired':result['failure_code']='execution_timeout'
-    for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
+    for key,choices in {'mode':set(ALL_COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
         value = item.get(key)
         result[key] = value if isinstance(value,str) and value in choices else 'unknown'
