@@ -1,9 +1,24 @@
 import pytest
+import os
+
+
+@pytest.fixture(autouse=True)
+def available_context_pack_sdk(request):
+    if request.function.__name__ in {'test_context_pack_sdk_is_explicitly_required',
+            'test_candidate_host_payload_cannot_silently_differ','test_required_lane_is_candidate_only'}:return
+    from prosaic_integration_lab.context_packs import require_context_pack_sdk
+    try:require_context_pack_sdk()
+    except (ImportError,ValueError):
+        if os.environ.get('CONTEXT_PACKS_REQUIRE_CANDIDATE')=='1':pytest.fail('required context-pack candidate SDK is unavailable')
+        pytest.skip('released baseline has no context-pack capability; required candidate lane runs this case')
 
 
 def test_context_pack_sdk_is_explicitly_required():
     from prosaic_integration_lab.context_packs import require_context_pack_sdk
-    require_context_pack_sdk()
+    from prosaic_runtime import ProsaicRuntime
+    if 'frozen_turn_inputs_v1' in ProsaicRuntime.capabilities:require_context_pack_sdk()
+    else:
+        with pytest.raises(ValueError,match='capability unavailable'):require_context_pack_sdk()
 
 
 def test_candidate_host_payload_cannot_silently_differ(tmp_path):
@@ -41,11 +56,13 @@ def test_conflicting_observations_remain_visible():
 
 
 def test_required_lane_is_candidate_only():
-    from lab_runner.gates import required_modes
+    from lab_runner.gates import required_modes,CONTEXT_PACK_TRAIN
     import json
     from pathlib import Path
     baseline=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
-    assert 'context-packs' in required_modes(candidate=True,manifest=baseline)
+    candidate={'artifacts':[{'distribution':key,'version':value} for key,value in CONTEXT_PACK_TRAIN.items()]}
+    assert 'context-packs' in required_modes(candidate=True,manifest=candidate)
+    assert 'context-packs' not in required_modes(candidate=True,manifest=baseline)
     assert 'context-packs' not in required_modes(candidate=False,manifest=baseline)
 
 

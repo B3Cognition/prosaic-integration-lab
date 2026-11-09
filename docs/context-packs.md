@@ -1,5 +1,18 @@
 # Context-pack candidate acceptance
 
+Hosted qualification uses the existing `Required integration acceptance` workflow
+on the feature branch with `candidate=true` and `context_packs=true`. Supply the
+successful exact-source Core, Runtime and Harness `Publish SDK` run IDs and
+commits. The four Linux ARM/AMD64 and PostgreSQL16/18 cells verify those receipts,
+retain the original recorder wheel, audit installed payloads and require all new
+contracts and owned-stack cases without skips. SDK publication stays disabled.
+
+Released-baseline CI keeps its existing SDK pins. Context-pack-only unit cases
+are optional there because those packages have no such capability; setting
+`CONTEXT_PACKS_REQUIRE_CANDIDATE=1` makes missing capability a failure. The hosted
+candidate job always sets this flag. Legacy candidate modes keep their original
+gates and cannot be silently upgraded to a different SDK train.
+
 This candidate-only lane consumes five checksummed installed SDK wheels. It
 does not change the released baseline or the historical live-evaluation approvals.
 Build an isolated candidate image with `scripts/build_consumer.py`, using the

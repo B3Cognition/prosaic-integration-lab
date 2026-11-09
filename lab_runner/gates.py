@@ -18,16 +18,18 @@ CEREBRO_V1_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.16','b3-prosaic-harn
 WORKFLOW_RULE_TRAIN={**CEREBRO_V1_TRAIN,'b3-prosaic-harness':'0.9.12'}
 ACCOUNTING_METADATA_TRAIN={**WORKFLOW_RULE_TRAIN,'b3-prosaic-runtime':'0.9.17'}
 SENT_EFFORT_TRAIN={**ACCOUNTING_METADATA_TRAIN,'b3-prosaic-runtime':'0.9.18'}
+CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19.dev0',
+    'b3-prosaic-harness':'0.9.13.dev0','b3-prosaic-harness-postgres':'0.4.2.dev0'}
 
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -44,7 +46,7 @@ def supports_conversation(manifest):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -54,8 +56,13 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Every explicit candidate must qualify the new lane. An unchanged released
     # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in COUNTS if (mode!='context-packs' or candidate) and
+    return tuple(mode for mode in COUNTS if (mode!='context-packs' or candidate and supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
+
+
+def supports_context_packs(manifest):
+    supports_conversation(manifest)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}==CONTEXT_PACK_TRAIN
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.

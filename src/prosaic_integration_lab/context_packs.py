@@ -21,10 +21,10 @@ def require_context_pack_sdk():
 
 def scenario(kind, *, outcome='complete', allow_partial=False, conflict=False, reader=False,
              namespace='context-pack-lab', authorize=None):
+    require_context_pack_sdk()
     from prosaic_harness import (ContextPackSpec,ContextSlot,ContextPackBindings,ContextScope,
         ContextAuthorizer,InputSource,ContextPacker,ContextSnapshot,ContextSource)
     from prosaic_harness.context_packs import capture_sources
-    require_context_pack_sdk()
     if kind not in {'markdown-review','service-impact'}: raise ValueError('unknown fixture scenario')
     alias='document' if kind=='markdown-review' else 'lookup'
     records={'task':'Identify supported changes with citations','private':'UNDECLARED-819'}

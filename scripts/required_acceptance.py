@@ -44,7 +44,7 @@ def main():
     released=json.loads((ROOT/'dependencies/releases.json').read_text())
     selected=json.loads(args.candidate_manifest.read_text()) if args.candidate else released
     context_enabled=supports_context_assembly(selected)
-    for mode in required_modes(candidate=args.candidate,manifest=released):
+    for mode in required_modes(candidate=args.candidate,manifest=selected):
         command = [sys.executable,'-m','lab_runner','test','--mode',mode,'--postgres-version',str(args.postgres_version),
             '--consumer-image',image_id]
         if args.candidate: command+=['--candidate','--candidate-manifest',str(args.candidate_manifest.resolve())]
