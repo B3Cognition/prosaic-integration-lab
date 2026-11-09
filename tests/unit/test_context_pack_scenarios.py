@@ -5,7 +5,7 @@ import os
 @pytest.fixture(autouse=True)
 def available_context_pack_sdk(request):
     if request.function.__name__ in {'test_context_pack_sdk_is_explicitly_required',
-            'test_candidate_host_payload_cannot_silently_differ','test_required_lane_is_candidate_only'}:return
+            'test_candidate_host_payload_cannot_silently_differ','test_required_lane_keeps_historical_train_gates'}:return
     from prosaic_integration_lab.context_packs import require_context_pack_sdk
     try:require_context_pack_sdk()
     except (ImportError,ValueError):
@@ -22,8 +22,8 @@ def test_context_pack_sdk_is_explicitly_required():
 
 
 def test_candidate_host_payload_cannot_silently_differ(tmp_path):
-    from lab_runner.context_packs import require_candidate_install
-    with pytest.raises((ValueError,FileNotFoundError)):require_candidate_install(tmp_path/'absent.json')
+    from lab_runner.context_packs import require_context_pack_install
+    with pytest.raises((ValueError,FileNotFoundError)):require_context_pack_install(tmp_path/'absent.json')
 
 
 def test_scenario_declares_only_selected_sources():
@@ -55,18 +55,19 @@ def test_conflicting_observations_remain_visible():
     assert 'revision-a' in body and 'revision-b' in body
 
 
-def test_required_lane_is_candidate_only():
+def test_required_lane_keeps_historical_train_gates():
     from lab_runner.gates import required_modes,CONTEXT_PACK_TRAIN
     import json
     from pathlib import Path
-    baseline=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases.json').read_text())
+    baseline=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases-pre-context-packs-2026-11-09.json').read_text())
     candidate={'artifacts':[{'distribution':key,'version':value} for key,value in CONTEXT_PACK_TRAIN.items()]}
     assert 'context-packs' in required_modes(candidate=True,manifest=candidate)
     assert 'context-packs' not in required_modes(candidate=True,manifest=baseline)
     assert 'context-packs' not in required_modes(candidate=False,manifest=baseline)
 
 
-def test_context_pack_runner_selects_required_tests_and_cleans_owned_stack(tmp_path,monkeypatch):
+@pytest.mark.parametrize("candidate",[True,False])
+def test_context_pack_runner_selects_required_tests_and_cleans_owned_stack(tmp_path,monkeypatch,candidate):
     import json
     import sys
     from types import SimpleNamespace
@@ -90,8 +91,14 @@ def test_context_pack_runner_selects_required_tests_and_cleans_owned_stack(tmp_p
             '<testcase name="'+name+'"/>' for name in FAILURE_CASES['context-packs'])+'</testsuite></testsuites>')
         return SimpleNamespace(returncode=0)
     monkeypatch.setattr(cli,'OwnedStack',Stack);monkeypatch.setattr(cli.subprocess,'run',run)
-    monkeypatch.setattr(driver,'require_candidate_install',lambda manifest:None)
-    monkeypatch.setattr(sys,'argv',['lab_runner','test','--mode','context-packs','--candidate','--candidate-manifest',str(tmp_path/'manifest.json')])
+    monkeypatch.setattr(driver,'require_context_pack_install',lambda manifest:None)
+    from lab_runner.gates import CONTEXT_PACK_TRAIN
+    (tmp_path/'dependencies').mkdir()
+    released=tmp_path/'dependencies/releases.json'
+    released.write_text(json.dumps({'artifacts':[{'distribution':name,'version':version} for name,version in CONTEXT_PACK_TRAIN.items()]}))
+    monkeypatch.setattr(cli,'ROOT',tmp_path)
+    flags=['--candidate','--candidate-manifest',str(released)] if candidate else []
+    monkeypatch.setattr(sys,'argv',['lab_runner','test','--mode','context-packs',*flags])
     assert cli.main()==0
     assert selected[0]['context_packs'] is True and selected[0]['conversation'] is True and selected[-1]=='cleanup'
     assert ALL_COUNTS['context-packs']==12

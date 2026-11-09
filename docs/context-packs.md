@@ -1,40 +1,33 @@
-# Context-pack candidate acceptance
+# Context-pack acceptance
 
-Hosted qualification uses the existing `Required integration acceptance` workflow
-on the feature branch with `candidate=true` and `context_packs=true`. Supply the
-successful exact-source Core, Runtime and Harness `Publish SDK` run IDs and
-commits. The four Linux ARM/AMD64 and PostgreSQL16/18 cells verify those receipts,
-retain the original recorder wheel, audit installed payloads and require all new
-contracts and owned-stack cases without skips. SDK publication stays disabled.
+Lab 0.9.12 consumes Runtime 0.9.19, Harness 0.9.13 and Harness PostgreSQL 0.4.2,
+with the original Core 0.5.0 and Runtime recorder 0.3.0 public bytes. The ordinary
+required acceptance matrix runs context packs in every Linux AMD64/ARM64 and
+PostgreSQL 16/18 cell. Historical released trains retain their original gates.
 
-Released-baseline CI keeps its existing SDK pins. Context-pack-only unit cases
-are optional there because those packages have no such capability; setting
-`CONTEXT_PACKS_REQUIRE_CANDIDATE=1` makes missing capability a failure. The hosted
-candidate job always sets this flag. Legacy candidate modes keep their original
-gates and cannot be silently upgraded to a different SDK train.
-
-This candidate-only lane consumes five checksummed installed SDK wheels. It
-does not change the released baseline or the historical live-evaluation approvals.
-Build an isolated candidate image with `scripts/build_consumer.py`, using the
-same complete manifest and wheel directory selected for the host environment.
-The host also audits its installed SDK payload against that manifest's verified
-cache at `.cache/wheels/<manifest-sha256>` before creating any resources. Populate
-the cache with `scripts/prepare_dependencies.py` or the candidate preparation
-workflow; a separately built image never substitutes for matching host bytes.
-Then run:
+Prepare the complete checksummed manifest and its cache with
+`scripts/prepare_dependencies.py`, then install exactly those wheels in the host
+environment. Build an isolated consumer image with `scripts/build_consumer.py`
+using the same manifest and wheel directory. Run:
 
 ```sh
-python -m lab_runner test --mode context-packs --candidate \
-  --candidate-manifest /absolute/path/to/manifest.json \
+python -m lab_runner test --mode context-packs \
   --consumer-image sha256:THE_IMMUTABLE_IMAGE_ID
 ```
 
-The lane fails without the requested capabilities, candidate lineage, Docker or
-PostgreSQL. The owner-only provisioning job enables new workflow/session storage
-contracts; workers use restricted roles and never perform DDL. Each invocation
-creates an owned stack and verifies cleanup, including when tests fail. Context
-bindings and tenant/actor identities are trusted fixture data, not public HTTP
-parameters. This is SDK consumer acceptance; it adds no new HTTP API.
+The runner verifies the host SDK payload against `dependencies/releases.json`
+and `.cache/wheels/<manifest-sha256>` before creating resources. An image alone
+does not substitute for matching host bytes. Missing capabilities, mismatched
+payloads or unavailable Docker/PostgreSQL fail qualification. The owner provisions
+new context storage contracts explicitly; restricted workers never perform DDL.
+Every invocation creates an owned stack and verifies cleanup, including on failure.
+Bindings and identities are trusted fixture data, not public HTTP parameters.
+
+For prepublication qualification, the existing manual `candidate=true` and
+`context_packs=true` lane consumes complete exact-source successful SDK receipts.
+Supply `--candidate --candidate-manifest /absolute/path/to/manifest.json` for a
+local candidate run. Candidate lineage remains mandatory there; public runs bind
+the released manifest instead. Both modes enforce the same 12 no-skip cases.
 
 Twelve no-skip cases cover Markdown agent defaults and node overrides; an explicit
 service lookup producer and its accepted structured result; citations and actual

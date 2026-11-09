@@ -46,7 +46,16 @@ def capacity_failure(phase,error,*,reason=None,receipt_bytes=None,state_bytes=No
     return 'CONTEXT_PACK_CAPACITY '+json.dumps(diagnostic,sort_keys=True)
 
 
-def require_candidate_install(manifest):
+def context_pack_manifest(*,candidate,candidate_manifest,released_manifest):
+    """Select the complete SDK manifest without implicit candidate fallback."""
+    if candidate:
+        if candidate_manifest is None:raise ValueError('complete candidate manifest required')
+        return candidate_manifest
+    if candidate_manifest is not None:raise ValueError('candidate manifest requires candidate mode')
+    return released_manifest
+
+
+def require_context_pack_install(manifest):
     """Audit host SDK bytes as well as the consumer image before any resources."""
     from pathlib import Path
     import runpy

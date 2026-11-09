@@ -19,8 +19,8 @@ CEREBRO_V1_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.16','b3-prosaic-harn
 WORKFLOW_RULE_TRAIN={**CEREBRO_V1_TRAIN,'b3-prosaic-harness':'0.9.12'}
 ACCOUNTING_METADATA_TRAIN={**WORKFLOW_RULE_TRAIN,'b3-prosaic-runtime':'0.9.17'}
 SENT_EFFORT_TRAIN={**ACCOUNTING_METADATA_TRAIN,'b3-prosaic-runtime':'0.9.18'}
-CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19.dev0',
-    'b3-prosaic-harness':'0.9.13.dev0','b3-prosaic-harness-postgres':'0.4.2.dev0'}
+CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
+    'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}
 
 
 def supports_consumer_blueprints(manifest):
@@ -55,9 +55,9 @@ def supports_conversation(manifest):
 
 
 def required_modes(*,candidate,manifest):
-    # Every explicit candidate must qualify the new lane. An unchanged released
-    # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in ALL_COUNTS if (mode!='context-packs' or candidate and supports_context_packs(manifest)) and
+    # Coherent context-pack trains qualify the lane for public and candidate bytes.
+    # Historical published trains retain their original gates.
+    return tuple(mode for mode in ALL_COUNTS if (mode!='context-packs' or supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 

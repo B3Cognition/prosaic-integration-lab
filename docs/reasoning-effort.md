@@ -1,6 +1,6 @@
 # Reasoning-effort integration lab
 
-This separate lane consumes published Runtime0.9.17 and checks canonical prose
+This separate lane consumes published Runtime0.9.19 and checks canonical prose
 through actual SDK HTTP requests and owned Claude/Codex CLI fixtures. It supplies
 copyable blueprints and an optional bounded live runner. The ordinary
 `dependencies/releases.json`, quality benchmarks, PostgreSQL/service gates and
@@ -13,10 +13,10 @@ they do not require `prosaic apply` or copies in Claude/Codex directories.
 ## Install the exact lane
 
 Use a fresh environment. `releases-reasoning.json` selects Core 0.5.0, Runtime
-0.9.17, recorder0.3.0, Harness0.9.12 and store0.4.1, matching the ordinary
+0.9.19, recorder0.3.0, Harness0.9.13 and store0.4.2, matching the ordinary
 Lab manifest. The control-test lane remains separate from service acceptance.
 Its former SDK pins are preserved in
-`dependencies/releases-reasoning-pre-accounting-metadata-2026-11-08.json`;
+`dependencies/releases-reasoning-pre-context-packs-2026-11-09.json`;
 older historical snapshots, prompt bytes and live evidence remain unchanged.
 
 From the Lab repository root:

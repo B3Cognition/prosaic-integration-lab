@@ -39,8 +39,8 @@ def context(host, **changes):
 def test_public_sdk_ownership_and_capability():
     from importlib.metadata import version
     import prosaic_runtime, prosaic_harness, prosaic_runtime_postgres
-    assert version('b3-prosaic-runtime') in {'0.9.17', '0.9.18'}
-    assert version('b3-prosaic-harness') == '0.9.12'
+    assert (version('b3-prosaic-runtime'),version('b3-prosaic-harness')) in {
+        ('0.9.17','0.9.12'),('0.9.18','0.9.12'),('0.9.19','0.9.13')}
     assert version('b3-prosaic-runtime-postgres') == '0.3.0'
     assert 'accounting_request_metadata_v1' in prosaic_runtime.ProsaicRuntime.capabilities
     for module in (prosaic_runtime, prosaic_harness, prosaic_runtime_postgres):

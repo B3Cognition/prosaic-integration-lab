@@ -76,15 +76,21 @@ def main():
     if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     if args.mode=='context-packs':
-        if args.command!='test' or not args.candidate:parser.error('context-packs requires test and --candidate')
+        if args.command!='test':parser.error('context-packs requires test')
         source=str(ROOT/'src')
         if source not in sys.path:sys.path.insert(0,source)
         from prosaic_integration_lab.context_packs import require_context_pack_sdk
         try:require_context_pack_sdk()
         except (ImportError,ValueError):parser.error('installed context-pack capability unavailable')
-        from .context_packs import require_candidate_install
-        try:require_candidate_install(args.candidate_manifest)
-        except (OSError,ValueError,KeyError,TypeError):parser.error('host SDK payload must match the complete cached candidate manifest')
+        from .context_packs import context_pack_manifest,require_context_pack_install
+        from .gates import supports_context_packs
+        from prosaic_integration_lab.dependencies import manifest_bytes
+        try:
+            selected=context_pack_manifest(candidate=args.candidate,candidate_manifest=args.candidate_manifest,
+                released_manifest=ROOT/'dependencies/releases.json')
+            if not supports_context_packs(json.loads(manifest_bytes(selected))):raise ValueError('unsupported context-pack train')
+            require_context_pack_install(selected)
+        except (OSError,ValueError,KeyError,TypeError):parser.error('host SDK payload must match the complete cached context-pack manifest')
     if args.mode=='conversation':
         if args.command not in {'test','demo'}:parser.error('conversation mode requires test or demo')
         source=str(ROOT/'src')
