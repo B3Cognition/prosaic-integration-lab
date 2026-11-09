@@ -153,14 +153,25 @@ def test_large_captured_context_obeys_default_record_capacity(store,provider):
     bindings=ContextPackBindings(specs={'impact':spec},sources={'task':InputSource('/task'),
         **{'fact'+str(i):InputSource('/fact'+str(i)) for i in range(15)}},scope=bindings.scope,authorizer=bindings.authorizer)
     records={'task':'Review','private':'PRIVATE-819'+'p'*65536,**{'fact'+str(i):'f'*2300 for i in range(15)}}
-    candidates=ContextPacker().compose(spec,capture_sources(spec,{'request':records},{},bindings))
-    assert len(candidates.snapshot.items)==16 and len(json.dumps(candidates.snapshot.to_dict()).encode())>=32768
-    chat=conversation(bindings,store,url);session=chat.create();replies.append(answer('Task-only answer'))
-    reply=chat.send(session.session_id,message_id='capacity',message='Review',expected_revision=session.revision,context_pack=candidates)
-    assert reply.document['status']=='completed' and 'PRIVATE-819' not in json.dumps(requests)
-    state=store.load_session(session.session_id,scope=chat.scope).state
-    receipt=store.load_receipt(session.session_id,state['turns'][0]['attempts'][0],scope=chat.scope)
-    assert len(json.dumps(receipt).encode())<=1048576 and len(json.dumps(state).encode())<=4194304
+    phase='capture';reason=None;receipt_bytes=state_bytes=None
+    try:
+        candidates=ContextPacker().compose(spec,capture_sources(spec,{'request':records},{},bindings))
+        assert len(candidates.snapshot.items)==16 and len(json.dumps(candidates.snapshot.to_dict()).encode())>=32768
+        chat=conversation(bindings,store,url);session=chat.create();replies.append(answer('Task-only answer'))
+        phase='dispatch'
+        reply=chat.send(session.session_id,message_id='capacity',message='Review',expected_revision=session.revision,context_pack=candidates)
+        phase='status';reason=reply.document.get('reason')
+        assert reply.document['status']=='completed' and 'PRIVATE-819' not in json.dumps(requests)
+        phase='load_state'
+        state=store.load_session(session.session_id,scope=chat.scope).state
+        phase='load_receipt'
+        receipt=store.load_receipt(session.session_id,state['turns'][0]['attempts'][0],scope=chat.scope)
+        receipt_bytes=len(json.dumps(receipt).encode());state_bytes=len(json.dumps(state).encode())
+        phase='receipt_size';assert receipt_bytes<=1048576
+        phase='state_size';assert state_bytes<=4194304
+    except Exception as error:
+        from lab_runner.context_packs import capacity_failure
+        pytest.fail(capacity_failure(phase,error,reason=reason,receipt_bytes=receipt_bytes,state_bytes=state_bytes),pytrace=False)
 
 
 def test_runtime_role_cannot_migrate(lab):

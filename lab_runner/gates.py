@@ -292,6 +292,9 @@ def export(item):
     if item.get('mode')=='qualification' and 'capacity_diagnostic' in item:
         from .capacity_diagnostics import sanitize
         result['capacity_diagnostic']=sanitize(item['capacity_diagnostic'])
+    if item.get('mode')=='context-packs' and 'context_pack_diagnostic' in item:
+        from .context_packs import sanitize_capacity_diagnostic
+        result['context_pack_diagnostic']=sanitize_capacity_diagnostic(item['context_pack_diagnostic'])
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner

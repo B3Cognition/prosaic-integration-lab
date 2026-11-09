@@ -4,6 +4,47 @@ from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 import json
 from threading import Thread
 
+CAPACITY_PHASES={'capture','dispatch','status','load_state','load_receipt','receipt_size','state_size'}
+CAPACITY_ERRORS={'AssertionError','ConversationError','StoreUnavailable','StoreConflict','LeaseLost',
+    'ContextPackError','ValueError','RuntimeError','OperationalError','unknown'}
+CAPACITY_REASONS={'unknown','storeUnavailable','leaseLost','recordLimit','stateLimit','receiptLimit',
+    'inputTooLarge','runtimeFailure','runtimeTimeout','contextPackLimit','contextUseDenied',
+    'bindingMismatch','quotaExceeded','busy','interrupted','failed','blocked','completed',
+    'statementTimeout','lockTimeout','constraintRejected','valueLimit','serializationFailure','deadlock','connectionLost'}
+
+
+def sanitize_capacity_diagnostic(value):
+    fields={'phase','error','reason','receipt_bytes','state_bytes'}
+    if (type(value) is not dict or set(value)!=fields or
+        type(value['phase']) is not str or value['phase'] not in CAPACITY_PHASES or
+        type(value['error']) is not str or value['error'] not in CAPACITY_ERRORS or
+        type(value['reason']) is not str or value['reason'] not in CAPACITY_REASONS or
+        any(v is not None and (type(v) is not int or not 0<=v<=8388608)
+            for v in (value['receipt_bytes'],value['state_bytes']))):
+        return {'status':'unavailable'}
+    return dict(value)
+
+
+def capacity_failure(phase,error,*,reason=None,receipt_bytes=None,state_bytes=None):
+    name=type(error).__name__
+    code=getattr(error,'code',reason)
+    current=error
+    for _ in range(4):
+        # SQLSTATE has a fixed public meaning; never expose driver diagnostics,
+        # statements, connection parameters or database-generated identifiers.
+        mapped={'57014':'statementTimeout','55P03':'lockTimeout','23514':'constraintRejected',
+            '22001':'valueLimit','40001':'serializationFailure','40P01':'deadlock',
+            '08006':'connectionLost'}.get(getattr(current,'sqlstate',None))
+        if mapped:
+            code=mapped;break
+        current=getattr(current,'__cause__',None) or getattr(current,'__context__',None)
+        if current is None:break
+    diagnostic=sanitize_capacity_diagnostic({'phase':phase,
+        'error':name if name in CAPACITY_ERRORS else 'unknown',
+        'reason':code if type(code) is str and code in CAPACITY_REASONS else 'unknown',
+        'receipt_bytes':receipt_bytes,'state_bytes':state_bytes})
+    return 'CONTEXT_PACK_CAPACITY '+json.dumps(diagnostic,sort_keys=True)
+
 
 def require_candidate_install(manifest):
     """Audit host SDK bytes as well as the consumer image before any resources."""
