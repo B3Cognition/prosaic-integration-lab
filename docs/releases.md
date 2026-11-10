@@ -1,11 +1,11 @@
 # Releases and compatibility
 
-Compatibility checkpoint: 2026-11-09. Lab **0.9.12** selects public Core
-**0.5.0**, Runtime **0.9.19**, Harness **0.9.13**, recorder **0.3.0** and Harness
-PostgreSQL **0.4.2**. [Context-pack acceptance](context-packs.md) is required in
+Compatibility checkpoint: 2026-11-10. Lab **0.9.13** selects public Core
+**0.5.0**, Runtime **0.9.20**, Harness **0.9.14**, recorder **0.3.0** and Harness
+PostgreSQL **0.4.3**. Tool-evidence and [context-pack acceptance](context-packs.md) are required in
 all four released Linux architecture/PostgreSQL cells. Earlier profiles remain
 available with their original hashes; their evidence does not certify the new train.
-See [release scope and qualification](release-0.9.12.md). Publication status and
+See [release scope and qualification](release-0.9.13.md). Publication status and
 original artifacts are authoritative on the linked release pages.
 
 Value-guard v2 requires explicit readmission from the old train. Header options
@@ -22,7 +22,7 @@ Published recorder0.3.0 keeps its schema/bytes; no old records are rewritten.
 
 ## Publication and previous releases
 
-The [Lab0.9.12 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12)
+The [Lab0.9.13 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13)
 is the authority for its publication status, original archives and attached
 qualification. A source version or tag alone is not proof of publication.
 
@@ -30,6 +30,7 @@ Earlier published versions are linked below. Backfilled notes explain changes us
 
 | Release | Published (UTC) | Notes |
 | --- | --- | --- |
+| [v0.9.13](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13) | See release page | [Safe tool events and citations](release-0.9.13.md) |
 | [v0.9.12](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12) | See release page | [Context-pack notes](release-0.9.12.md) |
 | [v0.9.11](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.11) | See release page | [Sent-effort notes](release-0.9.11.md) |
 | [v0.9.10](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.10) | 2026-11-08 | [Accounting metadata notes](release-0.9.10.md) |

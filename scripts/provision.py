@@ -24,7 +24,11 @@ def main():
                             env=env, capture_output=True)
     if result.returncode:
         raise RuntimeError('Harness explicit migration failed')
-    if config.get('context_packs') is True:
+    if config.get('tool_contracts') is True:
+        from prosaic_harness_postgres import PostgresRunStore
+        with PostgresRunStore(migration,namespace='provision') as store:
+            store.migrate_tool_contract_storage()
+    elif config.get('context_packs') is True:
         from prosaic_harness_postgres import PostgresRunStore
         with PostgresRunStore(migration,namespace='provision') as store:
             store.migrate_context_pack_storage()
@@ -34,7 +38,7 @@ def main():
         from prosaic_harness_postgres import PostgresSessionStore
         from prosaic_integration_lab.conversation_schema import initialize
         store=PostgresSessionStore(migration,namespace='provision')
-        try:store.initialize(**({'context_packs':True} if config.get('context_packs') is True else {}))
+        try:store.initialize(**({'tool_contracts':True} if config.get('tool_contracts') is True else {'context_packs':True} if config.get('context_packs') is True else {}))
         finally:store.close()
         initialize(migration,runtime_role='app_runtime')
     if 'billing_exporter' in config['roles']:

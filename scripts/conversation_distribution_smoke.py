@@ -197,7 +197,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
     run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
         directory=directory,environment=environment)
-    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN
+    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN
     selected=json.loads(manifest.read_bytes())
     if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
@@ -207,7 +207,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN):
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
             raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
                 '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
@@ -215,16 +215,19 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             if not (receipt.get('passed') is True and receipt.get('caseCount')==count
                     and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
                 raise ValueError('installed evaluation qualification incomplete')
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN):
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
         # The same external installed consumers execute every newly introduced blueprint.
         feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
         feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} == SENT_EFFORT_TRAIN:
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
+        if {item['distribution']:item['version'] for item in selected['artifacts']} == TOOL_EVIDENCE_TRAIN:
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
+            feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
         run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=',
              *feature_paths, '-q'],
             directory=directory, environment=feature_environment)

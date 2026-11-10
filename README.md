@@ -1,6 +1,9 @@
 # Prosaic integration lab
 
-Release train: **0.9.12**, with Runtime **0.9.19**, Harness **0.9.13** and Harness PostgreSQL **0.4.2**. See [release notes and compatible SDK versions](docs/releases.md).
+Lab **0.9.13** adds safe tool events and captured citations with Runtime **0.9.20**,
+Harness **0.9.14** and store **0.4.3**. See [release notes](docs/release-0.9.13.md).
+
+Release train: **0.9.13**, with Runtime **0.9.20**, Harness **0.9.14** and Harness PostgreSQL **0.4.3**. See [release notes and compatible SDK versions](docs/releases.md).
 
 [Context-pack acceptance](docs/context-packs.md) now runs in the normal released-SDK
 matrix. It checks per-agent defaults, workflow-node overrides, accepted-record
@@ -40,9 +43,9 @@ account, API key, local model or Docker.
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.19; fixtures need no key; bounded live calls require opt-in |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.20; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.19 and Harness 0.9.13 train; both synthetic provider wires, no live calls |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.20 and Harness 0.9.14 train; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -72,7 +75,7 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.12](docs/release-0.9.12.md)** supplies the current SDK train with
+Lab **[0.9.13](docs/release-0.9.13.md)** supplies the current SDK train with
 a [feature-to-blueprint map](docs/feature-blueprints.md). Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact
@@ -179,3 +182,10 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 See [the optional capability guide](docs/quickstart.md#optional-capabilities).
 Memory and correction remain experimental and opt-in.
+
+The `tool-evidence` lane demonstrates safe tool events and
+captured citations with exact paired Runtime/Harness artifacts. It runs 12 logical
+cases on both provider protocols (24 required cases), with separately owned
+PostgreSQL 16/18 storage. See the [copyable host](lab_runner/blueprints/tool_evidence/README.md).
+The released lane joins every ordinary architecture/database cell. See the
+[tool-evidence guide](docs/tool-evidence.md); archived candidates retain separate lineage checks.

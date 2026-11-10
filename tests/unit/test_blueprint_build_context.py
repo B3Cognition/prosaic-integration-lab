@@ -19,7 +19,7 @@ from lab_runner.blueprints import copy_blueprint
 import lab_runner.blueprints as blueprints
 assert Path(blueprints.__file__).resolve().is_relative_to(Path(sys.argv[1]).resolve())
 destination=Path(sys.argv[2])
-for name in ('request-headers','revision-review','conversation-caps','rule-admission','workflow-enforcement','accounting-metadata','sent-effort'):
+for name in ('request-headers','revision-review','conversation-caps','rule-admission','workflow-enforcement','accounting-metadata','sent-effort','tool-evidence'):
     project=copy_blueprint(name,destination/name)
     assert (project/'README.md').is_file()
     assert (project/'.prosaic/subagents').is_dir()
@@ -54,6 +54,8 @@ sys.path.insert(0,sys.argv[1])
 from lab_runner.quality.suite import resource
 saved=json.loads(resource('sdk-provenance-pre-context-packs.json'))
 assert {a['distribution']:a['version'] for a in saved['artifacts']}['b3-prosaic-runtime']=='0.9.18'
+saved=json.loads(resource('sdk-provenance-pre-tool-contracts.json'))
+assert {a['distribution']:a['version'] for a in saved['artifacts']}['b3-prosaic-runtime']=='0.9.19'
 from lab_runner.memory.suite import load_suite
 assert len(load_suite()['cases'])==12
 '''

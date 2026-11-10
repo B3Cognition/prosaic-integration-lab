@@ -62,7 +62,7 @@ def command(engine, *args):
 
 
 class OwnedStack:
-    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,conversation=False,baseline_image=None,context_assembly=False,context_packs=False):
+    def __init__(self, engine='docker', postgres_major=16, users=3, *, candidate=False, identity=False, billing=False, consumer_image=None, observability=False,capacity_policy=None, candidate_manifest=None,native=False,conversation=False,baseline_image=None,context_assembly=False,context_packs=False,tool_contracts=False):
         from .workload import identities
         self.identities = identities(users)
         self.context_assembly=context_assembly
@@ -83,8 +83,9 @@ class OwnedStack:
             if not re.fullmatch('sha256:[0-9a-f]{64}',consumer_image): raise ValueError('immutable consumer image required')
         self.consumer_image = consumer_image
         self.native_fixture=native
-        self.context_packs_fixture=context_packs
-        self.conversation_fixture=conversation or context_packs
+        self.tool_contracts_fixture=tool_contracts
+        self.context_packs_fixture=context_packs or tool_contracts
+        self.conversation_fixture=conversation or context_packs or tool_contracts
         self.baseline_image=baseline_image
         self.owner = uuid.uuid4().hex
         self.directory = ROOT / '.lab' / self.owner
@@ -270,7 +271,7 @@ class OwnedStack:
         if self.conversation_fixture:credentials['conversation_runtime']=secrets.token_hex(24)
         if self.billing:
             credentials['billing_exporter'] = secrets.token_hex(24)
-        self._secret('provision.json', json.dumps({'admin_password': admin, 'roles': credentials,'context_packs':self.context_packs_fixture}))
+        self._secret('provision.json', json.dumps({'admin_password': admin, 'roles': credentials,'context_packs':self.context_packs_fixture,'tool_contracts':self.tool_contracts_fixture}))
         container_config = {'namespace': f'lab-{self.owner}', 'environment': 'sandbox', 'assets': '/srv/lab/assets',
                             'fixture_events_url': 'http://model:8000/events'}
         if self.native_fixture:
