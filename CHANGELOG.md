@@ -5,6 +5,7 @@
 - Adopt safe tool events/citations with Runtime 0.9.20, Harness 0.9.14 and store 0.4.3.
 - Add the copied tool-evidence host and 24-case dual-provider lane with owned PostgreSQL16/18.
 - Recheck source/history revocation and retain original Core/recorder bytes.
+- Keep acceptance scripts usable from a source archive without a preinstalled Lab package.
 - See [release notes](docs/release-0.9.13.md); publication evidence accompanies the release.
 
 ## 0.9.12 — 2026-11-09

@@ -55,7 +55,7 @@ def test_candidate_feature_modes_cannot_be_mixed(tmp_path):
 def test_released_context_pack_train_preserves_original_core_and_recorder():
     from lab_runner.gates import CONTEXT_PACK_TRAIN
     root=Path(__file__).resolve().parents[2]
-    current=json.loads((root/'dependencies/releases.json').read_text())
+    current=json.loads((root/'dependencies/releases-pre-tool-contracts-2026-11-10.json').read_text())
     previous=json.loads((root/'dependencies/releases-pre-context-packs-2026-11-09.json').read_text())
     assert {a['distribution']:a['version'] for a in current['artifacts']}==CONTEXT_PACK_TRAIN
     assert (root/'dependencies/releases.json').read_bytes()==(root/'dependencies/releases-reasoning.json').read_bytes()

@@ -94,3 +94,21 @@ def test_released_mode_requires_complete_stable_family_and_original_retained_byt
     validate_tool_manifest(data,candidate=False)
     data['artifacts'][0]['sha256']='0'*64
     with pytest.raises(ValueError):validate_tool_manifest(data,candidate=False)
+
+
+def test_released_tools_family_requires_new_lane_and_preserves_existing_lanes():
+    from lab_runner.gates import required_modes,supports_context_packs,supports_conversation
+    from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN
+    manifest={'artifacts':[{'distribution':name,'version':version} for name,version in RELEASE_TRAIN.items()]}
+    assert supports_context_packs(manifest) and supports_conversation(manifest)
+    modes=required_modes(candidate=False,manifest=manifest)
+    assert {'tool-evidence','context-packs','conversation','native','audit'}<=set(modes)
+
+
+def test_released_acceptance_requires_installed_tool_blueprint_and_full_lane_timeout():
+    root=Path(__file__).resolve().parents[2]
+    workflow=(root/'.github/workflows/required-acceptance.yml').read_text()
+    assert 'PROSAIC_TOOL_EVIDENCE_REQUIRED=1' in workflow
+    assert 'tests/blueprint_acceptance/test_tool_evidence.py' in workflow
+    runner=(root/'scripts/required_acceptance.py').read_text()
+    assert "'context-packs','tool-evidence'" in runner

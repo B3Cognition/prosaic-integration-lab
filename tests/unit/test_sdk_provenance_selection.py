@@ -45,7 +45,7 @@ def test_current_public_train_binds_the_new_installed_sdk_versions_and_hashes():
     from lab_runner.quality.sdk_provenance import qualified_sdk
     manifest=ROOT/'dependencies/releases.json'
     data=json.loads(manifest.read_bytes())
-    installed={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.19','b3-prosaic-harness':'0.9.13'}
+    installed={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.20','b3-prosaic-harness':'0.9.14'}
     profile=qualified_sdk(installed)
     assert profile['manifestDigest']==hashlib.sha256(manifest.read_bytes()).hexdigest()
     assert profile['artifacts']==[{key:item[key] for key in ('distribution','sha256','version')}
@@ -58,3 +58,14 @@ def test_public_blueprint_train_admits_context_but_rejects_mixed_harness():
     assert supports_consumer_blueprints(data) and supports_context_assembly(data)
     next(a for a in data['artifacts'] if a['distribution']=='b3-prosaic-harness')['version']='0.9.0'
     with pytest.raises(ValueError):supports_context_assembly(data)
+
+
+def test_previous_context_pack_family_keeps_original_profile_after_tool_release():
+    from lab_runner.quality.sdk_provenance import qualified_sdk
+    archived=ROOT/'dependencies/releases-pre-tool-contracts-2026-11-10.json'
+    manifest=json.loads(archived.read_bytes())
+    names={'b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness'}
+    installed={a['distribution']:a['version'] for a in manifest['artifacts'] if a['distribution'] in names}
+    profile=qualified_sdk(installed)
+    assert profile['manifestDigest']==hashlib.sha256(archived.read_bytes()).hexdigest()
+    assert profile==json.loads((ROOT/'lab_runner/quality/data/sdk-provenance-pre-tool-contracts.json').read_bytes())

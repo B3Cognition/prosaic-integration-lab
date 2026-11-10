@@ -1,5 +1,18 @@
 # Current delivery status
 
+## Safe tool events and Lab 0.9.13 — 2026-11-10
+
+The current manifest selects Runtime 0.9.20, Harness 0.9.14 and Harness PostgreSQL
+0.4.3, retaining original Core 0.5.0 and Runtime recorder 0.3.0 bytes. Safe display
+and captured citations have a complete copyable host and 24 required dual-provider
+cases in every architecture/database cell. Existing gates and archived profiles
+remain available. Parallel calls, MCP and sub-agents remain follow-ups.
+
+See the [guide](tool-evidence.md), [release scope](release-0.9.13.md) and
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13)
+for published archives and qualification. Earlier checkpoints below describe their
+original SDK trains.
+
 ## Context packs and Lab 0.9.12 — 2026-11-09
 
 The current train selects Core 0.5.0, Runtime 0.9.19, Harness 0.9.13 and

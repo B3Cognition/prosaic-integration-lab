@@ -5,13 +5,14 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
-## Lab 0.9.11 feature map
+## Lab 0.9.13 feature map
 
-The checksum-pinned train is Core 0.5.0, Runtime 0.9.18, Harness 0.9.12,
-Runtime recorder 0.3.0 and Harness store 0.4.1.
+The checksum-pinned train is Core 0.5.0, Runtime 0.9.20, Harness 0.9.14,
+Runtime recorder 0.3.0 and Harness store 0.4.3.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
+| Safe tool events and captured citations | `tool-evidence` | Approved bounded display, typed results, captured selections, current permissions, durable reuse and fabricated-citation refusal on both provider protocols. [Guide](tool-evidence.md) |
 | Sent reasoning-effort evidence | `sent-effort` | Actual HTTP/native controls and format, requested/default annotations, bounded retries/fallback, failure boundaries and durable file/PG no-call recovery without provider-compliance claims. [Guide](sent-reasoning-effort.md) |
 | Accounting request metadata | `accounting-metadata` | Trusted run/variant labels reach prepare before dispatch, stay out of provider payloads, and remain frozen through file/PG resume and no-call receipt recovery. [Guide](accounting-request-metadata.md) |
 | Per-call OpenAI-compatible headers | `request-headers` | Real HTTP receives `x-tokenproxy-no-cache: 1`; prompt bytes and artifact identity match the ordinary call; later calls do not inherit it; tool continuations retain it; unsupported transport refuses before dispatch |
@@ -22,6 +23,7 @@ Runtime recorder 0.3.0 and Harness store 0.4.1.
 
 ```sh
 python -m lab_runner.blueprints list
+python -m lab_runner.blueprints copy tool-evidence /private/my-tool-host
 python -m lab_runner.blueprints copy sent-effort /private/my-effort-host
 python -m lab_runner.blueprints copy accounting-metadata /private/my-accounting-host
 python -m lab_runner.blueprints copy workflow-enforcement /private/my-workflow-review

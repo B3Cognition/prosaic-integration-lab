@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0,str(ROOT))
+sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
 from lab_runner.gates import COUNTS,export,validate,required_modes,supports_context_assembly
 from lab_runner.stack import EngineError
 
@@ -53,7 +53,7 @@ def main():
         item = {}
         try:
             process = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,
-                timeout=1200 if mode in {'legacy-upgrade','conversation'} else 900 if mode in {'lago','native','qualification','context-packs'} else 300)
+                timeout=1200 if mode in {'legacy-upgrade','conversation'} else 900 if mode in {'lago','native','qualification','context-packs','tool-evidence'} else 300)
             for line in process.stdout.splitlines():
                 if line.startswith('{'): item = json.loads(line)
             validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha,lineage_sha=lineage_sha,

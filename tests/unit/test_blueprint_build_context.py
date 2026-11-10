@@ -54,6 +54,8 @@ sys.path.insert(0,sys.argv[1])
 from lab_runner.quality.suite import resource
 saved=json.loads(resource('sdk-provenance-pre-context-packs.json'))
 assert {a['distribution']:a['version'] for a in saved['artifacts']}['b3-prosaic-runtime']=='0.9.18'
+saved=json.loads(resource('sdk-provenance-pre-tool-contracts.json'))
+assert {a['distribution']:a['version'] for a in saved['artifacts']}['b3-prosaic-runtime']=='0.9.19'
 from lab_runner.memory.suite import load_suite
 assert len(load_suite()['cases'])==12
 '''

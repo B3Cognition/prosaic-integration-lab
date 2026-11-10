@@ -132,7 +132,7 @@ jobs:
         env:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
-          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower())" >> "$GITHUB_OUTPUT"
+          .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly,supports_tool_evidence; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower()); print('tools='+str(supports_tool_evidence(manifest)).lower())" >> "$GITHUB_OUTPUT"
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json
@@ -150,6 +150,12 @@ jobs:
       - name: Current released baseline units and functional regressions
         if: ${{ steps.conversation-sdk.outputs.enabled != 'true' }}
         run: .venv/bin/python -m pytest -q --ignore=tests/functional/test_conversation_journey.py --ignore=tests/functional/test_conversation_http.py --ignore=tests/functional/test_conversation_conformance.py --ignore=tests/functional/test_context_assembly.py --ignore=tests/unit/test_context_counter.py --ignore=tests/unit/test_context_scenarios.py
+      - name: Verify released installed tool-evidence blueprint
+        if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.tools == 'true' }}
+        run: |
+          .venv/bin/python -m build --wheel
+          .venv/bin/python -m pip install --no-deps dist/*.whl
+          PROSAIC_TOOL_EVIDENCE_REQUIRED=1 .venv/bin/python -I -m pytest -o pythonpath= -q tests/blueprint_acceptance/test_tool_evidence.py
       - name: Qualify current Lab distributions with public SDKs
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
         env:

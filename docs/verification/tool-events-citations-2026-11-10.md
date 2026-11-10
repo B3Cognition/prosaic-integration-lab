@@ -1,5 +1,9 @@
 # Safe tool events and citations: implemented and independently reviewed
 
+This is the implementation checkpoint before stable release preparation. See
+[Lab 0.9.13](../release-0.9.13.md) for the subsequent release scope and linked
+publication evidence. The statements below describe the checkpoint only.
+
 This increment adds opt-in safe tool events, captured evidence and checked citations
 across Runtime, Harness and Lab. Parallel calls, MCP clients and sub-agent
 orchestration remain separate follow-ups. No release tags, publication, stable
