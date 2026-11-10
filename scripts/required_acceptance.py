@@ -53,7 +53,7 @@ def main():
         item = {}
         try:
             process = subprocess.run(command,cwd=ROOT,capture_output=True,text=True,
-                timeout=1200 if mode in {'legacy-upgrade','conversation'} else 900 if mode in {'lago','native','qualification','context-packs','tool-evidence'} else 300)
+                timeout=1200 if mode in {'legacy-upgrade','conversation'} else 900 if mode in {'lago','native','qualification','context-packs','tool-evidence','parallel-tools'} else 300)
             for line in process.stdout.splitlines():
                 if line.startswith('{'): item = json.loads(line)
             validate(item,mode,args.postgres_version,candidate=args.candidate,manifest_sha=manifest_sha,lineage_sha=lineage_sha,

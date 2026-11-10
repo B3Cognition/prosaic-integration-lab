@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
-ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24}
+ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -23,15 +23,26 @@ CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
     'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}
 
 from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN as TOOL_EVIDENCE_TRAIN
+from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN
+
+def supports_parallel_tools(manifest):
+    actual={item.get("distribution"):item.get("version") for item in manifest.get("artifacts",())}
+    if actual!=PARALLEL_TOOL_TRAIN:
+        if any(item.get("version")==PARALLEL_TOOL_TRAIN.get(item.get("distribution")) for item in manifest.get("artifacts",()) if item.get("distribution") not in {"b3-prosaic","b3-prosaic-runtime-postgres"}):raise ValueError("mixed parallel SDK family")
+        return False
+    from .parallel_tools import validate_parallel_manifest
+    validate_parallel_manifest(manifest)
+    return True
+
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -47,8 +58,9 @@ def supports_conversation(manifest):
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
+    if actual==PARALLEL_TOOL_TRAIN:supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -58,22 +70,24 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
     # Historical published trains retain their original gates.
-    return tuple(mode for mode in ALL_COUNTS if (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
+    return tuple(mode for mode in ALL_COUNTS if (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}==TOOL_EVIDENCE_TRAIN
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 from prosaic_integration_lab.tool_evidence import CASES as TOOL_EVIDENCE_CASES
+from prosaic_integration_lab.parallel_tools import CASES as PARALLEL_CASES
 FAILURE_CASES={
+    'parallel-tools':{'test_parallel_tools['+case+'-'+provider+']':case.replace('-','_') for case in PARALLEL_CASES for provider in ('openai-compatible','anthropic')},
     'tool-evidence':{'test_tool_evidence['+case+'-'+provider+']':case.replace('-','_') for case in TOOL_EVIDENCE_CASES for provider in ('openai-compatible','anthropic')},
     'context-packs':{
         'test_markdown_nodes_select_independent_contexts':'node_context',

@@ -189,3 +189,6 @@ cases on both provider protocols (24 required cases), with separately owned
 PostgreSQL 16/18 storage. See the [copyable host](lab_runner/blueprints/tool_evidence/README.md).
 The released lane joins every ordinary architecture/database cell. See the
 [tool-evidence guide](docs/tool-evidence.md); archived candidates retain separate lineage checks.
+
+The development candidate includes a copyable **parallel read tools** host and
+32 additional acceptance witnesses. See [candidate qualification and compatibility](docs/parallel-tools.md).

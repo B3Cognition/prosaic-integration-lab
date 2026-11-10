@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "manifestDigest": "1c9acfc8b17ba2c22ea9d100bebd6c744a8a85ef1ec08a30bfee0dfd9492cf06",
+  "artifacts": [
+    {
+      "distribution": "b3-prosaic",
+      "version": "0.5.0",
+      "sha256": "e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "version": "0.9.15.dev1",
+      "sha256": "3f1985a2298f64761fe4389cab597d9eec40b7dc395ed14103d2cbeeae74be33"
+    },
+    {
+      "distribution": "b3-prosaic-harness-postgres",
+      "version": "0.4.4.dev1",
+      "sha256": "6053f175ab3ab1db07e40b810b42157a5a0fd5099481771fbd3fb9c83b87b3f0"
+    },
+    {
+      "distribution": "b3-prosaic-runtime",
+      "version": "0.9.21.dev1",
+      "sha256": "bc751dcf302caf8360949042f718052700447f6b6e3b1110b9424e0b639b7839"
+    },
+    {
+      "distribution": "b3-prosaic-runtime-postgres",
+      "version": "0.3.0",
+      "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca"
+    }
+  ]
+}
