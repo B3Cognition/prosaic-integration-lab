@@ -84,3 +84,13 @@ def test_cli_bootstraps_application_source_without_pytest_pythonpath(tmp_path):
     result=subprocess.run([sys.executable,'-m','lab_runner','test','--mode','tool-evidence','--candidate','--candidate-manifest',str(manifest)],
         cwd=root,env=env,capture_output=True,text=True,timeout=15)
     assert result.returncode==2 and 'Traceback' not in result.stderr
+
+
+def test_released_mode_requires_complete_stable_family_and_original_retained_bytes():
+    from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN
+    from lab_runner.tool_evidence import validate_tool_manifest
+    data=paired_manifest();data.pop('candidate_lineage')
+    for item in data['artifacts']:item['version']=RELEASE_TRAIN[item['distribution']]
+    validate_tool_manifest(data,candidate=False)
+    data['artifacts'][0]['sha256']='0'*64
+    with pytest.raises(ValueError):validate_tool_manifest(data,candidate=False)

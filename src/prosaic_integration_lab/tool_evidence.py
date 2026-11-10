@@ -8,6 +8,7 @@ CASES=('safe-approved-event','event-only-legacy-return','denied-secret-display',
 TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.20.dev2','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.14.dev2','b3-prosaic-harness-postgres':'0.4.3.dev2'}
 
+RELEASE_TRAIN={**TRAIN,'b3-prosaic-runtime':'0.9.20','b3-prosaic-harness':'0.9.14','b3-prosaic-harness-postgres':'0.4.3'}
 
 def require_tool_evidence_sdk():
     from importlib import metadata
@@ -16,10 +17,12 @@ def require_tool_evidence_sdk():
     if not {'tool_events_v1','tool_results_v1','citations_v1'}<=runtime.ProsaicRuntime.capabilities or not hasattr(harness,'VerifiedToolReceipt'):
         raise ValueError('installed tool evidence capability unavailable')
     import importlib
+    versions={name:metadata.version(name) for name in TRAIN}
+    if versions not in (TRAIN,RELEASE_TRAIN):raise ValueError('installed tool evidence SDK versions differ')
     for module,name in [('prosaic','b3-prosaic'),('prosaic_runtime','b3-prosaic-runtime'),('prosaic_runtime_postgres','b3-prosaic-runtime-postgres'),
             ('prosaic_harness','b3-prosaic-harness'),('prosaic_harness_postgres','b3-prosaic-harness-postgres')]:
         owner=metadata.distribution(name);source=Path(importlib.import_module(module).__file__).resolve()
-        if owner.version!=TRAIN[name] or 'site-packages' not in source.parts or source not in {Path(owner.locate_file(f)).resolve() for f in owner.files}:
+        if 'site-packages' not in source.parts or source not in {Path(owner.locate_file(f)).resolve() for f in owner.files}:
             raise ValueError('installed tool evidence SDK identity differs')
 
 

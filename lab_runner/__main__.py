@@ -76,13 +76,13 @@ def main():
     if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs','tool-evidence'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     if args.mode=='tool-evidence':
-        if args.command!='test' or not args.candidate or args.candidate_manifest is None:parser.error('tool-evidence requires test and complete candidate manifest')
+        if args.command!='test':parser.error('tool-evidence requires test')
         source=str(ROOT/'src')
         if source not in sys.path:sys.path.insert(0,source)
         from prosaic_integration_lab.tool_evidence import require_tool_evidence_sdk
         from .tool_evidence import require_tool_evidence_install
         try:
-            require_tool_evidence_sdk();require_tool_evidence_install(args.candidate_manifest)
+            require_tool_evidence_sdk();require_tool_evidence_install(args.candidate_manifest if args.candidate else ROOT/'dependencies/releases.json',candidate=args.candidate)
         except (OSError,ValueError,KeyError,TypeError,ImportError):parser.error('installed tool evidence SDK bytes must match the complete qualified handoff')
     if args.mode=='context-packs':
         if args.command!='test':parser.error('context-packs requires test')

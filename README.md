@@ -1,5 +1,8 @@
 # Prosaic integration lab
 
+Lab **0.9.13** adds safe tool events and captured citations with Runtime **0.9.20**,
+Harness **0.9.14** and store **0.4.3**. See [release notes](docs/release-0.9.13.md).
+
 Release train: **0.9.12**, with Runtime **0.9.19**, Harness **0.9.13** and Harness PostgreSQL **0.4.2**. See [release notes and compatible SDK versions](docs/releases.md).
 
 [Context-pack acceptance](docs/context-packs.md) now runs in the normal released-SDK
@@ -180,7 +183,7 @@ Apache-2.0. See [LICENSE](LICENSE).
 See [the optional capability guide](docs/quickstart.md#optional-capabilities).
 Memory and correction remain experimental and opt-in.
 
-The unpublished `tool-evidence` candidate lane demonstrates safe tool events and
+The `tool-evidence` lane demonstrates safe tool events and
 captured citations with exact paired Runtime/Harness artifacts. It runs 12 logical
 cases on both provider protocols (24 required cases), with separately owned
 PostgreSQL 16/18 storage. See the [copyable host](lab_runner/blueprints/tool_evidence/README.md).
