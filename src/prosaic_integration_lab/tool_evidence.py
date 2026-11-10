@@ -5,8 +5,8 @@ import json,re,time,uuid
 CASES=('safe-approved-event','event-only-legacy-return','denied-secret-display','admitted-typed-output',
     'fabricated-citation','selected-inline-citation','exact-deferred-partial-read','replay-one-effect',
     'receipt-adoption-zero-work','retained-source-revocation','metadata-number-guard-isolation','unsupported-forged-delivery')
-TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.20.dev1','b3-prosaic-runtime-postgres':'0.3.0',
-    'b3-prosaic-harness':'0.9.14.dev1','b3-prosaic-harness-postgres':'0.4.3.dev1'}
+TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.20.dev2','b3-prosaic-runtime-postgres':'0.3.0',
+    'b3-prosaic-harness':'0.9.14.dev2','b3-prosaic-harness-postgres':'0.4.3.dev2'}
 
 
 def require_tool_evidence_sdk():
@@ -135,7 +135,12 @@ def run_tool_evidence_scenario(case,*,provider,session_store=None,journal=None):
                 if case=='retained-source-revocation':
                     ref=chat.retain_citation(session.session_id,aid,eid);allowed[0]=False
                     assert not chat.citation_view(session.session_id,aid,eid)['available']
-                    denied=chat.send(session.session_id,message_id='two',message='Reuse',expected_revision=result.document['revision'],retained_evidence=(ref,))
+                    try:chat.history(session.session_id)
+                    except harness.ConversationError as error:assert error.code=='evidenceUseDenied'
+                    else:raise AssertionError('revoked history remained readable')
+                    implicit=chat.send(session.session_id,message_id='two',message='Continue without imports',expected_revision=result.document['revision'])
+                    assert implicit.document['failureCode']=='evidenceUseDenied'
+                    denied=chat.send(session.session_id,message_id='three',message='Reuse',expected_revision=implicit.document['revision'],retained_evidence=(ref,))
                     assert denied.document['failureCode']=='evidenceUseDenied'
                 if case=='admitted-typed-output':assert view['content']==records and 'count' not in view
                 if case=='safe-approved-event':assert any(event.get('toolEventV1',{}).get('display',{}).get('count')==14 for event in events)

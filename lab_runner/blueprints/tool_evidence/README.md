@@ -1,6 +1,6 @@
 # Safe events and captured citations
 
-This candidate requires Runtime 0.9.20.dev1 and Harness 0.9.14.dev1.
+This candidate requires Runtime 0.9.20.dev2 and Harness 0.9.14.dev2.
 Copy with `python -m lab_runner.blueprints copy tool-evidence DESTINATION`.
 `host.py` accepts the application's authenticated lookup and explicit current
 permissions. The tool returns actual bounded records, selects public component
