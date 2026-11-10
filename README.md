@@ -179,3 +179,9 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 See [the optional capability guide](docs/quickstart.md#optional-capabilities).
 Memory and correction remain experimental and opt-in.
+
+The unpublished `tool-evidence` candidate lane demonstrates safe tool events and
+captured citations with exact paired Runtime/Harness artifacts. It runs 12 logical
+cases on both provider protocols (24 required cases), with separately owned
+PostgreSQL 16/18 storage. See the [copyable host](lab_runner/blueprints/tool_evidence/README.md).
+The candidate lane does not publish or replace released SDK manifests.
