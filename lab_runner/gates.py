@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
-ALL_COUNTS = {**COUNTS,'context-packs':12}
+ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -57,7 +57,7 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
     # Historical published trains retain their original gates.
-    return tuple(mode for mode in ALL_COUNTS if (mode!='context-packs' or supports_context_packs(manifest)) and
+    return tuple(mode for mode in ALL_COUNTS if mode!='tool-evidence' and (mode!='context-packs' or supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 
@@ -67,7 +67,9 @@ def supports_context_packs(manifest):
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
+from prosaic_integration_lab.tool_evidence import CASES as TOOL_EVIDENCE_CASES
 FAILURE_CASES={
+    'tool-evidence':{'test_tool_evidence['+case+'-'+provider+']':case.replace('-','_') for case in TOOL_EVIDENCE_CASES for provider in ('openai-compatible','anthropic')},
     'context-packs':{
         'test_markdown_nodes_select_independent_contexts':'node_context',
         'test_service_context_reopens_and_replays_without_provider_work':'accepted_records',

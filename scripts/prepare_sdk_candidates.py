@@ -40,10 +40,12 @@ def read(path):
     return json.loads(content),content
 
 
-def validate_run(run,commit):
+def validate_run(run,commit,*,tool_contracts=False):
+    name="Tool contract candidate" if tool_contracts else "Publish SDK"
+    path=".github/workflows/tool-contract-candidate.yml" if tool_contracts else ".github/workflows/publish.yml"
     if (not re.fullmatch('[0-9a-f]{40}',commit) or run.get('head_sha')!=commit or
-        run.get('conclusion')!='success' or run.get('name')!='Publish SDK' or
-        run.get('path')!='.github/workflows/publish.yml' or run.get('event') not in {'push','workflow_dispatch'}):
+        run.get('conclusion')!='success' or run.get('name')!=name or
+        run.get('path')!=path or run.get('event') not in {'push','workflow_dispatch'}):
         raise ValueError('candidate requires successful exact-source qualification')
 
 
@@ -62,7 +64,10 @@ def retained_runtime_postgres(cache_root):
     return dict(item),cache/item['filename']
 
 
-def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False):
+def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False,tool_contracts=False):
+    if tool_contracts:
+        if context_assembly or context_packs:raise ValueError("candidate feature modes are mutually exclusive")
+        return curate_tool_contracts(candidates,manifest,cache_root)
     if context_assembly and context_packs:raise ValueError('candidate feature modes are mutually exclusive')
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
     expected_train=CONTEXT_PACK_EXPECTED if context_packs else CONTEXT_EXPECTED if context_assembly else EXPECTED
@@ -133,6 +138,61 @@ def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs
     return data
 
 
+
+def curate_tool_contracts(candidates,manifest,cache_root):
+    from lab_runner.tool_evidence import validate_tool_manifest
+    from prosaic_integration_lab.tool_evidence import TRAIN
+    manifest=Path(manifest);cache_root=Path(cache_root)
+    if manifest.resolve().is_relative_to((ROOT/'dependencies').resolve()):
+        raise ValueError('tool candidates must not replace published dependency manifests')
+    if len(candidates)!=3:raise ValueError('three explicit original SDK runs required')
+    artifacts=[];sources={};paired=[];retained=[]
+    released=sdk_manifest(ROOT/'dependencies/releases.json')
+    for (repository,run_id,commit,directory),expected_repository in zip(candidates,EXPECTED):
+        if repository!=expected_repository or not re.fullmatch('[1-9][0-9]*',run_id):raise ValueError('candidate order or run identity differs')
+        directory=Path(directory);receipt,raw=read(directory/'release-receipt.json')
+        if receipt.get('source_commit')!=commit or raw!=serialized(receipt):raise ValueError('candidate source differs')
+        if repository=='B3Cognition/prosaic':
+            original=next(item for item in released['artifacts'] if item['distribution']=='b3-prosaic')
+            entry=next(item for item in receipt['artifacts'] if item['filename']==original['filename'])
+            if entry['sha256']!=original['sha256'] or commit!=original['source_commit']:raise ValueError('original Core differs')
+            artifacts.append(dict(original));retained.append(dict(original));sources[original['filename']]=directory/original['filename']
+            continue
+        sdk='runtime' if repository.endswith('runtime') else 'harness'
+        qualification,_=read(directory/'qualification-tool-contract-consumer.json')
+        run,_=read(directory/'tool-contract-run.json');validate_run(run,commit,tool_contracts=True)
+        if str(run.get('id'))!=run_id:raise ValueError('candidate run ID differs')
+        candidate=dict(sdk=sdk,receipt=receipt,qualification=qualification,run=run)
+        paired.append(candidate)
+        for distribution in receipt['distributions']:
+            name,version=distribution['name'],distribution['version']
+            if TRAIN.get(name)!=version:raise ValueError('unexpected tool candidate distribution')
+            filename=name.replace('-','_')+'-'+version+'-py3-none-any.whl'
+            entry=next(item for item in receipt['artifacts'] if item['filename']==filename)
+            artifacts.append(dict(distribution=name,version=version,source_commit=commit,**entry));sources[filename]=directory/filename
+    recorder,path=retained_runtime_postgres(cache_root);retained.append(recorder);artifacts.append(recorder);sources[path.name]=path
+    if paired[1]['sdk']!='harness' or paired[0]['sdk']!='runtime':raise ValueError('paired candidate order differs')
+    harness_directory=Path(candidates[2][3])
+    if read(harness_directory/'tool-contract-runtime-receipt.json')[0]!=paired[0]['receipt'] or read(harness_directory/'tool-contract-runtime-qualification.json')[0]!=paired[0]['qualification']:
+        raise ValueError('Harness used different Runtime bytes')
+    upstream_run=read(harness_directory/'tool-contract-runtime-run.json')[0]
+    if upstream_run!=paired[0]['run']:raise ValueError('Harness used a different Runtime candidate run')
+    data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind='hosted-tool-contract-handoff',candidates=paired,retained_artifacts=retained))
+    validate_tool_manifest(data);payload=serialized(data)
+    if manifest.exists() and manifest.read_bytes()!=payload:raise ValueError('candidate manifest is immutable')
+    with tempfile.TemporaryDirectory() as temporary:
+        selected=Path(temporary)/'manifest.json';selected.write_bytes(payload);sdk_manifest(selected)
+        cache=cache_directory(selected,cache_root);cache.mkdir(parents=True,exist_ok=True)
+        for item in artifacts:
+            source=sources[item['filename']]
+            if source.is_symlink() or file_digest(source)!=item['sha256']:raise ValueError('candidate payload differs')
+            target=cache/item['filename']
+            if target.exists() and file_digest(target)!=item['sha256']:raise ValueError('candidate cache conflict')
+            shutil.copyfile(source,target)
+        verified_wheel_paths(selected,cache)
+    manifest.parent.mkdir(parents=True,exist_ok=True);manifest.write_bytes(payload)
+    return data
+
 def load_profile(path):
     """Host-owned convenience recipe; every selected run is still reverified."""
     value,_=read(Path(path))
@@ -163,6 +223,7 @@ def main(argv=None):
     parser.add_argument('--cache-root',type=Path,default=ROOT/'.cache/wheels')
     features=parser.add_mutually_exclusive_group()
     features.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
+    features.add_argument('--tool-contracts',action='store_true',help='curate only qualified safe-event/citation candidate workflows')
     features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
     args=parser.parse_args(argv)
     manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
@@ -183,12 +244,14 @@ def main(argv=None):
             for prefix,(repository,run_id,commit) in zip(('core','runtime','harness'),selected):
                 result=subprocess.run(['gh','api','repos/'+repository+'/actions/runs/'+run_id],
                     capture_output=True,text=True,check=True,timeout=60)
-                validate_run(json.loads(result.stdout),commit)
+                validate_run(json.loads(result.stdout),commit,tool_contracts=args.tool_contracts and repository!='B3Cognition/prosaic')
                 directory=Path(temporary)/prefix
                 subprocess.run(['gh','run','download',run_id,'--repo',repository,'--name','qualified-release',
                     '--dir',str(directory)],capture_output=True,check=True,timeout=120)
+                if args.tool_contracts and repository!='B3Cognition/prosaic':
+                    (directory/'tool-contract-run.json').write_bytes(serialized(json.loads(result.stdout)))
                 candidates.append((repository,run_id,commit,directory))
-            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,context_packs=args.context_packs)
+            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,context_packs=args.context_packs,tool_contracts=args.tool_contracts)
         print(json.dumps({'event':'candidate_sdk_bytes_verified','candidate_manifest_sha256':digest(args.manifest.read_bytes()),
             'candidate_lineage_sha256':digest(serialized(data['candidate_lineage'])),'wheel_count':5}))
         return 0
