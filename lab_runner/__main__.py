@@ -76,12 +76,12 @@ def main():
     if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs','tool-evidence','parallel-tools','mcp-client'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     if args.mode=='mcp-client':
-        if args.command!='test' or not args.candidate:parser.error('mcp-client requires a candidate test')
+        if args.command!='test':parser.error('mcp-client requires a test run')
         source=str(ROOT/'src')
         if source not in sys.path:sys.path.insert(0,source)
         from .mcp_client import require_mcp_install
         try:
-            require_mcp_install(args.candidate_manifest)
+            require_mcp_install(args.candidate_manifest if args.candidate else ROOT/'dependencies/releases.json')
         except (OSError,ValueError,KeyError,TypeError,ImportError):
             parser.error('installed MCP SDK bytes must match the qualified handoff')
     if args.mode=='parallel-tools':

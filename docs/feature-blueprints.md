@@ -5,13 +5,14 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
-## Lab 0.9.14 feature map
+## Lab 0.9.15 feature map
 
-The checksum-pinned train is Core 0.5.0, Runtime 0.9.21, Harness 0.9.15,
+The checksum-pinned train is Core 0.5.0, Runtime 0.9.22, Harness 0.9.16,
 Runtime recorder 0.3.0 and Harness store 0.4.4.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
+| MCP read tools | `mcp-client` | Host-approved alias dispatch, current authorization and offline receipt adoption on both provider wires. [Guide](mcp-client.md) |
 | Parallel read tools | `parallel-tools` | Independent reads overlap within a bounded window, while guards and citations follow call order on both provider wires. [Guide](parallel-tools.md) |
 | Safe tool events and captured citations | `tool-evidence` | Approved bounded display, typed results, captured selections, current permissions, durable reuse and fabricated-citation refusal on both provider protocols. [Guide](tool-evidence.md) |
 | Sent reasoning-effort evidence | `sent-effort` | Actual HTTP/native controls and format, requested/default annotations, bounded retries/fallback, failure boundaries and durable file/PG no-call recovery without provider-compliance claims. [Guide](sent-reasoning-effort.md) |
@@ -24,6 +25,7 @@ Runtime recorder 0.3.0 and Harness store 0.4.4.
 
 ```sh
 python -m lab_runner.blueprints list
+python -m lab_runner.blueprints copy mcp-client /private/my-mcp-host
 python -m lab_runner.blueprints copy parallel-tools /private/my-parallel-host
 python -m lab_runner.blueprints copy tool-evidence /private/my-tool-host
 python -m lab_runner.blueprints copy sent-effort /private/my-effort-host

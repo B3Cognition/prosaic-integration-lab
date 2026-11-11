@@ -60,6 +60,9 @@ def require_mcp_install(manifest):
     from prosaic_integration_lab.sdk_audit import audit
 
     root = Path(__file__).resolve().parents[1]
-    validate_mcp_manifest(sdk_manifest(manifest))
+    from .gates import supports_mcp_client
+
+    if not supports_mcp_client(sdk_manifest(manifest)):
+        raise ValueError("exact MCP SDK family required")
     require_mcp_client_sdk()
     audit(manifest, cache_directory(manifest, root / ".cache/wheels"))

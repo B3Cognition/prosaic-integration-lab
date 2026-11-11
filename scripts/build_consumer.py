@@ -16,18 +16,6 @@ from prosaic_integration_lab.dependencies import (cache_directory, manifest_byte
     manifest_digest, sdk_manifest, verified_wheel_paths)
 from audit_install import wheel_payloads
 
-MCP_CANDIDATE_FILES = {
-    'lab_runner/mcp_client.py', 'lab_runner/mcp_fixture.py',
-    'src/prosaic_integration_lab/mcp_client.py',
-    'lab_runner/blueprints/mcp_client/__init__.py',
-    'lab_runner/blueprints/mcp_client/host.py',
-    'lab_runner/blueprints/mcp_client/README.md',
-    'lab_runner/blueprints/mcp_client/LICENSE',
-    'lab_runner/blueprints/mcp_client/NOTICE',
-    'lab_runner/blueprints/mcp_client/runtime.yml',
-    'lab_runner/blueprints/mcp_client/.prosaic/subagents/graph-review.md',
-}
-
 
 def public_file_allowed(filename):
     if type(filename) is not str or not filename:return False
@@ -48,8 +36,6 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
     sys.path.insert(0, str(ROOT))
     from lab_runner.gates import supports_mcp_client
     mcp_client = supports_mcp_client(data)
-    if mcp_client and dependency_mode != 'candidate':
-        raise ValueError('MCP wheels require candidate mode')
     paths = verified_wheel_paths(manifest, wheel_dir)
     wheel_payloads(manifest, wheel_dir)
     if manifest_digest(manifest) != digest:
@@ -71,7 +57,7 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
                 any(not isinstance(name, str) or not name for name in public_files) or
                 len(set(public_files)) != len(public_files)):
             raise ValueError('invalid public build inventory')
-        for filename in sorted(set(public_files) | (MCP_CANDIDATE_FILES if mcp_client else set())):
+        for filename in sorted(public_files):
             relative = Path(filename)
             if not public_file_allowed(filename):
                 raise ValueError('unsafe public build input')

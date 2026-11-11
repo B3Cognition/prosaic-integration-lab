@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.15 — 2026-11-11
+
+- Adopt Runtime 0.9.22 and Harness 0.9.16 for approved MCP reads.
+- Add a copyable MCP blueprint and 24 required cases per hosted cell.
+- See [release notes](docs/release-0.9.15.md).
+
 ## 0.9.14 — 2026-11-11
 
 - Add a copyable parallel-read blueprint and 32 required cases across both provider wires.

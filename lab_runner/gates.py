@@ -27,6 +27,8 @@ from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN,
 
 MCP_CLIENT_TRAIN = {**PARALLEL_RELEASE_TRAIN, "b3-prosaic-runtime": "0.9.22.dev1",
                     "b3-prosaic-harness": "0.9.16.dev1"}
+MCP_CLIENT_RELEASE_TRAIN = {**MCP_CLIENT_TRAIN, "b3-prosaic-runtime": "0.9.22",
+                            "b3-prosaic-harness": "0.9.16"}
 MCP_CASES = (
     "approved-structured", "approved-text", "legacy-negotiation", "scope-denial",
     "revocation-during-listing", "catalogue-drift", "citation-retained-read", "parallel-barrier",
@@ -40,7 +42,14 @@ def supports_mcp_client(manifest):
         from .mcp_client import validate_mcp_manifest
         validate_mcp_manifest(manifest)
         return True
-    if any(actual.get(name) == MCP_CLIENT_TRAIN[name] for name in
+    if actual == MCP_CLIENT_RELEASE_TRAIN:
+        from .mcp_client import RETAINED_WHEELS
+        if (len(manifest['artifacts']) != len(actual) or 'candidate_lineage' in manifest
+                or any(a.get('sha256') != RETAINED_WHEELS[a['distribution']]
+                       for a in manifest['artifacts'] if a['distribution'] in RETAINED_WHEELS)):
+            raise ValueError('invalid released MCP SDK family')
+        return True
+    if any(actual.get(name) in (MCP_CLIENT_TRAIN[name], MCP_CLIENT_RELEASE_TRAIN[name]) for name in
            ('b3-prosaic-runtime', 'b3-prosaic-harness')):
         raise ValueError('mixed MCP SDK family')
     return False
@@ -71,12 +80,12 @@ def supports_parallel_tools(manifest):
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -95,7 +104,7 @@ def supports_conversation(manifest):
     if supports_mcp_client(manifest):return True
     if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -105,17 +114,17 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
     # Historical published trains retain their original gates.
-    return tuple(mode for mode in ALL_COUNTS if (mode!='mcp-client' or (candidate and supports_mcp_client(manifest))) and (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
+    return tuple(mode for mode in ALL_COUNTS if (mode!='mcp-client' or supports_mcp_client(manifest)) and (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.

@@ -3,6 +3,10 @@ FROM ${PYTHON_IMAGE}
 WORKDIR /srv/lab
 COPY dependencies/requirements.lock dependencies/requirements.lock
 RUN python -m pip install --require-hashes -r dependencies/requirements.lock
+COPY dependencies/mcp-client.lock dependencies/mcp-client.lock
+RUN if [ -s dependencies/mcp-client.lock ]; then \
+    python -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock; \
+    fi
 ARG SDK_MANIFEST_SHA256
 COPY .cache/wheels/${SDK_MANIFEST_SHA256}/ /srv/wheels/
 COPY dependencies/releases.json dependencies/releases.json

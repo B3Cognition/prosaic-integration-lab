@@ -133,6 +133,15 @@ jobs:
           USE_CANDIDATE: ${{ inputs.candidate }}
         run: |
           .venv/bin/python -c "import json,os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_conversation,supports_context_assembly,supports_tool_evidence,supports_parallel_tools; from prosaic_integration_lab.conversation_execution import require_conversation_sdk; candidate=os.environ['USE_CANDIDATE']=='true'; manifest=sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if candidate else 'dependencies/releases.json')); enabled=supports_conversation(manifest); assert enabled or not candidate; require_conversation_sdk() if enabled else None; print('enabled='+str(enabled).lower()); print('context='+str(supports_context_assembly(manifest)).lower()); print('tools='+str(supports_tool_evidence(manifest)).lower()); print('parallel='+str(supports_parallel_tools(manifest)).lower())" >> "$GITHUB_OUTPUT"
+      - name: Install the locked optional MCP dependency set for the exact MCP SDK family
+        env:
+          USE_CANDIDATE: ${{ inputs.candidate }}
+        run: |
+          enabled=$(.venv/bin/python -c "import os,sys; sys.path[:0]=['src','.']; from pathlib import Path; from prosaic_integration_lab.dependencies import sdk_manifest; from lab_runner.gates import supports_mcp_client; print('yes' if supports_mcp_client(sdk_manifest(Path('.cache/sdk-hardening/manifest.json' if os.environ['USE_CANDIDATE']=='true' else 'dependencies/releases.json'))) else 'no')")
+          if [ "$enabled" = yes ]; then
+            .venv/bin/python -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock
+            .venv/bin/python -m pip check
+          fi
       - name: Verify ordinary public-index consumer adoption
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python scripts/verify_public_adoption.py --manifest dependencies/releases.json --export reports/public-adoption-pg${{ matrix.postgres }}.json

@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from lab_runner.gates import ALL_COUNTS, expected_test_count, required_modes, supports_mcp_client
+from lab_runner.gates import (ALL_COUNTS, MCP_CLIENT_RELEASE_TRAIN, expected_test_count,
+                              required_modes, supports_mcp_client)
 from lab_runner.mcp_client import RETAINED_WHEELS
 from prosaic_integration_lab.mcp_client import CASES, TRAIN
 
@@ -36,9 +37,14 @@ def candidate_manifest():
 
 
 def test_required_case_counts_remain_release_specific():
-    released = json.loads(Path("dependencies/releases.json").read_text())
-    for manifest, candidate, expected in [(released, False, (12, 402)),
-                                           (candidate_manifest(), True, (13, 426))]:
+    previous = json.loads(Path("dependencies/releases-pre-mcp-client-2026-11-11.json").read_text())
+    released = candidate_manifest()
+    del released["candidate_lineage"]
+    for artifact in released["artifacts"]:
+        artifact["version"] = MCP_CLIENT_RELEASE_TRAIN[artifact["distribution"]]
+    for manifest, candidate, expected in [(previous, False, (12, 402)),
+                                           (candidate_manifest(), True, (13, 426)),
+                                           (released, False, (13, 426))]:
         modes = required_modes(candidate=candidate, manifest=manifest)
         assert (len(modes), sum(expected_test_count(mode, True) for mode in modes)) == expected
     assert len(CASES) * 2 == ALL_COUNTS["mcp-client"]
