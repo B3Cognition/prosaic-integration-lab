@@ -194,3 +194,17 @@ The released lane joins every ordinary architecture/database cell. See the
 
 The development candidate includes a copyable **parallel read tools** host and
 32 additional acceptance witnesses. See [candidate qualification and compatibility](docs/parallel-tools.md).
+
+### MCP client qualification
+
+The `mcp-client` blueprint shows how to expose an approved remote graph lookup
+to a Harness conversation. The development candidate uses an exact Runtime and
+Harness wheel pair with the published Core and PostgreSQL adapter wheels.
+Install `dependencies/mcp-client.lock` alongside the base Lab lock in a
+candidate consumer.
+
+Use `scripts/prepare_sdk_candidates.py --mcp-client` with the two local
+qualified artifact directories and the original released wheel cache to curate
+an explicit manifest. Run `python -m lab_runner test --mode mcp-client
+--candidate --candidate-manifest PATH --postgres-version 16` and repeat for
+PostgreSQL 18.

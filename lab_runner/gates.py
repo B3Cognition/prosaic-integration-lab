@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
-ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32}
+ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32,'mcp-client':24}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
@@ -25,7 +25,30 @@ CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
 from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN as TOOL_EVIDENCE_TRAIN
 from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN, RELEASE_TRAIN as PARALLEL_RELEASE_TRAIN
 
+MCP_CLIENT_TRAIN = {**PARALLEL_RELEASE_TRAIN, "b3-prosaic-runtime": "0.9.22.dev1",
+                    "b3-prosaic-harness": "0.9.16.dev1"}
+MCP_CASES = (
+    "approved-structured", "approved-text", "legacy-negotiation", "scope-denial",
+    "revocation-during-listing", "catalogue-drift", "citation-retained-read", "parallel-barrier",
+    "budget-exhaustion", "uncertain-dispatch", "completed-replay", "receipt-adoption",
+)
+
+
+def supports_mcp_client(manifest):
+    actual = {item.get('distribution'): item.get('version') for item in manifest.get('artifacts', ())}
+    if actual == MCP_CLIENT_TRAIN:
+        from .mcp_client import validate_mcp_manifest
+        validate_mcp_manifest(manifest)
+        return True
+    if any(actual.get(name) == MCP_CLIENT_TRAIN[name] for name in
+           ('b3-prosaic-runtime', 'b3-prosaic-harness')):
+        raise ValueError('mixed MCP SDK family')
+    return False
+
+
 def supports_parallel_tools(manifest):
+    if supports_mcp_client(manifest):
+        return True
     artifacts = manifest.get('artifacts', ())
     actual = {item.get('distribution'): item.get('version') for item in artifacts}
     if actual == PARALLEL_RELEASE_TRAIN:
@@ -48,12 +71,12 @@ def supports_parallel_tools(manifest):
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -69,9 +92,10 @@ def supports_conversation(manifest):
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
+    if supports_mcp_client(manifest):return True
     if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -81,23 +105,24 @@ def supports_conversation(manifest):
 def required_modes(*,candidate,manifest):
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
     # Historical published trains retain their original gates.
-    return tuple(mode for mode in ALL_COUNTS if (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
+    return tuple(mode for mode in ALL_COUNTS if (mode!='mcp-client' or (candidate and supports_mcp_client(manifest))) and (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
         (mode!='conversation' or candidate or supports_conversation(manifest)))
 
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
 from prosaic_integration_lab.tool_evidence import CASES as TOOL_EVIDENCE_CASES
 from prosaic_integration_lab.parallel_tools import CASES as PARALLEL_CASES
 FAILURE_CASES={
+    'mcp-client':{'test_mcp_client['+case+'-'+provider+']':case.replace('-','_') for case in MCP_CASES for provider in ('openai-compatible','anthropic')},
     'parallel-tools':{'test_parallel_tools['+case+'-'+provider+']':case.replace('-','_') for case in PARALLEL_CASES for provider in ('openai-compatible','anthropic')},
     'tool-evidence':{'test_tool_evidence['+case+'-'+provider+']':case.replace('-','_') for case in TOOL_EVIDENCE_CASES for provider in ('openai-compatible','anthropic')},
     'context-packs':{
@@ -230,7 +255,8 @@ for name,parameters,code in (
     FAILURE_CASES['native-persistence'].update({name+'['+parameter+']':code for parameter in parameters})
 
 # Diagnostic export is independent of the existing candidate-lineage gates.
-EXPORT_FAILURE_CASES={**FAILURE_CASES,'lago':{
+EXPORT_FAILURE_CASES={
+    **FAILURE_CASES,'lago':{
     'test_released_adapters_ready_with_restricted_credentials':'adapter_ready',
     'test_runtime_roles_cannot_create_schema[harness_dsn]':'harness_role',
     'test_runtime_roles_cannot_create_schema[accounting_dsn]':'accounting_role',
