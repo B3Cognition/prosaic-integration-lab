@@ -1,0 +1,186 @@
+{
+  "public_wheels_verified": [
+    {
+      "distribution": "b3-prosaic",
+      "sha256": "07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51",
+      "wheel": "b3_prosaic-0.4.1-py3-none-any.whl"
+    },
+    {
+      "distribution": "b3-prosaic-runtime",
+      "sha256": "d9d416baf9a7f4b87328532d41b281a2f6dbc9bafc744f973661a5cf6015a540",
+      "wheel": "b3_prosaic_runtime-0.9.8-py3-none-any.whl"
+    },
+    {
+      "distribution": "b3-prosaic-runtime-postgres",
+      "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca",
+      "wheel": "b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "sha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b",
+      "wheel": "b3_prosaic_harness-0.9.4-py3-none-any.whl"
+    },
+    {
+      "distribution": "b3-prosaic-harness-postgres",
+      "sha256": "35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a",
+      "wheel": "b3_prosaic_harness_postgres-0.4.0-py3-none-any.whl"
+    }
+  ],
+  "runtime_module": "b3_prosaic_runtime-0.9.8-py3-none-any.whl/prosaic_runtime/adapter.py",
+  "harness_module": "b3_prosaic_harness-0.9.4-py3-none-any.whl/prosaic_harness/engine.py",
+  "runtime_adapter_and_harness_binding_admitted": true,
+  "static_graph_steps": 32,
+  "all_prior_required": [
+    {
+      "turn": 1,
+      "argument_bytes": 101,
+      "admitted": true
+    },
+    {
+      "turn": 2,
+      "argument_bytes": 255,
+      "admitted": true
+    },
+    {
+      "turn": 3,
+      "argument_bytes": 559,
+      "admitted": true
+    },
+    {
+      "turn": 4,
+      "argument_bytes": 1157,
+      "admitted": true
+    },
+    {
+      "turn": 5,
+      "argument_bytes": 2343,
+      "admitted": true
+    },
+    {
+      "turn": 6,
+      "argument_bytes": 4705,
+      "admitted": true
+    },
+    {
+      "turn": 7,
+      "argument_bytes": 9419,
+      "admitted": true
+    },
+    {
+      "turn": 8,
+      "argument_bytes": 18837,
+      "admitted": true
+    },
+    {
+      "turn": 9,
+      "argument_bytes": 37663,
+      "admitted": true
+    },
+    {
+      "turn": 10,
+      "argument_bytes": 75305,
+      "admitted": true
+    },
+    {
+      "turn": 11,
+      "argument_bytes": 150581,
+      "admitted": true
+    },
+    {
+      "turn": 12,
+      "argument_bytes": 301122,
+      "admitted": false
+    },
+    {
+      "turn": 13,
+      "argument_bytes": 602193,
+      "admitted": false
+    },
+    {
+      "turn": 14,
+      "argument_bytes": 1204324,
+      "admitted": false
+    }
+  ],
+  "chain_required_older_optional": [
+    {
+      "turn": 1,
+      "argument_bytes": 101,
+      "admitted": true
+    },
+    {
+      "turn": 2,
+      "argument_bytes": 255,
+      "admitted": true
+    },
+    {
+      "turn": 3,
+      "argument_bytes": 559,
+      "admitted": true
+    },
+    {
+      "turn": 4,
+      "argument_bytes": 1009,
+      "admitted": true
+    },
+    {
+      "turn": 5,
+      "argument_bytes": 1605,
+      "admitted": true
+    },
+    {
+      "turn": 6,
+      "argument_bytes": 2347,
+      "admitted": true
+    },
+    {
+      "turn": 7,
+      "argument_bytes": 3235,
+      "admitted": true
+    },
+    {
+      "turn": 8,
+      "argument_bytes": 4269,
+      "admitted": true
+    },
+    {
+      "turn": 9,
+      "argument_bytes": 5449,
+      "admitted": true
+    },
+    {
+      "turn": 10,
+      "argument_bytes": 6775,
+      "admitted": true
+    },
+    {
+      "turn": 11,
+      "argument_bytes": 8249,
+      "admitted": true
+    },
+    {
+      "turn": 12,
+      "argument_bytes": 9870,
+      "admitted": true
+    },
+    {
+      "turn": 13,
+      "argument_bytes": 11638,
+      "admitted": true
+    },
+    {
+      "turn": 14,
+      "argument_bytes": 13553,
+      "admitted": true
+    }
+  ],
+  "expired_paused_run_reason": "run_deadline",
+  "abandoned_unknown_attempt_reason": "usage_unknown",
+  "provider_calls": 0,
+  "runtime_executions": 0,
+  "store_writes": 0,
+  "scope": "Contract/admission probes; not implemented SUE execution or platform qualification.",
+  "probe_source_sha256": "ecab40a8559b01201a648bf3ce8cb1a546a4030a11e3d118291016d3bdb2cf9d",
+  "reviewed_design_commit": "58a647c",
+  "original_raw_evidence_sha256": "4ca9cf84ddefb9a6f87db418d8dacd634db1d7e0027d96cda30ac512a5f64489"
+}

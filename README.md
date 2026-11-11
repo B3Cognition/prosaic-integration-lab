@@ -40,6 +40,10 @@ account, API key, local model or Docker.
 
 ## What can I try?
 
+For the unpublished optional audit candidate, see
+[host-resolved evidence fixtures and application boundaries](docs/answer-span-resolved.md).
+Memory and SUE remain disabled by default.
+
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
@@ -132,6 +136,31 @@ Then use the [consumer guide](docs/consume-native-workflows.md),
 [benchmark protocol](docs/realistic-runtime-benchmark.md).
 The [optional capability guide](docs/quickstart.md#optional-capabilities) links
 memory, tool approval, failure isolation and evaluation examples with their limits.
+
+For the independent Prosaic Castle fork, start with the
+[enable/use guide](docs/prosaic-castle.md). Memory and SUE are independently
+opt-in and remain disabled by default. The [Castle quickstart](docs/castle-quickstart.md)
+retains the historical package profile and evidence.
+
+The experimental [own-data memory benchmark](docs/memory-benchmark.md) adds
+frozen datasets, file-search/FTS/expanded comparisons, optional bounded
+completeness review, strict external adjudication and offline replay. Larger
+corpora do not increase per-task context; fixture success is not quality evidence.
+Memory and review remain disabled by default, and live constrained generation
+requires the separately qualified SDK candidate described in that guide.
+
+The optional [answer-span audit](docs/answer-span-audit.md) checks actual answer
+wording against frozen source requirements, citations and status. Its explicit
+loopback fixture covers omissions, complete answers, unavailable context and
+unknown usage. It preserves the original answer and adds no automatic repair.
+
+The separately opt-in [SUE review guide](docs/sue-review.md) shows a
+credential-free requirements-review walkthrough, frozen sources, approval and
+recovery with the lightweight engine. Review stays **off by default**, independent
+of Castle memory; its reports are advisory and do not certify correctness.
+The separate [requirements comparison](docs/requirements-review-eval.md) exercises
+direct, critic-author and SUE strategies against frozen synthetic cases while
+preserving the original hackathon grader and retrieval checks.
 
 ## Install packages for an embedding service
 

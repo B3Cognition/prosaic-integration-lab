@@ -1,0 +1,26 @@
+{
+  "repository": "B3Cognition/prosaic-castle",
+  "source_commit": "d684bc613ead86755464c878d596dfdea6ad7025",
+  "source_tree": "a5654c8eaea95c2b28d2ca69c179abb8de4c1b99",
+  "package_directory": "packages/sue",
+  "candidate": true,
+  "publication_authorized": false,
+  "qualification_scope": "separate opt-in cycle/context test; restore legacy engine for legacy and PostgreSQL lanes",
+  "artifacts": [
+    {
+      "kind": "wheel",
+      "filename": "cognitive_castle_sue-0.1.0-py3-none-any.whl",
+      "sha256": "311127758bb692d9d260d8676edcb9670df58d6da28263138f4792d3306ead10",
+      "size_bytes": 48469
+    },
+    {
+      "kind": "sdist",
+      "filename": "cognitive_castle_sue-0.1.0.tar.gz",
+      "sha256": "b0b4d33cc836cb53d9690ec02f03af34f3ac4bb60f8f3a3024615bdf75473f03",
+      "size_bytes": 49878
+    }
+  ],
+  "engine_identity_sha256": "651841085bb6b4adf28db42e7fe9f2d0dd0051fd8fdf21cb1876b50c20e89728",
+  "source_manifest_sha256": "0205c2639c99bb00e9e70142ecbbca910c85fe1279e7e23832af451599d518a1",
+  "canonical_policy_sha256": "ba0523c407f0b96d269412c7f02dd371165944cfe044b8143be526022ae05da0"
+}

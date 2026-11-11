@@ -1,0 +1,87 @@
+{
+  "qualified": true,
+  "run_id": 40077572030,
+  "scope": "Runtime 0.9.8 host snapshot provider; original worker/adapter release archives remain selected from run 40074232401",
+  "default_memory_enabled": false,
+  "castle_source_commit": "ad18037b582148d9b23f82e8c95a416092b42b9f",
+  "lab_ci_source_commit": "7c4ce7d08db94672ee41f6f951f15a3a8e255f77",
+  "main_base_commit": "8194f6a0f6e64c6186c8aa129bc759e9e3ef3008",
+  "manifest_sha256": "74ff57004d3e43632073184fa2851dfca6fb31257cead8971a43987a8a0020d4",
+  "public_sdk_manifest_sha256": "36eec99280acb8688d2496f704f4445b59c3ff269fc506a83d6e7fe83bc92698",
+  "runtime_version": "0.9.8",
+  "worker_adapter_wheels_identical_to_original_r2": true,
+  "cells": [
+    {
+      "architecture": "arm64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "be419bdbeadabd8d17ed4fa90d96ea73ae2ff5b6a51a7a05db23402c744ad183",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "arm64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "beda69f0c3998a31c9e981cf03d5d13906f346b4f0f1c8aecfeb3df9c7fca3b5",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "d46f0d33d1d2397aaa6a2e6fc5f8b06f60fc237f732e51563faa0f3b3bcaf650",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "8b373334ab6a33c0c0803bcbfdd4e440e1fd56482fd9b0c3cc345411900a04dc",
+      "worker_dependencies": 76
+    }
+  ],
+  "github_artifacts": [
+    {
+      "name": "castle-release-bundle",
+      "id": 12554205421,
+      "digest": "sha256:e4388494561b1c7989fa7cbd64232d767443c8f49ea530bb2e6eb7d7bd675cc1",
+      "expires_at": "2027-01-22T08:19:16Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-arm-pg16",
+      "id": 12554106035,
+      "digest": "sha256:0233b62c99a0619575287ccb4c1eae84e5eb8590da7ade25d4198d2cb95ff076",
+      "expires_at": "2027-01-22T08:19:16Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-arm-pg18",
+      "id": 12554086031,
+      "digest": "sha256:dc7c071c834311185e090f9fc6d65fbc9731a9f3ca2172d95e6c8211264e9eef",
+      "expires_at": "2027-01-22T08:19:16Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-pg18",
+      "id": 12553438107,
+      "digest": "sha256:53041153f3a913aad540200f22b41da01f5276f84f97f90c84acefde06e8aa08",
+      "expires_at": "2027-01-22T08:19:16Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-pg16",
+      "id": 12553389736,
+      "digest": "sha256:7f0c6b88acd6135a78f5fa5347c29667acec54160965e46209b7d071d502648c",
+      "expires_at": "2027-01-22T08:19:16Z"
+    }
+  ]
+}
