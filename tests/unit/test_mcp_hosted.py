@@ -60,3 +60,13 @@ def test_invalid_mcp_candidate_refuses_admission(damage):
         harness["runtime_receipt"]["source_commit"] = "0" * 40
     with pytest.raises(ValueError):
         supports_mcp_client(manifest)
+
+
+def test_lab_journal_preserves_only_bounded_controlled_failures():
+    from prosaic_integration_lab.tool_journal import _snapshot_outcome
+
+    failed = {"status": "error", "error": "mcp_catalogue_changed"}
+    assert _snapshot_outcome(failed) == failed
+    for outcome in ({**failed, "error": "private error message"}, {**failed, "result": {}}):
+        with pytest.raises(ValueError, match="invalid_outcome"):
+            _snapshot_outcome(outcome)

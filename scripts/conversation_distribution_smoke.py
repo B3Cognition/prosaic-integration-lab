@@ -176,7 +176,8 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     run([*pip,'install','--index-url',public.INDEX,'--require-hashes','-r',lock],
         directory=directory,environment=environment)
     from lab_runner.gates import supports_mcp_client
-    if supports_mcp_client(sdk_manifest(manifest)):
+    selected=json.loads(manifest.read_bytes())
+    if supports_mcp_client(selected):
         run([*pip,'install','--index-url',public.INDEX,'--no-deps','--require-hashes',
              '-r',lock.with_name('mcp-client.lock')],directory=directory,environment=environment)
     run([*pip,'install','--no-deps',*verified_wheel_paths(manifest,wheels),wheel],
@@ -197,12 +198,11 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     example=directory/'example.py';example.write_text(public.PUBLIC_EXAMPLE+PUBLIC_CONVERSATION)
     run([python,'-I','-B',example,manifest],directory=directory,environment=environment)
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
-    verify_cli_versions(version,json.loads(manifest.read_bytes()))
+    verify_cli_versions(version,selected)
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
     run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
         directory=directory,environment=environment)
     from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN
-    selected=json.loads(manifest.read_bytes())
     if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
