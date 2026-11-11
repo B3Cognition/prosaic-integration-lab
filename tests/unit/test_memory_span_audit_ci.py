@@ -182,3 +182,25 @@ def test_sue_ci_preserves_legacy_engine_and_qualifies_opt_in_context_separately(
     legacy = next(step for step in steps if step.get('name')=='Require ordinary and explicitly enabled source regressions without skips')
     assert '--ignore=tests/sue_review/test_review_context.py' in legacy['run']
     assert 'dependencies/sue-review-source.json' in (ROOT/'.github/workflows/sue-review.yml').read_text()
+
+
+def test_current_candidate_uses_member_hashes_even_with_the_released_version(tmp_path):
+    path, spec, _ = wheel_fixture(tmp_path)
+    members = {
+        'prosaic_runtime/__init__.py': b"__version__ = '0.9.20'\n",
+        'b3_prosaic_runtime-0.9.20.dist-info/METADATA':
+            b'Metadata-Version: 2.1\nName: b3-prosaic-runtime\nVersion: 0.9.20\n',
+    }
+    spec['packageVersion'] = '0.9.20'
+    spec['members'] = {name: hashlib.sha256(data).hexdigest() for name, data in members.items()}
+    with zipfile.ZipFile(path, 'w') as wheel:
+        for name, data in members.items():
+            wheel.writestr(name, data)
+    verifier = script('verify_answer_span_runtime')
+    assert verifier.verify_wheel(path, spec)['qualified'] is True
+
+    with zipfile.ZipFile(path, 'w') as wheel:
+        for name, data in members.items():
+            wheel.writestr(name, data + b' ' if name.endswith('.py') else data)
+    with pytest.raises(ValueError, match='checksum'):
+        verifier.verify_wheel(path, spec)

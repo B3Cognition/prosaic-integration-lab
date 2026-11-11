@@ -366,7 +366,9 @@ answer-quality comparison or evidence that the completeness critic helps.
 ## Question-first experiments
 
 Two additional explicit freeze options require the separately checksummed
-Runtime `0.9.8+jsonschema.3` candidate and its `json_schema_order_v1` capability:
+Runtime candidate and its `json_schema_order_v1` capability. Use the current
+[candidate pin](answer-span-audit.md) for new runs. The historical comparisons
+below retain their original Runtime `0.9.8+jsonschema.3` binding.
 
 - `--generation-profile compact-question-first-v1` keeps compact guidance and
   sends the schema in its declared order, starting with `questionParts`.

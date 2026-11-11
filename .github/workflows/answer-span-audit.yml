@@ -43,10 +43,11 @@ jobs:
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
-          spec = json.load(open('dependencies/answer-span-runtime.json'))
+          spec = json.load(open('dependencies/answer-span-runtime-sdk-upgrade.json'))
           assert spec['repository'] == 'B3Cognition/prosaic-runtime'
-          assert spec['sourceCommit'] == 'd713e078a661a19a057f02482d47d3f7a23b0c5a'
-          assert spec['sourceTree'] == 'c6c46f49908f7df9a9e2845d80f57ba02cdf6c95'
+          assert spec['sourceCommit'] == 'c9e12a700c1bdc67719bb83df6ec58d90303e0ba'
+          assert spec['sourceTree'] == '3793f228db1e3d8e295a64f189bbde4d1808fc2e'
+          assert spec['packageVersion'] == '0.9.20'
           assert spec['publicationAuthorized'] is False
           print('commit=' + spec['sourceCommit'])
           PY
@@ -86,7 +87,7 @@ jobs:
         run: |
           .venv-audit/bin/python -m build --no-isolation --outdir bundle/lab .
           .venv-audit/bin/python -m build --no-isolation --outdir "$PWD/bundle/runtime" .cache/answer-span-runtime
-          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --wheel bundle/runtime/*.whl --source .cache/answer-span-runtime --export reports/audit-ci/runtime-direct.json
+          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --spec dependencies/answer-span-runtime-sdk-upgrade.json --wheel bundle/runtime/*.whl --source .cache/answer-span-runtime --export reports/audit-ci/runtime-direct.json
           .venv-audit/bin/python - <<'PY'
           import pathlib, tarfile
           for name in ('lab','runtime'):
@@ -96,7 +97,7 @@ jobs:
           PY
           .venv-audit/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-lab bundle/source/lab/*
           .venv-audit/bin/python -m build --no-isolation --wheel --outdir bundle/rebuilt-runtime bundle/source/runtime/*
-          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --wheel bundle/rebuilt-runtime/*.whl --export reports/audit-ci/runtime-rebuilt.json
+          .venv-audit/bin/python scripts/verify_answer_span_runtime.py --spec dependencies/answer-span-runtime-sdk-upgrade.json --wheel bundle/rebuilt-runtime/*.whl --export reports/audit-ci/runtime-rebuilt.json
       - name: Install the explicit candidate family and audit installed payloads
         run: |
           python -m venv .venv-candidate
@@ -110,13 +111,15 @@ jobs:
           cache = cache_directory(public,pathlib.Path('.cache/wheels'))
           target = pathlib.Path('.cache/audit-sdk'); target.mkdir()
           runtime = next(pathlib.Path('bundle/runtime').glob('*.whl'))
+          spec = json.loads(pathlib.Path('dependencies/answer-span-runtime-sdk-upgrade.json').read_text())
+          candidate_hash = hashlib.sha256(runtime.read_bytes()).hexdigest()
           for row in data['artifacts']:
               source = cache/row['filename']
               if row['distribution'] == 'b3-prosaic-runtime':
                   source = runtime
-                  row.update(filename=runtime.name,version='0.9.8+jsonschema.3',
-                      sha256=hashlib.sha256(runtime.read_bytes()).hexdigest(),
-                      source_commit='d713e078a661a19a057f02482d47d3f7a23b0c5a',
+                  assert candidate_hash != row['sha256']
+                  row.update(filename=runtime.name,version=spec['packageVersion'],
+                      sha256=candidate_hash, source_commit=spec['sourceCommit'],
                       url='immutable-candidate-source',checksum_url='exact-source-build')
               shutil.copyfile(source,target/row['filename'])
           data['qualification'] = 'Unpublished exact-source Runtime candidate; other SDK bytes remain released. No publication authorized.'

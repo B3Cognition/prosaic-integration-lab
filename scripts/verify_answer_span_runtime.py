@@ -18,7 +18,7 @@ def verify_wheel(path, spec):
     if (set(spec) != required or type(spec['version']) is not int or spec['version'] != 1
             or spec['repository'] != 'B3Cognition/prosaic-runtime'
             or spec['distribution'] != 'b3-prosaic-runtime'
-            or spec['packageVersion'] != '0.9.8+jsonschema.3'
+            or spec['packageVersion'] not in {'0.9.8+jsonschema.3', '0.9.20'}
             or spec['publicationAuthorized'] is not False
             or any(not re.fullmatch('[a-f0-9]{40}',spec[k]) for k in ('sourceCommit','sourceTree'))
             or not re.fullmatch('[a-f0-9]{64}',spec['originalWheelSha256'])):

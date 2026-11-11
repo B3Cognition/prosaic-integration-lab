@@ -57,7 +57,8 @@ local unit tests, build the consumer image, then use `python -m lab_runner test`
 for required real-stack acceptance. Unit tests alone are not stack evidence.
 
 The optional memory benchmark/audit requires the separately pinned Runtime
-candidate in `dependencies/answer-span-runtime.json`. Qualify both SDK profiles:
+candidate in `dependencies/answer-span-runtime-sdk-upgrade.json`. Keep the
+earlier candidate manifest for historical replay. Qualify both SDK profiles:
 run `scripts/regression_profiles.py --profile released --output <new-json>` in
 the SDK-only released environment and `--profile candidate` in the installed
 candidate environment. `--profile all --collect-only` and `--coverage` must prove

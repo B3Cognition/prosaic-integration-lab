@@ -1,5 +1,16 @@
 # Codex handoff
 
+## Castle audit SDK upgrade — 2026-11-11
+
+The audit fixture lane uses the current released Core 0.5.0 and Harness
+0.9.14, plus the exact unpublished Runtime 0.9.20 candidate pinned in
+`dependencies/answer-span-runtime-sdk-upgrade.json`. The candidate comes
+from [Runtime PR #34](https://github.com/B3Cognition/prosaic-runtime/pull/34).
+Use the [audit guide](answer-span-audit.md) for the installed fixture
+commands. Historical packets retain their prior SDK identity and
+reservation records. New live comparisons need newly frozen packets.
+Memory and SUE remain disabled by default.
+
 ## Host-resolved audit candidate — 2026-10-31
 
 The separately opt-in [reference profile](answer-span-resolved.md) resolves exact

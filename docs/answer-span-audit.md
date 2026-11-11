@@ -61,10 +61,17 @@ result = run_audit(runtime_config, packet, private_run_directory,
 Calling this API explicitly opts into execution. Live inference requires its
 own authorized, predeclared shared allowance and qualified serving profile.
 The current implementation verification uses fixtures only. Runtime must expose
-`json_schema_v1` and `json_schema_order_v1`; the existing tested candidate is
-`b3-prosaic-runtime==0.9.8+jsonschema.3` with Harness `0.9.4`. Unsupported
-Runtime versions fail before dispatch. No SDK internals or copied execution
-engines are used.
+`json_schema_v1` and `json_schema_order_v1`. The current fixture workflow
+installs the released SDKs from `dependencies/releases.json` (Core 0.5.0,
+Harness 0.9.14), then substitutes the unpublished Runtime 0.9.20 build from
+`dependencies/answer-span-runtime-sdk-upgrade.json`. The workflow verifies
+that build's exact source commit and wheel contents. The released Runtime
+0.9.20 wheel cannot run the audit by itself. Unsupported Runtime versions fail
+before dispatch.
+
+Historical audit runs use the earlier pin in
+`dependencies/answer-span-runtime.json`. Keep that environment for historical
+replay. Freeze new packets when changing SDK versions.
 
 The two stages are:
 

@@ -15,7 +15,8 @@ Review quality still needs a controlled comparison.
 ## Try the synthetic examples
 
 This is unpublished candidate functionality. Use the qualified Lab wheel with
-the exact Runtime candidate pinned in `dependencies/answer-span-runtime.json`;
+the exact Runtime candidate pinned in
+`dependencies/answer-span-runtime-sdk-upgrade.json`;
 ordinary released Runtime installations do not qualify this profile. CI builds
 that candidate and checks installed direct and sdist-rebuilt wheels on Linux
 AMD64 and ARM64. No PyPI publication is authorized.

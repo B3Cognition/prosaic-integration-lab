@@ -105,8 +105,8 @@ def execute_frozen_case(case_id, strategy, *, frozen, config, store, principal, 
 
     if strategy not in STRATEGIES:
         raise ValueError('unknown strategy')
-    _admit(config)
     frozen = verify_frozen(frozen)
+    _admit(config)
     capture = frozen['capture']
     expected_owner = {**vars(principal),'namespace':namespace}
     if capture is None or any(capture.get(key) != value for key,value in expected_owner.items()):
