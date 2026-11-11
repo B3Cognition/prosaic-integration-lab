@@ -70,3 +70,11 @@ def test_lab_journal_preserves_only_bounded_controlled_failures():
     for outcome in ({**failed, "error": "private error message"}, {**failed, "result": {}}):
         with pytest.raises(ValueError, match="invalid_outcome"):
             _snapshot_outcome(outcome)
+
+
+def test_optional_mcp_lock_matches_consumer_gate():
+    from prosaic_integration_lab.mcp_client import MCP_LOCKED_VERSIONS
+
+    lock = Path("dependencies/mcp-client.lock")
+    assert dict(line.split()[0].split("==") for line in lock.read_text().splitlines()
+                if line and not line.startswith("#")) == MCP_LOCKED_VERSIONS

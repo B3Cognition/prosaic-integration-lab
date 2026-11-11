@@ -6,6 +6,11 @@ from uuid import uuid4
 
 from lab_runner.gates import MCP_CASES as CASES, MCP_CLIENT_TRAIN as TRAIN
 
+MCP_LOCKED_VERSIONS = {
+    "httpcore2": "2.16.0", "httpx2": "2.16.0", "mcp": "2.3.0", "mcp-types": "2.3.0",
+    "python-multipart": "0.0.33", "sse-starlette": "3.7.0", "truststore": "0.10.5",
+}
+
 
 def require_mcp_client_sdk():
     from importlib.metadata import version
@@ -14,7 +19,7 @@ def require_mcp_client_sdk():
     import prosaic_harness as harness
     from prosaic_runtime.mcp import require_mcp_sdk
 
-    if any(version(name) != expected for name, expected in TRAIN.items()):
+    if any(version(name) != expected for name, expected in (TRAIN | MCP_LOCKED_VERSIONS).items()):
         raise ValueError("exact MCP candidate family required")
     if "mcp_client_v1" not in rt.ProsaicRuntime.capabilities:
         raise ValueError("MCP Runtime capability missing")
@@ -94,18 +99,45 @@ def run_case(case, provider, *, journal, store=None, build_host=None):
             scope = h.ConversationScope(store.namespace, "synthetic", "graph", "tenant", "actor")
             chat = h.Conversation(binding, store=store, scope=scope)
             session = chat.create()
-            reply = chat.send(session.session_id, message_id="question", message="Review",
-                              expected_revision=session.revision)
-            assert reply.document["status"] == "completed", reply.document
+            def send():
+                return chat.send(session.session_id, message_id="question", message="Review",
+                                 expected_revision=session.revision)
+
+            if case == "receipt-adoption":
+                class AfterReceipt(OSError):
+                    pass
+
+                def lose_owner(*_):
+                    raise AfterReceipt("durable receipt saved")
+
+                chat._adopt = lose_owner
+                try:
+                    send()
+                except AfterReceipt:
+                    pass
+                else:
+                    raise AssertionError("receipt adoption fault did not fire")
+                reply = None
+            else:
+                reply = send()
+                assert reply.document["status"] == "completed", reply.document
             snapshot = store.load_session(session.session_id, scope=scope)
             attempt = snapshot.state["turns"][0]["attempts"][-1]
             receipt = store.load_receipt(session.session_id, attempt, scope=scope)
             assert receipt["version"] == 4
+            if case == "receipt-adoption":
+                assert snapshot.state["pending"]["invocationId"] == attempt
+                assert snapshot.state["attempts"][attempt]["receiptAdopted"] is False
             frozen = catalog.to_dict()
             remote.close()
             restored = client.restore_catalog(frozen, access_scope="scope", expected_sha256=catalog.sha256)
             fresh = h.Conversation(build_host(client, restored, config, **options), store=store, scope=scope)
-            assert fresh.status(session.session_id).document == reply.document
+            if case == "receipt-adoption":
+                recovered = fresh.recover(session.session_id)
+                assert recovered.document["status"] == "completed", recovered.document
+                assert recovered.document["answer"] == "done"
+            else:
+                assert fresh.status(session.session_id).document == reply.document
             if citations:
                 citation_id = re.search(r"ev_[0-9a-f]{64}", reply.document["answer"])[0]
                 assert fresh.citation_view(session.session_id, attempt, citation_id)["available"] is True
