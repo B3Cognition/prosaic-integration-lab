@@ -48,3 +48,24 @@ def test_corrupt_or_incomplete_parallel_family_fails_closed(damage):
     elif damage=='missing':d['candidate_lineage'].pop('candidates')
     else:d['artifacts'][1]['version']='0.9.20'
     with pytest.raises(ValueError):supports_parallel_tools(d)
+
+
+def test_tool_evidence_lane_audits_the_exact_parallel_handoff(monkeypatch, tmp_path):
+    from lab_runner.tool_evidence import require_tool_evidence_install
+    from prosaic_integration_lab import dependencies, sdk_audit
+
+    manifest = tmp_path / 'manifest.json'
+    data = paired_manifest()
+    audited = []
+    monkeypatch.setattr(dependencies, 'sdk_manifest', lambda path: data)
+    monkeypatch.setattr(sdk_audit, 'audit', lambda path, wheels: audited.append(path))
+    manifest.write_text('{}')
+
+    require_tool_evidence_install(manifest)
+    assert audited == [manifest]
+    with pytest.raises(ValueError):
+        require_tool_evidence_install(manifest, candidate=False)
+    data['candidate_lineage']['candidates'].pop()
+    with pytest.raises(ValueError):
+        require_tool_evidence_install(manifest)
+    assert audited == [manifest]
