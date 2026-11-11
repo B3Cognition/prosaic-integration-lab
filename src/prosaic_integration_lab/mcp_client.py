@@ -99,20 +99,20 @@ def run_case(case, provider, *, journal, store=None, build_host=None):
             scope = h.ConversationScope(store.namespace, "synthetic", "graph", "tenant", "actor")
             chat = h.Conversation(binding, store=store, scope=scope)
             session = chat.create()
-            def send():
+            def send(**kwargs):
                 return chat.send(session.session_id, message_id="question", message="Review",
-                                 expected_revision=session.revision)
+                                 expected_revision=session.revision, **kwargs)
 
             if case == "receipt-adoption":
                 class AfterReceipt(OSError):
                     pass
 
-                def lose_owner(*_):
-                    raise AfterReceipt("durable receipt saved")
+                def lose_owner(event):
+                    if event["event"] == "receiptSaved":
+                        raise AfterReceipt("durable receipt saved")
 
-                chat._adopt = lose_owner
                 try:
-                    send()
+                    send(on_event=lose_owner)
                 except AfterReceipt:
                     pass
                 else:
