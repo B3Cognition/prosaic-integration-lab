@@ -15,14 +15,14 @@ def sample():
         inputTokens=200,outputTokens=100)
 
 
-@pytest.mark.parametrize('version,accepted', [('0.9.3+finalize.1',True),('0.9.3+../../private',False),('0.9.3+https://private',False)])
+@pytest.mark.parametrize('version,accepted', [('0.9.3+finalize.1',True),('0.9.21.dev1',True),('0.9.3+../../private',False),('0.9.3+https://private',False)])
 def test_pinned_local_candidate_versions_are_reported_without_paths(version,accepted):
     from lab_runner.quality.reporting import summarize
     identity=benchmark_identity();identity['sdkVersions']['b3-prosaic-runtime']=version
     identity['sdkManifestDigest']='b'*64
     if accepted:
         report=summarize([],[],identity=identity,origin='fixture',recovery=[])
-        assert report['identity']['sdkVersions']['b3-prosaic-runtime']=='0.9.3+finalize.1'
+        assert report['identity']['sdkVersions']['b3-prosaic-runtime']==version
     else:
         with pytest.raises(ValueError):summarize([],[],identity=identity,origin='fixture',recovery=[])
 

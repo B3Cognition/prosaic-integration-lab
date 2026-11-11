@@ -1,8 +1,13 @@
 # Current delivery status
 
+## Parallel read tools and Lab 0.9.14 — 2026-11-11
+
+Lab 0.9.14 adds the parallel-read blueprint and 32 required cases per cell.
+See [configuration and verification](parallel-tools.md) and [release notes](release-0.9.14.md).
+
 ## Safe tool events and Lab 0.9.13 — 2026-11-10
 
-The current manifest selects Runtime 0.9.20, Harness 0.9.14 and Harness PostgreSQL
+The 0.9.13 manifest selects Runtime 0.9.20, Harness 0.9.14 and Harness PostgreSQL
 0.4.3, retaining original Core 0.5.0 and Runtime recorder 0.3.0 bytes. Safe display
 and captured citations have a complete copyable host and 24 required dual-provider
 cases in every architecture/database cell. Existing gates and archived profiles

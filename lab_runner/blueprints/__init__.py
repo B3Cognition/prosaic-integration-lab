@@ -4,6 +4,7 @@ import shutil
 
 ROOT = Path(__file__).parent
 BLUEPRINTS = {
+    'parallel-tools': ROOT / 'parallel_tools',
     'tool-evidence': ROOT / 'tool_evidence',
     'sent-effort': ROOT / 'sent_effort',
     'accounting-metadata': ROOT / 'accounting_metadata',

@@ -1,12 +1,10 @@
 # Releases and compatibility
 
-Compatibility checkpoint: 2026-11-10. Lab **0.9.13** selects public Core
-**0.5.0**, Runtime **0.9.20**, Harness **0.9.14**, recorder **0.3.0** and Harness
-PostgreSQL **0.4.3**. Tool-evidence and [context-pack acceptance](context-packs.md) are required in
-all four released Linux architecture/PostgreSQL cells. Earlier profiles remain
-available with their original hashes; their evidence does not certify the new train.
-See [release scope and qualification](release-0.9.13.md). Publication status and
-original artifacts are authoritative on the linked release pages.
+Compatibility checkpoint: 2026-11-11. Lab **0.9.14** selects Core **0.5.0**,
+Runtime **0.9.21**, Harness **0.9.15**, recorder **0.3.0**, and Harness
+PostgreSQL **0.4.4**. [Parallel read tools](parallel-tools.md), tool evidence,
+and context packs run in all four released Linux architecture/PostgreSQL cells.
+See [release notes](release-0.9.14.md).
 
 Value-guard v2 requires explicit readmission from the old train. Header options
 add no persistent identity fields. Workflow tags now have a separate V2 blueprint with explicit guarded identity

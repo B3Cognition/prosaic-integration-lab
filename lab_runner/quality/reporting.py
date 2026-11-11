@@ -71,7 +71,7 @@ def summarize(schedule,results,*,identity,origin,recovery):
         elif key=='scorerVersion' and value!='evidence-score-v1':raise ValueError('invalid scorer')
         elif key=='sdkVersions':
             if set(value)!={'b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness'} or any(
-                type(v) is not str or not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:\+[a-z0-9]+(?:\.[a-z0-9]+)*)?',v) for v in value.values()):
+                type(v) is not str or not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+(?:\.dev[0-9]+)?(?:\+[a-z0-9]+(?:\.[a-z0-9]+)*)?',v) for v in value.values()):
                 raise ValueError('invalid SDK identity')
     for row in recovery:
         if set(row)!={'caseId','origin','passed','additionalProviderRequests','additionalToolCalls','elapsedSeconds','allowancePreserved'} or row['caseId'] not in {'saved-receipt','missing-receipt','schema-failure'} or row['origin']!='fixture':

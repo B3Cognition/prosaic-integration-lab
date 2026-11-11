@@ -81,5 +81,11 @@ def require_tool_evidence_install(manifest,*,candidate=True):
     from prosaic_integration_lab.dependencies import sdk_manifest,cache_directory
     from prosaic_integration_lab.sdk_audit import audit
     root=Path(__file__).resolve().parents[1]
-    validate_tool_manifest(sdk_manifest(manifest),candidate=candidate)
+    from .gates import supports_parallel_tools
+    data=sdk_manifest(manifest)
+    if supports_parallel_tools(data):
+        if candidate != ('candidate_lineage' in data):
+            raise ValueError('parallel SDK family does not match dependency mode')
+    else:
+        validate_tool_manifest(data,candidate=candidate)
     audit(manifest,cache_directory(manifest,root/'.cache/wheels'))

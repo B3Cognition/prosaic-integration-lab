@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prosaic-integration-lab"
-version = "0.9.13"
+version = "0.9.14"
 description = "Synthetic acceptance consumer for installed Prosaic releases"
 requires-python = ">=3.12"
 dependencies = ["fastapi", "uvicorn", "httpx", "psycopg[binary]>=3.2,<4", "psycopg-pool>=3.2,<4", "PyYAML", "jsonschema", "pyuca", "PyJWT[crypto]>=2.15,<3", "packaging"]
@@ -18,6 +18,7 @@ where = ["src", "."]
 include = ["prosaic_integration_lab*", "lab_runner*"]
 
 [tool.setuptools.package-data]
+"lab_runner.blueprints.parallel_tools" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.tool_evidence" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.sent_effort" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.accounting_metadata" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
