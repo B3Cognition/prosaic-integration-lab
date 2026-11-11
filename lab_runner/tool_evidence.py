@@ -83,6 +83,9 @@ def require_tool_evidence_install(manifest,*,candidate=True):
     root=Path(__file__).resolve().parents[1]
     from .gates import supports_parallel_tools
     data=sdk_manifest(manifest)
-    if not candidate or not supports_parallel_tools(data):
+    if supports_parallel_tools(data):
+        if candidate != ('candidate_lineage' in data):
+            raise ValueError('parallel SDK family does not match dependency mode')
+    else:
         validate_tool_manifest(data,candidate=candidate)
     audit(manifest,cache_directory(manifest,root/'.cache/wheels'))

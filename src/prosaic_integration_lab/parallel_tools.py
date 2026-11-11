@@ -6,6 +6,8 @@ import json,re,uuid
 
 CASES=('independent-overlap','concurrency-windows','ordered-evidence','serial-barrier','atomic-batch-admission','current-authorization','cancel-drain','uncertain-journal','same-key-replay','controlled-failure','guard-stop-retains-completion','safe-settlement-events','delivered-citations','bounded-buffers','receipt-adoption','lease-owner-fencing')
 TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.21.dev1','b3-prosaic-runtime-postgres':'0.3.0','b3-prosaic-harness':'0.9.15.dev1','b3-prosaic-harness-postgres':'0.4.4.dev1'}
+RELEASE_TRAIN = {**TRAIN, 'b3-prosaic-runtime': '0.9.21',
+                 'b3-prosaic-harness': '0.9.15', 'b3-prosaic-harness-postgres': '0.4.4'}
 
 
 def require_parallel_tool_sdk():

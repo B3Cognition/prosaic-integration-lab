@@ -4,6 +4,8 @@ from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from threading import Thread
 import json
 
+RETAINED_WHEELS = {'b3-prosaic':'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81','b3-prosaic-runtime-postgres':'5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'}
+
 @contextmanager
 def endpoint(provider):
     if provider not in {'openai-compatible','anthropic'}:raise ValueError('unsupported provider')
@@ -34,7 +36,6 @@ def validate_parallel_manifest(data):
     from prosaic_integration_lab.parallel_tools import TRAIN
     actual={item.get('distribution'):item.get('version') for item in data.get('artifacts',())}
     if actual!=TRAIN or len(data['artifacts'])!=5:raise ValueError('exact parallel candidate family required')
-    pins={'b3-prosaic':'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81','b3-prosaic-runtime-postgres':'5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'}
     lineage=data.get('candidate_lineage',{})
     if lineage.get('version')!=1 or lineage.get('kind')!='local-parallel-tool-handoff':raise ValueError('explicit parallel source handoff required')
     paired=lineage.get('candidates',[])
@@ -52,14 +53,17 @@ def validate_parallel_manifest(data):
     retained=lineage.get('retained_artifacts',[])
     if len(retained)!=2:raise ValueError('original Core and recorder required')
     for item in data['artifacts']:
-        if item['distribution'] in pins and (item['sha256']!=pins[item['distribution']] or item not in retained):raise ValueError('original retained bytes differ')
+        if item['distribution'] in RETAINED_WHEELS and (item['sha256']!=RETAINED_WHEELS[item['distribution']] or item not in retained):raise ValueError('original retained bytes differ')
     return data
 
 
-def require_parallel_install(manifest):
+def require_parallel_install(manifest, *, candidate):
+    from .gates import supports_parallel_tools
     from pathlib import Path
     from prosaic_integration_lab.dependencies import sdk_manifest,cache_directory
     from prosaic_integration_lab.sdk_audit import audit
     root=Path(__file__).resolve().parents[1]
-    validate_parallel_manifest(sdk_manifest(manifest))
+    data = sdk_manifest(manifest)
+    if not supports_parallel_tools(data) or candidate != ('candidate_lineage' in data):
+        raise ValueError('parallel SDK family does not match dependency mode')
     audit(manifest,cache_directory(manifest,root/'.cache/wheels'))

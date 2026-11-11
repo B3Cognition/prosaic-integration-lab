@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.14 — 2026-11-11
+
+- Add a copyable parallel-read blueprint and 32 required cases across both provider wires.
+- Adopt Runtime 0.9.21, Harness 0.9.15 and store 0.4.4 with existing lanes retained.
+- See [release notes](docs/release-0.9.14.md).
+
 ## 0.9.13 — 2026-11-10
 
 - Adopt safe tool events/citations with Runtime 0.9.20, Harness 0.9.14 and store 0.4.3.

@@ -18,8 +18,8 @@ def require_tool_evidence_sdk():
         raise ValueError('installed tool evidence capability unavailable')
     import importlib
     versions={name:metadata.version(name) for name in TRAIN}
-    from .parallel_tools import TRAIN as PARALLEL_TRAIN
-    if versions not in (TRAIN,RELEASE_TRAIN,PARALLEL_TRAIN):raise ValueError('installed tool evidence SDK versions differ')
+    from .parallel_tools import TRAIN as PARALLEL_TRAIN, RELEASE_TRAIN as PARALLEL_RELEASE_TRAIN
+    if versions not in (TRAIN,RELEASE_TRAIN,PARALLEL_TRAIN,PARALLEL_RELEASE_TRAIN):raise ValueError('installed tool evidence SDK versions differ')
     for module,name in [('prosaic','b3-prosaic'),('prosaic_runtime','b3-prosaic-runtime'),('prosaic_runtime_postgres','b3-prosaic-runtime-postgres'),
             ('prosaic_harness','b3-prosaic-harness'),('prosaic_harness_postgres','b3-prosaic-harness-postgres')]:
         owner=metadata.distribution(name);source=Path(importlib.import_module(module).__file__).resolve()

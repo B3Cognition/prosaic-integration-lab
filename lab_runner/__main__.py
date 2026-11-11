@@ -76,12 +76,15 @@ def main():
     if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs','tool-evidence','parallel-tools'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     if args.mode=='parallel-tools':
-        if args.command!='test' or not args.candidate:parser.error('parallel-tools requires test with an explicit candidate')
+        if args.command!='test':parser.error('parallel-tools requires test')
         source=str(ROOT/'src')
         if source not in sys.path:sys.path.insert(0,source)
         from prosaic_integration_lab.parallel_tools import require_parallel_tool_sdk
         from .parallel_tools import require_parallel_install
-        try:require_parallel_tool_sdk();require_parallel_install(args.candidate_manifest)
+        try:
+            require_parallel_tool_sdk()
+            manifest = args.candidate_manifest if args.candidate else ROOT/'dependencies/releases.json'
+            require_parallel_install(manifest, candidate=args.candidate)
         except (OSError,ValueError,KeyError,TypeError,ImportError):parser.error('installed parallel SDK bytes must match the qualified handoff')
     if args.mode=='tool-evidence':
         if args.command!='test':parser.error('tool-evidence requires test')

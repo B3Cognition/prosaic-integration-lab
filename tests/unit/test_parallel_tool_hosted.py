@@ -69,3 +69,26 @@ def test_tool_evidence_lane_audits_the_exact_parallel_handoff(monkeypatch, tmp_p
     with pytest.raises(ValueError):
         require_tool_evidence_install(manifest)
     assert audited == [manifest]
+
+
+def test_released_parallel_sdk_family_retains_all_acceptance_lanes():
+    from lab_runner.gates import expected_test_count, required_modes, supports_parallel_tools
+    from prosaic_integration_lab.parallel_tools import RELEASE_TRAIN
+
+    manifest = paired_manifest()
+    manifest.pop('candidate_lineage')
+    for artifact in manifest['artifacts']:
+        artifact['version'] = RELEASE_TRAIN[artifact['distribution']]
+    assert supports_parallel_tools(manifest)
+    modes = required_modes(candidate=False, manifest=manifest)
+    assert len(modes) == 12
+    assert sum(expected_test_count(mode, True) for mode in modes) == 402
+
+    mixed = deepcopy(manifest)
+    next(a for a in mixed['artifacts'] if a['distribution'] == 'b3-prosaic-runtime')['version'] = TRAIN['b3-prosaic-runtime']
+    with pytest.raises(ValueError):
+        supports_parallel_tools(mixed)
+    modified = deepcopy(manifest)
+    next(a for a in modified['artifacts'] if a['distribution'] == 'b3-prosaic')['sha256'] = 'f' * 64
+    with pytest.raises(ValueError):
+        supports_parallel_tools(modified)

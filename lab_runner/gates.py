@@ -23,26 +23,37 @@ CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
     'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}
 
 from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN as TOOL_EVIDENCE_TRAIN
-from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN
+from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN, RELEASE_TRAIN as PARALLEL_RELEASE_TRAIN
 
 def supports_parallel_tools(manifest):
-    actual={item.get("distribution"):item.get("version") for item in manifest.get("artifacts",())}
-    if actual!=PARALLEL_TOOL_TRAIN:
-        if any(item.get("version")==PARALLEL_TOOL_TRAIN.get(item.get("distribution")) for item in manifest.get("artifacts",()) if item.get("distribution") not in {"b3-prosaic","b3-prosaic-runtime-postgres"}):raise ValueError("mixed parallel SDK family")
-        return False
-    from .parallel_tools import validate_parallel_manifest
-    validate_parallel_manifest(manifest)
-    return True
+    artifacts = manifest.get('artifacts', ())
+    actual = {item.get('distribution'): item.get('version') for item in artifacts}
+    if actual == PARALLEL_RELEASE_TRAIN:
+        from .parallel_tools import RETAINED_WHEELS
+        if (len(artifacts) != 5 or 'candidate_lineage' in manifest or
+                any(item.get('sha256') != RETAINED_WHEELS[item['distribution']]
+                    for item in artifacts if item['distribution'] in RETAINED_WHEELS)):
+            raise ValueError('invalid released parallel SDK family')
+        return True
+    if actual == PARALLEL_TOOL_TRAIN:
+        from .parallel_tools import validate_parallel_manifest
+        validate_parallel_manifest(manifest)
+        return True
+    retained = {'b3-prosaic', 'b3-prosaic-runtime-postgres'}
+    if any(version in (PARALLEL_TOOL_TRAIN.get(name), PARALLEL_RELEASE_TRAIN.get(name))
+           for name, version in actual.items() if name in PARALLEL_TOOL_TRAIN and name not in retained):
+        raise ValueError('mixed parallel SDK family')
+    return False
 
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -58,9 +69,9 @@ def supports_conversation(manifest):
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
-    if actual==PARALLEL_TOOL_TRAIN:supports_parallel_tools(manifest)
+    if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -76,11 +87,11 @@ def required_modes(*,candidate,manifest):
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
