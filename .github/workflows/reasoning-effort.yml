@@ -1,0 +1,43 @@
+name: Reasoning effort integration
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  installed-sdk-controls:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Install exact released SDK family and the Lab wheel
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-reasoning.json
+          .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases-reasoning.json
+          .venv/bin/python -m build --wheel
+          .venv/bin/python -m pip install --no-deps dist/*.whl
+          .venv/bin/python scripts/audit_install.py --manifest dependencies/releases-reasoning.json
+          .venv/bin/python -m pip check
+      - name: Check actual API payloads, native argv and packaged blueprints
+        run: |
+          mkdir reports
+          .venv/bin/python -I -m pytest -o pythonpath= tests/reasoning_acceptance -q --junitxml=reports/reasoning.xml
+          WHEELS=$(.venv/bin/python -c "from pathlib import Path; from prosaic_integration_lab.dependencies import cache_directory; print(cache_directory(Path('dependencies/releases-reasoning.json'), Path('.cache/wheels')).resolve())")
+          .venv/bin/python -I -m lab_runner.reasoning_eval test --manifest dependencies/releases-reasoning.json --wheel-dir "$WHEELS" --output reports/reasoning.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: reasoning-${{ matrix.os }}
+          path: reports/
+          if-no-files-found: error

@@ -25,6 +25,17 @@ def sanitize_junit(path):
                 result['skipped'] += 1
             else:
                 result['failed_tests'].append(old.attrib.get('name', 'unknown_test'))
+                if old.attrib.get('name')=='test_large_captured_context_obeys_default_record_capacity':
+                    marker='CONTEXT_PACK_CAPACITY '
+                    text=child.text or ''
+                    if marker in text and len(text)<=16384:
+                        try:
+                            import json
+                            from .context_packs import sanitize_capacity_diagnostic
+                            value,_=json.JSONDecoder().raw_decode(text.split(marker,1)[1].lstrip())
+                            result['context_pack_diagnostic']=sanitize_capacity_diagnostic(value)
+                        except (ValueError,TypeError,RecursionError):
+                            result['context_pack_diagnostic']={'status':'unavailable'}
     temporary = path.with_suffix('.sanitized.xml')
     ET.ElementTree(root).write(temporary, encoding='unicode')
     temporary.replace(path)

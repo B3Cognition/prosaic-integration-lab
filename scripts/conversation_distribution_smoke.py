@@ -132,6 +132,10 @@ def wheel_identity(path):
         return {'name':info['Name'],'version':info['Version'],'files':files}
 
 
+def verify_observatory_source(source):
+    return _helper('observatory_source_smoke').verify(source)
+
+
 PUBLIC_CONVERSATION='''
 from prosaic_harness import Conversation, ConversationBindings, ConversationPolicy, ConversationScope, MemorySessionStore
 from prosaic_runtime import RunPolicy, ProsaicRuntime
@@ -193,7 +197,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
     run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
         directory=directory,environment=environment)
-    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN
+    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN
     selected=json.loads(manifest.read_bytes())
     if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
@@ -203,7 +207,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
-    if {item['distribution']:item['version'] for item in selected['artifacts']} == UNIFIED_POOL_TRAIN:
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
             raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
                 '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
@@ -211,6 +215,22 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             if not (receipt.get('passed') is True and receipt.get('caseCount')==count
                     and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
                 raise ValueError('installed evaluation qualification incomplete')
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
+        # The same external installed consumers execute every newly introduced blueprint.
+        feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
+        feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
+        if {item['distribution']:item['version'] for item in selected['artifacts']} == TOOL_EVIDENCE_TRAIN:
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
+            feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
+        run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=',
+             *feature_paths, '-q'],
+            directory=directory, environment=feature_environment)
     audit()
     return python
 
@@ -248,6 +268,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                      'assets/conversation/agents/assistant.md','scripts/conversation_conformance.py',
                      'tests/acceptance/test_conversation_journey.py','dependencies/public-build-inputs.json'):
             if not (source/name).is_file():raise ValueError('incomplete conversation source distribution')
+        verify_observatory_source(source)
         stage='sdist_build';built=directory/'rebuilt';built.mkdir()
         run([python,'-I','-m','build','--wheel','--outdir',built,source],directory=directory,environment=environment)
         choices=list(built.glob('*.whl'))
@@ -255,6 +276,9 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             raise ValueError('source build differs from Lab version')
         stage='sdist_consumer';second=directory/'sdist-consumer';second.mkdir()
         source_python=consume(choices[0],directory=second,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
+        stage='sdist_observatory'
+        run([source_python,'-m','pytest','-q','-p','no:cacheprovider',
+            'tests/unit/test_observatory_launcher.py'],directory=source,environment=environment)
         if run_stack:
             stage='sdist_image_build'
             image=run([source_python,source/'scripts/build_consumer.py','--manifest',snapshot,
@@ -268,7 +292,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=None
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
-                    '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
+                    '--consumer-image',image_id,*flags],directory=source,environment=environment,
+                    timeout=1200 if command=='test' else 900)
                 receipt=execution_receipt(raw,command=command)
                 if receipt.get('images',{}).get('consumer')!=image_id:
                     raise ValueError('source consumer image changed between build and qualification')
@@ -287,7 +312,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             wheel_sha256=hashlib.sha256(original_wheel.read_bytes()).hexdigest(),
             sdist_sha256=hashlib.sha256(original_sdist.read_bytes()).hexdigest(),
             installed_payloads_verified=True,isolated_imports_verified=True,pip_check_passed=True,
-            public_construction_verified=True,sdist_assets_verified=True)
+            public_construction_verified=True,sdist_assets_verified=True,observatory_source_verified=True)
     except Exception as error:
         result.update(failure='distribution_failed',failure_stage=stage)
         if stage in {'sdist_demo','sdist_acceptance'}:

@@ -1,6 +1,163 @@
 # Changelog
 
-## Unreleased
+## 0.9.13 — 2026-11-10
+
+- Adopt safe tool events/citations with Runtime 0.9.20, Harness 0.9.14 and store 0.4.3.
+- Add the copied tool-evidence host and 24-case dual-provider lane with owned PostgreSQL16/18.
+- Recheck source/history revocation and retain original Core/recorder bytes.
+- Keep acceptance scripts usable from a source archive without a preinstalled Lab package.
+- See [release notes](docs/release-0.9.13.md); publication evidence accompanies the release.
+
+## 0.9.12 — 2026-11-09
+
+- Adopt Runtime 0.9.19, Harness 0.9.13 and Harness PostgreSQL 0.4.2; retain original Core 0.5.0 and recorder 0.3.0 bytes.
+- Require all 12 context-pack cases in every released architecture/database cell, alongside existing acceptance, installed blueprint and reasoning gates.
+- Cover per-node context, accepted-record sources, private validation inputs, bounded reads, revocation, recovery, capacity and restricted roles.
+- Preserve prior SDK profiles and benchmark inputs; document migrations and synthetic qualification limits. See [release notes](docs/release-0.9.12.md).
+
+## 0.9.11
+
+- Adopt Runtime 0.9.18 and add the sent-effort blueprint; preserve the prior published train and original adapter bytes.
+
+## 0.9.10
+
+- Adopt exact published Runtime0.9.17 with trusted accounting run/variant labels and public capability; keep Core0.5.0/Harness0.9.12/adapter bytes.
+- Add copyable accounting-metadata host, installed both-wire and file/PG recovery/failure/privacy tests with restricted runtime roles and exact-owned cleanup.
+- Preserve prior profiles/manifests/freezes and all five earlier blueprint resources; advance only current provenance, with explicit accounting hash and reader compatibility notes.
+- Require original qualified CI archives, all native/PG/reasoning/distribution/public-consumer and post-merge gates. No live inference.
+
+## 0.9.9
+
+- Adopt the published Harness0.9.12 workflow-rule API with exact public artifact lineage; retain Core0.5.0/Runtime0.9.16/adapters.
+- Add a copyable workflow-enforcement V2 host, installed both-wire YAML/native acceptance and file/PG recovery while preserving Validator V1.
+- Preserve prior manifests/public profile/freezes verbatim, update only active provenance, and document identity/explicit budget limits.
+- Require all final native platform/PG, reasoning/distribution/public-consumer and post-merge proof; no live inference.
+
+## 0.9.8 — 2026-11-07
+
+- Adopt public Runtime 0.9.16 and Harness 0.9.11 with exact public hashes; retain Core 0.5.0 and unchanged PostgreSQL adapters.
+- Ship copyable header, versioned cross-step review V1 and input-cap hosts. Require all three fixed fee formats on both wires in the guarded example.
+- Require a blueprint, installed acceptance and linked guide for each added capability. Wheel/source include copy-out resources and provenance notices.
+- Archive the old manifests/profile/freezes verbatim, retain closed historical families and preserve benchmark inputs. Value guard v2 needs explicit readmission from the old train; headers add no persistent identity fields.
+- See [release scope and qualification](docs/release-0.9.8.md). Synthetic controls do not certify live providers.
+
+See [published release notes and compatibility](docs/releases.md), including backfilled historical release notes. Documentation refreshed on 2026-11-07; package versions and release archives are unchanged.
+
+## 0.9.6 — 2026-11-06
+
+- Add a released-SDK rule-admission lane and a copyable catalogue-desk
+  blueprint. The blueprint has tagged prose at all four stages, a `prose-only`
+  rule, a two-file per-(file, stage) composition, a custom
+  `loan_period_within_policy` guard and a `required_guards` floor in both forms.
+- Pin fix, retry and fail; the rules fingerprint; coverage; and the byte-identical
+  untagged guarantee with synthetic acceptance tests (3 strict expected
+  failures track fee formats Runtime does not yet read), including regressions
+  from an adversarial review and from two PR review rounds. The tests sit outside the default collection and
+  need no credentials or live calls.
+- Adopt published Core 0.5.0, Runtime 0.9.14 and Harness 0.9.9 in both active
+  manifests, with exact source commits and verified public wheel hashes.
+  Add a copyable Harness host and both-wire acceptance for policy preservation,
+  tool repair, composed after-tool checks, durable failures and file-store recovery.
+  The two reviewed value-guard gaps have independent passing Harness regressions.
+- Preserve the preceding manifests, SDK provenance and memory freezes verbatim.
+  Historical candidate manifests/builders remain available for reproduction;
+  ordinary release qualification never rebuilds a candidate implicitly.
+- Require all four rule-admission architecture/PostgreSQL cells alongside the
+  four ordinary stack cells and both installed-reasoning jobs. See
+  [release scope and qualification](docs/release-0.9.6.md).
+
+## 0.9.5 — 2026-11-06
+
+- Adopt checksum-pinned Prosaic 0.5.0, Runtime 0.9.13 and Harness 0.9.8 in both
+  active SDK manifests, with Runtime recorder 0.3.0 and Harness store 0.4.1.
+- Retain all nine real-stack gates, context assembly and installed native/unified
+  examples for the exact new train; unknown or mixed trains remain rejected.
+- Preserve former manifests, public benchmark provenance and memory freeze bytes
+  as named snapshots. Corpus, agent prompts, scoring and historical evidence stay
+  unchanged; current freezes bind the new SDK provenance.
+- Update current installation guides and Explorer SDK badges. Verify omitted and
+  explicit artifact effort against Runtime's explicit-effort precedence.
+- See [release scope and qualification](docs/release-0.9.5.md).
+
+## 0.9.4 — 2026-11-04
+
+- Keep the compact constructive CRT prompt in all seven shared effort agents;
+  add an explicit Gemma medium agent with the same complete JSON contract and
+  no CRT procedure. Select it in the default Gemma example workflow.
+- Document explicit prompt/profile selection, bounded native-control evidence,
+  retained failed attempts and the limits of reused regression questions.
+- In the retained studies, Qwen usable correct JSON improved from 9/18 to 15/18.
+  The final Gemma comparison recovered three fenced answers (9/18 to 12/18
+  usable correct JSON), with six caps for both it and fresh 0.9.3. These are
+  task-specific observations, not general accuracy guarantees.
+- Preserve effort metadata, native mappings, tools, Python implementation and
+  both checksum-pinned SDK manifests. No SDK release or new live inference is
+  required to qualify this package.
+
+## 0.9.3 — 2026-11-03
+
+- Remove the ambiguous hidden-reasoning prohibition from all seven packaged
+  reasoning-effort agents while preserving their strict JSON output rules,
+  effort metadata, provider mappings and both SDK manifests.
+- Clarify that the wording cleanup does not establish an arithmetic accuracy
+  improvement; native control verification and answer grading remain separate.
+
+## 0.9.2 — 2026-11-03
+
+- Add a separate checksum-pinned Runtime 0.9.12 reasoning lane with installed-SDK
+  HTTP/Claude/Codex control checks on Linux AMD64 and ARM64, preserving the ordinary
+  Lab release manifest and closed SDK provenance guards.
+- Include seven neutral effort agents, API/native configurations, an answer
+  schema and a one-call Harness workflow in the wheel and source archive.
+- Add explicit bounded live runs with atomic shared batch reservations, private
+  receipts, retained partial observations and conservative unknown outcomes.
+  Separate fixture control verification, live observations and answer grading;
+  keep Gemma's positive efforts binary and ultra Codex-only.
+- Refresh current installation/ownership documentation and preserve historical
+  Qwen/Gemma live evidence. No new live inference or SDK publication is required.
+
+## 0.9.1 — 2026-11-02
+
+- Start Observatory as an idle authenticated monitor, discover your captured
+  Chat/API and standalone workflow runs automatically, and keep watching after
+  completion. Make demos explicit, pin replay until Follow live, and distinguish
+  disconnected, stale, unavailable, live and retained events.
+- Restore manually authenticated Safari/browser sessions with the exact verified
+  Lab principal. Explain why oMLX keys cannot authenticate Lab, serialize browser
+  handshakes, and preserve workflow output visibility by capturing timing/counts
+  without raw agent text. Identify recorder calls whose timing was not captured.
+- Preserve real-model token usage in both Observatory views by translating the
+  local oMLX provider's exact empty prefill heartbeat into an SSE comment. Keep
+  real model conflicts, usage payloads and recorder accounting qualification intact.
+
+## 0.9.0 — 2026-11-01
+
+- Enable streaming by default in Lab conversations, native workflow bindings,
+  chat and local example profiles; preserve explicit buffered opt-out and exact
+  legacy binding identities for retained sessions and proposals.
+- Restore authorized local-launcher connections after reload with a bounded
+  same-origin session, validate manual credentials, and expose reconnect controls
+  after authentication failure instead of leaving a nonworking Start button.
+
+- Show actual streamed generation in both Observatory views: returning output
+  packets, provisional text, arrival marks, a character curve, first-output wait
+  and gaps, with pause/replay and separately qualified run-wide token totals.
+- Bound owner-only output observations and preserve interrupted/truncated
+  uncertainty. Support an explicit one-request launcher allowance while keeping
+  ordinary per-turn reservations independent of cumulative session budgets.
+- Allow bounded execution headroom for the full conversation recovery suite on
+  shared CI runners and identify deadline failures in safe receipts.
+
+## 0.8.0 — 2026-10-31
+
+- Add the source/complete-archive execution Observatory: 3D Live and Inspect
+  views, Blender-authored assets, owner-authorized message previews and bounded
+  Runtime/Harness observations with separately qualified provider usage counts.
+- Preserve unresolved workflow-start intent in the observations API, return
+  proper static-resource 404s, and require complete source assets, licenses and
+  texture/model provenance in distribution qualification.
+- Preserve Runtime 0.9.8, Harness 0.9.4, both adapter pins and existing Explorer,
+  execution, authorization, accounting and recovery behavior.
 
 - Update SHA-pinned GitHub Actions to stable Node 24 releases, removing the
   deprecated action-runtime warnings while retaining the acceptance matrix,

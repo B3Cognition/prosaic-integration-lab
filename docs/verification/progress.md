@@ -1,5 +1,100 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
+
+Runtime0.9.18 is published and publicly verified from source
+`d440d8664e0f307e01c62706976e485993b2e0a2`. The active manifests pin its exact
+public wheel hash with Core0.5.0/Harness0.9.12 and unchanged recorder0.3.0/store0.4.1.
+Fresh public installation passed132 sent-effort/metadata/durable cases, six smoke
+gates and pipcheck; no live inference. Lab0.9.11 final qualification is in progress.
+Previous active profiles/manifests/freezes are preserved as pre-sent-effort.
+Sent controls describe attempts, never provider receipt/compliance or retry consent.
+Old receipt absence stays unavailable; input identities and accounting/PG schemas
+stay unchanged. No live inference. Follow the guide, release0.9.11 gates and
+verification ledger; all ten final-head jobs, original CI archives/equal merge,
+public consumers and independent post-merge CI are mandatory before completion.
+
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The maintainer authorized Runtime accounting labels and a Lab blueprint, tests,
+merge/release and notes. Develop against an explicitly labeled candidate; advance
+active pins/freezes only after actual Runtime0.9.17 publication/public-byte proof.
+Core0.5.0/Harness0.9.12 and recorder0.3.0/store0.4.1 keep released bytes. Previous
+active profiles/manifests/freezes are preserved as pre-accounting-metadata; all
+five earlier blueprint resources/corpus/prompts/scoring remain unchanged.
+Trusted benchmark labels never replace actual run/tenant/payer authority. Saved
+Harness labels win on resume; same-call relabeling conflicts. Labeled contexts
+need >=0.9.17 readers; no DDL or adapter republish. No live calls.
+Follow the [guide](../accounting-request-metadata.md),
+[release gates](../release-0.9.10.md) and
+[ledger](accounting-request-metadata-2026-11-08.md).
+Require all ten final-head hosted jobs, exact merge/tree and original qualified
+archives, public consumers and all post-merge CI before marking complete.
+
+
+## Workflow enforcement V2 and Lab0.9.9 — 2026-11-07
+
+The maintainer authorized workflow enforcement tags with accepted earlier outputs,
+implementation/testing/merge/release and a new Lab blueprint/release notes.
+Harness0.9.12 PR16 is published and its public bytes are verified; retain released Runtime0.9.16/Core0.5.0 and
+both adapters. Adopt only actually published/verified Harness bytes. Existing
+V1 resources and all historical manifests/profile/freezes stay unchanged; prior
+active records are preserved as pre-workflow-enforcement. No live calls.
+Follow the [release guide](../release-0.9.9.md), [feature map](../feature-blueprints.md) and [current ledger](workflow-enforcement-2026-11-07.md).
+Require the complete four native ordinary cells, four rule/feature cells and
+both reasoning jobs, final review, exact merge tree, original archives, public
+wheel/rebuilt-source consumers and all post-merge checks. Older checkpoints
+below retain their historical limits.
+
+
+## Latest SDK blueprints and Lab 0.9.8 — 2026-11-07
+
+The maintainer authorized a new Lab release adopting Runtime 0.9.16 and Harness
+0.9.11, with a copyable blueprint, installed acceptance and guide per added
+capability. Core 0.5.0/recorder 0.3.0/store 0.4.1 retain their public bytes.
+Previous active records are archived as pre-cerebro; benchmark inputs are unchanged.
+Follow the [feature map](../feature-blueprints.md) and
+[qualification ledger](cerebro-sdk-blueprints-2026-11-07.md). Full source,
+installed consumers, final native matrix, review, merge equality and original
+archive/public-consumer proof remain required before publication. No live calls
+or upstream SDK publication. Older checkpoints retain their historical scope.
+
+
+## Released guarded SDK adoption — 2026-11-06
+
+Lab 0.9.6 combines the blueprint/guarded companion with released Core 0.5.0,
+Runtime 0.9.14 and Harness 0.9.9. Both SDK publications and public verification
+are complete; final Lab qualification remains in progress. Preserve
+the preceding manifests, SDK provenance and memory freezes as named snapshots.
+The [current ledger](guarded-sdk-release-2026-11-06.md) records the observed
+red/green host checks and pending final train, ten hosted jobs, merge equality
+and public-consumer proof. Historical candidate results below remain unchanged.
+
+## Guarded Harness integration follow-up — 2026-11-05
+
+Exact candidate train: Core 0.5.0 / Runtime #16 `498ffc7` / Harness `5b3f0f2`.
+The copyable Harness host and acceptance close registration, floor/composed-rule
+preservation and receipt/recovery gaps. Both provider wires are synthetic.
+Ordinary/reasoning manifests remain unchanged; candidate provenance, installed
+payload audits and PostgreSQL 16/18 checks are separate qualification gates.
+See [the companion ledger](guarded-harness-2026-11-05.md). Historical checkpoints
+below retain the limitations that existed at those commits.
+
+## Rule-admission blueprint candidate lane — 2026-11-05
+
+[Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk
+blueprint on candidate Core `9d5a02f` and Runtime PR #16 `65ba15d`, both rebuilt
+reproducibly from exact commits. 123 synthetic acceptance tests pin tagged
+prose, guard registration, both `required_guards` forms, fix, retry and fail,
+the fingerprint, coverage and the byte-identical untagged guarantee. They
+include regressions for 9 defects an adversarial review found and for every
+PR #45 review comment across two rounds, all fixed; the worst was a float loan-period policy
+bypass. Three strict expected failures track fee formats Runtime does not read
+yet. The tests pass from source and from the installed Lab wheel on macOS
+arm64, and CI rebuilds the candidates byte-identically on Linux AMD64 and
+ARM64. The lane is not a required check. It is a draft until #16
+merges. There is no Harness workflow and no live-model qualification.
+
 ## Sandboxed CLI consumer blueprint — 2026-10-20
 
 Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes

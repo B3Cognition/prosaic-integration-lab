@@ -1,0 +1,10 @@
+default_profile: local
+routes: {fast: local}
+allowed_tools: []
+profiles:
+  local:
+    base_url: http://127.0.0.1:9/v1
+    model: synthetic-model
+    max_tokens: 256
+    supported_efforts: [none, low, medium, high, xhigh, max]
+    features: {streaming: false, reasoning_effort: low}

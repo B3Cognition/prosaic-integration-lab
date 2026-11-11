@@ -139,6 +139,37 @@ def workflow_observation(record):
                     'run_completed','recovery_committed'}: return
     logger.info(json.dumps({'event':'workflow_observed',**correlation(),'kind':kind}))
 
+def scoped_observer(host, run_id):
+    """Correlate optional observations using a host-authorized reservation."""
+    sink = getattr(host, 'observations', None)
+    original = host.observer
+    if sink is None:
+        return original
+    def observed(record):
+        try:
+            if original is not None:
+                original(record)
+        finally:
+            sink.observe(run_id, record)
+    return observed
+
+
+def scoped_output(host, run_id):
+    """Forward public provisional events without changing fixture delivery."""
+    sink = getattr(host, 'observations', None)
+    fixture = host.fixture_event if host.config.get('fixture_events_url') else None
+    if sink is None:
+        return fixture
+    def output(event):
+        try:
+            sink.output(run_id, event, capture_text=False)
+        except Exception:
+            pass  # Optional display capture cannot fail execution.
+        if fixture is not None:
+            fixture(event)
+    return output
+
+
 class Observability:
     def __init__(self,app,*,metrics,operator_token=None):
         self.app,self.metrics,self.operator_token=app,metrics,operator_token

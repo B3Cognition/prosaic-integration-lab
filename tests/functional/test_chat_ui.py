@@ -22,3 +22,10 @@ def test_chat_public_exception_is_exact_get_only(chat_client):
     assert client.get('/chat/private').status_code == 401
     assert client.get('/chat?token=ignored').status_code == 200
     assert 'ignored' not in client.get('/chat?token=ignored').text
+
+
+def test_connection_validation_requires_a_valid_api_credential(chat_client):
+    client=chat_client.client
+    assert client.get('/chat/connection').status_code==401
+    assert client.get('/chat/connection',headers={'Authorization':'Bearer invalid'}).status_code==401
+    assert client.get('/chat/connection',headers=HEADERS).json()=={'connected':True}

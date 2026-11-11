@@ -34,6 +34,9 @@ def candidate_set(tmp_path,request):
     if getattr(request,'param',None)=='context':
         expected_versions['B3Cognition/prosaic-runtime']['b3-prosaic-runtime']='0.9.4'
         expected_versions['B3Cognition/prosaic-harness']={'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
+    if getattr(request,'param',None)=='packs':
+        from scripts.prepare_sdk_candidates import CONTEXT_PACK_EXPECTED
+        expected_versions=CONTEXT_PACK_EXPECTED
     candidates=[]
     for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
@@ -58,7 +61,7 @@ def candidate_set(tmp_path,request):
     return [tmp_path/str(index) for index in range(3)],candidates
 
 
-@pytest.mark.parametrize('candidate_set',['context'],indirect=True)
+@pytest.mark.parametrize('candidate_set',['context','packs'],indirect=True)
 @pytest.mark.parametrize('corrupt',[False,True])
 def test_context_train_keeps_original_adapter_bytes(candidate_set,tmp_path,monkeypatch,corrupt):
     import scripts.prepare_sdk_candidates as cli
@@ -70,12 +73,14 @@ def test_context_train_keeps_original_adapter_bytes(candidate_set,tmp_path,monke
     monkeypatch.setattr(cli,'retained_runtime_postgres',lambda cache:(retained,original))
     if corrupt:original.write_bytes(b'changed original')
     arguments=[(c['repository'],c['run_id'],c['source_commit'],d) for c,d in zip(candidates,directories)]
+    features=({'context_packs':True} if candidates[0]['receipt']['distributions'][0]['version']=='0.5.0'
+        else {'context_assembly':True})
     manifest=tmp_path/'context.json'
     if corrupt:
-        with pytest.raises(ValueError,match='bytes differ'):cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        with pytest.raises(ValueError,match='bytes differ'):cli.curate(arguments,manifest,tmp_path/'cache',**features)
         assert not manifest.exists()
     else:
-        data=cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        data=cli.curate(arguments,manifest,tmp_path/'cache',**features)
         assert next(a for a in data['artifacts'] if a['distribution']==retained['distribution'])==retained
         assert data['candidate_lineage']['retained_artifacts']==[retained]
         from prosaic_integration_lab.dependencies import cache_directory

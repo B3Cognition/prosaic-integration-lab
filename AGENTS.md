@@ -43,6 +43,9 @@ evidence as consent to retry, authority to approve output or a customer invoice.
   fail rather than skip missing infrastructure; verify cleanup as well as tests.
 - Record actual verification commands, architectures, versions and limitations.
   A plan, successful build or synthetic test is not live/provider certification.
+- Ship each newly added capability with a copyable blueprint, an installed-SDK
+  acceptance test and a linked user guide. Keep the feature map and release
+  checklist current; a feature is not release-ready without that coverage.
 - If a library defect is found, add its regression/fix upstream. Stop and seek
   authority for changes/releases outside this repository's agreed scope.
 - Preserve user changes. Do not push, release or delete unrelated branches or

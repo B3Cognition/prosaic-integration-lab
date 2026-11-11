@@ -3,6 +3,10 @@ recursive-include .github/workflows *.yml
 recursive-include .github/ci *.apparmor
 recursive-include assets *.yml *.json *.md
 include configs/README.md
+recursive-include lab_runner/reasoning_eval/data *.md *.json *.yml
+recursive-include lab_runner/rule_admission/blueprint *.md *.yml
+recursive-include lab_runner/blueprints *.py *.md *.json *.yml
+recursive-include lab_runner/blueprints LICENSE NOTICE
 include configs/native-runtime.example.yml configs/runtime-comparison-local.example.yml configs/unified-runtime.example.yml
 include configs/qualification.synthetic.json
 include configs/native.example.json
@@ -26,5 +30,6 @@ prune frontend/explorer/node_modules
 prune frontend/explorer/test-results
 prune frontend/explorer/playwright-report
 recursive-include lab_runner/explore/web *
+recursive-include prototypes/observatory *
 recursive-include tests *.py *.json *.yml *.md
 global-exclude __pycache__ *.py[cod]

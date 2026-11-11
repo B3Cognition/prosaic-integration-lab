@@ -13,6 +13,18 @@ def fixture():
         client.post('/control', json={}).raise_for_status()
 
 
+def test_native_fixture_streams_valid_usage_and_terminal_frame_when_requested():
+    import json
+    with TestClient(model.app) as client:
+        client.post('/control',json={'scenario':'normal'}).raise_for_status()
+        result=client.post('/v1/chat/completions',json={'stream':True,'messages':[]})
+        assert result.headers['content-type'].startswith('text/event-stream')
+        frames=[json.loads(line[6:]) for line in result.text.splitlines() if line.startswith('data: {')]
+        assert frames[-1]['usage']['total_tokens']==125
+        assert result.text.endswith('data: [DONE]\n\n')
+        client.post('/control',json={}).raise_for_status()
+
+
 @pytest.mark.parametrize('fault,status', [('truncated_json', 200), ('429', 429),
     ('503', 503), ('malformed_shape', 200)])
 def test_accepted_fault_is_counted_before_invalid_response(fixture, fault, status):

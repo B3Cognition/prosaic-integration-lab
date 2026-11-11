@@ -1,0 +1,140 @@
+[
+  {
+    "path": "three/three.module.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.min.js",
+    "sha256": "e2b5ee6bccd38fd6d8a2428546b83c5f2426d84b152ef82be8055556e3b40eb6",
+    "bytes": 338908
+  },
+  {
+    "path": "three/three.core.min.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.core.min.js",
+    "sha256": "61ba0df005b05991361d040d8ff670e1aadfd0ce7aeebd1fdb0725957a8957de",
+    "bytes": 381124
+  },
+  {
+    "path": "three/LICENSE",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/LICENSE",
+    "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+    "bytes": 1081
+  },
+  {
+    "path": "gsap/gsap.min.js",
+    "source": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js",
+    "sha256": "96c01b81f44a3290e2b4532f55e2c9534b2adc43273a19f3756b2cb41f0fd0b6",
+    "bytes": 72435
+  },
+  {
+    "path": "gsap/README.md",
+    "source": "https://cdn.jsdelivr.net/npm/gsap@3.13.0/README.md",
+    "sha256": "7675b3310fbe9bbed4d904d9f9afc617ae923f0463b30e4a47ae37c6bf9abb93",
+    "bytes": 6194
+  },
+  {
+    "path": "three/addons/controls/OrbitControls.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/controls/OrbitControls.js",
+    "sha256": "b97879c748170baadeb3fb84cea1ffdf4674e283dc06042f34e2acb95a76042c",
+    "bytes": 38703
+  },
+  {
+    "path": "three/addons/environments/RoomEnvironment.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/environments/RoomEnvironment.js",
+    "sha256": "c20f0b4677f6128a138d7152b85cbef9091f4f45cdfa05adca04d40c1697c7ae",
+    "bytes": 4899
+  },
+  {
+    "path": "three/addons/postprocessing/EffectComposer.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/EffectComposer.js",
+    "sha256": "4b8c855f28eed2570bed898adc0ab89c585a8a281ecb6d905c09d00697f9f50a",
+    "bytes": 8477
+  },
+  {
+    "path": "three/addons/postprocessing/RenderPass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/RenderPass.js",
+    "sha256": "fd91229aacc5830e3984b0f2bdefcf566163ea028f4c1f1ab233fa6665a133ac",
+    "bytes": 4112
+  },
+  {
+    "path": "three/addons/postprocessing/UnrealBloomPass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/UnrealBloomPass.js",
+    "sha256": "d92742959879b461f25348b2abddc7ca0d48527e7718340bcfa29fa771e2799a",
+    "bytes": 14388
+  },
+  {
+    "path": "three/addons/postprocessing/ShaderPass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/ShaderPass.js",
+    "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d",
+    "bytes": 3228
+  },
+  {
+    "path": "three/addons/postprocessing/MaskPass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/MaskPass.js",
+    "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3",
+    "bytes": 4694
+  },
+  {
+    "path": "three/addons/postprocessing/Pass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/Pass.js",
+    "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5",
+    "bytes": 4218
+  },
+  {
+    "path": "three/addons/shaders/CopyShader.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/shaders/CopyShader.js",
+    "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718",
+    "bytes": 729
+  },
+  {
+    "path": "three/addons/shaders/LuminosityHighPassShader.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/shaders/LuminosityHighPassShader.js",
+    "sha256": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e",
+    "bytes": 1291
+  },
+  {
+    "path": "three/addons/postprocessing/OutputPass.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/postprocessing/OutputPass.js",
+    "sha256": "f5b81c96e76b6b28b4b3ba8c41c4aeb982b1e03f3d82883242d951b2ab082fa2",
+    "bytes": 4029
+  },
+  {
+    "path": "three/addons/shaders/OutputShader.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/shaders/OutputShader.js",
+    "sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2",
+    "bytes": 1876
+  },
+  {
+    "path": "fonts/public-sans.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/publicsans/PublicSans%5Bwght%5D.ttf",
+    "sha256": "d75a7dc1a27eb9e336d5b33f55489d2ecb5621bf694d5c43b2415bce2ca830a8",
+    "bytes": 103316
+  },
+  {
+    "path": "fonts/OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/publicsans/OFL.txt",
+    "sha256": "157a9e77f7580246e97c769490e2e977ae94399f9d30f4556015c41fe8c28bac",
+    "bytes": 4390
+  },
+  {
+    "path": "three/addons/utils/BufferGeometryUtils.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/utils/BufferGeometryUtils.js",
+    "sha256": "fda7e946b8e0b5ab39b779206589e7a1079a22eb24efb89d7223e03fdfb1f751",
+    "bytes": 35539
+  },
+  {
+    "path": "fonts/ibm-plex-mono.ttf",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/IBMPlexMono-Regular.ttf",
+    "sha256": "6a3412f058c7d8dfd9170c41e85ade48e5156ecb89356110ca57a0a27734af46",
+    "bytes": 135580
+  },
+  {
+    "path": "fonts/IBM-PLEX-OFL.txt",
+    "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/ibmplexmono/OFL.txt",
+    "sha256": "7e6b2818edbd8f6a01ae80641cc8f16a51080d08fb4e532be3a0b6f74adb07da",
+    "bytes": 4456
+  },
+  {
+    "path": "three/addons/loaders/GLTFLoader.js",
+    "source": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/loaders/GLTFLoader.js",
+    "sha256": "67ac5551fdafa6e349bd80c8f8e5e39c136d6b2fb1ad647db9abb21dc86f9e4a",
+    "bytes": 114739
+  }
+]

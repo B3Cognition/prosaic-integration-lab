@@ -1,5 +1,131 @@
 # Current delivery status
 
+## Safe tool events and Lab 0.9.13 — 2026-11-10
+
+The current manifest selects Runtime 0.9.20, Harness 0.9.14 and Harness PostgreSQL
+0.4.3, retaining original Core 0.5.0 and Runtime recorder 0.3.0 bytes. Safe display
+and captured citations have a complete copyable host and 24 required dual-provider
+cases in every architecture/database cell. Existing gates and archived profiles
+remain available. Parallel calls, MCP and sub-agents remain follow-ups.
+
+See the [guide](tool-evidence.md), [release scope](release-0.9.13.md) and
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13)
+for published archives and qualification. Earlier checkpoints below describe their
+original SDK trains.
+
+## Context packs and Lab 0.9.12 — 2026-11-09
+
+The current train selects Core 0.5.0, Runtime 0.9.19, Harness 0.9.13 and
+Harness PostgreSQL 0.4.2, retaining the original Runtime recorder 0.3.0 bytes.
+All twelve context-pack cases join normal released acceptance in each Linux
+architecture/PostgreSQL cell. Agent defaults, workflow-node overrides, accepted
+records, scoped reads and recovery use owned synthetic fixtures. Applications
+retain authorization and explicit migration responsibilities.
+
+See the [context-pack guide](context-packs.md) and
+[release scope](release-0.9.12.md). The
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12)
+is the publication and qualification authority. Prior manifests, profiles,
+benchmark freezes and published artifacts retain their original bytes.
+Earlier checkpoints below describe their historical SDK trains.
+
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The current train is Core0.5.0/Runtime0.9.17/Harness0.9.12 with the original
+recorder0.3.0/store0.4.1 bytes. A separate copyable accounting-metadata host
+labels prepare-time requests from trusted run/variant context, preserves saved
+labels through resume and excludes them from provider payloads. None/empty
+retains legacy accounting hashes; present labels intentionally enter accounting
+hashes/private receipts. Labeled runs require >=0.9.17 readers; no DDL or adapter
+republish. Prior profiles and all five earlier blueprint resources stay intact.
+
+See the [guide](accounting-request-metadata.md), [release gates](release-0.9.10.md)
+and [qualification ledger](verification/accounting-request-metadata-2026-11-08.md).
+The [release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.10)
+is the publication/proof authority; a version/tag or development test alone is
+insufficient. No live inference. Earlier checkpoints below retain their scope.
+
+## Harness 0.9.10 SDK adoption — 2026-11-06
+
+The maintainer authorized Lab 0.9.7 with Harness 0.9.10, Runtime 0.9.14 and
+Core 0.5.0, retaining recorder 0.3.0/store 0.4.1 public bytes. Both active
+manifests and current provenance/freezes advance; previous records are archived
+verbatim. No session migration or live calls. Follow the
+[release plan](superpowers/plans/2026-11-06-harness0910-lab-release.md),
+[release guide](release-0.9.7.md) and
+[verification ledger](verification/harness0910-sdk-release-2026-11-06.md).
+Require all ten final-head hosted jobs, equal qualified/merged trees and original
+CI archive/public-consumer proof. Earlier checkpoints below retain their scope.
+
+Lab 0.9.6 preparation targets the released guarded family: Core 0.5.0, Runtime
+0.9.14 and Harness 0.9.9, with recorder 0.3.0 and store 0.4.1. Runtime is publicly
+verified, as is Harness. Both active manifests and current freezes now bind the
+verified public bytes; final Lab hosted qualification remains required. See the
+[release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md).
+
+## Lab 0.9.5 — Core 0.5 SDK adoption
+
+The current source adopts Core 0.5.0, Runtime 0.9.13 and Harness 0.9.8 with
+recorder 0.3.0 and store 0.4.1 in both active manifests. The
+[SDK adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) records
+the new source verification separately from the historical release results below.
+Lab 0.9.5 packages this SDK update. The [release guide](release-0.9.5.md)
+requires final-source hosted qualification and immutable release artifacts.
+
+## Lab 0.9.4 — separate Qwen and Gemma prompts
+
+[Release scope](release-0.9.4.md) keeps the compact Qwen/shared agents and selects
+a simpler explicit Gemma agent in the default API workflow. The retained live
+studies distinguish strict JSON, correct integers, caps and native controls.
+Gemma recovered three fenced answers without extra caps relative to fresh
+0.9.3; historical shared-prompt cap counts are not a simultaneous control.
+Both SDK manifests and Python implementation remain unchanged. Publication
+requires both reasoning architectures and all four ordinary CI cells on the
+exact versioned source; release verification assets record actual completion.
+
+## Lab 0.9.3 — reasoning prompt clarification
+
+[Release scope](release-0.9.3.md) removes the ambiguous reasoning prohibition
+from all seven effort agents. Strict JSON output, native mappings and both SDK
+manifests are unchanged. The preceding prompt comparison did not establish an
+arithmetic accuracy improvement. Final publication is gated on both reasoning
+architectures and all four ordinary service/database CI cells at the exact source;
+the release's verification assets retain the actual qualification/publication proof.
+
+## Lab 0.9.2 — reasoning controls and blueprints
+
+[Release scope](release-0.9.2.md) adds the separate reasoning lane, packaged
+blueprints and atomic bounded live receipts. Final qualification requires both
+reasoning architectures and all four ordinary service/database cells at the exact
+versioned source. The [GitHub release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.2)
+and attached run-specific verification record provide publication status and
+original archive hashes. Ordinary SDK pins and historical releases are unchanged.
+
+## Reasoning-effort integration lane — 2026-11-03
+
+The separate [reasoning lane](reasoning-effort.md) selects published Runtime
+0.9.12 with a checksum-pinned manifest. It adds installed-SDK API/native control
+fixtures, seven effort agents, profile configs, a Harness workflow and an opt-in
+live runner. It preserves the ordinary release manifest and historical live
+results. Its verification ledger distinguishes local fixtures, package checks
+and remote CI; no new live-provider certification is implied.
+
+## Lab 0.9.1 published — 2026-11-02
+
+[Lab 0.9.1](release-0.9.1.md) makes the Observatory an authenticated monitor,
+with automatic owned-run discovery, honest idle/demo/replay states and local oMLX
+usage compatibility. PR #41's implementation head passed all four Linux
+AMD64/ARM64 × PostgreSQL 16/18 cells. The
+[public release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.1)
+is available with versioned archives, checksums and provenance. Its release notes
+and verification asset retain the final merge/publication evidence.
+
+Capture stays optional, process-local and bounded to 32 recent runs. Workflow
+text is withheld, missing callback timing is explicit, and provider counts retain
+their existing accounting qualification. SDK pins and earlier releases are
+unchanged. The recorded real-model demonstration is distinct from synthetic CI.
+
 ## Lab 0.7.0 published and verified — 2026-10-25
 
 [Lab 0.7.0](release-0.7.0.md) is published from qualified source `9a7542c`,

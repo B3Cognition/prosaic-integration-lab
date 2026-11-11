@@ -5,7 +5,7 @@ import subprocess
 import sys
 from types import SimpleNamespace
 import pytest
-from lab_runner.gates import COUNTS,required_modes
+from lab_runner.gates import ALL_COUNTS as COUNTS,required_modes
 
 
 def test_native_persistence_candidate_requires_manifest_before_stack_allocation(monkeypatch):
@@ -71,6 +71,31 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary_and_archives():
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
 
+def test_required_conversation_wrapper_allows_suite_and_owned_stack_cleanup(monkeypatch,tmp_path):
+    import hashlib
+    source=Path(__file__).resolve().parents[2]/'scripts/required_acceptance.py'
+    spec=importlib.util.spec_from_file_location('required_conversation_deadline',source)
+    runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+    monkeypatch.setattr(runner,'resolve_image',lambda candidate:'sha256:'+'1'*64)
+    monkeypatch.setattr(runner,'required_modes',lambda **kwargs:('conversation',))
+    def lane(command,**kwargs):
+        if kwargs['timeout']<950:
+            raise subprocess.TimeoutExpired(command,kwargs['timeout'],output='PRIVATE_TOKEN')
+        item={'mode':'conversation','context_assembly':True,'passed':True,'cleanup':'verified',
+            'dependency_mode':'released','test_returncode':0,'test_count':103,'skipped':0,'failed_tests':[],
+            'host_architecture':'x86_64','payload_audit':'verified',
+            'released_manifest_sha256':hashlib.sha256((source.parents[1]/'dependencies/releases.json').read_bytes()).hexdigest(),
+            'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:18@sha256:'+'2'*64}}
+        return SimpleNamespace(returncode=0,stdout=json.dumps(item),stderr='PRIVATE_TOKEN')
+    monkeypatch.setattr(runner.subprocess,'run',lane)
+    target=tmp_path/'safe.json'
+    monkeypatch.setattr(sys,'argv',['required_acceptance','--postgres-version','18','--export',str(target)])
+    assert runner.main()==0
+    result=json.loads(target.read_text())
+    assert result['passed'] is True and result['lanes'][0]['test_count']==103
+    assert result['lanes'][0]['cleanup']=='verified' and 'PRIVATE' not in target.read_text()
+
+
 def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_path):
     import os,shlex,yaml
     root=Path(__file__).resolve().parents[2]
@@ -85,10 +110,10 @@ def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_
     command=selected['run'].replace('.venv/bin/python',shlex.quote(sys.executable))
     result=subprocess.run(['/bin/bash','-e','-c',command],cwd=root,env=environment,capture_output=True,timeout=15)
     assert result.returncode==0,result.stderr.decode()
-    from lab_runner.gates import supports_context_assembly
+    from lab_runner.gates import supports_context_assembly,supports_tool_evidence
     import json
     manifest=json.loads((root/'dependencies/releases.json').read_text())
-    assert output.read_text()=='enabled=true\ncontext='+str(supports_context_assembly(manifest)).lower()+'\n'
+    assert output.read_text()=='enabled=true\ncontext='+str(supports_context_assembly(manifest)).lower()+'\ntools='+str(supports_tool_evidence(manifest)).lower()+'\n'
 
 
 def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):

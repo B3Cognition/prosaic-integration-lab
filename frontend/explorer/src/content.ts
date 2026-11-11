@@ -46,7 +46,7 @@ const markdown = node(
 const core = node(
   "core",
   "Core artifact",
-  "Core 0.4.1",
+  "Core 0.5.0",
   "Core parses, validates and distributes canonical prose to target adapters.",
   "Canonical Markdown",
   "Inspected, rendered task artifact",
@@ -57,7 +57,7 @@ const core = node(
 const runtime = node(
   "runtime",
   "Permitted execution",
-  "Runtime 0.9.8",
+  "Runtime 0.9.17",
   "Runtime chooses an eligible provider under the explicit host policy.",
   "Inspected agent + policy + workspace",
   "Execution result and provider observations",
@@ -68,7 +68,7 @@ const runtime = node(
 const harness = node(
   "harness",
   "Durable workflow",
-  "Harness 0.9.4",
+  "Harness 0.9.12",
   "Harness keeps workflow state, pauses and exact human decisions across workers.",
   "Admitted workflow + trusted owner",
   "Paused or completed workflow",

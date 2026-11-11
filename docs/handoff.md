@@ -22,6 +22,419 @@ remain disabled by default; live audit quality is unmeasured. Runtime candidate
 package payloads and is available as candidate source only, with no PyPI release.
 The new comparison is preparation-only; old unknown reservations remain held.
 
+## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
+
+Runtime0.9.18 is published and publicly verified from source
+`d440d8664e0f307e01c62706976e485993b2e0a2`. The active manifests pin its exact
+public wheel hash with Core0.5.0/Harness0.9.12 and unchanged recorder0.3.0/store0.4.1.
+Fresh public installation passed132 sent-effort/metadata/durable cases, six smoke
+gates and pipcheck; no live inference. Lab0.9.11 final qualification is in progress.
+Previous active profiles/manifests/freezes are preserved as pre-sent-effort.
+Sent controls describe attempts, never provider receipt/compliance or retry consent.
+Old receipt absence stays unavailable; input identities and accounting/PG schemas
+stay unchanged. No live inference. Follow the guide, release0.9.11 gates and
+verification ledger; all ten final-head jobs, original CI archives/equal merge,
+public consumers and independent post-merge CI are mandatory before completion.
+
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The maintainer authorized Runtime accounting labels and a Lab blueprint, tests,
+merge/release and notes. Develop against an explicitly labeled candidate; advance
+active pins/freezes only after actual Runtime0.9.17 publication/public-byte proof.
+Core0.5.0/Harness0.9.12 and recorder0.3.0/store0.4.1 keep released bytes. Previous
+active profiles/manifests/freezes are preserved as pre-accounting-metadata; all
+five earlier blueprint resources/corpus/prompts/scoring remain unchanged.
+Trusted benchmark labels never replace actual run/tenant/payer authority. Saved
+Harness labels win on resume; same-call relabeling conflicts. Labeled contexts
+need >=0.9.17 readers; no DDL or adapter republish. No live calls.
+Follow the [guide](accounting-request-metadata.md),
+[release gates](release-0.9.10.md) and
+[ledger](verification/accounting-request-metadata-2026-11-08.md).
+Require all ten final-head hosted jobs, exact merge/tree and original qualified
+archives, public consumers and all post-merge CI before marking complete.
+
+
+## Workflow enforcement V2 and Lab0.9.9 — 2026-11-07
+
+The maintainer authorized workflow enforcement tags with accepted earlier outputs,
+implementation/testing/merge/release and a new Lab blueprint/release notes.
+Harness0.9.12 PR16 merged816436b and is published/verified; retain released
+Runtime0.9.16/Core0.5.0 and both adapters. Active manifests now adopt its exact
+public wheel SHAfb07797c3e42ab2e7e8f0a727b7bd25229e9b223cf15309716f10ff9d1f1147b. Existing
+V1 resources and all historical manifests/profile/freezes stay unchanged; prior
+active records are preserved as pre-workflow-enforcement. No live calls.
+Follow the [release guide](release-0.9.9.md), [feature map](feature-blueprints.md) and [current ledger](verification/workflow-enforcement-2026-11-07.md).
+Require the complete four native ordinary cells, four rule/feature cells and
+both reasoning jobs, final review, exact merge tree, original archives, public
+wheel/rebuilt-source consumers and all post-merge checks. Older checkpoints
+below retain their historical limits.
+
+
+## Latest SDK blueprints and Lab 0.9.8 — 2026-11-07
+
+The maintainer authorized a new Lab release adopting Runtime 0.9.16 and Harness
+0.9.11, with a copyable blueprint, installed acceptance and guide per added
+capability. Core 0.5.0/recorder 0.3.0/store 0.4.1 retain their public bytes.
+Previous active records are archived as pre-cerebro; benchmark inputs are unchanged.
+Follow the [feature map](feature-blueprints.md) and
+[qualification ledger](verification/cerebro-sdk-blueprints-2026-11-07.md). Full source,
+installed consumers, final native matrix, review, merge equality and original
+archive/public-consumer proof remain required before publication. No live calls
+or upstream SDK publication. Older checkpoints retain their historical scope.
+
+
+## Harness 0.9.10 SDK adoption — 2026-11-06
+
+The maintainer authorized Lab 0.9.7 with Harness 0.9.10, Runtime 0.9.14 and
+Core 0.5.0, retaining recorder 0.3.0/store 0.4.1 public bytes. Both active
+manifests and current provenance/freezes advance; previous records are archived
+verbatim. No session migration or live calls. Follow the
+[release plan](superpowers/plans/2026-11-06-harness0910-lab-release.md),
+[release guide](release-0.9.7.md) and
+[verification ledger](verification/harness0910-sdk-release-2026-11-06.md).
+Require all ten final-head hosted jobs, equal qualified/merged trees and original
+CI archive/public-consumer proof. Earlier checkpoints below retain their scope.
+
+## Guarded ecosystem release authorized — 2026-11-06
+
+The maintainer explicitly authorized updating, merging and releasing Runtime,
+Harness and Lab after the independent Lab 0.9.5 release completed. That release
+is now published and verified. This isolated follow-up combines its main tree
+with the #45 blueprint and #46 guarded Harness companion. Preserve both sets of
+changes and all historical manifests, prompts and verification evidence.
+
+Runtime 0.9.14 and Harness 0.9.9 are published and publicly verified. Both active
+Lab manifests now select their exact public wheel bytes with Core 0.5.0 and the
+unchanged recorder 0.3.0/store 0.4.1. Current provenance/freezes have advanced;
+all five prior snapshots remain byte-identical. Final Lab hosted qualification
+must consume these published bytes; local candidates are not release evidence.
+No new live inference is authorized.
+Follow the [0.9.6 release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md). The isolated
+merge with Lab 0.9.5 preserves both the author blueprint and guarded companion;
+its pre-guarded snapshots must never be overwritten. Require all ten final-head
+hosted jobs, equal qualified/merged trees and original CI archive/public-consumer
+proof before marking Lab complete.
+
+## Lab 0.9.5 merge and release authorized — 2026-11-06
+
+The maintainer explicitly requested merging, pushing and releasing the tested SDK
+adoption. This supersedes the earlier source-only scope below. Prepare 0.9.5 from
+main `3cf2d6416f822acde27bf721982571deaa38fe6b`, preserve the exact five public
+SDK pins and historical snapshots, and follow the
+[release plan](superpowers/plans/2026-11-06-core050-lab-release.md) and
+[release guide](release-0.9.5.md). Require four native Linux acceptance cells and
+both installed-reasoning jobs on the final source, expected-head merge with equal
+trees, original CI archives and fresh anonymous-download/installed-consumer proof.
+No new live inference or upstream SDK publication is needed.
+
+## Core 0.5.0 SDK adoption — 2026-11-05
+
+The current request updates both active manifests to Core 0.5.0, Runtime 0.9.13,
+Harness 0.9.8, recorder 0.3.0 and store 0.4.1. It supersedes prior requests to
+keep those active pins unchanged. Historical manifests, benchmark profiles and
+freeze records are archived verbatim; corpus, prompts and scoring are unchanged.
+Read the [adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) for
+current verification results. Work is isolated from the original experiment
+checkout; no Lab version bump, commit, push or publication was requested.
+
+## Guarded Harness companion — 2026-11-05
+
+The maintainer authorized implementing the remaining Harness and Lab gaps.
+This follow-up branch starts at PR #45 `44539fd`. The guarded lane now uses
+released Core 0.5.0, fixed Runtime #16 `498ffc7`, and local Harness companion
+`5b3f0f2` (branch `codex/harness-rule-admission`). It owns policy and composed
+inspection rules, registers guards at every phase, seals explicit guard project
+roots, and persists bounded rule receipts and ruleViolation failures.
+
+The copyable `blueprint/harness.py` and both-wire acceptance cover before-tool
+repair, composed after-tool failure, retry exhaustion and file-store recovery.
+Independent value-source regressions now pass through Harness; three strict
+expected failures still document the upstream fee grammar limits. A separate
+required PostgreSQL lane covers receipt recovery with installed SDKs.
+
+Both candidate wheels were rebuilt twice with identical recorded hashes and
+both five-wheel train audits pass. The Harness source suite passed 1,035 with
+real PostgreSQL 18; its saved compatibility regressions pass all four cases.
+Final installed/default/PG qualification is recorded in
+[the companion ledger](verification/guarded-harness-2026-11-05.md).
+
+No release or author-branch modification is included. Before remote CI can
+build this lane, push the exact Harness companion commit. For local rebuilding,
+the builder accepts an explicit `--local-repository` checkout and still archives
+only that commit and verifies its hash. Ordinary/reasoning manifests are unchanged.
+Earlier checkpoints below describe their historical candidates.
+
+## Rule-admission blueprint, draft only — 2026-11-05
+
+The maintainer asked for an adoption example of Prosaic rule admission.
+Branch `feat/rule-admission-blueprint` is based on main `3cf2d64`. Its draft
+PR waits for prosaic-runtime#16. No version bump, no `release-x.md`, and the ordinary and
+reasoning manifests are unchanged.
+
+- Candidates: Core `9d5a02f` (main, PR #4) and Runtime `65ba15d` (PR #16 head).
+  Both are rebuilt from `git archive` with `setuptools==80.9.0`, no isolation
+  and `SOURCE_DATE_EPOCH` set to the commit time. Two local builds produced
+  identical bytes. Neither commit has a `Publish SDK` run; the draft PR asks the
+  maintainer to dispatch one so action-built wheels can replace the local ones.
+- Blueprint: `lab_runner/rule_admission/blueprint`. It has no Harness workflow:
+  Harness 0.9.7 lacks `ruleViolation` in `_FAILURES` (it raises after provider
+  spend), and its conversation path drops `required_guards`, composed rules and
+  guards.
+- Review: an adversarial pass found 9 defects, each pinned by a test that
+  failed first; all are fixed. The worst was a policy bypass: `"days": 28.0`
+  skipped the loan-period guard. Coverage now takes its verdict from real
+  admission.
+- Re-pin 1: Runtime `4082e72` to `65ba15d` (review changes). No blueprint test
+  broke. One new variant pins the cross-file rule change: different settings at
+  one stage are now refused. Generic guard sources changed without a version
+  bump, so the rules fingerprint did not move; reported for #16's thread.
+- PR #45 review: 7 inline comments and 2 general points, all addressed
+  test-first. The floor now covers the custom guard; the id rule's wording
+  matches the guard; the companion moved to `companions/` (never distributed as
+  an agent); `fix` where the guard cannot repair is refused by the host; the
+  missed fee formats are strict expected failures; huge periods are repaired;
+  the blueprint checks the SDKs on import.
+- PR #45 re-review: the floor needs a guard bound only once, so prose could drop
+  the loan check's `before_tool` tag (or move it to `after_tool`) and a 300-day
+  loan was placed before the turn failed. The host now declares
+  `REQUIRED_STAGES` and `compose` refuses a bound guard missing one (coverage:
+  `hostPolicy`). `place_loan` also refuses over-policy periods itself. Smaller
+  points fixed: trailing `€` is read by Runtime (docs corrected), duplicate
+  README header, frontmatter behind a BOM or blank lines. The lane has 123
+  tests.
+- Verification: see the [ledger](verification/rule-admission-2026-11-05.md).
+  CI (`rule-admission.yml`) rebuilds the candidates byte-identically on Linux
+  AMD64 and ARM64. It is not a required check until the re-pin to releases.
+- Next: after Core releases `parse_rules` and #16 merges and releases, follow
+  the re-pin steps in [the lane guide](rule-admission.md#re-pin-after-release).
+
+## Lab 0.9.4 merge and release authorized — 2026-11-04
+
+The maintainer explicitly requested keeping the tested Qwen and Gemma prompts,
+getting CI green, fixing failures, merging and releasing the next Lab version.
+This supersedes the experiments' earlier no-publication scope. Target 0.9.4
+from current main `0220109` (tree identical to 0.9.3 source `719fdb1`). Keep all
+selected prompt bytes and both SDK manifests unchanged; no new model calls or
+SDK release are needed. Follow the
+[release plan](superpowers/plans/2026-11-04-reasoning-model-prompts-release.md)
+and [release guide](release-0.9.4.md): six final-source CI jobs, fresh review,
+expected-head merge, equal qualified/merge trees, original CI archives and
+separate anonymous-download/fresh-consumer postpublication proof. Earlier
+checkpoints below retain their historical experimental state and limits.
+
+## Separate Gemma prompt comparison completed — 2026-11-04
+
+Keep all seven shared compact Qwen agents unchanged. The explicit new
+`subagents/gemma-medium.md` removes the CRT procedure while retaining the full
+tested JSON contract, including the no-fences line. Its 69-word body renders to
+111 tokens for the original CRT task versus shared C3's 192. The default Gemma
+workflow explicitly selects this file; Qwen workflows must select their Qwen
+profile and shared xhigh agent. Runtime profiles and the Lab multi-effort live
+command do not automatically substitute prompts.
+
+The first positive-only attempt was too aggressive: all three completed answers
+were fenced. It stopped safely after 16 known responses, cleanup verified,
+leaving 20 unused slots and no unknown reservation. The final revision restored
+the explicit no-fences line and completed a fresh 36-call paired comparison.
+Gemma usable correct JSON improved from 9/18 to 12/18; all three fenced baseline
+answers recovered. All twelve completed candidate responses were correct strict
+JSON. Both arms had six caps (knapsack and digit counting), below historical
+C3's thirteen but not a completion gain over fresh 0.9.3. Arithmetic correct
+returns remained 12/18 for both; token costs were task-dependent and censored.
+
+All 36 native-control/activation/generation-input checks passed; owned cleanup,
+all prior hashes and seven unchanged Qwen agents verified. Total follow-up
+inference was 52 requests, including the stopped prefix; no retries or Qwen
+inference occurred. Full source tests passed 2,077; reasoning tests passed 31;
+both five-wheel SDK audits and private builds passed. Python payloads, SDK pins
+and version 0.9.3 remain unchanged. The
+[Gemma qualification](verification/reasoning-gemma-minimal-2026-11-04.md) records
+both attempts and limits. This remains local adaptive regression development;
+no commit, PR, push or release was requested. Historical checkpoints below
+describe their own candidates and point-in-time state.
+
+## Compact prompt comparison completed — 2026-11-04
+
+The seven unreleased agent bodies are shortened from 169 to 95 words. They keep
+the constructive CRT formula, inverse condition and positive-zero handling,
+plus the exact first-`{`/last-`}` JSON boundary rule. Generic check/correct loops
+and duplicate verification instructions are removed. Original-CRT rendered
+input shrank 26.8% for Qwen and 28.6% for Gemma; shorter input did not reliably
+reduce generated reasoning or caps.
+
+The fresh 72-request comparison completed with all native-control, rendered
+activation and generation prompt-count checks passing, cleanup verified, no
+retries, no transport failures and zero unknown reservations. Qwen xhigh usable
+correct JSON improved from 9/18 to 15/18: CRT and knapsack were each correct in
+3/3 compact trials; both prompts capped on digit counting in 3/3. Gemma medium
+thinking-on regressed from 8/18 to 5/18 usable correct JSON, with caps rising
+from seven to thirteen (historical longer candidate: nine caps). All five
+completed compact Gemma responses were correct strict JSON, but only one of
+three fenced baseline pairs recovered; the other two capped. The Gemma
+cap-reduction target failed. Do not present this as a Gemma reliability fix.
+
+The full source suite passed 2,077 tests; the reasoning lane passed 31. Both
+five-wheel SDK audits and the private wheel/sdist build passed. SDK pins,
+Python payloads and version 0.9.3 remain unchanged. This is local adaptive prompt
+development on reused questions, not held-out qualification or a new release.
+See the [compact qualification](verification/reasoning-prompt-compaction-2026-11-04.md).
+Preserve prior failed/unknown reservations and historical C2 evidence. No push,
+merge, tag or publication was requested by this experiment. Older checkpoints
+below describe their own longer candidates and point-in-time state.
+
+## Gemma prompt comparison completed — 2026-11-04
+
+The restored Gemma endpoint completed all 36 remaining calls using the frozen
+candidate and existing shared allowance. Correct fenced answers fell from two
+to zero, and both affected pairs returned correct bare JSON with the candidate.
+Among normally completed responses, strict JSON improved from 10/12 to 9/9.
+However, capped outputs rose from six to nine, reducing usable correct JSON
+from 10/18 to 9/18. The candidate improves the observed wrapping behavior but
+regresses overall Gemma reliability at the fixed 4,096-token limit; do not
+describe it as a general Gemma reliability fix.
+
+The [qualification ledger](verification/reasoning-answer-validation-2026-11-03.md)
+records the complete 72-response Qwen/Gemma study. All native-control and prompt
+count checks passed, cleanup was verified, and the current allowance is fully
+consumed with zero unknowns. Earlier unknown reservations remain unchanged.
+The previous Qwen-only report is preserved separately. Prompts, SDK pins and
+published artifacts are unchanged by this continuation; the candidate remains
+local and unreleased.
+
+## Unreleased reasoning answer validation — 2026-11-03
+
+The maintainer requested improving the blueprints for Qwen's CRT failure and
+Gemma's JSON fences without restoring the removed reasoning prohibition, then
+repeating the comparison. The seven source agents now require condition checks,
+a constructive Chinese Remainder Theorem procedure with inverse/remainder
+verification, and explicit JSON boundaries. Generic checking alone failed the
+Qwen CRT target in two trials; the constructive candidate passed all three
+paired target trials. The completed 36-call Qwen comparison improved correct
+results from 9/18 to 12/18, entirely from CRT; the other five questions remained
+9/15 for both prompts. Gemma's 36-call new stage awaits endpoint availability;
+its TCP port and model-list API remain unreachable. Do not claim its JSON
+regression has been verified fixed. The existing unused allowance permits that
+authorized stage once the endpoint is restored, without retrying the prior timeout.
+Effort metadata, SDK pins, Python execution and released artifacts are unchanged.
+The [qualification ledger](verification/reasoning-answer-validation-2026-11-03.md)
+records offline checks and the bounded paired study. This is an unreleased
+source candidate; this follow-up does not authorize publication. Preserve prior
+studies and consumed/unknown allowances, and keep model quality, strict output
+format and native controls as separate measurements.
+
+## Authorized Lab 0.9.3 prompt cleanup and release — 2026-11-03
+
+The maintainer explicitly requested removing the ambiguous reasoning prohibition
+from all blueprints, running tests and releasing a new Lab version. Follow the
+[0.9.3 plan](superpowers/plans/2026-11-03-reasoning-prompt-cleanup-release.md).
+Remove only the phrase from the seven effort-agent bodies. Preserve strict JSON,
+native mappings, both SDK manifests and previous evidence/releases. The preceding
+12-call prompt comparison found no arithmetic accuracy improvement from removing
+the phrase. No additional inference or SDK publication is needed. Qualify the
+exact versioned source in both workflows, merge on green CI, publish original CI
+archives and verify fresh public consumers without further confirmation.
+
+## Authorized Lab 0.9.2 and four-PR closure — 2026-11-03
+
+The maintainer explicitly authorized getting CI green, fixing failures, merging
+Lab42/Core3/Runtime15/Harness10 and releasing a new Integration Lab version.
+Follow the [0.9.2 release plan](superpowers/plans/2026-11-03-reasoning-lab-release.md).
+This authorization supersedes the earlier no-publication scope below. Both SDK
+manifests and prior release evidence remain unchanged; no live inference or new
+SDK release is required. Publish original qualified CI archives and verify their
+public downloads and installed consumers before claiming completion.
+
+## Reasoning-effort integration — 2026-11-03
+
+The maintainer requested adding the reasoning integration and blueprints and
+reviewing documentation across the Prosaic packages. Use the separate
+[reasoning lane](reasoning-effort.md), installed Runtime 0.9.12 and
+`dependencies/releases-reasoning.json`. The ordinary manifest retains its
+original pins. Fixtures and opt-in live runs have distinct evidence contracts;
+this update does not authorize inference or a new Lab/SDK publication.
+Historical ledgers and dirty sibling checkouts are preserved.
+
+## Authorized Lab 0.9.1 release — 2026-11-02
+
+The maintainer explicitly requested checking all four PR #41 cells, fixing any
+failures, merging and publishing a new version once green. All four implementation
+head cells passed at `f0398df87e0490ca96f51745da2305a6eccfc158` in run41343271503.
+Prepare 0.9.1 metadata/notes and qualify its final source separately before merge.
+Follow the [release plan](superpowers/plans/2026-11-02-observatory-monitor-release.md).
+Publish original CI bytes with safe receipts and provenance, verify anonymous
+downloads and isolated consumers, and preserve all earlier release artifacts.
+This authorization supersedes the earlier unreleased-only scope below; no further
+merge/release confirmation is required. No new inference is needed.
+
+## Authenticated Observatory monitoring — 2026-11-01
+
+The maintainer confirmed automatic monitoring of all their Integration Lab runs.
+The hosted page now defaults to idle monitoring, discovers owned captured
+Chat/API and standalone workflow runs, keeps watching after completion, and
+requires explicit selection of demos/replay. Safari restores the exact verified
+Lab identity; provider keys are clearly distinguished. Capture remains optional,
+process-local and bounded; workflow raw text is withheld and missing callback
+timing is explicit. See the [plan](superpowers/plans/2026-11-01-observatory-monitor.md)
+and [verification ledger](verification/observatory-monitor-2026-11-01.md).
+One external real-model API request was automatically observed in Safari:
+533 input / 111 output / 644 provider-reported tokens in both views. Keep the
+unqualified accounting marker, immutable published artifacts and SDK pins.
+The source-only preview is retained for the maintainer; this follow-up is not
+merged or released.
+
+Final regressions: 2,077 Python + 32 Node passed. Owned PostgreSQL16 observability
+acceptance: 26 passed with cleanup verified; focused review has no blockers.
+
+## Real-model usage compatibility fix — 2026-11-01
+
+The maintainer requested actual token counts in both Observatory views after
+the released 0.9.0 real-model preview showed unknown usage. On
+`codex/observatory-token-usage`, the local gateway translates only the exact
+empty oMLX prefill heartbeat into a transport comment. Its fake model name had
+caused correct recorder quarantine of otherwise present counts. Live verification
+now shows 533 input / 98 output / 631 total provider-reported tokens in both views, with
+the existing unqualified marker; accounting qualification is unchanged. See the
+[verification ledger](verification/observatory-token-usage-2026-11-01.md).
+All 2,072 Python tests and 25 frontend tests passed, along with a focused review.
+Keep published 0.9.0 artifacts/tags, older previews, SDK pins and model-server
+settings unchanged. This fix has not been released.
+
+## Authorized Lab 0.9.0 release — 2026-11-01
+
+The maintainer now explicitly authorizes the version bump, release notes, PR,
+four-cell CI, fixes, merge and release once green. This supersedes the earlier
+no-merge/release scope below. Version 0.9.0 includes actual generation, streaming
+defaults, exact legacy identity retention and launcher reconnection, with the
+unchanged released SDK train. Follow the
+[release plan](superpowers/plans/2026-11-01-observatory-streaming-release.md).
+Require the exact versioned head's four CI cells and publish its original CI
+artifacts/provenance; preserve earlier releases and unrelated worktree changes.
+
+## Streaming defaults and usable launcher connection — 2026-10-31
+
+The maintainer additionally authorized enabling streaming throughout Lab/chat,
+fixing the nonworking Start button, testing, committing and pushing this whole
+work package. The earlier screenshot showed a401 before dispatch; the old real
+preview also had a spent one-call allowance. New defaults preserve retained
+buffered identities and explicit opt-out. Launcher sessions survive reload;
+invalid manual credentials cannot appear Connected. A fresh synthetic preview
+is retained for repeated review. See the [follow-up ledger](verification/observatory-streaming-defaults-2026-10-31.md).
+No merge/release or SDK changes are included. Preserve original0.8.0 artifacts
+and the unrelated dirty original checkout.
+
+## Unreleased Observatory generation — 2026-10-31
+
+The maintainer authorized research and implementation of visible generation in
+both Observatory views. Branch `codex/observatory-token-stream` starts at current
+main `4787265953bbda9a9e7ed63b500d152b8bcf486b` after the published 0.8.0 release.
+It consumes public Runtime/Harness callbacks, adds bounded owner-only provisional
+output and event-driven animation, and preserves SDK pins and published bytes.
+See the [generation ledger](verification/observatory-generation-2026-10-31.md)
+for tests, independent review, actual local-model observations and preview use.
+This feature is not merged or released; require the normal exact-head CI gate
+before integration. Preserve the original dirty Lab checkout and older evidence.
+
 ## Lab 0.7.0 published; verification documentation — 2026-10-25
 
 Lab 0.7.0 is published at qualified source

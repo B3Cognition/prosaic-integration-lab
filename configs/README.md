@@ -1,5 +1,14 @@
 # Optional local inference
 
+Current release: **0.9.9**. See [release notes and compatible SDK versions](../docs/releases.md). Lab 0.9.9 selects Runtime 0.9.16 and Harness 0.9.12 with copyable feature blueprints.
+
+For reasoning tiers and binary thinking controls, use the separate
+[reasoning-effort lane](../docs/reasoning-effort.md) and its packaged
+[API/native/workflow blueprints](../lab_runner/reasoning_eval/data/README.md).
+They require Runtime 0.9.12 or later; Lab 0.9.9 pins Runtime 0.9.16 in both
+the ordinary and dedicated reasoning manifests. Example configurations remain
+inert until the host explicitly opts in to provider calls.
+
 For released Runtime 0.9.8 unified pools, start with the
 [guided model setup](../docs/quickstart.md#4-connect-real-models-explicit-opt-in).
 Copy `unified-runtime.example.yml`,
@@ -44,7 +53,8 @@ and sets `no_proxy`/`NO_PROXY` to `*` before preflight, credential reads or disp
 This bypass also disables system proxy discovery. It restores the exact original
 proxy environment on success or exceptions. It then validates every profile and
 both routes without reading the credential file. It accepts literal loopback IP endpoints, secret-managed
-`api_key_file`, non-streaming responses and at most 512 output tokens. It admits
+`api_key_file`, streaming responses by default and at most 512 output tokens.
+An explicit boolean `streaming: false` still selects buffered transport. It admits
 three separate workflows: omitted tier with empty explicit tier grants, balanced,
 then strong. Each invocation permits one provider request, no tools, no retries
 and a 60-second deadline. The command reserves failed/uncertain attempts from the

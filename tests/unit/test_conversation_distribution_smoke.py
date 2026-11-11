@@ -32,9 +32,9 @@ def test_wheel_identity_requires_current_source_version_instead_of_historical_re
     with pytest.raises(ValueError):module.wheel_identity(wheel('0.0.0'))
 
 
-@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified'])
+@pytest.mark.parametrize('train', ['context', 'blueprints', 'unified', 'core050', 'cerebro', 'workflow', 'metadata', 'effort'])
 def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, monkeypatch, train):
-    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN
+    from lab_runner.gates import CONTEXT_TRAIN, CONSUMER_BLUEPRINT_TRAIN, UNIFIED_POOL_TRAIN, CORE050_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN
     module = implementation()
     calls = []
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
@@ -53,7 +53,7 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
     monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
     versions = {'context': CONTEXT_TRAIN, 'blueprints': CONSUMER_BLUEPRINT_TRAIN,
-                'unified': UNIFIED_POOL_TRAIN}[train]
+                'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN, 'cerebro': CEREBRO_V1_TRAIN, 'workflow': WORKFLOW_RULE_TRAIN, 'metadata': ACCOUNTING_METADATA_TRAIN, 'effort': SENT_EFFORT_TRAIN}[train]
     manifest.write_text(json.dumps({'artifacts': [{'distribution': key, 'version': value}
                                                 for key, value in versions.items()]}))
     module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
@@ -67,7 +67,16 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
         if train != 'context':
             assert '-I' in selected[0] and '--source-root' in selected[0]
     installed = [call for call in calls if 'lab_runner.native_eval' in call]
-    assert len(installed) == (4 if train == 'unified' else 0)
+    assert len(installed) == (4 if train in {'unified', 'core050', 'cerebro', 'workflow', 'metadata', 'effort'} else 0)
+    feature_calls = [call for call in calls if any(str(arg).endswith('tests/blueprint_acceptance/test_blueprints.py') for arg in call)]
+    assert len(feature_calls) == int(train in {'cerebro', 'workflow', 'metadata', 'effort'})
+    if train in {'metadata','effort'}:
+        assert any(str(arg).endswith('tests/blueprint_acceptance/test_accounting_metadata.py') for arg in feature_calls[0])
+        assert any(str(arg).endswith('tests/blueprint_acceptance/test_workflow_enforcement.py') for arg in feature_calls[0])
+    if train == 'effort':
+        assert any(str(arg).endswith('tests/blueprint_acceptance/test_sent_effort.py') for arg in feature_calls[0])
+    workflow_calls = [call for call in calls if any(str(arg).endswith('test_workflow_enforcement.py') for arg in call)]
+    assert len(workflow_calls) == int(train in {'workflow', 'metadata', 'effort'})
     if installed:
         assert [call[call.index('lab_runner.native_eval') + 1] for call in installed] == [
             'test', 'unified-test', 'unified-cli-test', 'unified-fallback-test']
@@ -75,8 +84,9 @@ def test_consumer_runs_experimental_smokes_only_for_qualified_train(tmp_path, mo
 
 
 @pytest.mark.parametrize('defect', ['failed', 'wrong-count', 'live-call', 'unclean'])
-def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(tmp_path, monkeypatch, defect):
-    from lab_runner.gates import UNIFIED_POOL_TRAIN
+@pytest.mark.parametrize('train', ['unified', 'core050'])
+def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(tmp_path, monkeypatch, defect, train):
+    from lab_runner.gates import UNIFIED_POOL_TRAIN, CORE050_TRAIN
     module = implementation()
     monkeypatch.setattr(module, 'verified_wheel_paths', lambda *args: [])
     monkeypatch.setattr(module, 'wheel_identity', lambda path: {'name': 'lab', 'version': '0.6.0', 'files': {}})
@@ -93,14 +103,15 @@ def test_installed_evaluation_receipt_cannot_silently_weaken_distribution_gate(t
     monkeypatch.setattr(module, 'run', run)
     manifest = tmp_path / 'manifest.json'
     manifest.write_text(json.dumps({'artifacts': [{'distribution': k, 'version': v}
-        for k, v in UNIFIED_POOL_TRAIN.items()]}))
+        for k, v in {'unified': UNIFIED_POOL_TRAIN, 'core050': CORE050_TRAIN}[train].items()]}))
     with pytest.raises(ValueError, match='installed evaluation qualification incomplete'):
         module.consume(tmp_path / 'lab.whl', directory=tmp_path, manifest=manifest,
             wheels=tmp_path, lock=tmp_path / 'lock', environment={})
 
 
 @pytest.mark.parametrize('complete_context_evidence',[False,True])
-def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monkeypatch,complete_context_evidence):
+@pytest.mark.parametrize('stack_elapsed',[0,950])
+def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monkeypatch,complete_context_evidence,stack_elapsed):
     from lab_runner.gates import CONTEXT_TRAIN
     module=implementation()
     lineage={'version':1,'candidates':[]}  # structural process-double evidence only
@@ -114,6 +125,7 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'wheel_identity',lambda path:{'version':'0.5.0'})
     monkeypatch.setattr(module,'_helper',lambda name:SimpleNamespace(isolated_environment=lambda:{}))
     monkeypatch.setattr(module,'consume',lambda *args,**kwargs:Path('/fixture/python'))
+    monkeypatch.setattr(module,'verify_observatory_source',lambda source:None)
     def extract(archive,destination):
         destination.mkdir()
         for name in ('configs/conversation-conformance.example.json','docs/conversations.md',
@@ -124,11 +136,17 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'extract_sdist',extract)
     identifier='sha256:'+'a'*64
     def process(argv,**kwargs):
+        if 'pytest' in argv:
+            assert 'tests/unit/test_observatory_launcher.py' in argv
+            return b''
         if 'build' in argv:
             out=Path(argv[argv.index('--outdir')+1]);(out/'rebuilt.whl').write_bytes(b'rebuilt');return b''
         if any(str(arg).endswith('build_consumer.py') for arg in argv):return (identifier+'\n').encode()
         assert '--context-assembly' in argv
         kind='demo' if 'demo' in argv else 'conversation'
+        if kind=='conversation' and kwargs['timeout']<stack_elapsed:
+            import subprocess
+            raise subprocess.TimeoutExpired(argv,kwargs['timeout'],output='PRIVATE_TOKEN')
         receipt={'owner':'a'*32,'mode':kind,'passed':True,'cleanup':'verified','test_returncode':0,
             'test_count':103 if complete_context_evidence else 97,'skipped':0,'failed_tests':[],
             'context_assembly':complete_context_evidence,'host_architecture':'arm64','dependency_mode':'candidate',
@@ -141,6 +159,8 @@ def test_extracted_context_train_requires_demo_flag_and_103_cases(tmp_path,monke
     monkeypatch.setattr(module,'run',process)
     result=module.verify(wheel,sdist,manifest,candidate=True,run_stack=True)
     assert result['passed'] is complete_context_evidence, json.dumps(result)
+    assert result['owned_temporary_cleanup'] is True
+    assert 'PRIVATE' not in json.dumps(result)
     if not complete_context_evidence:assert result['failure_stage']=='sdist_acceptance', result
 
 
