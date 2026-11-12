@@ -1,5 +1,13 @@
 # Current delivery status
 
+## MCP read tools and Lab 0.9.15 — 2026-11-11
+
+Lab 0.9.15 adds a host-approved MCP read tool blueprint and 24 required
+synthetic cases per Linux architecture and PostgreSQL cell. The installed
+manifest selects Runtime 0.9.22 and Harness 0.9.16 alongside Core 0.5.0,
+Runtime recorder 0.3.0 and Harness PostgreSQL 0.4.4.
+See the [MCP guide](mcp-client.md) and [release notes](release-0.9.15.md).
+
 ## Parallel read tools and Lab 0.9.14 — 2026-11-11
 
 Lab 0.9.14 adds the parallel-read blueprint and 32 required cases per cell.
