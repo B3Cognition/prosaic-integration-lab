@@ -21,9 +21,10 @@ a dedicated Python 3.12 environment with these exact public wheels.
 
 Use a dedicated three-wheel hash lock. The example needs neither PostgreSQL
 adapter. Keep the two stable SDK manifests, their SDK provenance and the 450-case
-released stack contract byte-for-byte intact. Experimental acceptance has its own
-dispatch-only job, environment and results. Retain the existing five-distribution SDK manifest
-validation for service and stack consumers.
+released stack contract byte-for-byte intact. Experimental acceptance runs on
+manual dispatch and ontology-specific pull requests in its own environment.
+Retain the existing five-distribution SDK manifest validation for service and
+stack consumers.
 
 The copied directory includes `workflow.yml`, `host.py`, two small Markdown
 agent artifacts, the Core conformance attachment and expected projection, the

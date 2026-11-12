@@ -70,8 +70,9 @@ lab_ontology_tests="$PWD/tests/catalogue_ontology_acceptance"
 (cd "$lab_ontology_dir" && "$lab_ontology_python" -I -m pytest -o pythonpath= -q "$lab_ontology_tests")
 ```
 
-The dispatch-only [Experimental catalogue ontology workflow](../.github/workflows/catalogue-ontology.yml)
-checks both the checkout wheel and a wheel rebuilt from the sdist. Tests copy
+The [Experimental catalogue ontology workflow](../.github/workflows/catalogue-ontology.yml)
+runs on manual dispatch and on pull requests that touch the ontology files.
+It checks both the checkout wheel and a wheel rebuilt from the sdist. Tests copy
 the installed blueprint, exercise projection and admission, and prove that the
 workflow runs with sockets and subprocesses disabled.
 

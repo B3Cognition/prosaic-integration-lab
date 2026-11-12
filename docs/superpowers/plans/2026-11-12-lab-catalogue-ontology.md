@@ -20,8 +20,9 @@ Runtime 0.9.23, pytest, setuptools and GitHub Actions.
 
 - Start implementation from Lab `origin/main` containing `v0.9.16`. The two
   stable manifests, provenance and freeze files, released CI, 14 lanes and 450
-  required cases per cell stay byte-for-byte intact. The experimental workflow is
-  dispatch-only and separate from stable release qualification.
+  required cases per cell stay byte-for-byte intact. The experimental workflow
+  runs on manual dispatch and ontology-specific pull requests, separately from
+  stable release qualification.
 - The catalogue's ordinary mode works with the stable SDKs. Copying the example
   imports no ontology APIs. Enabling the attachment on an unsupported SDK pair
   must fail with an actionable message before workflow or tool execution.
@@ -154,8 +155,9 @@ Task 1.
   itself, and replace the admitted direct tool with `read_policy`. Assert
   rejection. Also construct a factory where `read_receipt` is discoverable
   but the host grants no direct tools, and assert the authored graph is denied.
-- [ ] Add a dispatch-only, read-permission workflow on Ubuntu Python 3.12 with
-  two independent cells. Build the checkout wheel in one cell and a wheel
+- [ ] Add a read-permission workflow on Ubuntu Python 3.12 with two independent
+  cells and triggers for manual dispatch and ontology-specific pull requests.
+  Build the checkout wheel in one cell and a wheel
   rebuilt from a clean extracted sdist in the other. Use the existing
   hash-locked build dependencies and a fresh RC consumer venv for each cell.
   Install only the Lab wheel and Task 1's locked dependencies, run `pip check`,

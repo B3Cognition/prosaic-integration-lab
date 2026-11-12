@@ -1,6 +1,14 @@
 name: Experimental catalogue ontology
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/catalogue-ontology.yml'
+      - 'dependencies/catalogue-ontology-rc.lock'
+      - 'docs/catalogue-ontology.md'
+      - 'lab_runner/blueprints/catalogue_ontology/**'
+      - 'tests/catalogue_ontology_acceptance/**'
   workflow_dispatch:
 
 permissions:

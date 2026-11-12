@@ -1,7 +1,8 @@
 # Required release gates
 
 The [experimental catalogue ontology check](catalogue-ontology.md) runs on
-dispatch with its own RC lock. The released matrix uses the stable SDK manifests.
+manual dispatch and ontology-specific pull requests with its own RC lock.
+The released matrix uses the stable SDK manifests.
 
 Lab 0.9.16 adds the [bounded delegation lane](sub-agents.md) to the released architecture and PostgreSQL matrix. Each cell requires 450 cases across 14 lanes, including 24 delegation cases on the two synthetic provider protocols.
 
