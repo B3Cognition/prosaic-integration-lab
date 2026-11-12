@@ -63,10 +63,9 @@ The review policy and workflow originate in the Apache-2.0 Harness 0.9.11
 Its validator uses a semantic V1 label plus the actual `checks.py` hash. The Lab
 adapts its runner for isolated copy-out execution. It does not copy SDK engines.
 
-Workflow enforcement V2 originates in the separate Harness0.9.12 example and
-retains V1 above. Accounting request labels now have their own Runtime0.9.17 host and guide above. Per-call sent-effort results, a
-separate repair allowance and remaining identity/publisher guarantees stay in the SDK
-[Cerebro backlog](https://github.com/B3Cognition/prosaic-harness/blob/v0.9.12/docs/cerebro-requests.md).
+Workflow enforcement V2 originates in the separate Harness 0.9.12 example and
+retains V1 above. The SDK backlog tracks shipped capabilities and the next
+follow-up, sub-agents. [Cerebro backlog](https://github.com/B3Cognition/prosaic-harness/blob/main/docs/cerebro-requests.md)
 
 ## Existing feature families
 
