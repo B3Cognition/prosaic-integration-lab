@@ -216,31 +216,42 @@ def load_profile(path):
 
 
 
-def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_root):
+def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_root,*,mcp_client=False):
     """Consume local build-once receipts; never invoke a hosted release workflow."""
     from lab_runner.parallel_tools import validate_parallel_manifest
     from prosaic_integration_lab.parallel_tools import TRAIN
+    validate = validate_parallel_manifest
+    kind, label, prefix = 'local-parallel-tool-handoff', 'parallel-tool-consumer', 'parallel'
+    retained_names = ['b3-prosaic', 'b3-prosaic-runtime-postgres']
+    harness_names = {'b3-prosaic-harness', 'b3-prosaic-harness-postgres'}
+    if mcp_client:
+        from lab_runner.mcp_client import validate_mcp_manifest
+        from prosaic_integration_lab.mcp_client import TRAIN
+        validate = validate_mcp_manifest
+        kind, label, prefix = 'local-mcp-client-handoff', 'mcp-client-consumer', 'mcp'
+        retained_names.append('b3-prosaic-harness-postgres')
+        harness_names.remove('b3-prosaic-harness-postgres')
     manifest=Path(manifest);cache_root=Path(cache_root)
     if manifest.resolve().is_relative_to((ROOT/'dependencies').resolve()):raise ValueError('candidate cannot replace public manifests')
     released=sdk_manifest(ROOT/'dependencies/releases.json');artifacts=[];sources={};paired=[];retained=[]
-    for sdk,directory,names in [('runtime',Path(runtime_directory),{'b3-prosaic-runtime'}),('harness',Path(harness_directory),{'b3-prosaic-harness','b3-prosaic-harness-postgres'})]:
-        receipt,_=read(directory/'release-receipt.json');qualification,_=read(directory/'qualification-parallel-tool-consumer.json')
+    for sdk,directory,names in [('runtime',Path(runtime_directory),{'b3-prosaic-runtime'}),('harness',Path(harness_directory),harness_names)]:
+        receipt,_=read(directory/'release-receipt.json');qualification,_=read(directory/f'qualification-{label}.json')
         candidate=dict(sdk=sdk,receipt=receipt,qualification=qualification)
         if sdk=='harness':
-            candidate.update(runtime_receipt=read(directory/'parallel-runtime-receipt.json')[0],runtime_qualification=read(directory/'parallel-runtime-qualification.json')[0])
+            candidate.update(runtime_receipt=read(directory/f'{prefix}-runtime-receipt.json')[0],runtime_qualification=read(directory/f'{prefix}-runtime-qualification.json')[0])
         paired.append(candidate)
         for name in sorted(names):
             filename=name.replace('-','_')+'-'+TRAIN[name]+'-py3-none-any.whl'
             item=next(item for item in receipt['artifacts'] if item['filename']==filename)
             artifacts.append(dict(distribution=name,version=TRAIN[name],source_commit=receipt['source_commit'],**item));sources[filename]=directory/filename
     # Retain the original audited Core/recorder payloads and provenance.
-    for name in ('b3-prosaic','b3-prosaic-runtime-postgres'):
+    for name in retained_names:
         item=next(item for item in released['artifacts'] if item['distribution']==name)
         source=cache_directory(ROOT/'dependencies/releases.json',cache_root)/item['filename']
         if not source.is_file():raise ValueError('original released wheel cache required')
         artifacts.append(dict(item));retained.append(dict(item));sources[item['filename']]=source
-    data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind='local-parallel-tool-handoff',candidates=paired,retained_artifacts=retained))
-    validate_parallel_manifest(data);payload=serialized(data)
+    data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind=kind,candidates=paired,retained_artifacts=retained))
+    validate(data);payload=serialized(data)
     if manifest.exists() and manifest.read_bytes()!=payload:raise ValueError('candidate manifest is immutable')
     with tempfile.TemporaryDirectory() as temporary:
         probe=Path(temporary)/'manifest.json';probe.write_bytes(payload);sdk_manifest(probe)
@@ -265,15 +276,17 @@ def main(argv=None):
     features=parser.add_mutually_exclusive_group()
     features.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
     features.add_argument('--parallel-tools',action='store_true',help='curate explicit local parallel candidate archives without publication')
+    features.add_argument('--mcp-client',action='store_true',help='curate exact qualified local MCP candidate wheels')
     parser.add_argument('--runtime-artifacts',type=Path)
     parser.add_argument('--harness-artifacts',type=Path)
     features.add_argument('--tool-contracts',action='store_true',help='curate only qualified safe-event/citation candidate workflows')
     features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
     args=parser.parse_args(argv)
-    if args.parallel_tools:
-        if args.runtime_artifacts is None or args.harness_artifacts is None:parser.error("parallel tools require both local artifact directories")
-        curate_parallel_tools(args.runtime_artifacts,args.harness_artifacts,args.manifest,args.cache_root)
-        print(json.dumps({"manifest":str(args.manifest),"kind":"local-parallel-tool-handoff"}))
+    if args.parallel_tools or args.mcp_client:
+        if args.runtime_artifacts is None or args.harness_artifacts is None:parser.error("local handoff requires both artifact directories")
+        result=curate_parallel_tools(args.runtime_artifacts,args.harness_artifacts,args.manifest,args.cache_root,
+                                     mcp_client=args.mcp_client)
+        print(json.dumps({"manifest":str(args.manifest),"kind":result["candidate_lineage"]["kind"]}))
         return 0
     manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
             for field in ('run_id','source')]

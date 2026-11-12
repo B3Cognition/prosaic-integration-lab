@@ -11,7 +11,12 @@ from .proposals import bounded_text
 
 def _snapshot_outcome(value):
     try:
-        if type(value) is not dict or set(value) != {'status','result'} or value['status'] != 'ok':
+        if type(value) is not dict:
+            raise ValueError()
+        if set(value) == {'status', 'error'} and value['status'] == 'error':
+            from prosaic_runtime import ToolFailure
+            return {'status': 'error', 'error': ToolFailure(value['error']).code}
+        if set(value) != {'status','result'} or value['status'] != 'ok':
             raise ValueError()
         pending = [(value,0)]
         count = 0

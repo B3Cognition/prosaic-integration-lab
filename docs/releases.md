@@ -1,10 +1,10 @@
 # Releases and compatibility
 
-Compatibility checkpoint: 2026-11-11. Lab **0.9.14** selects Core **0.5.0**,
-Runtime **0.9.21**, Harness **0.9.15**, recorder **0.3.0**, and Harness
-PostgreSQL **0.4.4**. [Parallel read tools](parallel-tools.md), tool evidence,
-and context packs run in all four released Linux architecture/PostgreSQL cells.
-See [release notes](release-0.9.14.md).
+Compatibility checkpoint: 2026-11-11. Lab **0.9.15** selects Core **0.5.0**,
+Runtime **0.9.22**, Harness **0.9.16**, recorder **0.3.0**, and Harness
+PostgreSQL **0.4.4**. [MCP read tools](mcp-client.md) join parallel read tools,
+tool evidence, and context packs in the four Linux architecture/PostgreSQL cells.
+See the [0.9.15 release notes](release-0.9.15.md).
 
 Value-guard v2 requires explicit readmission from the old train. Header options
 add no persistent identity fields. Workflow tags now have a separate V2 blueprint with explicit guarded identity
@@ -20,7 +20,7 @@ Published recorder0.3.0 keeps its schema/bytes; no old records are rewritten.
 
 ## Publication and previous releases
 
-The [Lab0.9.13 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13)
+The [Lab 0.9.15 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.15)
 is the authority for its publication status, original archives and attached
 qualification. A source version or tag alone is not proof of publication.
 
@@ -28,6 +28,7 @@ Earlier published versions are linked below. Backfilled notes explain changes us
 
 | Release | Published (UTC) | Notes |
 | --- | --- | --- |
+| [v0.9.14](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.14) | See release page | [Parallel read tools](release-0.9.14.md) |
 | [v0.9.13](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13) | See release page | [Safe tool events and citations](release-0.9.13.md) |
 | [v0.9.12](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12) | See release page | [Context-pack notes](release-0.9.12.md) |
 | [v0.9.11](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.11) | See release page | [Sent-effort notes](release-0.9.11.md) |

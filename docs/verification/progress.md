@@ -1,5 +1,22 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## MCP read tools and Lab 0.9.15 — 2026-11-11
+
+The [MCP client blueprint](../mcp-client.md) uses an approved remote read alias
+with host-owned authorization and receipts. All four released Linux architecture
+and PostgreSQL cells require 13 lanes and 426 cases each, including 24 synthetic
+MCP cases across the two provider wires. The rule-admission matrix also requires
+the installed MCP blueprint.
+
+The local ARM64 pin rehearsal used locally built Runtime 0.9.22 and Harness
+0.9.16 wheels. Python 3.12 passed `python -m pytest -q` (2,315 source tests)
+and `python -I -m pytest -o pythonpath= tests/blueprint_acceptance -q`
+(164 blueprint tests, with `PROSAIC_MCP_CLIENT_REQUIRED=1`). The focused
+released-mode MCP lane passed 24 cases each on PostgreSQL 16 and 18 with owned
+cleanup verified. This evidence is synthetic and local. The published
+[release assets](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.15)
+record the hosted checks, actual package hashes and archive provenance.
+
 ## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
 
 Runtime0.9.18 is published and publicly verified from source

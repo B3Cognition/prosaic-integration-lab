@@ -45,7 +45,7 @@ def test_current_public_train_binds_the_new_installed_sdk_versions_and_hashes():
     from lab_runner.quality.sdk_provenance import qualified_sdk
     manifest=ROOT/'dependencies/releases.json'
     data=json.loads(manifest.read_bytes())
-    installed={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.21','b3-prosaic-harness':'0.9.15'}
+    installed={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.22','b3-prosaic-harness':'0.9.16'}
     profile=qualified_sdk(installed)
     assert profile['manifestDigest']==hashlib.sha256(manifest.read_bytes()).hexdigest()
     assert profile['artifacts']==[{key:item[key] for key in ('distribution','sha256','version')}

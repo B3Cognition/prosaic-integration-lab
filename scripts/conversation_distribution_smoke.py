@@ -175,6 +175,11 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     pip=[python,'-I','-m','pip','--isolated','--no-input','--keyring-provider','disabled']
     run([*pip,'install','--index-url',public.INDEX,'--require-hashes','-r',lock],
         directory=directory,environment=environment)
+    from lab_runner.gates import supports_mcp_client
+    selected=json.loads(manifest.read_bytes())
+    if supports_mcp_client(selected):
+        run([*pip,'install','--index-url',public.INDEX,'--no-deps','--require-hashes',
+             '-r',lock.with_name('mcp-client.lock')],directory=directory,environment=environment)
     run([*pip,'install','--no-deps',*verified_wheel_paths(manifest,wheels),wheel],
         directory=directory,environment=environment)
     expected=directory/'lab-wheel.json';expected.write_text(json.dumps(wheel_identity(wheel)))
@@ -193,12 +198,11 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     example=directory/'example.py';example.write_text(public.PUBLIC_EXAMPLE+PUBLIC_CONVERSATION)
     run([python,'-I','-B',example,manifest],directory=directory,environment=environment)
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
-    verify_cli_versions(version,json.loads(manifest.read_bytes()))
+    verify_cli_versions(version,selected)
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
     run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
         directory=directory,environment=environment)
     from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN
-    selected=json.loads(manifest.read_bytes())
     if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
@@ -207,7 +211,8 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+    from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
             raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
                 '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
@@ -215,22 +220,25 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             if not (receipt.get('passed') is True and receipt.get('caseCount')==count
                     and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
                 raise ValueError('installed evaluation qualification incomplete')
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
         # The same external installed consumers execute every newly introduced blueprint.
         feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
         feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
             feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_parallel_tools.py')
             feature_environment['PROSAIC_PARALLEL_TOOLS_REQUIRED']='1'
+        if supports_mcp_client(selected):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_mcp_client.py')
+            feature_environment['PROSAIC_MCP_CLIENT_REQUIRED']='1'
         run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=',
              *feature_paths, '-q'],
             directory=directory, environment=feature_environment)
@@ -264,6 +272,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
         original_wheel=directory/wheel.name;original_sdist=directory/sdist.name
         shutil.copyfile(wheel,original_wheel);shutil.copyfile(sdist,original_sdist)
         lock=directory/'requirements.lock';shutil.copyfile(ROOT/'dependencies/requirements.lock',lock)
+        shutil.copyfile(ROOT/'dependencies/mcp-client.lock',directory/'mcp-client.lock')
         stage='wheel_consumer';consumer=directory/'wheel';consumer.mkdir()
         python=consume(original_wheel,directory=consumer,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
         stage='sdist_inventory';source=extract_sdist(original_sdist,directory/'source')

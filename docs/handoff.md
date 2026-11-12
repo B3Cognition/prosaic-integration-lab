@@ -1,5 +1,9 @@
 # Codex handoff
 
+## MCP client and Lab 0.9.15 — 2026-11-11
+
+The maintainer authorized hosted qualification, ordered merge and publication of Runtime 0.9.22, Harness 0.9.16 and Lab 0.9.15. Adopt only verified public Runtime and Harness bytes and retain Core and both PostgreSQL adapter wheels. The [MCP guide](mcp-client.md), [feature map](feature-blueprints.md) and [release gates](release-gates.md) describe the lane and its fixtures.
+
 ## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
 
 Runtime0.9.18 is published and publicly verified from source
