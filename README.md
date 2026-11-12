@@ -1,7 +1,8 @@
 # Prosaic integration lab
 
-The [experimental catalogue ontology blueprint](docs/catalogue-ontology.md)
-shows policy-scoped discovery and a local receipt workflow using the prerelease SDKs.
+The [catalogue ontology blueprint](docs/catalogue-ontology.md) shows
+policy-scoped discovery and a local receipt workflow. The public example uses
+the isolated RC lock. A build-only profile qualifies the stable SDK candidates.
 
 Lab **0.9.16** adds a copyable [bounded sub-agent workflow and conversation blueprint](docs/sub-agents.md). See [release notes](docs/release-0.9.16.md).
 

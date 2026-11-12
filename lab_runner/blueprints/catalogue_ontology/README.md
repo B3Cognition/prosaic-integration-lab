@@ -1,7 +1,8 @@
-# Experimental catalogue ontology
+# Catalogue ontology
 
 Use the [Lab ontology guide](https://github.com/B3Cognition/prosaic-integration-lab/blob/main/docs/catalogue-ontology.md)
-to install the experimental SDKs in a separate environment.
+to install the published RC pair in a separate environment or qualify the
+stable SDK candidates.
 
 ```sh
 python host.py discover

@@ -5,8 +5,11 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/catalogue-ontology.yml'
-      - 'dependencies/catalogue-ontology-rc.lock'
+      - 'MANIFEST.in'
+      - 'pyproject.toml'
+      - 'dependencies/*.lock'
       - 'docs/catalogue-ontology.md'
+      - 'scripts/qualify_catalogue_ontology.py'
       - 'lab_runner/blueprints/catalogue_ontology/**'
       - 'tests/catalogue_ontology_acceptance/**'
   workflow_dispatch:
@@ -33,42 +36,11 @@ jobs:
         env:
           BUILD_ORIGIN: ${{ matrix.origin }}
         run: |
-          work=$(mktemp -d "$RUNNER_TEMP/catalogue-ontology.XXXXXX")
-          source="$GITHUB_WORKSPACE"
-          python -m venv "$work/build-env"
-          builder="$work/build-env/bin/python"
-          "$builder" -m pip install --require-hashes -r "$source/dependencies/requirements.lock" -r "$source/dependencies/rule-admission-build.lock"
-          if [[ "$BUILD_ORIGIN" == sdist ]]; then
-            "$builder" -m build --no-isolation --sdist --outdir "$work/sdist" "$source"
-            mkdir "$work/extracted"
-            tar -xzf "$work/sdist/"*.tar.gz -C "$work/extracted"
-            extracted=("$work/extracted/"*/)
-            test "${#extracted[@]}" -eq 1
-            source="${extracted[0]}"
-          fi
-          "$builder" -m build --no-isolation --wheel --outdir "$work/wheel" "$source"
-
-          python -m venv "$work/consumer"
-          consumer="$work/consumer/bin/python"
-          "$consumer" -m pip install --require-hashes -r "$source/dependencies/requirements.lock"
-          "$consumer" -m pip install --no-deps --require-hashes -r "$source/dependencies/catalogue-ontology-rc.lock"
-          "$consumer" -m pip install --no-deps "$work/wheel/"*.whl
-          "$consumer" -m pip check
-          cd "$work"
-          "$consumer" -I -m pytest -o pythonpath= -q "$source/tests/catalogue_ontology_acceptance" --junitxml="$work/tests.xml"
-          "$consumer" - "$work/tests.xml" "$RUNNER_TEMP/catalogue-ontology-summary.json" <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          import sys
-          from xml.etree import ElementTree
-
-          suite, = ElementTree.parse(sys.argv[1]).getroot().iter("testsuite")
-          counts = {name: int(suite.attrib[name]) for name in ("tests", "failures", "errors", "skipped")}
-          if counts["tests"] <= 0 or any(counts[name] for name in ("failures", "errors", "skipped")):
-              raise SystemExit(f"Invalid experimental acceptance result: {counts}")
-          Path(sys.argv[2]).write_text(json.dumps({"origin": os.environ["BUILD_ORIGIN"], **counts}) + "\n")
-          PY
+          python -m venv "$RUNNER_TEMP/ontology-builder"
+          builder="$RUNNER_TEMP/ontology-builder/bin/python"
+          "$builder" -m pip install --require-hashes -r dependencies/requirements.lock -r dependencies/rule-admission-build.lock
+          "$builder" scripts/qualify_catalogue_ontology.py --origin "$BUILD_ORIGIN" \
+            --export "$RUNNER_TEMP/catalogue-ontology-summary.json"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: catalogue-ontology-${{ matrix.origin }}

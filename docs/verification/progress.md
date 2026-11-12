@@ -1,5 +1,31 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Stable catalogue ontology candidate — 2026-11-12
+
+On macOS ARM64 with Python 3.12.15, `scripts/qualify_catalogue_ontology.py`
+passed the 11 installed cases on both the Lab wheel and the wheel rebuilt
+from the sdist with the Core 0.5.1 and Harness 0.9.18 candidate SDKs. The
+published Runtime 0.9.23 wheel was used in both environments. The same
+installed cases also passed under the frozen RC profile.
+
+The [candidate workflow](../../.github/workflows/catalogue-ontology-candidate.yml)
+curates the pair through the Harness compatibility receipt and reuses the
+three public Runtime and PostgreSQL adapter wheels for stack tests. The
+separate `scripts/qualify_catalogue_ontology_upgrade.py` check recovered a
+run written by the current released SDKs with the candidate SDKs and an
+attached ontology. The file and owned PostgreSQL 16/18 witnesses passed
+with verified fixture cleanup.
+
+The locally audited candidate image also passed the tool evidence,
+parallel calls, MCP and sub-agent lanes on owned PostgreSQL 18. All
+104 cases passed without skips, and each fixture verified cleanup.
+
+The ordinary SDK-only Lab suite passed 2,330 tests before the final
+candidate-mode build check was added. The focused candidate, blueprint and
+curation tests passed with the released wheels. The active stable manifests
+and the RC lock match their pre-change bytes. The hosted Linux architecture
+matrix and Windows Core qualification still need hosted runs.
+
 ## Experimental catalogue ontology — 2026-11-12
 
 On ARM64 macOS with Python 3.12.15, the [experimental workflow](../catalogue-ontology.md)

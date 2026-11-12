@@ -1,5 +1,12 @@
 # Required release gates
 
+The [catalogue ontology candidate check](catalogue-ontology.md#qualify-the-candidate-sdks)
+requires exact build-only Core and Harness artifacts and Harness's separate
+compatibility receipt for the released Runtime 0.9.23 wheel. It requires
+both installed Lab distribution paths, cross-version file and PostgreSQL
+recovery, and the existing 14-lane, 450-case matrix. The candidate uses a
+separate manifest with the original released Runtime and adapter bytes.
+
 The [experimental catalogue ontology check](catalogue-ontology.md) runs on
 manual dispatch and ontology-specific pull requests with its own RC lock.
 The released matrix uses the stable SDK manifests.

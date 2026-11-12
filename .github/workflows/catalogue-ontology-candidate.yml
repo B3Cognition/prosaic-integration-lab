@@ -1,0 +1,170 @@
+name: Catalogue ontology candidate qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      core_run_id:
+        description: Successful exact-source Core build-only run
+        type: string
+        required: true
+      core_source:
+        description: Exact Core source commit
+        type: string
+        required: true
+      harness_run_id:
+        description: Successful exact-source Harness build-only run
+        type: string
+        required: true
+      harness_source:
+        description: Exact Harness source commit
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  curate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Verify the qualified candidate lineage and retained releases
+        env:
+          GH_TOKEN: ${{ secrets.ECOSYSTEM_ARTIFACT_TOKEN || github.token }}
+          CORE_RUN: ${{ inputs.core_run_id }}
+          CORE_SOURCE: ${{ inputs.core_source }}
+          HARNESS_RUN: ${{ inputs.harness_run_id }}
+          HARNESS_SOURCE: ${{ inputs.harness_source }}
+        run: |
+          python -m pip install --require-hashes -r dependencies/requirements.lock
+          handoff="$RUNNER_TEMP/ontology-handoff"
+          python scripts/prepare_sdk_candidates.py --catalogue-ontology \
+            --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" \
+            --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" \
+            --manifest "$handoff/manifest.json" --cache-root "$RUNNER_TEMP/wheel-cache"
+          digest=$(sha256sum "$handoff/manifest.json" | cut -d ' ' -f 1)
+          mkdir "$handoff/wheels"
+          cp "$RUNNER_TEMP/wheel-cache/$digest/"*.whl "$handoff/wheels/"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: qualified-ontology-handoff
+          path: ${{ runner.temp }}/ontology-handoff/
+          if-no-files-found: error
+
+  installed:
+    needs: curate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        origin: [wheel, sdist]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: qualified-ontology-handoff
+          path: ${{ runner.temp }}/ontology-handoff
+      - name: Qualify the installed ontology blueprint
+        env:
+          BUILD_ORIGIN: ${{ matrix.origin }}
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock -r dependencies/rule-admission-build.lock
+          handoff="$RUNNER_TEMP/ontology-handoff"
+          .venv/bin/python scripts/qualify_catalogue_ontology.py --origin "$BUILD_ORIGIN" \
+            --manifest "$handoff/manifest.json" --wheel-dir "$handoff/wheels" \
+            --export "$RUNNER_TEMP/catalogue-ontology-summary.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: catalogue-ontology-candidate-${{ matrix.origin }}
+          path: ${{ runner.temp }}/catalogue-ontology-summary.json
+          if-no-files-found: error
+
+  stack:
+    needs: curate
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: [16, 18]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: qualified-ontology-handoff
+          path: ${{ runner.temp }}/ontology-handoff
+      - name: Build the isolated candidate consumer
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          handoff="$RUNNER_TEMP/ontology-handoff"
+          digest=$(sha256sum "$handoff/manifest.json" | cut -d ' ' -f 1)
+          mkdir -p ".cache/wheels/$digest"
+          cp "$handoff/wheels/"*.whl ".cache/wheels/$digest/"
+          .venv/bin/python scripts/install_dependencies.py --manifest "$handoff/manifest.json"
+          .venv/bin/python -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock
+          .venv/bin/python -m pip check
+          image=$(.venv/bin/python scripts/build_consumer.py --manifest "$handoff/manifest.json" \
+            --dependency-mode candidate --tag prosaic-integration-lab:ontology-candidate | tail -n 1)
+          [[ "$image" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "ONTOLOGY_CANDIDATE_IMAGE=$image" >> "$GITHUB_ENV"
+      - name: Install released SDKs for recovery and build the historical baseline
+        run: |
+          python -m venv "$RUNNER_TEMP/ontology-released"
+          released="$RUNNER_TEMP/ontology-released/bin/python"
+          "$released" -m pip install --require-hashes -r dependencies/requirements.lock
+          "$released" scripts/prepare_dependencies.py --manifest dependencies/releases.json
+          "$released" scripts/install_dependencies.py --manifest dependencies/releases.json
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
+          baseline=$(.venv/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; print(build_baseline())' | tail -n 1)
+          [[ "$baseline" =~ ^sha256:[0-9a-f]{64}$ ]]
+          echo "ONTOLOGY_BASELINE_IMAGE=$baseline" >> "$GITHUB_ENV"
+      - name: Verify recovery of a pre-upgrade saved run
+        env:
+          POSTGRES_MAJOR: ${{ matrix.postgres }}
+        run: |
+          .venv/bin/python scripts/qualify_catalogue_ontology_upgrade.py \
+            --manifest "$RUNNER_TEMP/ontology-handoff/manifest.json" --consumer-image "$ONTOLOGY_CANDIDATE_IMAGE" \
+            --released-python "$RUNNER_TEMP/ontology-released/bin/python" \
+            --postgres-version "$POSTGRES_MAJOR" --export "$RUNNER_TEMP/ontology-recovery.json"
+      - name: Require all fourteen inherited acceptance lanes
+        env:
+          POSTGRES_MAJOR: ${{ matrix.postgres }}
+        run: |
+          export PYTHONPATH="$PWD/src"
+          export PATH="$PWD/.venv/bin:$PATH"
+          .venv/bin/python scripts/required_acceptance.py --candidate \
+            --candidate-manifest "$RUNNER_TEMP/ontology-handoff/manifest.json" \
+            --consumer-image "$ONTOLOGY_CANDIDATE_IMAGE" --baseline-image "$ONTOLOGY_BASELINE_IMAGE" \
+            --postgres-version "$POSTGRES_MAJOR" --export "$RUNNER_TEMP/ontology-stack.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: catalogue-ontology-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          path: |
+            ${{ runner.temp }}/ontology-recovery.json
+            ${{ runner.temp }}/ontology-stack.json
+          if-no-files-found: error

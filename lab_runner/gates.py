@@ -3,6 +3,7 @@ import re
 import hashlib
 import json
 from pathlib import Path
+from prosaic_integration_lab.catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
 ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32,'mcp-client':24,'sub-agents':24}
@@ -43,6 +44,10 @@ from prosaic_integration_lab.sub_agents import (CASES as SUB_AGENT_CASES,
 def supports_sub_agents(manifest):
     artifacts = manifest.get('artifacts', ())
     actual = {item.get('distribution'): item.get('version') for item in artifacts}
+    if actual == ONTOLOGY_TRAIN:
+        from .catalogue_ontology import validate_manifest
+        validate_manifest(manifest)
+        return True
     if actual == SUB_AGENT_TRAIN:
         from .sub_agents import validate_sub_agent_manifest
         validate_sub_agent_manifest(manifest)
@@ -106,12 +111,12 @@ def supports_parallel_tools(manifest):
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -130,7 +135,7 @@ def supports_conversation(manifest):
     if supports_mcp_client(manifest):return True
     if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -146,11 +151,11 @@ def required_modes(*,candidate,manifest):
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
