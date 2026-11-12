@@ -1,8 +1,8 @@
 # MCP client blueprint
 
 Install Lab's checksum-pinned SDK family and optional MCP dependency lock.
-The published MCP family is Runtime 0.9.22 and Harness 0.9.16 with the
-published PostgreSQL store 0.4.4.
+Lab 0.9.15 introduced the MCP lane with Runtime 0.9.22, Harness 0.9.16 and
+PostgreSQL store 0.4.4. The [current SDK train](releases.md) continues to run it.
 
 ```sh
 python -m lab_runner.blueprints copy mcp-client /private/my-mcp-host

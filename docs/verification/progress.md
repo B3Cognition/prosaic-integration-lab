@@ -1,5 +1,24 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Bounded delegation candidate — 2026-11-12
+
+The [bounded delegation guide](../sub-agents.md) documents the analyst and reviewer
+blueprint, the exact candidate handoff and the required stack lane. Local
+qualification used Python 3.12.15 on ARM64 with Runtime 0.9.23.dev1, Harness
+0.9.17.dev1 and its PostgreSQL adapter 0.4.5.dev1. The candidate retained the
+published Core and Runtime recorder wheels.
+
+- The installed Runtime and Harness SDK witness suites passed 2 and 5 cases
+  respectively. The installed Lab blueprint passed 4 cases.
+- `python -m lab_runner test --mode sub-agents --candidate --candidate-manifest PATH
+  --postgres-version 16` passed 24 synthetic cases. The same command with
+  PostgreSQL 18 passed 24. Both runs verified owned cleanup and had zero skips.
+- The Harness PostgreSQL adapter migration tests passed 2 cases on each major,
+  covering owner-only migration and active writer fencing.
+- The Lab 0.9.15 manifest selected 13 lanes and 426 cases. Lab 0.9.16
+  selects 14 lanes and 450 cases. The local qualification used synthetic
+  endpoints. Hosted results are recorded with the [Lab 0.9.16 release assets](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.16).
+
 ## MCP read tools and Lab 0.9.15 — 2026-11-11
 
 The [MCP client blueprint](../mcp-client.md) uses an approved remote read alias

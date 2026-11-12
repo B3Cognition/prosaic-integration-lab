@@ -14,17 +14,18 @@ def test_parallel_candidate_keeps_all_existing_lanes():
     with pytest.raises(ValueError):supports_parallel_tools({'artifacts':[dict(distribution=k,version=v) for k,v in TRAIN.items()]})
 
 
-def paired_manifest():
+def paired_manifest(train=TRAIN, *, kind="local-parallel-tool-handoff",
+                    label="parallel-tool-consumer", witness="test_parallel_tool_installed.py"):
     pins={'b3-prosaic':'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81','b3-prosaic-runtime-postgres':'5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'}
-    artifacts=[dict(distribution=k,version=v,filename=k.replace('-','_')+'-'+v+'-py3-none-any.whl',source_commit='a'*40,sha256=pins.get(k,'b'*64)) for k,v in TRAIN.items()]
+    artifacts=[dict(distribution=k,version=v,filename=k.replace('-','_')+'-'+v+'-py3-none-any.whl',source_commit='a'*40,sha256=pins.get(k,'b'*64)) for k,v in train.items()]
     paired=[]
     for sdk,names in [('runtime',{'b3-prosaic-runtime'}),('harness',{'b3-prosaic-harness','b3-prosaic-harness-postgres'})]:
         chosen=[a for a in artifacts if a['distribution'] in names]
         receipt=dict(source_commit='a'*40,distributions=[dict(name=a['distribution'],version=a['version']) for a in chosen],artifacts=[dict(filename=a['filename'],sha256=a['sha256']) for a in chosen])
-        qualification=dict(source_commit='a'*40,artifacts=receipt['artifacts'],label='parallel-tool-consumer',exit_code=0,command=['python','-I','-m','pytest','tests/test_parallel_tool_installed.py'],result_counts=dict(tests=8,failures=0,errors=0,skipped=0))
+        qualification=dict(source_commit='a'*40,artifacts=receipt['artifacts'],label=label,exit_code=0,command=['python','-I','-m','pytest','tests/'+witness],result_counts=dict(tests=8,failures=0,errors=0,skipped=0))
         paired.append(dict(sdk=sdk,receipt=receipt,qualification=qualification))
     paired[1].update(runtime_receipt=deepcopy(paired[0]['receipt']),runtime_qualification=deepcopy(paired[0]['qualification']))
-    return dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind='local-parallel-tool-handoff',candidates=paired,retained_artifacts=[a for a in artifacts if a['distribution'] in pins]))
+    return dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind=kind,candidates=paired,retained_artifacts=[a for a in artifacts if a['distribution'] in pins]))
 
 
 def test_exact_parallel_family_adds_32_without_losing_any_case():

@@ -57,8 +57,14 @@ jobs:
           PGPASSWORD: synthetic-only
         run: |
           mkdir reports
-          export PROSAIC_RULE_POSTGRES_DSN="$(.venv/bin/python -c 'import os; from psycopg.conninfo import make_conninfo; print(make_conninfo(host=os.environ["PGHOST"], port=os.environ["PGPORT"], user=os.environ["PGUSER"], dbname=os.environ["PGDATABASE"], password=os.environ["PGPASSWORD"]))')"
+          PROSAIC_RULE_POSTGRES_DSN="$(.venv/bin/python -c 'import os; from psycopg.conninfo import make_conninfo; print(make_conninfo(host=os.environ["PGHOST"], port=os.environ["PGPORT"], user=os.environ["PGUSER"], dbname=os.environ["PGDATABASE"], password=os.environ["PGPASSWORD"]))')"
+          export PROSAIC_RULE_POSTGRES_DSN
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_acceptance -q --junitxml=reports/rule-admission.xml
+          if .venv/bin/python -I -c "import sys; from pathlib import Path; from lab_runner.gates import supports_sub_agents; from prosaic_integration_lab.dependencies import sdk_manifest; sys.exit(0 if supports_sub_agents(sdk_manifest(Path('dependencies/releases.json'))) else 3)"; then
+            export PROSAIC_SUB_AGENTS_REQUIRED=1
+          elif [ "$?" -ne 3 ]; then
+            exit 1
+          fi
           PROSAIC_BLUEPRINT_INSTALLED=1 PROSAIC_MCP_CLIENT_REQUIRED=1 .venv/bin/python -I -m pytest -o pythonpath= tests/blueprint_acceptance -q --junitxml=reports/feature-blueprints.xml
           .venv/bin/python -I -m pytest -o pythonpath= tests/rule_admission_postgres -q --junitxml=reports/rule-postgres.xml
           .venv/bin/python -I -m lab_runner.rule_admission.blueprint.coverage --json > reports/coverage.json

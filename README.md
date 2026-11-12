@@ -1,5 +1,7 @@
 # Prosaic integration lab
 
+Lab **0.9.16** adds a copyable [bounded sub-agent workflow and conversation blueprint](docs/sub-agents.md). See [release notes](docs/release-0.9.16.md).
+
 Lab **0.9.15** adds the [MCP client blueprint](docs/mcp-client.md) and adopts Runtime **0.9.22** and Harness **0.9.16**. See [release notes](docs/release-0.9.15.md).
 
 Lab **0.9.14** adds [parallel read tools](docs/parallel-tools.md) with Runtime **0.9.21**, Harness **0.9.15**, and store **0.4.4**. See [release notes](docs/release-0.9.14.md).
@@ -7,7 +9,7 @@ Lab **0.9.14** adds [parallel read tools](docs/parallel-tools.md) with Runtime *
 Lab **0.9.13** adds safe tool events and captured citations with Runtime **0.9.20**,
 Harness **0.9.14** and store **0.4.3**. See [release notes](docs/release-0.9.13.md).
 
-Release train: **0.9.15**, with Runtime **0.9.22**, Harness **0.9.16** and Harness PostgreSQL **0.4.4**. See [release notes and compatible SDK versions](docs/releases.md).
+Release train: **0.9.16**, with Runtime **0.9.23**, Harness **0.9.17** and Harness PostgreSQL **0.4.5**. See [release notes and compatible SDK versions](docs/releases.md).
 
 [Context-pack acceptance](docs/context-packs.md) now runs in the normal released-SDK
 matrix. It checks per-agent defaults, workflow-node overrides, accepted-record
@@ -47,9 +49,9 @@ account, API key, local model or Docker.
 | I want to… | Start here | Requirements / what happens |
 | --- | --- | --- |
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
-| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.22; fixtures need no key; bounded live calls require opt-in |
+| Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.23; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.22 and Harness 0.9.16 train; both synthetic provider wires, no live calls |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Complete Core 0.5.0, Runtime 0.9.23 and Harness 0.9.17 train; both synthetic provider wires, no live calls |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -79,7 +81,7 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.15](docs/release-0.9.15.md)** supplies the current SDK train with
+Lab **[0.9.16](docs/release-0.9.16.md)** supplies the current SDK train with
 a [feature-to-blueprint map](docs/feature-blueprints.md). Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact
@@ -208,3 +210,5 @@ qualified artifact directories and the original released wheel cache to curate
 an explicit manifest. Run `python -m lab_runner test --mode mcp-client
 --candidate --candidate-manifest PATH --postgres-version 16` and repeat for
 PostgreSQL 18.
+
+The [bounded delegation blueprint](docs/sub-agents.md) shows how to give a dependency analyst and reviewer separate context packs and share the coordinator’s execution budget.

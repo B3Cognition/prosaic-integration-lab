@@ -6,7 +6,7 @@ from .suite import resource
 def qualified_sdk(installed):
     names={'b3-prosaic','b3-prosaic-runtime','b3-prosaic-harness'}
     if set(installed)==names:
-        for name in ('sdk-provenance-parallel-tools-candidate.json','sdk-provenance-public.json','sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json','sdk-provenance-pre-cerebro.json','sdk-provenance-pre-workflow-enforcement.json','sdk-provenance-pre-accounting-metadata.json','sdk-provenance-pre-sent-effort.json','sdk-provenance-pre-context-packs.json','sdk-provenance-pre-tool-contracts.json','sdk-provenance-pre-parallel-tools.json','sdk-provenance-pre-mcp-client.json','sdk-provenance.json'):
+        for name in ('sdk-provenance-parallel-tools-candidate.json','sdk-provenance-public.json','sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json','sdk-provenance-pre-cerebro.json','sdk-provenance-pre-workflow-enforcement.json','sdk-provenance-pre-accounting-metadata.json','sdk-provenance-pre-sent-effort.json','sdk-provenance-pre-context-packs.json','sdk-provenance-pre-tool-contracts.json','sdk-provenance-pre-parallel-tools.json','sdk-provenance-pre-mcp-client.json','sdk-provenance-pre-sub-agents.json','sdk-provenance.json'):
             profile=decode(resource(name))
             expected={a['distribution']:a['version'] for a in profile['artifacts'] if a['distribution'] in names}
             if expected==installed:return profile

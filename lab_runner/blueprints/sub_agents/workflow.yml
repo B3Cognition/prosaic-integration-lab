@@ -1,0 +1,21 @@
+version: 1
+name: Dependency review
+source: .prosaic
+runtime: runtime.yml
+start: review_dependencies
+limits:
+  max_calls: 1
+  max_visits: 1
+  timeout_s: 30
+  max_tokens: 16384
+  max_provider_requests_per_invocation: 6
+  max_tool_calls_per_invocation: 4
+steps:
+  review_dependencies:
+    kind: agent
+    agent: subagents/coordinator.md
+    tools: [analyze, review]
+    schema: schemas/dependency-review.json
+    next: done
+  done:
+    kind: finish

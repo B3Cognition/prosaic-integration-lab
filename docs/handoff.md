@@ -1,5 +1,9 @@
 # Codex handoff
 
+## Bounded sub-agents and Lab 0.9.16 — 2026-11-12
+
+Qualify and publish Runtime 0.9.23, Harness 0.9.17 and its PostgreSQL adapter 0.4.5 in dependency order, then adopt their verified public wheels in Lab. The [workflow and conversation guide](sub-agents.md) explains the copyable example. The published delegation family selects 450 required cases per architecture and PostgreSQL cell.
+
 ## MCP client and Lab 0.9.15 — 2026-11-11
 
 The maintainer authorized hosted qualification, ordered merge and publication of Runtime 0.9.22, Harness 0.9.16 and Lab 0.9.15. Adopt only verified public Runtime and Harness bytes and retain Core and both PostgreSQL adapter wheels. The [MCP guide](mcp-client.md), [feature map](feature-blueprints.md) and [release gates](release-gates.md) describe the lane and its fixtures.

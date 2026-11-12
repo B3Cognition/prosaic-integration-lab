@@ -9,6 +9,10 @@ on:
         description: Qualify exact unpublished SDK artifacts without changing release pins
         type: boolean
         default: false
+      delegation_handoff_run_id:
+        description: Successful same-repository run containing the qualified-sub-agents handoff
+        type: string
+        default: ''
       context_assembly:
         description: Qualify context SDK candidates and retain the original Runtime PostgreSQL wheel
         type: boolean
@@ -75,8 +79,23 @@ jobs:
           .venv/bin/python scripts/prepare_dependencies.py
           .venv/bin/python scripts/install_dependencies.py --manifest dependencies/releases.json
           .venv/bin/python scripts/audit_install.py --manifest dependencies/releases.json
+      - name: Curate exact delegation SDK handoff
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.delegation_handoff_run_id != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HANDOFF_RUN: ${{ inputs.delegation_handoff_run_id }}
+          USE_CANDIDATE: ${{ inputs.candidate }}
+        run: |
+          test "$USE_CANDIDATE" = true
+          [[ "$HANDOFF_RUN" =~ ^[1-9][0-9]*$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$HANDOFF_RUN" --jq '.conclusion + " " + .head_repository.full_name' | grep -Fx "success $GITHUB_REPOSITORY"
+          gh run download "$HANDOFF_RUN" --repo "$GITHUB_REPOSITORY" --name qualified-sub-agents --dir "$RUNNER_TEMP/delegation-handoff"
+          .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases.json
+          .venv/bin/python scripts/prepare_sdk_candidates.py --sub-agents --runtime-artifacts "$RUNNER_TEMP/delegation-handoff/runtime" --harness-artifacts "$RUNNER_TEMP/delegation-handoff/harness" --manifest .cache/sdk-hardening/manifest.json
+          .venv/bin/python scripts/install_dependencies.py --manifest .cache/sdk-hardening/manifest.json
+          .venv/bin/python -B scripts/audit_install.py --manifest .cache/sdk-hardening/manifest.json
       - name: Verify exact candidate source runs and curate original SDK bytes
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate && inputs.delegation_handoff_run_id == '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CORE_RUN: ${{ inputs.core_run_id }}
@@ -148,8 +167,17 @@ jobs:
       - name: Verify exact checkout history before full regressions
         run: .venv/bin/python -m pytest -q tests/functional/test_required_acceptance.py -k candidate_checkout_history
       - name: Unit and functional regressions
-        if: ${{ steps.conversation-sdk.outputs.context == 'true' }}
+        if: ${{ steps.conversation-sdk.outputs.context == 'true' && inputs.delegation_handoff_run_id == '' }}
         run: .venv/bin/python -m pytest -q
+      - name: Released-pins regression during delegation qualification
+        if: ${{ inputs.delegation_handoff_run_id != '' }}
+        run: |
+          python -m venv "$RUNNER_TEMP/released-regression"
+          released_python="$RUNNER_TEMP/released-regression/bin/python"
+          "$released_python" -m pip install --require-hashes -r dependencies/requirements.lock
+          "$released_python" scripts/install_dependencies.py --manifest dependencies/releases.json
+          "$released_python" -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock
+          PATH="$RUNNER_TEMP/released-regression/bin:$PATH" "$released_python" -m pytest -q
       - name: Released native and unified pool acceptance
         if: ${{ !inputs.candidate }}
         run: .venv/bin/python -m pytest -q tests/native_acceptance

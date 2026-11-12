@@ -1,6 +1,8 @@
 # Required release gates
 
-Lab 0.9.15 adds the MCP client lane to the released architecture and PostgreSQL matrix. Each released cell runs 13 lanes and 426 required cases with the checksum-pinned MCP SDK family and optional dependency lock. See the [MCP release notes](release-0.9.15.md).
+Lab 0.9.16 adds the [bounded delegation lane](sub-agents.md) to the released architecture and PostgreSQL matrix. Each cell requires 450 cases across 14 lanes, including 24 delegation cases on the two synthetic provider protocols.
+
+Lab 0.9.15 adds the MCP client lane to the released architecture and PostgreSQL matrix. Each 0.9.15 cell ran 13 lanes and 426 required cases with the checksum-pinned MCP SDK family and optional dependency lock. See the [MCP release notes](release-0.9.15.md).
 
 Each added capability requires a [feature map](feature-blueprints.md) entry,
 copyable blueprint, installed acceptance and user guide before release. The
@@ -67,7 +69,7 @@ the historical eight-lane receipts remain unchanged.
 Staged activation remains explicit for historical reproduction. Earlier trains
 without Conversation capability retain their original eight gates; their source
 job excludes only the three installed conversation functional files. The active
-released five-package train requires all nine lanes, full source tests and
+released five-package train requires all 14 lanes, full source tests and
 distribution/demo checks. Explicit candidate dispatch requires equally complete
 lineage and capability evidence. Unknown/mixed versions fail admission; an old
 train never emits a passing conversation receipt.
@@ -168,3 +170,5 @@ the upstream fixes first, update provenance deliberately, run the required nativ
 matrix, then require all four checks in branch protection. Preserve failing
 historical receipts and the prior pinned images for compatible pending-run
 recovery. Runner process/daemon failure cannot be called verified cleanup.
+
+The [bounded delegation candidate lane](sub-agents.md) requires 24 cases in each PostgreSQL and architecture cell. The exact candidate family also runs the 13 existing lanes for a total of 450 cases per cell.
