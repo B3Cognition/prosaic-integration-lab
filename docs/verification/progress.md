@@ -17,6 +17,14 @@ message when asked for ontology. The attached and unattached workflows use
 temporary local storage and make zero provider requests. The experimental
 workflow was exercised locally.
 
+With the stable SDKs installed in a fresh SDK-only environment, the source
+command `python -m pytest -q` passed all 2,323 tests. The owned stable
+consumer image built with `scripts/build_consumer.py --manifest
+dependencies/releases.json` passed the 54-case `python -m lab_runner test
+--mode native --postgres-version 16 --consumer-image IMAGE` lane on ARM64.
+The runner verified cleanup. Both stable manifests and the 450-case released
+stack contract match Lab 0.9.16.
+
 ## Bounded delegation candidate — 2026-11-12
 
 The [bounded delegation guide](../sub-agents.md) documents the analyst and reviewer
