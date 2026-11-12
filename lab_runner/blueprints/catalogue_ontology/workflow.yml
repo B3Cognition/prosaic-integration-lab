@@ -1,0 +1,21 @@
+version: 1
+name: Read a synthetic release receipt
+start: read
+limits:
+  max_calls: 1
+  max_visits: 2
+  timeout_s: 5
+  max_run_s: 15
+  max_tokens: 4096
+  max_provider_requests_per_invocation: 0
+  max_tool_calls_per_invocation: 1
+steps:
+  read:
+    kind: tool
+    tool: read_receipt
+    arguments: {}
+    schema: receipt
+    next: done
+  done:
+    kind: finish
+    requires: [read]

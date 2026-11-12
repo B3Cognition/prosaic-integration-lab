@@ -18,6 +18,7 @@ where = ["src", "."]
 include = ["prosaic_integration_lab*", "lab_runner*"]
 
 [tool.setuptools.package-data]
+"lab_runner.blueprints.catalogue_ontology" = ["README.md", "LICENSE", "NOTICE", "workflow.yml", "receipt.schema.json", "fixtures/*.json", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.sub_agents" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", "workflow.yml", "schemas/*.json", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.mcp_client" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.parallel_tools" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "candidateId": {"type": "string"},
+    "receiptId": {"type": "string"},
+    "check": {"type": "string"}
+  },
+  "required": ["candidateId", "receiptId", "check"],
+  "additionalProperties": false
+}

@@ -1,0 +1,6 @@
+Prosaic integration lab
+
+Application-owned examples distributed under the Apache License, Version 2.0.
+The two fixtures under fixtures/ are unchanged Prosaic Core conformance fixtures
+from conformance-fixtures/catalogue-ontology at commit
+9cab09dc9e802ae066e1187e442c2a12b62175ed (v0.5.1rc1), under the same license.
