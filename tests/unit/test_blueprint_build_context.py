@@ -12,7 +12,7 @@ def test_public_container_snapshot_can_copy_and_admit_all_feature_blueprints(tmp
     for name in json.loads((root/'dependencies/public-build-inputs.json').read_text())['files']:
         target=snapshot/name;target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copyfile(root/name,target)
-    script='''import sys,runpy
+    script='''import json,subprocess,sys,runpy
 from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from lab_runner.blueprints import copy_blueprint
@@ -36,6 +36,13 @@ effort=runpy.run_path(str(destination/'sent-effort/host.py'))
 effort['workflow'](effort['build_runtime'](project=destination/'sent-effort'),project=destination/'sent-effort')
 caps=runpy.run_path(str(destination/'conversation-caps/host.py'))
 assert caps['limits'](caps['build_bindings'](project=destination/'conversation-caps'))=={'ordinary':8192,'interpretation':8192}
+ontology=copy_blueprint('catalogue-ontology',destination/'catalogue-ontology')
+command=[sys.executable,'-I',str(ontology/'host.py'),'discover']
+ordinary=subprocess.run(command,capture_output=True,text=True,timeout=15,check=True)
+assert 'ontology' not in json.loads(ordinary.stdout)
+unsupported=subprocess.run(command+['--ontology'],capture_output=True,text=True,timeout=15)
+assert unsupported.returncode!=0
+assert 'Core 0.5.1rc1 and Harness 0.9.17rc1' in unsupported.stderr
 '''
     result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied')],
         cwd=tmp_path,capture_output=True,text=True,timeout=30)

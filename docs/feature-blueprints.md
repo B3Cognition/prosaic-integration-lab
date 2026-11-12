@@ -5,6 +5,12 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
+## Experimental blueprint
+
+| Capability | Copyable blueprint | What the installed test proves |
+| --- | --- | --- |
+| Catalogue ontology | `catalogue-ontology` | Policy-scoped projection and identical authored workflow execution with or without an attachment. Uses the isolated RC install. [Guide](catalogue-ontology.md) |
+
 ## Lab 0.9.16 feature map
 
 The checksum-pinned train is Core 0.5.0, Runtime 0.9.23, Harness 0.9.17,

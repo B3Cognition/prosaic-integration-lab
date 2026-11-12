@@ -1,0 +1,10 @@
+# Experimental catalogue ontology consumer only.
+# Core v0.5.1rc1 (9cab09dc9e802ae066e1187e442c2a12b62175ed).
+b3-prosaic @ https://files.pythonhosted.org/packages/04/e2/c3557ccc5ef37f2a9a10a037ba5ec534323ff76301c511dbf04dd1670d1f/b3_prosaic-0.5.1rc1-py3-none-any.whl \
+    --hash=sha256:73a15af9205faaee1db3cef96969797890d87299d0518dd71e093d311156b334
+# Harness v0.9.17rc1 (95c366c55d007ac6cc1c1c69da605456e9426678).
+b3-prosaic-harness @ https://files.pythonhosted.org/packages/1b/17/f143075f18f2db10ffffeac5e504682ebd2da5b4a37179bff9793ae89fc7/b3_prosaic_harness-0.9.17rc1-py3-none-any.whl \
+    --hash=sha256:53e3f0324d0214ed47055b8187541956b74559b1cd4a1e783c9654c305474055
+# Runtime v0.9.23 (48c10ac9aeb18bd06f53015df0624b35d5254646).
+b3-prosaic-runtime @ https://files.pythonhosted.org/packages/05/82/31f3cb8cb46da4d72a247f1fb5ee6a2d7fb6b14f12a387ea0e4b95d7129c/b3_prosaic_runtime-0.9.23-py3-none-any.whl \
+    --hash=sha256:5caab59f6d0ffd14299ee0840dd5f9b58b4e4f4a1b724ff6e3e2fa1699f08fd8

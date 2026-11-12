@@ -1,5 +1,30 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Experimental catalogue ontology — 2026-11-12
+
+On ARM64 macOS with Python 3.12.15, the [experimental workflow](../catalogue-ontology.md)
+qualification commands built the checkout wheel and a wheel rebuilt from a
+clean sdist. Each fresh consumer installed the hash-locked Core 0.5.1rc1,
+Harness 0.9.17rc1 and Runtime 0.9.23 wheels, passed `pip check`, and ran
+`python -I -m pytest -o pythonpath= -q tests/catalogue_ontology_acceptance`
+with an absolute test path from outside the checkout. Both runs passed all
+11 tests with zero skips. A temporary lock with an altered Core hash failed
+at installation.
+
+The Lab wheel also copied and ran the ordinary example with the stable SDKs.
+The stable pair and each mixed Core/Harness pair returned the RC installation
+message when asked for ontology. The attached and unattached workflows use
+temporary local storage and make zero provider requests. The experimental
+workflow was exercised locally.
+
+With the stable SDKs installed in a fresh SDK-only environment, the source
+command `python -m pytest -q` passed all 2,323 tests. The owned stable
+consumer image built with `scripts/build_consumer.py --manifest
+dependencies/releases.json` passed the 54-case `python -m lab_runner test
+--mode native --postgres-version 16 --consumer-image IMAGE` lane on ARM64.
+The runner verified cleanup. Both stable manifests and the 450-case released
+stack contract match Lab 0.9.16.
+
 ## Bounded delegation candidate — 2026-11-12
 
 The [bounded delegation guide](../sub-agents.md) documents the analyst and reviewer
