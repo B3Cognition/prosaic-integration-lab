@@ -12,6 +12,8 @@ CASES = ("chat", "workflow", "siblings", "scope-and-citations", "unauthorized",
 TRAIN = {"b3-prosaic": "0.5.0", "b3-prosaic-runtime": "0.9.23.dev1",
          "b3-prosaic-runtime-postgres": "0.3.0", "b3-prosaic-harness": "0.9.17.dev1",
          "b3-prosaic-harness-postgres": "0.4.5.dev1"}
+RELEASE_TRAIN = {**TRAIN, "b3-prosaic-runtime": "0.9.23",
+                 "b3-prosaic-harness": "0.9.17", "b3-prosaic-harness-postgres": "0.4.5"}
 
 
 def require_sub_agent_sdk():
@@ -19,8 +21,8 @@ def require_sub_agent_sdk():
     import prosaic_harness as h
     import prosaic_harness_postgres as pg
 
-    if {name: version(name) for name in TRAIN} != TRAIN:
-        raise ValueError("exact sub-agent SDK candidate family required")
+    if {name: version(name) for name in TRAIN} not in (TRAIN, RELEASE_TRAIN):
+        raise ValueError("exact sub-agent SDK family required")
     if ("sub_agents_v1" not in rt.ProsaicRuntime.capabilities
             or not hasattr(h, "SubAgentBindingsV1") or not hasattr(pg.PostgresSessionStore, "migrate_sub_agent_storage")
             or any("site-packages" not in Path(module.__file__).parts for module in (rt, h, pg))):

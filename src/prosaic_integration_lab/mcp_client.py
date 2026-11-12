@@ -19,9 +19,9 @@ def require_mcp_client_sdk():
     import prosaic_harness as harness
     from prosaic_runtime.mcp import require_mcp_sdk
 
-    from .sub_agents import TRAIN as DELEGATION_TRAIN
+    from .sub_agents import RELEASE_TRAIN as DELEGATION_RELEASE_TRAIN, TRAIN as DELEGATION_TRAIN
     installed = {name: version(name) for name in TRAIN}
-    if installed not in (TRAIN, MCP_CLIENT_RELEASE_TRAIN, DELEGATION_TRAIN) or any(
+    if installed not in (TRAIN, MCP_CLIENT_RELEASE_TRAIN, DELEGATION_TRAIN, DELEGATION_RELEASE_TRAIN) or any(
             version(name) != expected for name, expected in MCP_LOCKED_VERSIONS.items()):
         raise ValueError("exact MCP SDK family required")
     if "mcp_client_v1" not in rt.ProsaicRuntime.capabilities:

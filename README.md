@@ -1,5 +1,7 @@
 # Prosaic integration lab
 
+Lab **0.9.16** adds a copyable [bounded sub-agent workflow and conversation blueprint](docs/sub-agents.md). See [release notes](docs/release-0.9.16.md).
+
 Lab **0.9.15** adds the [MCP client blueprint](docs/mcp-client.md) and adopts Runtime **0.9.22** and Harness **0.9.16**. See [release notes](docs/release-0.9.15.md).
 
 Lab **0.9.14** adds [parallel read tools](docs/parallel-tools.md) with Runtime **0.9.21**, Harness **0.9.15**, and store **0.4.4**. See [release notes](docs/release-0.9.14.md).

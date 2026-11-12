@@ -1,5 +1,7 @@
 # Releases and compatibility
 
+Lab 0.9.16 adds [bounded sub-agents](release-0.9.16.md) with Runtime 0.9.23, Harness 0.9.17 and PostgreSQL store 0.4.5.
+
 Compatibility checkpoint: 2026-11-11. Lab **0.9.15** selects Core **0.5.0**,
 Runtime **0.9.22**, Harness **0.9.16**, recorder **0.3.0**, and Harness
 PostgreSQL **0.4.4**. [MCP read tools](mcp-client.md) join parallel read tools,

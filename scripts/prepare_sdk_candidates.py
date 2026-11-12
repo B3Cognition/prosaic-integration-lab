@@ -216,6 +216,24 @@ def load_profile(path):
 
 
 
+def retained_mcp_store(cache_root):
+    """Resolve MCP's unchanged adapter from the active or historical release."""
+    from lab_runner.mcp_client import RETAINED_WHEELS
+    from scripts.prepare_dependencies import prepare
+
+    name = 'b3-prosaic-harness-postgres'
+    released = ROOT/'dependencies/releases.json'
+    item = next(entry for entry in sdk_manifest(released)['artifacts'] if entry['distribution'] == name)
+    if item['sha256'] == RETAINED_WHEELS[name]:
+        return item, cache_directory(released, cache_root)/item['filename']
+
+    archived = ROOT/'dependencies/releases-pre-mcp-client-2026-11-11.json'
+    item = next(entry for entry in sdk_manifest(archived)['artifacts'] if entry['distribution'] == name)
+    if item['sha256'] != RETAINED_WHEELS[name]:
+        raise ValueError('historical MCP adapter differs from released bytes')
+    return item, prepare(archived, cache_root)/item['filename']
+
+
 def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_root,*,mcp_client=False,sub_agents=False):
     """Consume local build-once receipts; never invoke a hosted release workflow."""
     from lab_runner.parallel_tools import validate_parallel_manifest
@@ -238,7 +256,8 @@ def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_roo
         kind, label, prefix = 'local-sub-agent-handoff', 'sub-agent-consumer', 'sub-agents'
     manifest=Path(manifest);cache_root=Path(cache_root)
     if manifest.resolve().is_relative_to((ROOT/'dependencies').resolve()):raise ValueError('candidate cannot replace public manifests')
-    released=sdk_manifest(ROOT/'dependencies/releases.json');artifacts=[];sources={};paired=[];retained=[]
+    released_manifest=ROOT/'dependencies/releases.json'
+    released=sdk_manifest(released_manifest);artifacts=[];sources={};paired=[];retained=[]
     for sdk,directory,names in [('runtime',Path(runtime_directory),{'b3-prosaic-runtime'}),('harness',Path(harness_directory),harness_names)]:
         receipt,_=read(directory/'release-receipt.json');qualification,_=read(directory/f'qualification-{label}.json')
         candidate=dict(sdk=sdk,receipt=receipt,qualification=qualification)
@@ -251,8 +270,11 @@ def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_roo
             artifacts.append(dict(distribution=name,version=TRAIN[name],source_commit=receipt['source_commit'],**item));sources[filename]=directory/filename
     # Retain the original audited Core/recorder payloads and provenance.
     for name in retained_names:
-        item=next(item for item in released['artifacts'] if item['distribution']==name)
-        source=cache_directory(ROOT/'dependencies/releases.json',cache_root)/item['filename']
+        if mcp_client and name == 'b3-prosaic-harness-postgres':
+            item, source = retained_mcp_store(cache_root)
+        else:
+            item=next(item for item in released['artifacts'] if item['distribution']==name)
+            source=cache_directory(released_manifest,cache_root)/item['filename']
         if not source.is_file():raise ValueError('original released wheel cache required')
         artifacts.append(dict(item));retained.append(dict(item));sources[item['filename']]=source
     data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind=kind,candidates=paired,retained_artifacts=retained))

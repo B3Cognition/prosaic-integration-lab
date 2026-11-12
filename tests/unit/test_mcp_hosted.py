@@ -11,7 +11,7 @@ from prosaic_integration_lab.mcp_client import CASES, TRAIN
 
 
 def candidate_manifest():
-    published = json.loads(Path("dependencies/releases.json").read_text())
+    published = json.loads(Path("dependencies/releases-pre-mcp-client-2026-11-11.json").read_text())
     artifacts = [item for item in published["artifacts"] if item["distribution"] in RETAINED_WHEELS]
     lineage = {"version": 1, "kind": "local-mcp-client-handoff", "candidates": [],
                "retained_artifacts": list(artifacts)}

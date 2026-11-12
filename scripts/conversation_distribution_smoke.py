@@ -211,8 +211,8 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
-    from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN, SUB_AGENT_TRAIN, supports_sub_agents
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+    from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, supports_sub_agents
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
             raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
                 '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
@@ -220,20 +220,20 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             if not (receipt.get('passed') is True and receipt.get('caseCount')==count
                     and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
                 raise ValueError('installed evaluation qualification incomplete')
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
         # The same external installed consumers execute every newly introduced blueprint.
         feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
         feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
             feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN):
+        if {item['distribution']:item['version'] for item in selected['artifacts']} in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_parallel_tools.py')
             feature_environment['PROSAIC_PARALLEL_TOOLS_REQUIRED']='1'
         if supports_sub_agents(selected):

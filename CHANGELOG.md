@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.16 — 2026-11-12
+
+- Add a copyable dependency analyst and reviewer with separate packs for authored YAML workflows and conversations.
+- Add 24 bounded delegation cases per required PostgreSQL and architecture cell.
+- See [release notes](docs/release-0.9.16.md).
+
 ## 0.9.15 — 2026-11-11
 
 - Adopt Runtime 0.9.22 and Harness 0.9.16 for approved MCP reads.

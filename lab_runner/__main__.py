@@ -76,13 +76,13 @@ def main():
     if args.candidate and args.mode in {'native-persistence','native','legacy-upgrade','qualification','conversation','context-packs','tool-evidence','parallel-tools','mcp-client','sub-agents'} and args.candidate_manifest is None:
         parser.error('new required candidate lanes require an explicit complete SDK manifest')
     if args.mode=='sub-agents':
-        if args.command!='test' or not args.candidate or args.candidate_manifest is None:
-            parser.error('sub-agents requires test with an explicit candidate manifest')
+        if args.command!='test':parser.error('sub-agents requires a test run')
         source=str(ROOT/'src')
         if source not in sys.path:sys.path.insert(0,source)
         from .sub_agents import require_sub_agent_install
         try:
-            require_sub_agent_install(args.candidate_manifest)
+            manifest = args.candidate_manifest if args.candidate else ROOT/'dependencies/releases.json'
+            require_sub_agent_install(manifest, candidate=args.candidate)
         except (OSError,ValueError,KeyError,TypeError,ImportError):
             parser.error('installed delegation SDK bytes must match the qualified handoff')
     if args.mode=='mcp-client':

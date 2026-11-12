@@ -8,6 +8,24 @@ python -m lab_runner.blueprints copy sub-agents /private/my-delegation-host
 
 Bind specialist packs and local reads using the service's authorized scope. The analyst receives a graph pack and a typed graph lookup. The reviewer receives its own brief and a closed draft schema. The parent owns the answer and cites delivered graph observations through the existing citation contract.
 
+## Authored workflow and conversation
+
+The [copied workflow YAML](../lab_runner/blueprints/sub_agents/workflow.yml) grants
+`analyze` and `review` on one coordinator node. The node uses the ordinary agent
+kind, and the coordinator Markdown also declares the aliases. The host registers
+each alias, specialist context pack, read permissions, and output schema in
+`SubAgentBindingsV1`. The blueprint's `build_workflow` passes that binding, the
+journal, and the tool contracts to `Workflow.load`. An application can also pass
+the binding to `WorkflowBindings` for a trusted authored graph built with
+`WorkflowFactory.build`. Generated workflow proposals cannot select delegates.
+
+Use the blueprint's `build_host` for a conversation. Both entry points require
+trusted host identity, a current result grant covering the selected sources, and
+a store initialized or migrated for sub-agents. The installed blueprint tests
+copy and run the authored YAML and conversation with both provider protocols.
+
+## Candidate qualification
+
 Qualify unpublished SDK wheels with a checksum-verified candidate manifest. Use the Runtime and Harness artifact directories containing their local build and installed-consumer receipts.
 
 ```sh

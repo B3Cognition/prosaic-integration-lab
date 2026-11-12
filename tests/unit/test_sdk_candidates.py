@@ -187,3 +187,37 @@ def test_profile_cannot_be_partially_overridden_with_manual_sources(tmp_path,mon
         cli.main(['--profile',str(tmp_path/'profile.json'),'--core-run-id','999',
                   '--manifest',str(tmp_path/'manifest.json')])
     assert error.value.code==2
+
+
+@pytest.mark.parametrize('active_matches', [True, False])
+def test_mcp_candidate_preserves_original_adapter_after_public_store_upgrade(tmp_path, monkeypatch, active_matches):
+    from scripts import prepare_dependencies, prepare_sdk_candidates as cli
+    from prosaic_integration_lab.dependencies import cache_directory, sdk_manifest
+
+    name = 'b3-prosaic-harness-postgres'
+    original = cli.ROOT/'dependencies/releases-pre-mcp-client-2026-11-11.json'
+    dependencies = tmp_path/'dependencies'
+    dependencies.mkdir()
+    archived = dependencies/original.name
+    archived.write_bytes(original.read_bytes())
+    active = dependencies/'releases.json'
+    old_manifest = sdk_manifest(archived)
+    old = next(item for item in old_manifest['artifacts'] if item['distribution'] == name)
+    if not active_matches:
+        replacement = dict(old, version='0.4.5', sha256='a'*64,
+                           filename='b3_prosaic_harness_postgres-0.4.5-py3-none-any.whl')
+        old_manifest['artifacts'][old_manifest['artifacts'].index(old)] = replacement
+    active.write_text(json.dumps(old_manifest))
+    monkeypatch.setattr(cli, 'ROOT', tmp_path)
+    prepared = []
+
+    def prepare(manifest, cache_root):
+        prepared.append(manifest)
+        return cache_directory(manifest, cache_root)
+
+    monkeypatch.setattr(prepare_dependencies, 'prepare', prepare)
+    cache_root = tmp_path/'wheels'
+    item, source = cli.retained_mcp_store(cache_root)
+    assert item == old
+    assert source == cache_directory(active if active_matches else archived, cache_root)/old['filename']
+    assert prepared == ([] if active_matches else [archived])
