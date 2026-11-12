@@ -15,9 +15,9 @@ published Core and Runtime recorder wheels.
   PostgreSQL 18 passed 24. Both runs verified owned cleanup and had zero skips.
 - The Harness PostgreSQL adapter migration tests passed 2 cases on each major,
   covering owner-only migration and active writer fencing.
-- The released manifest selects 13 lanes and 426 cases. The delegation candidate
-  selects 14 lanes and 450 cases. The complete hosted architecture matrix is
-  pending. The local qualification used synthetic endpoints.
+- The Lab 0.9.15 manifest selected 13 lanes and 426 cases. Lab 0.9.16
+  selects 14 lanes and 450 cases. The local qualification used synthetic
+  endpoints. Hosted results are recorded with the [Lab 0.9.16 release assets](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.16).
 
 ## MCP read tools and Lab 0.9.15 — 2026-11-11
 

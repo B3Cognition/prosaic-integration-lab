@@ -27,14 +27,14 @@ def test_current_manifest_pins_the_exact_released_guarded_train():
             for name, item in released.items()} == {
         ('b3-prosaic', '0.5.0', CORE_COMMIT,
          'e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81'),
-        ('b3-prosaic-runtime', '0.9.22', 'd589b91b823e4f6159af7727e5d600f8c337b12d',
-         'cfd50633e1731dfc10ae61034b56cc02170cafd5cfd0722984177cf068ffad0d'),
-        ('b3-prosaic-harness', '0.9.16', '95340505adfc1a5b7d844b8216a5400ddf72306d',
-         '0d4130c8fd841cba24c6a1a664d466bc4cdfce8ab36997122acd0527447457b7'),
+        ('b3-prosaic-runtime', '0.9.23', '48c10ac9aeb18bd06f53015df0624b35d5254646',
+         '5caab59f6d0ffd14299ee0840dd5f9b58b4e4f4a1b724ff6e3e2fa1699f08fd8'),
+        ('b3-prosaic-harness', '0.9.17', '5cf6b08e3f181bfb368b24afbe1eadf9911b4504',
+         'c65c932798cc7e52e7e9659e43e72cc5f2e48feee9b889b5593e80e9e241c0fb'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
-        ('b3-prosaic-harness-postgres', '0.4.4', '86800f3c5ad94ebb35d881579e6c6206c1862a98',
-         '99fe045d9e5711efd678644bfd44ac2406f94ffd2156f8bccfa28878e7385944'),
+        ('b3-prosaic-harness-postgres', '0.4.5', '5cf6b08e3f181bfb368b24afbe1eadf9911b4504',
+         '6a64d3276850582fbf24d6a6698d83bd0adb861bd9189f096733a3f1d28b03cc'),
     }
     for item in released.values():
         assert 'qualification' not in item

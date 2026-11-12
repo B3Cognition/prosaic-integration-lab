@@ -24,6 +24,21 @@ trusted host identity, a current result grant covering the selected sources, and
 a store initialized or migrated for sub-agents. The installed blueprint tests
 copy and run the authored YAML and conversation with both provider protocols.
 
+## Verify the released SDK family
+
+After the [quickstart setup](quickstart.md#setup-once), run the published
+acceptance lane with the pinned SDK wheels and an owned PostgreSQL fixture.
+
+```sh
+python scripts/prepare_dependencies.py
+python scripts/install_dependencies.py --manifest dependencies/releases.json
+python -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock
+python scripts/build_consumer.py --manifest dependencies/releases.json --tag prosaic-integration-lab:dev
+python -m lab_runner test --mode sub-agents --postgres-version 16
+```
+
+Repeat for PostgreSQL 18.
+
 ## Candidate qualification
 
 Qualify unpublished SDK wheels with a checksum-verified candidate manifest. Use the Runtime and Harness artifact directories containing their local build and installed-consumer receipts.

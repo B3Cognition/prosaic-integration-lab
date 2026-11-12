@@ -5,10 +5,10 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
-## Lab 0.9.15 feature map
+## Lab 0.9.16 feature map
 
-The checksum-pinned train is Core 0.5.0, Runtime 0.9.22, Harness 0.9.16,
-Runtime recorder 0.3.0 and Harness store 0.4.4.
+The checksum-pinned train is Core 0.5.0, Runtime 0.9.23, Harness 0.9.17,
+Runtime recorder 0.3.0 and Harness store 0.4.5.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
@@ -26,6 +26,7 @@ Runtime recorder 0.3.0 and Harness store 0.4.4.
 
 ```sh
 python -m lab_runner.blueprints list
+python -m lab_runner.blueprints copy sub-agents /private/my-delegation-host
 python -m lab_runner.blueprints copy mcp-client /private/my-mcp-host
 python -m lab_runner.blueprints copy parallel-tools /private/my-parallel-host
 python -m lab_runner.blueprints copy tool-evidence /private/my-tool-host

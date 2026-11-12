@@ -2,7 +2,7 @@
 
 Lab 0.9.16 adds [bounded sub-agents](release-0.9.16.md) with Runtime 0.9.23, Harness 0.9.17 and PostgreSQL store 0.4.5.
 
-Compatibility checkpoint: 2026-11-11. Lab **0.9.15** selects Core **0.5.0**,
+Lab **0.9.15** selected Core **0.5.0**,
 Runtime **0.9.22**, Harness **0.9.16**, recorder **0.3.0**, and Harness
 PostgreSQL **0.4.4**. [MCP read tools](mcp-client.md) join parallel read tools,
 tool evidence, and context packs in the four Linux architecture/PostgreSQL cells.
@@ -22,7 +22,7 @@ Published recorder0.3.0 keeps its schema/bytes; no old records are rewritten.
 
 ## Publication and previous releases
 
-The [Lab 0.9.15 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.15)
+The [Lab 0.9.16 release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.16)
 is the authority for its publication status, original archives and attached
 qualification. A source version or tag alone is not proof of publication.
 
@@ -30,6 +30,7 @@ Earlier published versions are linked below. Backfilled notes explain changes us
 
 | Release | Published (UTC) | Notes |
 | --- | --- | --- |
+| [v0.9.15](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.15) | See release page | [MCP read tools](release-0.9.15.md) |
 | [v0.9.14](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.14) | See release page | [Parallel read tools](release-0.9.14.md) |
 | [v0.9.13](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13) | See release page | [Safe tool events and citations](release-0.9.13.md) |
 | [v0.9.12](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12) | See release page | [Context-pack notes](release-0.9.12.md) |

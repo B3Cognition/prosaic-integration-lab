@@ -10,7 +10,7 @@ AGENT_NAMES=('reviewer','critic','author','review-corrector')
 def resource(name):
     if name not in {'evidence-review-v1.json','answer.schema.json','review.schema.json',
                     'reviewer.md','critic.md','author.md','review-corrector.md','sdk-provenance.json','sdk-provenance-public.json',
-                    'sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json','sdk-provenance-pre-cerebro.json','sdk-provenance-pre-workflow-enforcement.json','sdk-provenance-pre-accounting-metadata.json','sdk-provenance-pre-sent-effort.json','sdk-provenance-pre-context-packs.json','sdk-provenance-pre-tool-contracts.json','sdk-provenance-pre-parallel-tools.json','sdk-provenance-pre-mcp-client.json','sdk-provenance-parallel-tools-candidate.json'}:
+                    'sdk-provenance-pre-unified.json','sdk-provenance-pre-core050.json','sdk-provenance-pre-guarded.json','sdk-provenance-pre-harness0910.json','sdk-provenance-pre-cerebro.json','sdk-provenance-pre-workflow-enforcement.json','sdk-provenance-pre-accounting-metadata.json','sdk-provenance-pre-sent-effort.json','sdk-provenance-pre-context-packs.json','sdk-provenance-pre-tool-contracts.json','sdk-provenance-pre-parallel-tools.json','sdk-provenance-pre-mcp-client.json','sdk-provenance-pre-sub-agents.json','sdk-provenance-parallel-tools-candidate.json'}:
         raise ValueError('unknown benchmark resource')
     return files(__package__).joinpath('data', name).read_text(encoding='utf-8')
 

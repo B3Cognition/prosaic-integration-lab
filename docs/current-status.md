@@ -1,5 +1,13 @@
 # Current delivery status
 
+## Bounded delegation and Lab 0.9.16 — 2026-11-12
+
+The active manifest selects Runtime 0.9.23, Harness 0.9.17 and Harness PostgreSQL
+0.4.5, with the existing Core 0.5.0 and Runtime recorder 0.3.0. The copyable
+blueprint runs an analyst and reviewer in an authored YAML workflow or a
+conversation. Each required architecture and PostgreSQL cell includes 24
+delegation cases. See the [user guide](sub-agents.md) and [release notes](release-0.9.16.md).
+
 ## MCP read tools and Lab 0.9.15 — 2026-11-11
 
 Lab 0.9.15 adds a host-approved MCP read tool blueprint and 24 required
