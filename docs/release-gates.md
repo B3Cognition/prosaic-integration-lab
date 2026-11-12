@@ -168,3 +168,5 @@ the upstream fixes first, update provenance deliberately, run the required nativ
 matrix, then require all four checks in branch protection. Preserve failing
 historical receipts and the prior pinned images for compatible pending-run
 recovery. Runner process/daemon failure cannot be called verified cleanup.
+
+The [bounded delegation candidate lane](sub-agents.md) requires 24 cases in each PostgreSQL and architecture cell. The exact candidate family also runs the 13 existing lanes for a total of 450 cases per cell.

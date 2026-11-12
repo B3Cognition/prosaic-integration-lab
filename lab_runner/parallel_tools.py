@@ -32,21 +32,26 @@ def endpoint(provider):
 
 
 def validate_parallel_manifest(data):
-    import re
     from prosaic_integration_lab.parallel_tools import TRAIN
+    return validate_local_handoff(data, train=TRAIN, kind='local-parallel-tool-handoff',
+        label='parallel-tool-consumer', witness='test_parallel_tool_installed.py')
+
+
+def validate_local_handoff(data, *, train, kind, label, witness):
+    import re
     actual={item.get('distribution'):item.get('version') for item in data.get('artifacts',())}
-    if actual!=TRAIN or len(data['artifacts'])!=5:raise ValueError('exact parallel candidate family required')
+    if actual!=train or len(data['artifacts'])!=5:raise ValueError('exact parallel candidate family required')
     lineage=data.get('candidate_lineage',{})
-    if lineage.get('version')!=1 or lineage.get('kind')!='local-parallel-tool-handoff':raise ValueError('explicit parallel source handoff required')
+    if lineage.get('version')!=1 or lineage.get('kind')!=kind:raise ValueError('explicit parallel source handoff required')
     paired=lineage.get('candidates',[])
     if len(paired)!=2 or [c.get('sdk') for c in paired]!=['runtime','harness']:raise ValueError('paired parallel SDKs required')
     for candidate in paired:
         receipt=candidate['receipt'];qualification=candidate['qualification'];sdk=candidate['sdk']
-        if (not re.fullmatch('[0-9a-f]{40}',receipt.get('source_commit','')) or qualification.get('source_commit')!=receipt['source_commit'] or qualification.get('exit_code')!=0 or qualification.get('label')!='parallel-tool-consumer' or qualification.get('artifacts')!=receipt.get('artifacts') or 'test_parallel_tool_installed.py' not in ' '.join(qualification.get('command',[]))):raise ValueError('parallel candidate qualification mismatch')
+        if (not re.fullmatch('[0-9a-f]{40}',receipt.get('source_commit','')) or qualification.get('source_commit')!=receipt['source_commit'] or qualification.get('exit_code')!=0 or qualification.get('label')!=label or qualification.get('artifacts')!=receipt.get('artifacts') or witness not in ' '.join(qualification.get('command',[]))):raise ValueError('parallel candidate qualification mismatch')
         counts=qualification.get('result_counts',{})
         if (set(counts)!={'tests','failures','errors','skipped'} or any(type(v) is not int or v<0 for v in counts.values()) or counts['tests']<1 or any(counts[k] for k in ('failures','errors','skipped'))):raise ValueError('parallel candidate checks must pass without skips')
         names={'b3-prosaic-runtime'} if sdk=='runtime' else {'b3-prosaic-harness','b3-prosaic-harness-postgres'}
-        if {d['name']:d['version'] for d in receipt['distributions']}!={k:TRAIN[k] for k in names}:raise ValueError('parallel receipt versions differ')
+        if {d['name']:d['version'] for d in receipt['distributions']}!={k:train[k] for k in names}:raise ValueError('parallel receipt versions differ')
         for item in data['artifacts']:
             if item['distribution'] in names and (item['source_commit']!=receipt['source_commit'] or {'filename':item['filename'],'sha256':item['sha256']} not in receipt['artifacts']):raise ValueError('parallel wheel/source mismatch')
     if paired[1].get('runtime_receipt')!=paired[0]['receipt'] or paired[1].get('runtime_qualification')!=paired[0]['qualification']:raise ValueError('Harness tested different Runtime bytes')

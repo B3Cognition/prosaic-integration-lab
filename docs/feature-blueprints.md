@@ -12,6 +12,7 @@ Runtime recorder 0.3.0 and Harness store 0.4.4.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
+| Bounded delegation | `sub-agents` | Separate analyst and reviewer packs, typed observations and receipt-first recovery. [Guide](sub-agents.md) |
 | MCP read tools | `mcp-client` | Host-approved alias dispatch, current authorization and offline receipt adoption on both provider wires. [Guide](mcp-client.md) |
 | Parallel read tools | `parallel-tools` | Independent reads overlap within a bounded window, while guards and citations follow call order on both provider wires. [Guide](parallel-tools.md) |
 | Safe tool events and captured citations | `tool-evidence` | Approved bounded display, typed results, captured selections, current permissions, durable reuse and fabricated-citation refusal on both provider protocols. [Guide](tool-evidence.md) |

@@ -208,3 +208,5 @@ qualified artifact directories and the original released wheel cache to curate
 an explicit manifest. Run `python -m lab_runner test --mode mcp-client
 --candidate --candidate-manifest PATH --postgres-version 16` and repeat for
 PostgreSQL 18.
+
+The [bounded delegation blueprint](docs/sub-agents.md) shows how to give a dependency analyst and reviewer separate context packs and share the coordinator’s execution budget.

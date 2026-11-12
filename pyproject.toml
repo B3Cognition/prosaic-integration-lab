@@ -18,6 +18,7 @@ where = ["src", "."]
 include = ["prosaic_integration_lab*", "lab_runner*"]
 
 [tool.setuptools.package-data]
+"lab_runner.blueprints.sub_agents" = ["README.md", "LICENSE", "NOTICE", "runtime.yml"]
 "lab_runner.blueprints.mcp_client" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.parallel_tools" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
 "lab_runner.blueprints.tool_evidence" = ["README.md", "LICENSE", "NOTICE", "runtime.yml", ".prosaic/subagents/*.md"]
