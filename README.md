@@ -1,5 +1,8 @@
 # Prosaic integration lab
 
+The [experimental catalogue ontology blueprint](docs/catalogue-ontology.md)
+shows policy-scoped discovery and a local receipt workflow using the prerelease SDKs.
+
 Lab **0.9.16** adds a copyable [bounded sub-agent workflow and conversation blueprint](docs/sub-agents.md). See [release notes](docs/release-0.9.16.md).
 
 Lab **0.9.15** adds the [MCP client blueprint](docs/mcp-client.md) and adopts Runtime **0.9.22** and Harness **0.9.16**. See [release notes](docs/release-0.9.15.md).

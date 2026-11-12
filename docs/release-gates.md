@@ -1,5 +1,8 @@
 # Required release gates
 
+The [experimental catalogue ontology check](catalogue-ontology.md) runs on
+dispatch with its own RC lock. The released matrix uses the stable SDK manifests.
+
 Lab 0.9.16 adds the [bounded delegation lane](sub-agents.md) to the released architecture and PostgreSQL matrix. Each cell requires 450 cases across 14 lanes, including 24 delegation cases on the two synthetic provider protocols.
 
 Lab 0.9.15 adds the MCP client lane to the released architecture and PostgreSQL matrix. Each 0.9.15 cell ran 13 lanes and 426 required cases with the checksum-pinned MCP SDK family and optional dependency lock. See the [MCP release notes](release-0.9.15.md).
