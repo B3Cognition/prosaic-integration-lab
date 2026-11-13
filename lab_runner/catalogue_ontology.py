@@ -1,12 +1,15 @@
-"""Validate the exact ontology compatibility handoff before candidate use."""
+"""Validate the exact candidate and released ontology SDK families."""
 import hashlib
 import json
+from pathlib import Path
 import re
+from urllib.parse import urlsplit
 
 from prosaic_integration_lab.catalogue_ontology import TRAIN
 
 
 KIND = 'catalogue-ontology'
+PUBLIC_PROFILE = Path(__file__).with_name('data') / 'catalogue-ontology-public-0.5.1-0.9.18.json'
 RETAINED = {
     'b3-prosaic-runtime': ('48c10ac9aeb18bd06f53015df0624b35d5254646',
         '5caab59f6d0ffd14299ee0840dd5f9b58b4e4f4a1b724ff6e3e2fa1699f08fd8'),
@@ -118,4 +121,39 @@ def validate_manifest(data, *, hosted=False):
             _check(results['wheel'][sdk + '_wheel_sha256'] == by_name[name]['sha256'])
     except (KeyError, TypeError, AttributeError) as error:
         raise ValueError('invalid catalogue ontology candidate evidence') from error
+    return data
+
+
+def validate_released_manifest(data):
+    """Match an independently committed public release, including exact wheel provenance."""
+    from prosaic_integration_lab.dependencies import sdk_manifest
+
+    message = 'invalid released catalogue ontology SDK family'
+    try:
+        profile = sdk_manifest(PUBLIC_PROFILE)
+        if set(profile) != {'artifacts'} or data != profile:
+            raise ValueError(message)
+
+        by_name = {item['distribution']: item for item in profile['artifacts']}
+        if {name: item['version'] for name, item in by_name.items()} != TRAIN:
+            raise ValueError(message)
+        for name, item in by_name.items():
+            filename = name.replace('-', '_') + '-' + TRAIN[name] + '-py3-none-any.whl'
+            url = urlsplit(item['url'])
+            if (set(item) != {'distribution', 'version', 'filename', 'sha256',
+                              'source_commit', 'url', 'checksum_url'}
+                    or item['filename'] != filename or not _hex(item['source_commit'], 40)
+                    or url.scheme != 'https' or url.netloc != 'files.pythonhosted.org'
+                    or url.query or url.fragment or not url.path.endswith('/' + filename)):
+                raise ValueError(message)
+        for name, expected in RETAINED.items():
+            item = by_name[name]
+            if (item['source_commit'], item['sha256']) != expected:
+                raise ValueError(message)
+        for repository, name in (('prosaic', PACKAGES['core']), ('prosaic-harness', PACKAGES['harness'])):
+            expected = f'https://github.com/B3Cognition/{repository}/releases/download/v{TRAIN[name]}/SHA256SUMS'
+            if by_name[name]['checksum_url'] != expected:
+                raise ValueError(message)
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        raise ValueError(message) from error
     return data

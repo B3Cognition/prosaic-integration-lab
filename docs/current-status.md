@@ -1,5 +1,12 @@
 # Current delivery status
 
+## Catalogue ontology and Lab 0.9.17 — 2026-11-13
+
+The active manifests use Core 0.5.1 and Harness 0.9.18 with Runtime 0.9.23
+and the original PostgreSQL adapter wheels. The copyable receipt workflow
+shows how to request ontology metadata through policy-scoped discovery.
+See the [user guide](catalogue-ontology.md) and [release notes](release-0.9.17.md).
+
 ## Bounded delegation and Lab 0.9.16 — 2026-11-12
 
 The active manifest selects Runtime 0.9.23, Harness 0.9.17 and Harness PostgreSQL

@@ -175,8 +175,10 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     pip=[python,'-I','-m','pip','--isolated','--no-input','--keyring-provider','disabled']
     run([*pip,'install','--index-url',public.INDEX,'--require-hashes','-r',lock],
         directory=directory,environment=environment)
-    from lab_runner.gates import supports_mcp_client
+    from lab_runner.gates import ONTOLOGY_TRAIN, supports_mcp_client
     selected=json.loads(manifest.read_bytes())
+    versions = {item['distribution']: item['version'] for item in selected['artifacts']}
+    released_ontology = versions == ONTOLOGY_TRAIN and 'candidate_lineage' not in selected
     if supports_mcp_client(selected):
         run([*pip,'install','--index-url',public.INDEX,'--no-deps','--require-hashes',
              '-r',lock.with_name('mcp-client.lock')],directory=directory,environment=environment)
@@ -212,7 +214,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
     from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, supports_sub_agents
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+    if versions in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
             raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
                 '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
@@ -220,20 +222,20 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             if not (receipt.get('passed') is True and receipt.get('caseCount')==count
                     and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
                 raise ValueError('installed evaluation qualification incomplete')
-    if {item['distribution']:item['version'] for item in selected['artifacts']} in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+    if versions in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
         # The same external installed consumers execute every newly introduced blueprint.
         feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
         feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+        if versions in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+        if versions in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+        if versions in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+        if versions in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
             feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
-        if {item['distribution']:item['version'] for item in selected['artifacts']} in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN):
+        if versions in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, ONTOLOGY_TRAIN):
             feature_paths.append(ROOT/'tests/blueprint_acceptance/test_parallel_tools.py')
             feature_environment['PROSAIC_PARALLEL_TOOLS_REQUIRED']='1'
         if supports_sub_agents(selected):
@@ -245,6 +247,16 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
         run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=',
              *feature_paths, '-q'],
             directory=directory, environment=feature_environment)
+    if released_ontology:
+        from scripts.qualify_catalogue_ontology import validate_report
+
+        report = directory / 'catalogue-ontology.xml'
+        run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=', '-q',
+             ROOT / 'tests/catalogue_ontology_acceptance', f'--junitxml={report}'],
+            directory=directory, environment={**environment, 'PROSAIC_LAB_ONTOLOGY_PROFILE': 'released'})
+        raw_report = report.read_bytes()
+        evidence = {**validate_report(raw_report), 'junit_sha256': hashlib.sha256(raw_report).hexdigest()}
+        (directory / 'catalogue-ontology.json').write_text(json.dumps(evidence, sort_keys=True))
     audit()
     return python
 
@@ -328,8 +340,14 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             sdist_sha256=hashlib.sha256(original_sdist.read_bytes()).hexdigest(),
             installed_payloads_verified=True,isolated_imports_verified=True,pip_check_passed=True,
             public_construction_verified=True,sdist_assets_verified=True,observatory_source_verified=True)
+        from lab_runner.gates import ONTOLOGY_TRAIN
+        if not candidate and {item['distribution']: item['version'] for item in data['artifacts']} == ONTOLOGY_TRAIN:
+            result['catalogue_ontology'] = {
+                origin: json.loads((folder / 'catalogue-ontology.json').read_bytes())
+                for origin, folder in (('wheel', consumer), ('sdist', second))
+            }
     except Exception as error:
-        result.update(failure='distribution_failed',failure_stage=stage)
+        result.update(passed=False,failure='distribution_failed',failure_stage=stage)
         if stage in {'sdist_demo','sdist_acceptance'}:
             output=error.output if isinstance(error,DistributionCommandError) else raw
             if output is not None:result.update(safe_stack_failure(output))

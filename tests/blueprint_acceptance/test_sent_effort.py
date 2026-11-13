@@ -32,7 +32,7 @@ def rows(result,count):
 def test_installed_ownership_and_capabilities():
     import prosaic_runtime,prosaic_harness
     from importlib.metadata import version
-    assert (version('b3-prosaic-runtime'),version('b3-prosaic-harness')) in {('0.9.18','0.9.12'),('0.9.19','0.9.13'),('0.9.20','0.9.14'),('0.9.21.dev1','0.9.15.dev1'),('0.9.21','0.9.15'),('0.9.22.dev1','0.9.16.dev1'),('0.9.22','0.9.16'),('0.9.23','0.9.17'),('0.9.23.dev1','0.9.17.dev1')}
+    assert (version('b3-prosaic-runtime'),version('b3-prosaic-harness')) in {('0.9.18','0.9.12'),('0.9.19','0.9.13'),('0.9.20','0.9.14'),('0.9.21.dev1','0.9.15.dev1'),('0.9.21','0.9.15'),('0.9.22.dev1','0.9.16.dev1'),('0.9.22','0.9.16'),('0.9.23','0.9.17'),('0.9.23','0.9.18'),('0.9.23.dev1','0.9.17.dev1')}
     assert KEY in prosaic_runtime.ProsaicRuntime.capabilities
     for module in (prosaic_runtime,prosaic_harness):assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix))
 

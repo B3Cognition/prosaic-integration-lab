@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.17 — 2026-11-13
+
+- Adopt the verified Core 0.5.1 and Harness 0.9.18 releases.
+- Qualify the catalogue ontology blueprint with the released SDKs through
+  both installed package paths. Keep the original RC lock for reproduction.
+- See the [release notes](docs/release-0.9.17.md).
+
 ## 0.9.16 — 2026-11-12
 
 - Add a copyable dependency analyst and reviewer with separate packs for authored YAML workflows and conversations.

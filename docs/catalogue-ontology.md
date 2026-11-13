@@ -1,11 +1,9 @@
 # Catalogue ontology
 
 The `catalogue-ontology` blueprint shows how a host attaches public concepts
-and relationships to the aliases it already registers. The public example
-uses the experimental Core 0.5.1rc1, Harness 0.9.17rc1 and Runtime 0.9.23
-wheels in a separate environment. The build-only candidate profile verifies
-the same API with Core 0.5.1 and Harness 0.9.18 candidates. The stable Lab
-release uses its usual SDK manifest.
+and relationships to the aliases it already registers. Lab 0.9.17 uses
+Core 0.5.1, Harness 0.9.18 and Runtime 0.9.23 from the released SDK manifest.
+The experimental RC lock remains available for reproducing the original example.
 
 ## Install and copy
 
@@ -19,8 +17,8 @@ lab_ontology_python="$lab_ontology_dir/venv/bin/python"
 
 "$lab_ontology_python" -m pip install --require-hashes \
   -r dependencies/requirements.lock -r dependencies/rule-admission-build.lock
-"$lab_ontology_python" -m pip install --no-deps --require-hashes \
-  -r dependencies/catalogue-ontology-rc.lock
+"$lab_ontology_python" scripts/prepare_dependencies.py --manifest dependencies/releases.json
+"$lab_ontology_python" scripts/install_dependencies.py --manifest dependencies/releases.json
 "$lab_ontology_python" -m build --no-isolation --wheel --outdir "$lab_ontology_dir/dist"
 "$lab_ontology_python" -m pip install --no-deps "$lab_ontology_dir"/dist/*.whl
 "$lab_ontology_python" -m pip check
@@ -71,11 +69,12 @@ The tool checks no real release and performs zero provider requests.
 
 ## Verify the installed example
 
-From the Lab checkout, run the installed suite with the RC environment above.
+From the Lab checkout, run the installed suite with the released environment above.
 
 ```sh
 lab_ontology_tests="$PWD/tests/catalogue_ontology_acceptance"
-(cd "$lab_ontology_dir" && "$lab_ontology_python" -I -m pytest -o pythonpath= -q "$lab_ontology_tests")
+(cd "$lab_ontology_dir" && PROSAIC_LAB_ONTOLOGY_PROFILE=released \
+  "$lab_ontology_python" -I -m pytest -o pythonpath= -q "$lab_ontology_tests")
 ```
 
 The [Experimental catalogue ontology workflow](../.github/workflows/catalogue-ontology.yml)

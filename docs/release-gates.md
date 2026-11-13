@@ -1,5 +1,9 @@
 # Required release gates
 
+Lab 0.9.17 verifies catalogue ontology in both installed package paths with
+the exact released SDK profile. Each Linux architecture and PostgreSQL
+cell also runs the existing 14 lanes and 450 real-stack cases.
+
 The [catalogue ontology candidate check](catalogue-ontology.md#qualify-the-candidate-sdks)
 requires exact build-only Core and Harness artifacts and Harness's separate
 compatibility receipt for the released Runtime 0.9.23 wheel. It requires

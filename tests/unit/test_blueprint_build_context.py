@@ -1,4 +1,5 @@
 """The safe public image snapshot must retain usable copy-out examples."""
+from importlib.metadata import version
 import json
 from pathlib import Path
 import shutil
@@ -40,11 +41,19 @@ ontology=copy_blueprint('catalogue-ontology',destination/'catalogue-ontology')
 command=[sys.executable,'-I',str(ontology/'host.py'),'discover']
 ordinary=subprocess.run(command,capture_output=True,text=True,timeout=15,check=True)
 assert 'ontology' not in json.loads(ordinary.stdout)
-unsupported=subprocess.run(command+['--ontology'],capture_output=True,text=True,timeout=15)
-assert unsupported.returncode!=0
-assert 'Core 0.5.1rc1 and Harness 0.9.17rc1' in unsupported.stderr
+explicit=subprocess.run(command+['--ontology'],capture_output=True,text=True,timeout=15)
+if sys.argv[3] == 'released-ontology':
+    assert explicit.returncode == 0, explicit.stderr
+    enriched=json.loads(explicit.stdout)
+    assert enriched.pop('ontology') == json.loads((ontology/'fixtures/visible.json').read_bytes())
+    assert enriched == json.loads(ordinary.stdout)
+else:
+    assert explicit.returncode != 0
+    assert 'Core 0.5.1rc1 and Harness 0.9.17rc1' in explicit.stderr
 '''
-    result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied')],
+    pair = (version('b3-prosaic'), version('b3-prosaic-harness'))
+    profile = 'released-ontology' if pair == ('0.5.1','0.9.18') else 'historical'
+    result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied'),profile],
         cwd=tmp_path,capture_output=True,text=True,timeout=30)
     assert result.returncode==0,result.stderr
 

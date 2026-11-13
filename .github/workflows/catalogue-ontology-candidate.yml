@@ -139,8 +139,8 @@ jobs:
           python -m venv "$RUNNER_TEMP/ontology-released"
           released="$RUNNER_TEMP/ontology-released/bin/python"
           "$released" -m pip install --require-hashes -r dependencies/requirements.lock
-          "$released" scripts/prepare_dependencies.py --manifest dependencies/releases.json
-          "$released" scripts/install_dependencies.py --manifest dependencies/releases.json
+          "$released" scripts/prepare_dependencies.py --manifest dependencies/releases-pre-ontology-2026-11-13.json
+          "$released" scripts/install_dependencies.py --manifest dependencies/releases-pre-ontology-2026-11-13.json
           .venv/bin/python scripts/prepare_dependencies.py --manifest dependencies/releases-lab-0.2.0.json
           baseline=$(.venv/bin/python -c 'from lab_runner.legacy_upgrade import build_baseline; print(build_baseline())' | tail -n 1)
           [[ "$baseline" =~ ^sha256:[0-9a-f]{64}$ ]]

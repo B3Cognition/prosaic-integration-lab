@@ -149,7 +149,7 @@ def curate_tool_contracts(candidates,manifest,cache_root):
         raise ValueError('tool candidates must not replace published dependency manifests')
     if len(candidates)!=3:raise ValueError('three explicit original SDK runs required')
     artifacts=[];sources={};paired=[];retained=[]
-    released=sdk_manifest(ROOT/'dependencies/releases.json')
+    released=sdk_manifest(ROOT/'dependencies/releases-pre-ontology-2026-11-13.json')
     for (repository,run_id,commit,directory),expected_repository in zip(candidates,EXPECTED):
         if repository!=expected_repository or not re.fullmatch('[1-9][0-9]*',run_id):raise ValueError('candidate order or run identity differs')
         directory=Path(directory);receipt,raw=read(directory/'release-receipt.json')
@@ -272,6 +272,12 @@ def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_roo
     for name in retained_names:
         if mcp_client and name == 'b3-prosaic-harness-postgres':
             item, source = retained_mcp_store(cache_root)
+        elif name == 'b3-prosaic':
+            from scripts.prepare_dependencies import prepare
+
+            archived = ROOT/'dependencies/releases-pre-ontology-2026-11-13.json'
+            item = next(entry for entry in sdk_manifest(archived)['artifacts'] if entry['distribution'] == name)
+            source = prepare(archived, cache_root)/item['filename']
         else:
             item=next(item for item in released['artifacts'] if item['distribution']==name)
             source=cache_directory(released_manifest,cache_root)/item['filename']
