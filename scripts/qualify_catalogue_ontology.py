@@ -31,6 +31,17 @@ def run(*arguments, **options):
     subprocess.run([str(part) for part in arguments], check=True, timeout=300, **options)
 
 
+def validate_report(raw):
+    suite, = ElementTree.fromstring(raw).iter('testsuite')
+    counts = {name: int(suite.attrib[name]) for name in ('tests', 'failures', 'errors', 'skipped')}
+    cases = list(suite.iter('testcase'))
+    if (counts != dict(tests=len(CASES), failures=0, errors=0, skipped=0)
+            or sorted(case.attrib['name'] for case in cases) != CASES
+            or any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))):
+        raise ValueError('incomplete catalogue ontology acceptance')
+    return counts
+
+
 def installed(origin, export, manifest=None, wheel_dir=None):
     with tempfile.TemporaryDirectory(prefix='lab-installed-ontology-') as directory:
         work = Path(directory)
@@ -72,13 +83,7 @@ def installed(origin, export, manifest=None, wheel_dir=None):
             source / 'tests/catalogue_ontology_acceptance', f'--junitxml={report}', cwd=work,
             env={**os.environ, 'PROSAIC_LAB_ONTOLOGY_PROFILE': profile})
         raw = report.read_bytes()
-        suite, = ElementTree.fromstring(raw).iter('testsuite')
-        counts = {name: int(suite.attrib[name]) for name in ('tests', 'failures', 'errors', 'skipped')}
-        cases = list(suite.iter('testcase'))
-        if (counts != dict(tests=len(CASES), failures=0, errors=0, skipped=0)
-                or sorted(case.attrib['name'] for case in cases) != CASES
-                or any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))):
-            raise ValueError('incomplete catalogue ontology acceptance')
+        counts = validate_report(raw)
         export.parent.mkdir(parents=True, exist_ok=True)
         export.write_text(json.dumps({
             'origin': origin, 'profile': profile, **counts, 'cases': CASES,

@@ -18,29 +18,44 @@ SDK = {
 }
 
 
+ADAPTERS = {
+    "b3-prosaic-harness-postgres": "prosaic_harness_postgres",
+    "b3-prosaic-runtime-postgres": "prosaic_runtime_postgres",
+}
+
+
 def test_exact_installed_sdk_payloads():
     profile = os.environ.get("PROSAIC_LAB_ONTOLOGY_PROFILE", "rc")
-    assert profile in {"rc", "candidate"}
-    if profile == "candidate":
+    assert profile in {"rc", "candidate", "released"}
+    modules = {name: module for name, (_, module) in SDK.items()}
+    if profile == "released":
+        from lab_runner.catalogue_ontology import PUBLIC_PROFILE, validate_released_manifest
+
+        modules.update(ADAPTERS)
+        lab = metadata.distribution("prosaic-integration-lab")
+        assert any(Path(file.locate()).resolve() == PUBLIC_PROFILE.resolve() for file in lab.files)
+        released = validate_released_manifest(json.loads(PUBLIC_PROFILE.read_bytes()))
+        assert {item["distribution"] for item in released["artifacts"]} == set(modules)
+    if profile == "rc":
+        expected = {name: version for name, (version, _) in SDK.items()}
+    else:
         from prosaic_integration_lab.catalogue_ontology import TRAIN
 
-        expected = {name: TRAIN[name] for name in SDK}
-    else:
-        expected = {name: version for name, (version, _) in SDK.items()}
-    assert {name: metadata.version(name) for name in SDK} == expected
+        expected = {name: TRAIN[name] for name in modules}
+    assert {name: metadata.version(name) for name in modules} == expected
 
-    names = set(SDK) | {"b3-prosaic-harness-postgres", "b3-prosaic-runtime-postgres"}
+    names = set(SDK) | set(ADAPTERS)
     sdk_names = names | {name.removeprefix("b3-") for name in names}
     installed = [
         canonicalize_name(dist.metadata["Name"])
         for dist in metadata.distributions()
         if canonicalize_name(dist.metadata["Name"]) in sdk_names
     ]
-    assert sorted(installed) == sorted(SDK)
+    assert sorted(installed) == sorted(modules)
 
     assert sys.prefix != sys.base_prefix
     prefix = Path(sys.prefix).resolve()
-    for name, (_, module) in SDK.items():
+    for name, module in modules.items():
         distribution = metadata.distribution(name)
         origin = Path(import_module(module).__file__).resolve()
         assert origin.is_relative_to(prefix)

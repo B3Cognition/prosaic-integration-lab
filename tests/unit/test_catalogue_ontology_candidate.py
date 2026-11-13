@@ -19,7 +19,7 @@ def _sha(value):
 
 @pytest.fixture
 def manifest():
-    released = json.loads((ROOT / 'dependencies/releases.json').read_bytes())['artifacts']
+    released = json.loads((ROOT / 'dependencies/releases-pre-ontology-2026-11-13.json').read_bytes())['artifacts']
     retained = [item for item in released if item['distribution'] not in {'b3-prosaic', 'b3-prosaic-harness'}]
     from lab_runner.catalogue_ontology import CASES
 
@@ -45,7 +45,7 @@ def manifest():
         artifacts.append(dict(distribution=name, version=version, source_commit=digit * 40,
                               **package_files[0]))
     runtime = retained[0]
-    floor = dict(repository='B3Cognition/prosaic', source_commit=released[0]['source_commit'])
+    floor = dict(repository='B3Cognition/prosaic', source_commit='67b3807281ed0cdfd345fff84c56b236ec82cfb1')
     runtime_upstream = dict(version=1, candidates=[floor])
     upstream = dict(version=1, candidates=[floor, dict(repository='B3Cognition/prosaic-runtime',
         run_id='43210113804', source_commit=runtime['source_commit'], receipt_sha256='c' * 64,
@@ -98,3 +98,121 @@ def test_candidate_rejects_mismatched_lineage_and_artifacts(manifest, change):
     change(altered)
     with pytest.raises(ValueError):
         validate_manifest(altered)
+
+
+@pytest.fixture
+def released_ontology(manifest, tmp_path, monkeypatch):
+    from lab_runner import catalogue_ontology
+
+    for item in manifest['artifacts']:
+        name = item['filename']
+        if 'url' not in item:
+            repository = 'prosaic' if item['distribution'] == 'b3-prosaic' else 'prosaic-harness'
+            item.update(
+                url=f'https://files.pythonhosted.org/packages/fixture/{name}',
+                checksum_url=f'https://github.com/B3Cognition/{repository}/releases/download/v{item["version"]}/SHA256SUMS',
+            )
+    released = {'artifacts': manifest['artifacts']}
+    path = tmp_path / 'catalogue-ontology-public-0.5.1-0.9.18.json'
+    path.write_text(json.dumps(released))
+    monkeypatch.setattr(catalogue_ontology, 'PUBLIC_PROFILE', path, raising=False)
+    return released
+
+
+def test_public_ontology_requires_the_full_inherited_stack(released_ontology):
+    modes = required_modes(candidate=False, manifest=released_ontology)
+    assert modes == tuple(ALL_COUNTS)
+    assert len(modes) == 14
+    assert sum(expected_test_count(mode, True) for mode in modes) == 450
+
+
+@pytest.mark.parametrize('alteration', ['changed-digest', 'changed-source', 'qualified-run', 'lineage'])
+def test_released_ontology_rejects_changed_public_provenance(released_ontology, alteration):
+    from lab_runner import catalogue_ontology
+
+    changed = deepcopy(released_ontology)
+    core = next(item for item in changed['artifacts'] if item['distribution'] == 'b3-prosaic')
+    if alteration == 'changed-digest':
+        core['sha256'] = 'f' * 64
+    elif alteration == 'changed-source':
+        core['source_commit'] = 'e' * 40
+    elif alteration == 'qualified-run':
+        core['qualified_run_id'] = '12345'
+    else:
+        changed['candidate_lineage'] = {'kind': 'catalogue-ontology'}
+    with pytest.raises(ValueError):
+        catalogue_ontology.validate_released_manifest(changed)
+
+
+def test_qualified_candidate_cannot_supply_released_ontology_proof(manifest, released_ontology):
+    from lab_runner import catalogue_ontology
+
+    with pytest.raises(ValueError):
+        catalogue_ontology.validate_released_manifest(manifest)
+
+
+def test_released_stack_rejects_candidate_lineage(manifest):
+    with pytest.raises(ValueError):
+        required_modes(candidate=False, manifest=manifest)
+
+
+@pytest.mark.parametrize('complete', [True, False])
+def test_public_distribution_requires_the_installed_ontology_cases(
+        released_ontology, tmp_path, monkeypatch, complete):
+    from types import SimpleNamespace
+    from xml.etree import ElementTree
+    from scripts import conversation_distribution_smoke as smoke
+
+    calls = []
+    monkeypatch.setattr(smoke, 'verified_wheel_paths', lambda *args: ())
+    monkeypatch.setattr(smoke, 'wheel_identity', lambda path: {'name': 'lab', 'version': '0.9.16', 'files': {}})
+    monkeypatch.setattr(smoke, 'verify_cli_versions', lambda *args: None)
+    monkeypatch.setattr(smoke, '_helper', lambda name: SimpleNamespace(
+        INDEX='https://pypi.org/simple', AUDIT_LAUNCH='', PUBLIC_EXAMPLE=''))
+
+    def run(argv, *, directory, environment, **kwargs):
+        if 'lab_runner.native_eval' in argv:
+            counts = {'test': 9, 'unified-test': 11, 'unified-cli-test': 13, 'unified-fallback-test': 18}
+            command = argv[argv.index('lab_runner.native_eval') + 1]
+            calls.append(command)
+            return json.dumps({'passed': True, 'caseCount': counts[command],
+                'cleanup': 'verified', 'liveInvocations': 0}).encode()
+        if any(str(arg).endswith('/tests/catalogue_ontology_acceptance') for arg in argv):
+            assert '-I' in argv and '-B' in argv
+            assert environment['PROSAIC_LAB_ONTOLOGY_PROFILE'] == 'released'
+            calls.append('ontology')
+            names = (
+                'test_discovery_and_execution_are_offline',
+                'test_projection_is_opt_in_scoped_and_detached',
+                'test_discovery_bounds_combined_response',
+                'test_core_rejects_invalid_attachments[malformed-json]',
+                'test_core_rejects_invalid_attachments[duplicate-key]',
+                'test_core_rejects_invalid_attachments[unknown-concept]',
+                'test_unregistered_aliases_are_rejected[agents]',
+                'test_unregistered_aliases_are_rejected[tools]',
+                'test_workflow_admission_ignores_ontology_authority',
+                'test_exact_installed_sdk_payloads',
+                'test_copied_catalogue_and_workflow',
+            )
+            suite = ElementTree.Element('testsuite', tests='11', failures='0', errors='0', skipped='0')
+            for name in names if complete else names[1:]:
+                ElementTree.SubElement(suite, 'testcase', name=name)
+            flag = next(str(arg) for arg in argv if str(arg).startswith('--junitxml='))
+            ElementTree.ElementTree(suite).write(flag.split('=', 1)[1])
+        if any(str(arg).endswith('/tests/blueprint_acceptance/test_sub_agents.py') for arg in argv):
+            calls.append('delegation')
+        return b'{}'
+
+    monkeypatch.setattr(smoke, 'run', run)
+    manifest_path = tmp_path / 'manifest.json'
+    manifest_path.write_text(json.dumps(released_ontology))
+    arguments = dict(directory=tmp_path, manifest=manifest_path, wheels=tmp_path,
+                     lock=tmp_path / 'requirements.lock', environment={})
+    if complete:
+        smoke.consume(tmp_path / 'lab.whl', **arguments)
+        assert calls == ['test', 'unified-test', 'unified-cli-test', 'unified-fallback-test',
+                         'delegation', 'ontology']
+    else:
+        with pytest.raises(ValueError, match='incomplete catalogue ontology acceptance'):
+            smoke.consume(tmp_path / 'lab.whl', **arguments)
+        assert 'ontology' in calls

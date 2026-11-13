@@ -45,8 +45,11 @@ def supports_sub_agents(manifest):
     artifacts = manifest.get('artifacts', ())
     actual = {item.get('distribution'): item.get('version') for item in artifacts}
     if actual == ONTOLOGY_TRAIN:
-        from .catalogue_ontology import validate_manifest
-        validate_manifest(manifest)
+        from .catalogue_ontology import validate_manifest, validate_released_manifest
+        if 'candidate_lineage' in manifest:
+            validate_manifest(manifest)
+        else:
+            validate_released_manifest(manifest)
         return True
     if actual == SUB_AGENT_TRAIN:
         from .sub_agents import validate_sub_agent_manifest
@@ -143,6 +146,9 @@ def supports_conversation(manifest):
 
 
 def required_modes(*,candidate,manifest):
+    versions = {item['distribution']: item['version'] for item in manifest['artifacts']}
+    if versions == ONTOLOGY_TRAIN and ('candidate_lineage' in manifest) != candidate:
+        raise ValueError('ontology manifest provenance must match acceptance mode')
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
     # Historical published trains retain their original gates.
     return tuple(mode for mode in ALL_COUNTS if (mode!='sub-agents' or supports_sub_agents(manifest)) and (mode!='mcp-client' or supports_mcp_client(manifest)) and (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
