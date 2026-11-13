@@ -5,19 +5,14 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
-## Experimental blueprint
+## Lab 0.9.17 feature map
 
-| Capability | Copyable blueprint | What the installed test proves |
-| --- | --- | --- |
-| Catalogue ontology | `catalogue-ontology` | Policy-scoped projection and the same authored workflow with or without an attachment. Lab 0.9.17 uses the released SDKs. [Guide](catalogue-ontology.md) |
-
-## Lab 0.9.16 feature map
-
-The checksum-pinned train is Core 0.5.0, Runtime 0.9.23, Harness 0.9.17,
+The checksum-pinned train is Core 0.5.1, Runtime 0.9.23, Harness 0.9.18,
 Runtime recorder 0.3.0 and Harness store 0.4.5.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
+| Catalogue ontology | `catalogue-ontology` | Policy-scoped projection and the same authored workflow with or without an attachment. [Guide](catalogue-ontology.md) |
 | Bounded delegation | `sub-agents` | Separate analyst and reviewer packs, typed observations and receipt-first recovery. [Guide](sub-agents.md) |
 | MCP read tools | `mcp-client` | Host-approved alias dispatch, current authorization and offline receipt adoption on both provider wires. [Guide](mcp-client.md) |
 | Parallel read tools | `parallel-tools` | Independent reads overlap within a bounded window, while guards and citations follow call order on both provider wires. [Guide](parallel-tools.md) |
