@@ -1,7 +1,10 @@
 name: Catalogue ontology candidate qualification
 
 on:
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      ECOSYSTEM_ARTIFACT_TOKEN:
+        required: false
     inputs:
       core_run_id:
         description: Successful exact-source Core build-only run

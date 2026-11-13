@@ -86,9 +86,11 @@ workflow runs with sockets and subprocesses disabled.
 
 ## Qualify the candidate SDKs
 
-Use [Catalogue ontology candidate qualification](../.github/workflows/catalogue-ontology-candidate.yml)
-with successful build-only Core and Harness run IDs and their exact source
-commits. The Harness run carries a separate compatibility receipt for those
+Dispatch [Experimental catalogue ontology](../.github/workflows/catalogue-ontology.yml)
+with `candidate=true`, successful build-only Core and Harness run IDs, and
+their exact source commits. It calls the
+[candidate workflow](../.github/workflows/catalogue-ontology-candidate.yml).
+The Harness run carries a separate compatibility receipt for those
 SDKs and the original published Runtime 0.9.23 wheel. Lab verifies that
 receipt and runs 11 installed cases for each Lab distribution path.
 

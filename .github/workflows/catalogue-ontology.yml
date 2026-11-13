@@ -13,12 +13,30 @@ on:
       - 'lab_runner/blueprints/catalogue_ontology/**'
       - 'tests/catalogue_ontology_acceptance/**'
   workflow_dispatch:
+    inputs:
+      candidate:
+        description: Run the full build-only ontology candidate qualification
+        type: boolean
+        default: false
+      core_run_id:
+        description: Successful exact-source Core build-only run
+        type: string
+      core_source:
+        description: Exact Core source commit
+        type: string
+      harness_run_id:
+        description: Successful exact-source Harness build-only run
+        type: string
+      harness_source:
+        description: Exact Harness source commit
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   installed-ontology:
+    if: ${{ !inputs.candidate }}
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     strategy:
@@ -46,3 +64,16 @@ jobs:
           name: catalogue-ontology-${{ matrix.origin }}
           path: ${{ runner.temp }}/catalogue-ontology-summary.json
           if-no-files-found: error
+
+  candidate:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/catalogue-ontology-candidate.yml
+    with:
+      core_run_id: ${{ inputs.core_run_id }}
+      core_source: ${{ inputs.core_source }}
+      harness_run_id: ${{ inputs.harness_run_id }}
+      harness_source: ${{ inputs.harness_source }}
+    secrets: inherit
