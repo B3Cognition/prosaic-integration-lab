@@ -1,0 +1,125 @@
+name: Enabled Castle provider qualification
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/castle-provider-qualification.yml'
+      - 'dependencies/castle-*'
+      - 'dependencies/releases.json'
+      - 'dependencies/requirements.*'
+      - 'dependencies/images.json'
+      - 'src/**'
+      - 'lab_runner/**'
+      - 'pyproject.toml'
+      - 'configs/memory-provider.example.json'
+      - 'tests/acceptance/test_memory_workflow.py'
+      - 'tests/unit/test_castle_*'
+      - 'scripts/prepare_dependencies.py'
+      - 'scripts/memory_smoke.py'
+      - 'scripts/build_castle_release_bundle.py'
+      - 'scripts/castle_release_qualification.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Select immutable Castle source
+        id: source
+        run: |
+          python -c "import json,re; p=json.load(open('dependencies/castle-release-source.json')); assert p['repository']=='B3Cognition/cognitive-castle' and re.fullmatch('[0-9a-f]{40}',p['source_commit']); assert p['publication_authorized'] is False; print('commit='+p['source_commit'])" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          repository: B3Cognition/cognitive-castle
+          ref: ${{ steps.source.outputs.commit }}
+          path: .cache/castle-source
+          persist-credentials: false
+      - name: Install locked build dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv/bin/python -m pip install --require-hashes -r dependencies/castle-build.lock
+      - name: Build both distributions once and verify rebuilt source archives
+        run: .venv/bin/python scripts/build_castle_release_bundle.py --castle-source .cache/castle-source --source-spec dependencies/castle-release-source.json --output bundle
+      - name: Qualify clean Runtime-only installed host access and model-tool gate
+        run: |
+          python -m venv .venv-adapter
+          .venv-adapter/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv-adapter/bin/python -m pip install --no-deps bundle/b3_prosaic-*.whl bundle/b3_prosaic_runtime-*.whl bundle/b3_prosaic_memory_castle-*.whl
+          .venv-adapter/bin/python -m pip check
+          .venv-adapter/bin/python -I bundle/adapter_wheel_smoke.py --host-only
+      - name: Retain exact release preparation bytes without publishing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: castle-release-bundle
+          path: bundle/
+          if-no-files-found: error
+          retention-days: 90
+
+  enabled:
+    needs: build
+    name: castle-${{ matrix.runner }}-pg${{ matrix.postgres }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: [16, 18]
+    env:
+      PG_MAJOR: ${{ matrix.postgres }}
+      EXPECTED_ARCH: ${{ matrix.runner == 'ubuntu-24.04' && 'amd64' || 'arm64' }}
+      HF_HUB_OFFLINE: '1'
+      TRANSFORMERS_OFFLINE: '1'
+      PYTHONPATH: ''
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: castle-release-bundle
+          path: bundle/
+      - name: Install exact host wheels with unchanged public SDKs
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv/bin/python -m pip install --no-deps bundle/b3_*.whl bundle/prosaic_integration_lab-*.whl
+          .venv/bin/python -m pip check
+          .venv/bin/python -I scripts/memory_smoke.py
+      - name: Install separate CPU worker and record resolved dependency hashes
+        run: |
+          python -m venv .venv-worker
+          .venv-worker/bin/python -m pip install --index-url https://download.pytorch.org/whl/cpu --report "$RUNNER_TEMP/torch-install.json" torch
+          .venv-worker/bin/python -m pip install --report "$RUNNER_TEMP/worker-install.json" bundle/cognitive_castle-*.whl
+          .venv-worker/bin/python -m pip check
+      - name: Cache exact PostgreSQL image
+        run: |
+          image=$(python -c "import json,os; print(json.load(open('dependencies/images.json'))['postgres'+os.environ['PG_MAJOR']])")
+          docker pull "$image"
+          docker tag "$image" "postgres:$PG_MAJOR"
+      - name: Require enabled frozen-memory workflow with verified cleanup
+        run: |
+          .venv/bin/python -I -m lab_runner.castle_memory --enable --manifest "$PWD/bundle/manifest.json" --artifacts "$PWD/bundle" --worker-python "$PWD/.venv-worker/bin/python" --postgres-version "$PG_MAJOR" --output reports/memory.json
+          .venv/bin/python scripts/castle_release_qualification.py --receipt reports/memory.json --bundle bundle --architecture "$EXPECTED_ARCH" --postgres-version "$PG_MAJOR" --worker-python "$PWD/.venv-worker/bin/python" --worker-report "$RUNNER_TEMP/torch-install.json" --worker-report "$RUNNER_TEMP/worker-install.json" --output reports/qualification.json
+      - name: Retain sanitized enabled-provider receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: castle-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          path: reports/*.json
+          if-no-files-found: error
+          retention-days: 90

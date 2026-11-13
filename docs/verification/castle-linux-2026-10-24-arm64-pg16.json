@@ -1,0 +1,460 @@
+{
+  "qualified": true,
+  "synthetic_only": true,
+  "native_linux": true,
+  "architecture": "arm64",
+  "postgres_major": 16,
+  "host_python": "3.12.15",
+  "worker": {
+    "system": "Linux",
+    "machine": "aarch64",
+    "python": "3.12.15"
+  },
+  "castle_source_commit": "6329ecf4923f18e57795fae5dac87e1fb1c5f3a8",
+  "lab_source_commit": "886c0aaad5087379cf8d163ba5da6d1247419b33",
+  "bundle_build_sha256": "c5d033bd21b64b63c4132a49b2d10a8b361636d660d5dde068c83b8ecd10893a",
+  "memory_profile": "memory-fts-v1",
+  "recency_boost": false,
+  "default_memory_enabled": false,
+  "installed_lab_payloads_verified": true,
+  "memory": {
+    "enabled": true,
+    "qualified": true,
+    "manifest_sha256": "c91d99ca1852ad6d7cd39a1cf4c18cdcbd882103e8fb0b525e85fd35c68b9ecf",
+    "artifacts": [
+      {
+        "distribution": "b3-prosaic",
+        "version": "0.4.1",
+        "sha256": "07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51"
+      },
+      {
+        "distribution": "b3-prosaic-runtime",
+        "version": "0.9.7",
+        "sha256": "3caebab8602d0a55d0a119be9cbbb2b0d24c922979d9f7ab0a5839defd4674bb"
+      },
+      {
+        "distribution": "b3-prosaic-runtime-postgres",
+        "version": "0.3.0",
+        "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca"
+      },
+      {
+        "distribution": "b3-prosaic-harness",
+        "version": "0.9.4",
+        "sha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b"
+      },
+      {
+        "distribution": "b3-prosaic-harness-postgres",
+        "version": "0.4.0",
+        "sha256": "35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a"
+      },
+      {
+        "distribution": "b3-prosaic-memory-castle",
+        "version": "0.1.0",
+        "sha256": "434cf2b8d1d43114d54e982449ccebd3afb97da200db53571fc7f6858e76fad3"
+      },
+      {
+        "distribution": "cognitive-castle",
+        "version": "3.4.2",
+        "sha256": "a2a745878502a1f4911ce5d0631a956cf4b3c83accd60d8625392b4b3f03ac63"
+      }
+    ],
+    "synthetic_only": true,
+    "private_state_exported": false,
+    "tests": 6,
+    "failures": 0,
+    "skipped": 0,
+    "postgres": {
+      "owner": "bd9c5e3b8c424eb8bab0efbbd2c8356d",
+      "kind": "optional-memory",
+      "cleanup_verified": true,
+      "image_id": "sha256:ed134ce8cc303c24d12c4bc6f5a2a43dc7ee7bbde8f67d9f60be5cc03206eab0",
+      "architecture": "arm64",
+      "container_id": "6ff28d65c0319fc09e2bb05834d63c82eb8c2a90430458b3ca1fcc5f0ed92b1e",
+      "server_version": "16.15 (Debian 16.15-1.pgdg13+2)",
+      "separate_runtime_role": true
+    }
+  },
+  "worker_dependencies": [
+    {
+      "distribution": "Jinja2",
+      "version": "3.1.6",
+      "sha256": "85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"
+    },
+    {
+      "distribution": "MarkupSafe",
+      "version": "3.0.3",
+      "sha256": "3a7e8ae81ae39e62a41ec302f972ba6ae23a5c5396c8e60113e9066ef893da0d"
+    },
+    {
+      "distribution": "PyYAML",
+      "version": "6.0.3",
+      "sha256": "9149cad251584d5fb4981be1ecde53a1ca46c891a79788c0df828d2f166bda28"
+    },
+    {
+      "distribution": "Pygments",
+      "version": "2.21.0",
+      "sha256": "2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9"
+    },
+    {
+      "distribution": "annotated-doc",
+      "version": "0.0.5",
+      "sha256": "117bac03a25ede5df5440e855b32d556049ca169ead221505badf432fed4b101"
+    },
+    {
+      "distribution": "annotated-types",
+      "version": "0.8.0",
+      "sha256": "f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0"
+    },
+    {
+      "distribution": "anyio",
+      "version": "4.15.1",
+      "sha256": "6152fdbbf9a77fdec97731721bebf7c4c44f7c29b424b0065826173efc7ed101"
+    },
+    {
+      "distribution": "blis",
+      "version": "1.3.3",
+      "sha256": "d734b19fba0be7944f272dfa7b443b37c61f9476d9ab054a9ac53555ceadd2e0"
+    },
+    {
+      "distribution": "catalogue",
+      "version": "2.0.10",
+      "sha256": "58c2de0020aa90f4a2da7dfad161bf7b3b054c86a5f09fcedc0b2b740c109a9f"
+    },
+    {
+      "distribution": "certifi",
+      "version": "2026.10.23",
+      "sha256": "e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1"
+    },
+    {
+      "distribution": "charset-normalizer",
+      "version": "3.5.2",
+      "sha256": "b91363207bd9dc966a691e959bb47f64b30f7ac4b072be9968b366982f7db77c"
+    },
+    {
+      "distribution": "click",
+      "version": "8.5.0",
+      "sha256": "255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360"
+    },
+    {
+      "distribution": "cloudpathlib",
+      "version": "0.26.0",
+      "sha256": "abcd7f54bcbb2fbb79c0e96b79241f08866760aee6276586882b3558672d571b"
+    },
+    {
+      "distribution": "cloudpickle",
+      "version": "3.1.2",
+      "sha256": "9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a"
+    },
+    {
+      "distribution": "cognitive-castle",
+      "version": "3.4.2",
+      "sha256": "a2a745878502a1f4911ce5d0631a956cf4b3c83accd60d8625392b4b3f03ac63"
+    },
+    {
+      "distribution": "confection",
+      "version": "1.3.3",
+      "sha256": "b9fef9ee84b237ef4611ec3eb5797b70e13063e6310ad9f15536373f5e313c82"
+    },
+    {
+      "distribution": "cymem",
+      "version": "2.0.13",
+      "sha256": "742fc19764467a49ed22e56a4d2134c262d73a6c635409584ae3bf9afa092c33"
+    },
+    {
+      "distribution": "deprecation",
+      "version": "2.1.0",
+      "sha256": "a10811591210e1fb0e768a8c25517cabeabcba6f0bf96564f8ff45189f90b14a"
+    },
+    {
+      "distribution": "filelock",
+      "version": "3.32.3",
+      "sha256": "7f0ca4bcc0e181c60dbbd8aa9ab5b120ebb99e4e064e83636340056f833a1f09"
+    },
+    {
+      "distribution": "fsspec",
+      "version": "2026.7.0",
+      "sha256": "b57ddbafedfaef7018c1ecab32aa200a9d7ca26b77965f64e48b70061249d279"
+    },
+    {
+      "distribution": "h11",
+      "version": "0.16.0",
+      "sha256": "63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"
+    },
+    {
+      "distribution": "hf-xet",
+      "version": "1.7.0",
+      "sha256": "fcfd6c22418e57dd5b3aea649e813b2e2cfb2aebf317b210d90f1fe4b3018b52"
+    },
+    {
+      "distribution": "httpcore",
+      "version": "1.0.9",
+      "sha256": "2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"
+    },
+    {
+      "distribution": "httpcore2",
+      "version": "2.16.0",
+      "sha256": "5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f"
+    },
+    {
+      "distribution": "httpx",
+      "version": "0.28.1",
+      "sha256": "d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"
+    },
+    {
+      "distribution": "httpx2",
+      "version": "2.16.0",
+      "sha256": "fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a"
+    },
+    {
+      "distribution": "huggingface_hub",
+      "version": "2.3.0",
+      "sha256": "5da369600233568a126eb5578754935b2add9446b42d9e2fc0927d56840ac1a5"
+    },
+    {
+      "distribution": "idna",
+      "version": "3.20",
+      "sha256": "ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"
+    },
+    {
+      "distribution": "joblib",
+      "version": "1.6.0",
+      "sha256": "3dbbf9f6e4b592a2357b854608e980fe6390d131d7a82f011a377ef2ebef7aba"
+    },
+    {
+      "distribution": "lance-namespace",
+      "version": "0.13.0",
+      "sha256": "438c7b17aef421c21c138196e715f2510d62f07e865372047f87c1e75e618c7a"
+    },
+    {
+      "distribution": "lance-namespace-urllib3-client",
+      "version": "0.13.0",
+      "sha256": "fb361eb4f6c7f2d1f9e92809609657b73e38241393e9c4516e12d6b6ee643a0a"
+    },
+    {
+      "distribution": "lancedb",
+      "version": "0.40.0",
+      "sha256": "e967577fe42980217e43f9b6ecbe042c5ae314370a34b88f1c54e825f96b26f0"
+    },
+    {
+      "distribution": "markdown-it-py",
+      "version": "4.2.0",
+      "sha256": "9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a"
+    },
+    {
+      "distribution": "mdurl",
+      "version": "0.1.2",
+      "sha256": "84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8"
+    },
+    {
+      "distribution": "mpmath",
+      "version": "1.3.0",
+      "sha256": "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
+    },
+    {
+      "distribution": "murmurhash",
+      "version": "1.0.15",
+      "sha256": "32c6fde7bd7e9407003370a07b5f4addacabe1556ad3dc2cac246b7a2bba3400"
+    },
+    {
+      "distribution": "narwhals",
+      "version": "2.27.1",
+      "sha256": "d057df13f5852b8e157596e82eb5e955fad267425df5e420e0ee9863da483b31"
+    },
+    {
+      "distribution": "networkx",
+      "version": "3.6.1",
+      "sha256": "d47fbf302e7d9cbbb9e2555a0d267983d2aa476bac30e90dfbe5669bd57f3762"
+    },
+    {
+      "distribution": "numpy",
+      "version": "2.5.4",
+      "sha256": "fe4d21ab149f15e4e6043dfb0de87e6e5f34ac176cde83060e9802981fca2ac2"
+    },
+    {
+      "distribution": "packaging",
+      "version": "26.3",
+      "sha256": "d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"
+    },
+    {
+      "distribution": "preshed",
+      "version": "3.0.13",
+      "sha256": "62cf7f3113132891d6bba70ff547ad81c6fe50a31930bbbb8499f1d47cd122b7"
+    },
+    {
+      "distribution": "pyarrow",
+      "version": "26.0.0",
+      "sha256": "01c863a18bd9c8412453dd0d92de6d0ee7b2b3d6fb079d9734a4b2a3c8bd4453"
+    },
+    {
+      "distribution": "pydantic",
+      "version": "2.14.1",
+      "sha256": "9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454"
+    },
+    {
+      "distribution": "pydantic_core",
+      "version": "2.50.1",
+      "sha256": "c18db21573bd2c6489f9a544b7499f0df2853958c568e5e783536ee1f690af41"
+    },
+    {
+      "distribution": "python-dateutil",
+      "version": "3.0.0",
+      "sha256": "3c79630202e4152c6add678446984236efe4f57e84d8e892aab0637bab82e9fd"
+    },
+    {
+      "distribution": "regex",
+      "version": "2026.9.29",
+      "sha256": "f93bc1c3486ef3747e07c9d7c1d0a147b8fbaab975f80e348aed6f71309dfaca"
+    },
+    {
+      "distribution": "requests",
+      "version": "2.34.2",
+      "sha256": "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"
+    },
+    {
+      "distribution": "rich",
+      "version": "15.0.0",
+      "sha256": "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"
+    },
+    {
+      "distribution": "safetensors",
+      "version": "0.8.0",
+      "sha256": "7a46e5ff292c356d6991e60942ba7f79817682d3a2cef0702136448cb9c4d235"
+    },
+    {
+      "distribution": "scikit-learn",
+      "version": "1.9.1",
+      "sha256": "e4c20a6c017d820faa7ac8c783e3d0c6a9a2e297bf9f55332ca17cdf7fd4d04d"
+    },
+    {
+      "distribution": "scipy",
+      "version": "1.18.1",
+      "sha256": "3c085faa2cfa879c5141df483f836f4d691045a078224a670fa570fa01612d89"
+    },
+    {
+      "distribution": "sentence-transformers",
+      "version": "6.2.0",
+      "sha256": "ffb51ccfef65427cfa61776d0eeeb257600b0099cf0c7533ae9a6856d31e4665"
+    },
+    {
+      "distribution": "setuptools",
+      "version": "78.1.0",
+      "sha256": "3e386e96793c8702ae83d17b853fb93d3e09ef82ec62722e61da5cd22376dcd8"
+    },
+    {
+      "distribution": "shellingham",
+      "version": "1.5.4",
+      "sha256": "7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686"
+    },
+    {
+      "distribution": "six",
+      "version": "1.17.0",
+      "sha256": "4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"
+    },
+    {
+      "distribution": "smart_open",
+      "version": "8.0.4",
+      "sha256": "8a3a67679942fa40d1a93ed3aea37619b4b4ec5458f1d5a9228dfc301db11b4c"
+    },
+    {
+      "distribution": "spacy",
+      "version": "3.8.16",
+      "sha256": "a2c46c35467d963a62dc0407c99d3a18562d4c85ee887a57e4a07dde020f1a38"
+    },
+    {
+      "distribution": "spacy-legacy",
+      "version": "3.0.12",
+      "sha256": "476e3bd0d05f8c339ed60f40986c07387c0a71479245d6d0f4298dbd52cda55f"
+    },
+    {
+      "distribution": "spacy-loggers",
+      "version": "1.0.5",
+      "sha256": "196284c9c446cc0cdb944005384270d775fdeaf4f494d8e269466cfa497ef645"
+    },
+    {
+      "distribution": "srsly",
+      "version": "2.5.4",
+      "sha256": "168a1b9b5d275276cdf9895fd7527dadc29c1d81d0a1fde7adb464e089051cec"
+    },
+    {
+      "distribution": "sympy",
+      "version": "1.14.0",
+      "sha256": "e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"
+    },
+    {
+      "distribution": "thinc",
+      "version": "8.3.13",
+      "sha256": "5a08c87143a6d20177652dca1ec0dc815d88216d8fc62594a57e8bc45bf5ed49"
+    },
+    {
+      "distribution": "threadpoolctl",
+      "version": "3.7.0",
+      "sha256": "cd8b60b5641b45c67bbf73c64c843235fc2d8a480c87389f52f5dbee893b86be"
+    },
+    {
+      "distribution": "tokenizers",
+      "version": "0.23.3",
+      "sha256": "ec82e80e65a862275b97c3d90b7a523df8d9519ee48aeb4e9625b2cc909274e0"
+    },
+    {
+      "distribution": "torch",
+      "version": "2.14.1+cpu",
+      "sha256": "2af649994b36dffc627175c3f306d9e513a309b58d4619ac7107577613336454"
+    },
+    {
+      "distribution": "tqdm",
+      "version": "4.70.1",
+      "sha256": "c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73"
+    },
+    {
+      "distribution": "transformers",
+      "version": "5.20.2",
+      "sha256": "7ae75dbc1fb3922aff1b6c97b9e5479d6cf26fd86a8866bfb71324190479f807"
+    },
+    {
+      "distribution": "truststore",
+      "version": "0.10.5",
+      "sha256": "9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c"
+    },
+    {
+      "distribution": "typer",
+      "version": "0.27.3",
+      "sha256": "e50022f28b82a86313e54501317a1db64bf8f8d036ff8cfe5ca7e47675454aff"
+    },
+    {
+      "distribution": "typing-inspection",
+      "version": "0.4.4",
+      "sha256": "65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147"
+    },
+    {
+      "distribution": "typing_extensions",
+      "version": "4.16.0",
+      "sha256": "481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8"
+    },
+    {
+      "distribution": "tzdata",
+      "version": "2026.5",
+      "sha256": "b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac"
+    },
+    {
+      "distribution": "urllib3",
+      "version": "2.8.0",
+      "sha256": "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
+    },
+    {
+      "distribution": "wasabi",
+      "version": "1.1.3",
+      "sha256": "f76e16e8f7e79f8c4c8be49b4024ac725713ab10cd7f19350ad18a8e3f71728c"
+    },
+    {
+      "distribution": "weasel",
+      "version": "1.0.0",
+      "sha256": "89518acee027f49d743126c3502d35e6dd14f5768be5c37c9af47c171b6005cc"
+    },
+    {
+      "distribution": "wrapt",
+      "version": "2.5.1",
+      "sha256": "d6d274ec50a5b208be75596dc44ea253e65deaa6ee3a600babc86dafbb957dfc"
+    }
+  ],
+  "private_state_exported": false
+}
