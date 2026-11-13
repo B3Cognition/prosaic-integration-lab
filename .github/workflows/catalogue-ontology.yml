@@ -76,4 +76,5 @@ jobs:
       core_source: ${{ inputs.core_source }}
       harness_run_id: ${{ inputs.harness_run_id }}
       harness_source: ${{ inputs.harness_source }}
-    secrets: inherit
+    secrets:
+      ECOSYSTEM_ARTIFACT_TOKEN: ${{ secrets.ECOSYSTEM_ARTIFACT_TOKEN }}
