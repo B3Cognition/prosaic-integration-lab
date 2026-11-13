@@ -9,7 +9,7 @@ installed APIs; the Lab never supplies a second workflow or model engine.
 
 | Capability | Copyable blueprint | What the installed test proves |
 | --- | --- | --- |
-| Catalogue ontology | `catalogue-ontology` | Policy-scoped projection and identical authored workflow execution with or without an attachment. Uses the isolated RC install. [Guide](catalogue-ontology.md) |
+| Catalogue ontology | `catalogue-ontology` | Policy-scoped projection and identical authored workflow execution with or without an attachment. Isolated public RC example and separate stable SDK candidate qualification. [Guide](catalogue-ontology.md) |
 
 ## Lab 0.9.16 feature map
 

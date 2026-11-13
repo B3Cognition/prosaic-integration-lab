@@ -2,6 +2,7 @@
 
 from importlib import import_module, metadata
 import json
+import os
 from pathlib import Path
 import runpy
 import subprocess
@@ -18,7 +19,14 @@ SDK = {
 
 
 def test_exact_installed_sdk_payloads():
-    expected = {name: version for name, (version, _) in SDK.items()}
+    profile = os.environ.get("PROSAIC_LAB_ONTOLOGY_PROFILE", "rc")
+    assert profile in {"rc", "candidate"}
+    if profile == "candidate":
+        from prosaic_integration_lab.catalogue_ontology import TRAIN
+
+        expected = {name: TRAIN[name] for name in SDK}
+    else:
+        expected = {name: version for name, (version, _) in SDK.items()}
     assert {name: metadata.version(name) for name in SDK} == expected
 
     names = set(SDK) | {"b3-prosaic-harness-postgres", "b3-prosaic-runtime-postgres"}
@@ -37,6 +45,8 @@ def test_exact_installed_sdk_payloads():
         origin = Path(import_module(module).__file__).resolve()
         assert origin.is_relative_to(prefix)
         assert any(Path(file.locate()).resolve() == origin for file in distribution.files)
+    ontology = Path(import_module("prosaic.ontology").__file__).resolve()
+    assert ontology == metadata.distribution("b3-prosaic").locate_file("prosaic/ontology.py").resolve()
 
 
 def test_copied_catalogue_and_workflow(copied_blueprint, copy_command):

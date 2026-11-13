@@ -17,7 +17,8 @@ class ExperimentalSDKUnavailable(RuntimeError):
 
 
 def _load_attachment(project: Path) -> dict:
-    required = "Experimental ontology requires Core 0.5.1rc1 and Harness 0.9.17rc1."
+    required = ("Catalogue ontology requires the compatible Core 0.5.1 and Harness 0.9.18 candidates "
+                "or published Core 0.5.1rc1 and Harness 0.9.17rc1 from dependencies/catalogue-ontology-rc.lock.")
     if ("ontology" not in signature(WorkflowCatalog).parameters
             or "include_ontology" not in signature(WorkflowFactory.describe).parameters):
         raise ExperimentalSDKUnavailable(required)
@@ -93,7 +94,7 @@ def main() -> None:
     commands = parser.add_subparsers(dest="command", required=True)
     for name in ("discover", "run"):
         command = commands.add_parser(name)
-        command.add_argument("--ontology", action="store_true", help="Enable the experimental attachment")
+        command.add_argument("--ontology", action="store_true", help="Enable the catalogue attachment")
     args = parser.parse_args()
     project = Path(__file__).resolve().parent
     try:

@@ -21,7 +21,10 @@ def require_mcp_client_sdk():
 
     from .sub_agents import RELEASE_TRAIN as DELEGATION_RELEASE_TRAIN, TRAIN as DELEGATION_TRAIN
     installed = {name: version(name) for name in TRAIN}
-    if installed not in (TRAIN, MCP_CLIENT_RELEASE_TRAIN, DELEGATION_TRAIN, DELEGATION_RELEASE_TRAIN) or any(
+    from .catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
+
+    if installed not in (TRAIN, MCP_CLIENT_RELEASE_TRAIN, DELEGATION_TRAIN, DELEGATION_RELEASE_TRAIN,
+                         ONTOLOGY_TRAIN) or any(
             version(name) != expected for name, expected in MCP_LOCKED_VERSIONS.items()):
         raise ValueError("exact MCP SDK family required")
     if "mcp_client_v1" not in rt.ProsaicRuntime.capabilities:

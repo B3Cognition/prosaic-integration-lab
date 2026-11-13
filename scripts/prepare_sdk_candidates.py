@@ -292,6 +292,129 @@ def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_roo
     manifest.parent.mkdir(parents=True,exist_ok=True);manifest.write_bytes(payload)
     return data
 
+def curate_catalogue_ontology(core_dir, harness_dir, manifest, cache_root, *, hosted=None):
+    """Bind the separate ontology proof and stage two candidates plus three public wheels."""
+    from xml.etree import ElementTree
+    from lab_runner.catalogue_ontology import CASES, KIND, PACKAGES, RETAINED, TRAIN, validate_manifest
+    from scripts.prepare_dependencies import prepare
+
+    core_dir, harness_dir, manifest, cache_root = map(Path, (core_dir, harness_dir, manifest, cache_root))
+    if manifest.is_symlink() or manifest.resolve().is_relative_to((ROOT / 'dependencies').resolve()):
+        raise ValueError('candidate cannot replace public manifests')
+    core, core_bytes = read(core_dir / 'release-receipt.json')
+    harness, harness_bytes = read(harness_dir / 'release-receipt.json')
+    proof, proof_bytes = read(harness_dir / 'catalogue-ontology-compatibility.json')
+    upstream, upstream_bytes = read(harness_dir / 'upstream-receipt.json')
+    for document, content in ((core, core_bytes), (harness, harness_bytes),
+                              (proof, proof_bytes), (upstream, upstream_bytes)):
+        if serialized(document) != content:
+            raise ValueError('candidate receipts must retain their canonical bytes')
+    if hosted is None:
+        if proof['core']['run_id'] is not None:
+            raise ValueError('hosted evidence requires verified run identities')
+        harness_run = None
+    else:
+        core_run, core_commit, harness_run, harness_commit = hosted
+        if (proof['core']['run_id'] != core_run or core['source_commit'] != core_commit
+                or harness['source_commit'] != harness_commit):
+            raise ValueError('ontology candidate run binding differs')
+
+    released_manifest = ROOT / 'dependencies/releases.json'
+    retained = [item for item in sdk_manifest(released_manifest)['artifacts']
+                if item['distribution'] in RETAINED]
+    artifacts = retained.copy()
+    sources = {}
+    for sdk, directory, receipt in (('core', core_dir, core), ('harness', harness_dir, harness)):
+        name = PACKAGES[sdk]
+        filename = name.replace('-', '_') + '-' + TRAIN[name] + '-py3-none-any.whl'
+        selected, = [item for item in receipt['artifacts'] if item['filename'] == filename]
+        artifacts.append({'distribution': name, 'version': TRAIN[name],
+                          'source_commit': receipt['source_commit'], **selected})
+        sources[filename] = directory / filename
+    lineage = {'version': 1, 'kind': KIND, 'core_receipt': core, 'harness_receipt': harness,
+               'harness_upstream': upstream, 'compatibility': proof,
+               'compatibility_sha256': digest(proof_bytes), 'harness_run_id': harness_run,
+               'retained_artifacts': retained}
+    data = validate_manifest({'artifacts': artifacts, 'candidate_lineage': lineage}, hosted=hosted is not None)
+    for directory, receipt in ((core_dir, core), (harness_dir, harness)):
+        inventory = {item['filename']: item['sha256'] for item in receipt['artifacts']}
+        if {path.name for path in directory.iterdir() if path.name.endswith(('.whl', '.tar.gz'))} != set(inventory):
+            raise ValueError('ontology candidate artifact inventory differs')
+        for name, sha in inventory.items():
+            path = directory / name
+            if path.is_symlink() or not path.is_file() or file_digest(path) != sha:
+                raise ValueError('ontology candidate payload differs')
+    for origin, result in proof['results'].items():
+        path = harness_dir / f'catalogue-ontology-{origin}.xml'
+        if path.is_symlink():
+            raise ValueError('unsafe ontology qualification result')
+        with path.open('rb') as stream:
+            raw = stream.read(262145)
+        if len(raw) > 262144 or digest(raw) != result['junit_sha256']:
+            raise ValueError('ontology qualification result digest differs')
+        suite, = ElementTree.fromstring(raw).iter('testsuite')
+        cases = list(suite.iter('testcase'))
+        if (sorted(case.attrib['name'] for case in cases) != CASES
+                or [int(suite.attrib[key]) for key in ('tests', 'failures', 'errors', 'skipped')]
+                != [len(CASES), 0, 0, 0]
+                or any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))):
+            raise ValueError('incomplete ontology qualification result')
+
+    payload = serialized(data)
+    if manifest.exists() and manifest.read_bytes() != payload:
+        raise ValueError('candidate manifest is immutable')
+    released_cache = prepare(released_manifest, cache_root)
+    sources.update({item['filename']: released_cache / item['filename'] for item in retained})
+    with tempfile.TemporaryDirectory(prefix='ontology-manifest-') as temporary:
+        probe = Path(temporary) / 'manifest.json'
+        probe.write_bytes(payload)
+        sdk_manifest(probe)
+        cache = cache_directory(probe, cache_root)
+        if cache.is_symlink():
+            raise ValueError('unsafe ontology candidate cache')
+        cache.mkdir(parents=True, exist_ok=True)
+        for item in artifacts:
+            name, sha = item['filename'], item['sha256']
+            source, target = sources[name], cache / name
+            if source.is_symlink() or file_digest(source) != sha:
+                raise ValueError('ontology candidate payload differs')
+            if target.is_symlink() or (target.exists() and file_digest(target) != sha):
+                raise ValueError('ontology candidate cache conflict')
+            if not target.exists():
+                shutil.copyfile(source, target)
+        verified_wheel_paths(probe, cache)
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with manifest.open('xb') as stream:
+            stream.write(payload)
+    except FileExistsError:
+        if manifest.is_symlink() or manifest.read_bytes() != payload:
+            raise ValueError('candidate manifest is immutable')
+    return data
+
+
+def _hosted_ontology(args):
+    identities = (args.core_run_id, args.core_source, args.harness_run_id, args.harness_source)
+    if not all(identities):
+        raise ValueError('ontology requires two explicit run and source pairs')
+    with tempfile.TemporaryDirectory(prefix='lab-ontology-candidates-') as temporary:
+        root = Path(temporary)
+        for sdk, repository, run, commit in (
+                ('core', 'B3Cognition/prosaic', *identities[:2]),
+                ('harness', 'B3Cognition/prosaic-harness', *identities[2:])):
+            if not re.fullmatch('[1-9][0-9]*', run):
+                raise ValueError('invalid ontology qualification run')
+            result = subprocess.check_output(['gh', 'api', f'repos/{repository}/actions/runs/{run}'], timeout=60)
+            run_record = json.loads(result)
+            validate_run(run_record, commit)
+            if run_record['id'] != int(run) or run_record['repository']['full_name'] != repository:
+                raise ValueError('ontology qualification run identity differs')
+            subprocess.run(['gh', 'run', 'download', run, '--repo', repository, '--name', 'qualified-release',
+                            '--dir', str(root / sdk)], check=True, timeout=120)
+        return curate_catalogue_ontology(root / 'core', root / 'harness', args.manifest,
+                                        args.cache_root, hosted=identities)
+
+
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile',type=Path,help='pinned Core/Runtime/Harness run and source recipe')
@@ -305,11 +428,27 @@ def main(argv=None):
     features.add_argument('--parallel-tools',action='store_true',help='curate explicit local parallel candidate archives without publication')
     features.add_argument('--mcp-client',action='store_true',help='curate exact qualified local MCP candidate wheels')
     features.add_argument('--sub-agents',action='store_true',help='curate exact local delegation candidate wheels')
+    features.add_argument('--catalogue-ontology',action='store_true',help='curate the exact qualified ontology pair')
+    parser.add_argument('--core-artifacts',type=Path)
     parser.add_argument('--runtime-artifacts',type=Path)
     parser.add_argument('--harness-artifacts',type=Path)
     features.add_argument('--tool-contracts',action='store_true',help='curate only qualified safe-event/citation candidate workflows')
     features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
     args=parser.parse_args(argv)
+    if args.catalogue_ontology:
+        if any((args.profile, args.runtime_artifacts, args.runtime_run_id, args.runtime_source)):
+            parser.error('ontology retains the published Runtime and requires an explicit Core/Harness pair')
+        if args.core_artifacts is not None or args.harness_artifacts is not None:
+            if not all((args.core_artifacts, args.harness_artifacts)):
+                parser.error('local ontology handoff requires Core and Harness artifact directories')
+            if any((args.core_run_id, args.core_source, args.harness_run_id, args.harness_source)):
+                parser.error('local artifact paths cannot be combined with hosted run identities')
+            data = curate_catalogue_ontology(args.core_artifacts, args.harness_artifacts, args.manifest,
+                                            args.cache_root)
+        else:
+            data = _hosted_ontology(args)
+        print(json.dumps({'manifest': str(args.manifest), 'kind': data['candidate_lineage']['kind']}))
+        return 0
     if args.parallel_tools or args.mcp_client or args.sub_agents:
         if args.runtime_artifacts is None or args.harness_artifacts is None:parser.error("local handoff requires both artifact directories")
         result=curate_parallel_tools(args.runtime_artifacts,args.harness_artifacts,args.manifest,args.cache_root,

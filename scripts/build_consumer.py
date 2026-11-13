@@ -34,7 +34,10 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
     digest = hashlib.sha256(content).hexdigest()
     data = sdk_manifest(manifest)
     sys.path.insert(0, str(ROOT))
+    from lab_runner.catalogue_ontology import KIND as ONTOLOGY_KIND
     from lab_runner.gates import supports_mcp_client
+    if data.get('candidate_lineage', {}).get('kind') == ONTOLOGY_KIND and dependency_mode != 'candidate':
+        raise ValueError('ontology handoff requires candidate mode')
     mcp_client = supports_mcp_client(data)
     paths = verified_wheel_paths(manifest, wheel_dir)
     wheel_payloads(manifest, wheel_dir)

@@ -21,7 +21,9 @@ def require_sub_agent_sdk():
     import prosaic_harness as h
     import prosaic_harness_postgres as pg
 
-    if {name: version(name) for name in TRAIN} not in (TRAIN, RELEASE_TRAIN):
+    from .catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
+
+    if {name: version(name) for name in TRAIN} not in (TRAIN, RELEASE_TRAIN, ONTOLOGY_TRAIN):
         raise ValueError("exact sub-agent SDK family required")
     if ("sub_agents_v1" not in rt.ProsaicRuntime.capabilities
             or not hasattr(h, "SubAgentBindingsV1") or not hasattr(pg.PostgresSessionStore, "migrate_sub_agent_storage")
