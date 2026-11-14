@@ -1,5 +1,7 @@
 # Releases and compatibility
 
+Lab 0.9.18 adds [guarded workflow recovery](release-0.9.18.md) with a separate installed profile.
+
 Lab 0.9.17 supports [catalogue ontology](release-0.9.17.md) on Core 0.5.1
 and Harness 0.9.18 with Runtime 0.9.23 and the existing PostgreSQL adapters.
 

@@ -1,5 +1,15 @@
 # Codex handoff
 
+## Guarded workflow recovery and Lab 0.9.18
+
+The [guarded recovery blueprint](guarded-recovery.md) uses Runtime 0.9.25
+and Harness 0.9.19 with Core 0.5.1, recorder 0.3.0 and store 0.4.5.
+Use the dedicated released recovery manifest to qualify the copied host on
+both synthetic provider wires from the installed wheel and rebuilt source.
+The tests check the request budget, an authorized lookup, typed recovery
+evidence and the resume identity. The ordinary and reasoning manifests
+continue to select the published catalogue ontology train.
+
 ## Bounded sub-agents and Lab 0.9.16 — 2026-11-12
 
 Qualify and publish Runtime 0.9.23, Harness 0.9.17 and its PostgreSQL adapter 0.4.5 in dependency order, then adopt their verified public wheels in Lab. The [workflow and conversation guide](sub-agents.md) explains the copyable example. The published delegation family selects 450 required cases per architecture and PostgreSQL cell.
