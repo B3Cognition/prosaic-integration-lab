@@ -20,7 +20,7 @@ from lab_runner.blueprints import copy_blueprint
 import lab_runner.blueprints as blueprints
 assert Path(blueprints.__file__).resolve().is_relative_to(Path(sys.argv[1]).resolve())
 destination=Path(sys.argv[2])
-for name in ('request-headers','revision-review','conversation-caps','rule-admission','workflow-enforcement','accounting-metadata','sent-effort','tool-evidence','guarded-recovery'):
+for name in ('request-headers','revision-review','conversation-caps','rule-admission','workflow-enforcement','accounting-metadata','sent-effort','tool-evidence','guarded-recovery','nemotron-correction'):
     project=copy_blueprint(name,destination/name)
     assert (project/'README.md').is_file()
     assert (project/'.prosaic/subagents').is_dir()

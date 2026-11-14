@@ -1,5 +1,12 @@
 # Codex handoff
 
+## Nemotron lookup correction and Lab 0.9.19
+
+The [Nemotron blueprint](nemotron-correction.md) qualifies the Runtime 0.9.26
+correction through published Harness 0.9.19. The installed wheel and rebuilt
+source gates use the dedicated release manifest. The existing guarded recovery
+and ordinary SDK profiles retain their versions.
+
 ## Guarded workflow recovery and Lab 0.9.18
 
 The [guarded recovery blueprint](guarded-recovery.md) uses Runtime 0.9.25

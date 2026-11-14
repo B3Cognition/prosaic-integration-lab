@@ -4,6 +4,7 @@ import shutil
 
 ROOT = Path(__file__).parent
 BLUEPRINTS = {
+    'nemotron-correction': ROOT / 'nemotron_correction',
     'guarded-recovery': ROOT / 'guarded_recovery',
     'catalogue-ontology': ROOT / 'catalogue_ontology',
     'sub-agents': ROOT / 'sub_agents',
