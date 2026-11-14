@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.18 — 2026-11-14
+
+- Add the guarded recovery blueprint, with a checksum-pinned SDK profile and installed wheel and rebuilt-source acceptance.
+- See the [release notes](docs/release-0.9.18.md).
+
 ## 0.9.17 — 2026-11-13
 
 - Adopt the verified Core 0.5.1 and Harness 0.9.18 releases.
