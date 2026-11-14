@@ -1,5 +1,7 @@
 # Required release gates
 
+Lab 0.9.18 requires the [guarded recovery blueprint](guarded-recovery.md) to pass both synthetic provider wires from the Lab wheel and the wheel rebuilt from source. Its separate SDK profile is checksum-pinned.
+
 Lab 0.9.17 verifies catalogue ontology in both installed package paths with
 the exact released SDK profile. Each Linux architecture and PostgreSQL
 cell also runs the existing 14 lanes and 450 real-stack cases.

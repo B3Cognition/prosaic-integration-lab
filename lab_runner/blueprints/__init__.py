@@ -4,6 +4,7 @@ import shutil
 
 ROOT = Path(__file__).parent
 BLUEPRINTS = {
+    'guarded-recovery': ROOT / 'guarded_recovery',
     'catalogue-ontology': ROOT / 'catalogue_ontology',
     'sub-agents': ROOT / 'sub_agents',
     'mcp-client': ROOT / 'mcp_client',
