@@ -12,9 +12,16 @@ from conversation_distribution_smoke import extract_sdist
 from qualify_catalogue_ontology import run
 
 ROOT = Path(__file__).resolve().parents[1]
+CASES = {
+    'guarded-recovery': ('guarded_recovery_acceptance/test_guarded_recovery.py',
+        'test_copied_guarded_recovery', ('anthropic', 'openai-compatible')),
+    'nemotron-correction': ('nemotron_correction_acceptance/test_nemotron_correction.py',
+        'test_copied_nemotron_correction', ('ignored', 'optional', 'required', 'ungrounded')),
+}
 
 
-def qualify(origin, export, archive=None):
+def qualify(origin, export, archive=None, profile="guarded-recovery"):
+    test_path, test_name, modes = CASES[profile]
     with tempfile.TemporaryDirectory(prefix='lab-guarded-recovery-') as directory:
         work = Path(directory)
         source = ROOT
@@ -29,7 +36,7 @@ def qualify(origin, export, archive=None):
         else:
             run(*build, '--wheel', '-o', work / 'wheel', source)
             wheel, = (work / 'wheel').glob('*.whl')
-        manifest = source / 'dependencies/releases-guarded-recovery.json'
+        manifest = source / f'dependencies/releases-{profile}.json'
         run(sys.executable, '-m', 'venv', work / 'consumer')
         python = work / 'consumer/bin/python'
         run(python, '-m', 'pip', 'install', '--require-hashes',
@@ -45,16 +52,15 @@ def qualify(origin, export, archive=None):
         run(python, '-m', 'pip', 'check')
         report = work / 'report.xml'
         run(python, '-I', '-m', 'pytest', '-o', 'pythonpath=', '-q',
-            source / 'tests/guarded_recovery_acceptance/test_guarded_recovery.py',
+            source / 'tests' / test_path,
             '--junitxml', report, cwd=work,
             env={**os.environ, 'PROSAIC_BLUEPRINT_INSTALLED': '1', 'NO_PROXY': '*', 'no_proxy': '*'})
         suite, = ElementTree.parse(report).getroot().iter('testsuite')
         counts = {key: int(suite.attrib[key]) for key in ('tests', 'failures', 'errors', 'skipped')}
         cases = sorted(case.attrib['name'] for case in suite.iter('testcase'))
-        if (counts != {'tests': 2, 'failures': 0, 'errors': 0, 'skipped': 0}
-                or cases != ['test_copied_guarded_recovery[anthropic]',
-                             'test_copied_guarded_recovery[openai-compatible]']):
-            raise ValueError('guarded recovery requires both provider cases')
+        if (counts != {'tests': len(modes), 'failures': 0, 'errors': 0, 'skipped': 0}
+                or cases != sorted(f'{test_name}[{mode}]' for mode in modes)):
+            raise ValueError(f'incomplete {profile} acceptance')
         export.write_text(json.dumps({'version': 1, 'origin': origin, 'counts': counts,
             'cases': cases, 'manifestSha256': digest, 'liveProvider': False}, sort_keys=True) + '\n')
 
@@ -64,5 +70,6 @@ if __name__ == '__main__':
     parser.add_argument('--origin', choices=('wheel', 'sdist'), required=True)
     parser.add_argument('--export', type=Path, required=True)
     parser.add_argument('--archive', type=Path, help='Test an already verified release archive')
+    parser.add_argument('--profile', choices=CASES, default='guarded-recovery')
     args = parser.parse_args()
-    qualify(args.origin, args.export, args.archive)
+    qualify(args.origin, args.export, args.archive, args.profile)

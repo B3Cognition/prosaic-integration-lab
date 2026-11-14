@@ -1,5 +1,9 @@
 # Required release gates
 
+Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
+to pass all four synthetic cases from the installed Lab wheel and rebuilt
+source, using the checksum-pinned Runtime 0.9.26 profile.
+
 Lab 0.9.18 requires the [guarded recovery blueprint](guarded-recovery.md) to pass both synthetic provider wires from the Lab wheel and the wheel rebuilt from source. Its separate SDK profile is checksum-pinned.
 
 Lab 0.9.17 verifies catalogue ontology in both installed package paths with

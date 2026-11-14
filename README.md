@@ -1,5 +1,7 @@
 # Prosaic integration lab
 
+Lab **0.9.19** ships the [Nemotron lookup correction blueprint](docs/nemotron-correction.md) using Runtime 0.9.26. See the [release notes](docs/release-0.9.19.md).
+
 Lab **0.9.18** adds the [guarded recovery blueprint](docs/guarded-recovery.md) for Runtime 0.9.25 and Harness 0.9.19. See the [release notes](docs/release-0.9.18.md).
 
 Lab **0.9.17** adds the [catalogue ontology blueprint](docs/catalogue-ontology.md)

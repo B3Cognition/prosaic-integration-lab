@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.19
+
+- Add the [Nemotron lookup correction blueprint](docs/nemotron-correction.md) and installed acceptance.
+- See [release notes](docs/release-0.9.19.md).
+
 ## 0.9.18 — 2026-11-14
 
 - Add the guarded recovery blueprint, with a checksum-pinned SDK profile and installed wheel and rebuilt-source acceptance.

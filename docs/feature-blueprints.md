@@ -5,6 +5,12 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
+## Lab 0.9.19 feature map
+
+| Capability | Copyable blueprint | What the installed test proves |
+| --- | --- | --- |
+| Nemotron lookup correction | `nemotron-correction` | Correction-only wire grammar, one authorized read, grounded output and no-call resume. [Guide](nemotron-correction.md) |
+
 ## Lab 0.9.18 feature map
 
 | Capability | Copyable blueprint | What the installed test proves |
