@@ -79,9 +79,10 @@ lab_ontology_tests="$PWD/tests/catalogue_ontology_acceptance"
 
 The [Experimental catalogue ontology workflow](../.github/workflows/catalogue-ontology.yml)
 runs on manual dispatch and on pull requests that touch the ontology files.
-It checks both the checkout wheel and a wheel rebuilt from the sdist. Tests copy
-the installed blueprint, exercise projection and admission, and prove that the
-workflow runs with sockets and subprocesses disabled.
+It verifies the frozen RC profile. The [required integration matrix](release-gates.md)
+verifies the released SDK profile. Both run the suite on the Lab wheel and a
+wheel rebuilt from the sdist. Tests copy the installed blueprint, exercise
+projection and admission, and run the workflow with sockets and subprocesses disabled.
 
 ## Qualify the candidate SDKs
 
@@ -98,6 +99,6 @@ The same workflow checks pre-upgrade file and PostgreSQL recovery and all
 The stack uses the original published PostgreSQL adapters. Candidate
 qualification uses its own manifest and wheel cache.
 
-See the [Core attachment format](https://github.com/B3Cognition/prosaic/blob/v0.5.1rc1/docs/catalogue-ontology.md),
-[shared fixture](https://github.com/B3Cognition/prosaic/tree/v0.5.1rc1/conformance-fixtures/catalogue-ontology)
-and [Harness prerelease](https://github.com/B3Cognition/prosaic-harness/releases/tag/v0.9.17rc1).
+See the [Core 0.5.1 attachment format](https://github.com/B3Cognition/prosaic/blob/v0.5.1/docs/catalogue-ontology.md),
+[shared fixture](https://github.com/B3Cognition/prosaic/tree/v0.5.1/conformance-fixtures/catalogue-ontology)
+and [Harness 0.9.18 discovery guide](https://github.com/B3Cognition/prosaic-harness/blob/v0.9.18/docs/catalogue-ontology.md).
