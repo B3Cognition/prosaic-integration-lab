@@ -1,5 +1,21 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Handoff and verification ledger post-merge — 2026-11-15
+
+Lab [PR #66](https://github.com/B3Cognition/prosaic-integration-lab/pull/66)
+merged to `main` as `4a7bf914b4d432c63edc2c7ad53c6ac8cef485f9`. It recorded
+the ontology documentation merge and its CI evidence in the handoff and
+this ledger. All four workflows triggered by the merge passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629881) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629922) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629880) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629932) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
 ## Catalogue ontology docs post-merge — 2026-11-14
 
 Lab [PR #63](https://github.com/B3Cognition/prosaic-integration-lab/pull/63)
