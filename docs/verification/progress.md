@@ -1,5 +1,36 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Catalogue ontology docs post-merge — 2026-11-14
+
+Lab [PR #63](https://github.com/B3Cognition/prosaic-integration-lab/pull/63)
+merged to `main` as `dd97cc62523a29c0dd7f55f0b78c31439ace864d`.
+The [ontology guide](../catalogue-ontology.md) distinguishes the stable SDK
+qualification from the frozen RC workflow and links the stable Core and
+Harness guides. The [feature map](../feature-blueprints.md#lab-0917-feature-map)
+lists catalogue ontology under Lab 0.9.17.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924) | All four Linux x64/ARM64 and PostgreSQL 16/18 cells passed after the single-cell retry. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734956) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734960) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734955) | Passed. |
+
+The acceptance workflow used Python 3.12 and the released Core 0.5.1,
+Runtime 0.9.23, Harness 0.9.18, recorder 0.3.0 and store 0.4.5 wheels.
+The four checksum-verified reports from `scripts/required_acceptance.py`
+record 450 synthetic stack cases per cell, zero skips and verified cleanup.
+The distribution smoke reports record 11 installed ontology tests from
+the Lab wheel and 11 from a wheel rebuilt from the source archive in each
+cell, for 88 tests with zero failures, errors or skips.
+
+GitHub reported that the [original ARM64/PostgreSQL 16 runner](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/job/132482882788)
+lost communication during package qualification. The [retry attempt](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/attempts/2)
+reran only that failed cell on the same commit. The
+[retried job](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/job/132508334742)
+passed package qualification, including the rebuilt-source stack check,
+and the full acceptance suite. These results qualify the documentation merge.
+
 ## Stable catalogue ontology candidate — 2026-11-12
 
 On macOS ARM64 with Python 3.12.15, `scripts/qualify_catalogue_ontology.py`
