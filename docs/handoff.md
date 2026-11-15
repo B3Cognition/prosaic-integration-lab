@@ -17,6 +17,20 @@ The tests check the request budget, an authorized lookup, typed recovery
 evidence and the resume identity. The ordinary and reasoning manifests
 continue to select the published catalogue ontology train.
 
+## Catalogue ontology guide follow-up — 2026-11-14
+
+Lab [PR #63](https://github.com/B3Cognition/prosaic-integration-lab/pull/63)
+merged as `dd97cc6`. The [ontology guide](catalogue-ontology.md) links to
+stable Core 0.5.1 and Harness 0.9.18 and explains how the released SDK matrix
+and frozen RC workflow qualify the example. The [feature map](feature-blueprints.md#lab-0917-feature-map)
+lists ontology under Lab 0.9.17.
+
+All four post-merge workflows passed. GitHub reported that the
+ARM64/PostgreSQL 16 runner lost contact during package qualification. Only
+that cell was rerun, and it passed on the same commit. The
+[verification ledger](verification/progress.md#catalogue-ontology-docs-post-merge--2026-11-14)
+records both attempts. PR #63 was a documentation-only merge.
+
 ## Bounded sub-agents and Lab 0.9.16 — 2026-11-12
 
 Qualify and publish Runtime 0.9.23, Harness 0.9.17 and its PostgreSQL adapter 0.4.5 in dependency order, then adopt their verified public wheels in Lab. The [workflow and conversation guide](sub-agents.md) explains the copyable example. The published delegation family selects 450 required cases per architecture and PostgreSQL cell.
