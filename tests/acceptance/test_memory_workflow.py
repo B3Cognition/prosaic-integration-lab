@@ -142,6 +142,7 @@ def test_actual_castle_snapshot_survives_changed_source_and_cross_process_resume
         providers.close()
         trace = (castle / "operations.log").read_text()
         assert trace.splitlines() == ["hello", "search", "snapshot"]
+        assert not (castle / "operations.forbidden").exists()
         child = int((castle / "operations.pid").read_text())
         with pytest.raises(ProcessLookupError):
             os.kill(child, 0)
@@ -151,6 +152,7 @@ def test_actual_castle_snapshot_survives_changed_source_and_cross_process_resume
         )
         assert store.load_run(run_id).state["inputs"]["memory"] == frozen
         assert (castle / "operations.log").read_text() == trace
+        assert not (castle / "operations.forbidden").exists()
         assert len(requests) == 1
         messages = requests[0]["messages"]
         assert "Exact original evidence" in json.dumps(

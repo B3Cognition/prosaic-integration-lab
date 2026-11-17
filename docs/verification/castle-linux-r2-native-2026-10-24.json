@@ -1,0 +1,119 @@
+{
+  "qualified": true,
+  "run_id": 40074232401,
+  "original_zip_hashes_verified": 5,
+  "default_memory_enabled": false,
+  "build": {
+    "built": true,
+    "published": false,
+    "castle_source_commit": "ad18037b582148d9b23f82e8c95a416092b42b9f",
+    "lab_source_commit": "a981a55932aea1a888e66be9de05856697b4bf66",
+    "source_date_epoch": "1792826618",
+    "packages": [
+      {
+        "distribution": "cognitive-castle",
+        "version": "3.4.2",
+        "wheel": "cognitive_castle-3.4.2-py3-none-any.whl",
+        "wheel_sha256": "01f599742c5c3845d1b0d3ad4659fd570618de2fba8fa42a9feebca9637a42fa",
+        "sdist": "cognitive_castle-3.4.2.tar.gz",
+        "sdist_sha256": "1690e263a3dd7c57ae4aabfd94ea717a24e6697c45bc141da0187209c5bf43fb",
+        "rebuilt_sdist_payloads_match": true
+      },
+      {
+        "distribution": "b3-prosaic-memory-castle",
+        "version": "0.1.0",
+        "wheel": "b3_prosaic_memory_castle-0.1.0-py3-none-any.whl",
+        "wheel_sha256": "029fac711dfe8e4a121942ab69a13e7abbd147e3de7dde2f638ecedccfa70cb5",
+        "sdist": "b3_prosaic_memory_castle-0.1.0.tar.gz",
+        "sdist_sha256": "6e9974dd12ee4301d93cbb99d31947dbc662df31f315ae19b6b0b341f9efdaac",
+        "rebuilt_sdist_payloads_match": true
+      }
+    ],
+    "lab_wheel": {
+      "filename": "prosaic_integration_lab-0.6.0-py3-none-any.whl",
+      "sha256": "2789cb7ae761f950e293832bfff2ec37af4893a73f3751e1e32dead47e9d1a30"
+    },
+    "manifest_sha256": "4c3739a2169799f4f255c44eae43d3ae0e7aa5ba89de4f55f20234153cb20977",
+    "public_sdk_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+    "build_tools": {
+      "build": "1.6.1",
+      "setuptools": "84.2.1",
+      "hatchling": "1.32.4",
+      "twine": "7.0.0"
+    }
+  },
+  "cells": [
+    {
+      "architecture": "arm64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "238ad1bb09be1cee99cfb142f6a97a72c18a5f9b13f4905a24c823f8ae604b3d",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "arm64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "198a825087f1a66fad67a1188d6187a620cd7d0fd0c175766a432fdcf85dc3d7",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "11e220a45797081283503fca807d395c007c238c761f33d0c2693b63618023fd",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "receipt_sha256": "6b5de274ef3b33442c597ab4a3368f8cbbcb64dadeea45b45def5b9024fedb76",
+      "worker_dependencies": 76
+    }
+  ],
+  "github_artifacts": [
+    {
+      "name": "castle-ubuntu-24.04-arm-pg18",
+      "id": 12553000172,
+      "sha256": "cbf473d032e1e6a79004f8535620d34695320076a6f9e2d56287f935867bc564",
+      "expires_at": "2027-01-22T07:27:56Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-pg16",
+      "id": 12552995197,
+      "sha256": "c3e0b0a32dc05b09450ce2805f4d7a3fe6ecdb27d9cef3a65b021ec965bb4267",
+      "expires_at": "2027-01-22T07:27:56Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-arm-pg16",
+      "id": 12552541758,
+      "sha256": "5dd6d56c1c649020d83f0dc53b3d3e89fe369b08bd50155b65c11525393fdcc6",
+      "expires_at": "2027-01-22T07:27:56Z"
+    },
+    {
+      "name": "castle-release-bundle",
+      "id": 12552517790,
+      "sha256": "1a1c1bd8cc4692285428a0a78026526ac0ac8a0d08bb99d419ae5e202592eba7",
+      "expires_at": "2027-01-22T07:27:56Z"
+    },
+    {
+      "name": "castle-ubuntu-24.04-pg18",
+      "id": 12552511831,
+      "sha256": "bf61ba301f06cf92d59f3317a36a421234832fcb426e102481f1558d7f5ea204",
+      "expires_at": "2027-01-22T07:27:56Z"
+    }
+  ]
+}

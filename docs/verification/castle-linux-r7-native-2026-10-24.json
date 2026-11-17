@@ -1,0 +1,120 @@
+{
+  "qualified": true,
+  "run_id": 40084670025,
+  "scope": "Native Linux FTS host provider, exact frozen snapshots/resume and unavailable memory; not model-tool registration or live quality certification",
+  "default_memory_enabled": false,
+  "castle_source_commit": "58f4242080212c2bebcca0c685af0f5e1090aa94",
+  "lab_ci_source_commit": "7a11bc2020e1886990850556310112a12d5180f0",
+  "main_base_commit": "8194f6a0f6e64c6186c8aa129bc759e9e3ef3008",
+  "manifest_sha256": "a7b011ba17708bec6216c2953298ff95289c15ded992cc62bc2288875442fa0e",
+  "public_sdk_manifest_sha256": "36eec99280acb8688d2496f704f4445b59c3ff269fc506a83d6e7fe83bc92698",
+  "runtime_version": "0.9.8",
+  "package_payload_files_verified": {
+    "cognitive-castle": 132,
+    "b3-prosaic-memory-castle": 4,
+    "prosaic-integration-lab": 171
+  },
+  "selected_packages": [
+    {
+      "distribution": "cognitive-castle",
+      "version": "3.4.2",
+      "wheel": "cognitive_castle-3.4.2-py3-none-any.whl",
+      "wheel_sha256": "4c0d6723d6f305639c14c51ae0327dcdcd75547ad8e2be89180a833df33ff027",
+      "sdist": "cognitive_castle-3.4.2.tar.gz",
+      "sdist_sha256": "774d092188e11f9e4bdaf523ee8b9f051f064451c30c605594fe111139657dfa",
+      "rebuilt_sdist_payloads_match": true
+    },
+    {
+      "distribution": "b3-prosaic-memory-castle",
+      "version": "0.1.0",
+      "wheel": "b3_prosaic_memory_castle-0.1.0-py3-none-any.whl",
+      "wheel_sha256": "15044ab131e271799dd684b499acacc3cbfdb6988a512ee1854c18ed3bd29bfd",
+      "sdist": "b3_prosaic_memory_castle-0.1.0.tar.gz",
+      "sdist_sha256": "da9cee8397cbdfcc058b2cf8f1aad77d703bb783802f2c334d3cadaf6a9f9e95",
+      "rebuilt_sdist_payloads_match": true
+    }
+  ],
+  "cells": [
+    {
+      "architecture": "arm64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "qualification_sha256": "a6c36a8331d388670af56f2b629fdfd0ebdf2f00eba4ddd6b5b83b0104ebdc20",
+      "memory_receipt_sha256": "87d015be8dffff9b97d8263bade682356c6955c978a522e1e5273522f79109c5",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "arm64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "qualification_sha256": "9a8bca37d73a073e4c941f6fcdb950a5756bc0274822bedf4a46fc09de645e7b",
+      "memory_receipt_sha256": "f727e2721c06c5d44bbb707ad660fece0d7b468cf40400092468d3fd570688f2",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 16,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "qualification_sha256": "d9f67c3b76c84959b22a453660da4fe2f9d9bd4eaaa3373249653676e43f1853",
+      "memory_receipt_sha256": "75938b2265b2073d6de9e9cfe88318b26247588a00e30b51dc5bec39ad59376a",
+      "worker_dependencies": 76
+    },
+    {
+      "architecture": "amd64",
+      "postgres_major": 18,
+      "tests": 6,
+      "failures": 0,
+      "skipped": 0,
+      "cleanup_verified": true,
+      "qualification_sha256": "0675b4c97a754329e92fb69b4fff2b3de9bb03676a413c1495e41a15971dfd44",
+      "memory_receipt_sha256": "f7267aa7ad2e088aae88c66edd531fcae32f1423c765049a8fe8348c96bd03e1",
+      "worker_dependencies": 76
+    }
+  ],
+  "github_artifacts": [
+    {
+      "id": 12557115475,
+      "name": "castle-release-bundle",
+      "sha256": "85497d45b6e9858e5134c37db9cf8c822bb06e878ff23676fa4d67e30477a546",
+      "github_digest_verified": true,
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40084670025/artifacts/12557115475"
+    },
+    {
+      "id": 12556966750,
+      "name": "castle-ubuntu-24.04-pg18",
+      "sha256": "cd56eb6f88dfbf58884ca5a8f880c8bc2293c67cbeca588cc2318ebaf7f7f01c",
+      "github_digest_verified": true,
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40084670025/artifacts/12556966750"
+    },
+    {
+      "id": 12556737646,
+      "name": "castle-ubuntu-24.04-arm-pg16",
+      "sha256": "ba6d17c156bace29721d38f62d11f9adb94b71a2aea8cf16861cf8fec41c2505",
+      "github_digest_verified": true,
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40084670025/artifacts/12556737646"
+    },
+    {
+      "id": 12556487214,
+      "name": "castle-ubuntu-24.04-arm-pg18",
+      "sha256": "31932b50179c37c0c584e235ef11b05f42dec2b2ffcfe4941efb1682b7ec04cf",
+      "github_digest_verified": true,
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40084670025/artifacts/12556487214"
+    },
+    {
+      "id": 12556292729,
+      "name": "castle-ubuntu-24.04-pg16",
+      "sha256": "3fed069df206389ad220f20668a67b93cc3e56dc1faa5e36ff31786a7d7d5bc1",
+      "github_digest_verified": true,
+      "url": "https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/40084670025/artifacts/12556292729"
+    }
+  ]
+}
