@@ -1,5 +1,20 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## PR #69 post-merge verification — 2026-11-17
+
+Lab [PR #69](https://github.com/B3Cognition/prosaic-integration-lab/pull/69)
+merged to `main` as `21b9fa4ee794975317a269687af45d33aaf9ed8b` and added
+the #68 verification record below. All four post-merge workflows passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122260) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122266) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122131) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122091) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
 ## PR #68 post-merge verification — 2026-11-15
 
 Lab [PR #68](https://github.com/B3Cognition/prosaic-integration-lab/pull/68)
