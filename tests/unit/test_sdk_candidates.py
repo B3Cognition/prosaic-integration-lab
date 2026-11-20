@@ -37,6 +37,11 @@ def candidate_set(tmp_path,request):
     if getattr(request,'param',None)=='packs':
         from scripts.prepare_sdk_candidates import CONTEXT_PACK_EXPECTED
         expected_versions=CONTEXT_PACK_EXPECTED
+    if getattr(request,'param',None)=='cli-sandbox':
+        expected_versions={
+            'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
+            'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.27','b3-prosaic-runtime-postgres':'0.3.0'},
+            'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.20','b3-prosaic-harness-postgres':'0.4.5'}}
     candidates=[]
     for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
@@ -100,6 +105,21 @@ def test_candidates_curate_only_exact_five_verified_wheels(candidate_set,tmp_pat
     assert {item['distribution']:item['version'] for item in data['artifacts']}=={
         'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
         'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+
+
+@pytest.mark.parametrize('candidate_set',['cli-sandbox'],indirect=True)
+def test_cli_sandbox_image_curation_requires_the_exact_candidate_chain(candidate_set,tmp_path):
+    from scripts.prepare_sdk_candidates import curate
+    from prosaic_integration_lab.dependencies import cache_directory,verified_wheel_paths
+    directories,candidates=candidate_set
+    arguments=[(c['repository'],c['run_id'],c['source_commit'],d) for c,d in zip(candidates,directories)]
+    manifest=tmp_path/'sandbox.json'
+    cache=tmp_path/'cache'
+    data=curate(arguments,manifest,cache,cli_sandbox=True)
+    assert len(verified_wheel_paths(manifest,cache_directory(manifest,cache)))==5
+    assert data['candidate_lineage']['candidates']==candidates
+    with pytest.raises(ValueError,match='distribution'):
+        curate(arguments,tmp_path/'wrong-train.json',cache)
 
 
 @pytest.mark.parametrize('version',['0.8.1','0.10.0'])

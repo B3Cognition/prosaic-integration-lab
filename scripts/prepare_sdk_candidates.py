@@ -27,6 +27,10 @@ CONTEXT_PACK_EXPECTED={
     'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.19','b3-prosaic-runtime-postgres':'0.3.0'},
     'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}}
+CLI_SANDBOX_EXPECTED={
+    'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
+    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.27','b3-prosaic-runtime-postgres':'0.3.0'},
+    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.20','b3-prosaic-harness-postgres':'0.4.5'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
@@ -64,15 +68,17 @@ def retained_runtime_postgres(cache_root):
     return dict(item),cache/item['filename']
 
 
-def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False,tool_contracts=False,parallel_tools=False):
+def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False,tool_contracts=False,
+           parallel_tools=False,cli_sandbox=False):
+    if sum((context_assembly,context_packs,tool_contracts,parallel_tools,cli_sandbox))>1:
+        raise ValueError('candidate feature modes are mutually exclusive')
     if parallel_tools:
         return curate_parallel_tools(candidates[0],candidates[1],manifest,cache_root)
     if tool_contracts:
-        if context_assembly or context_packs:raise ValueError("candidate feature modes are mutually exclusive")
         return curate_tool_contracts(candidates,manifest,cache_root)
-    if context_assembly and context_packs:raise ValueError('candidate feature modes are mutually exclusive')
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
-    expected_train=CONTEXT_PACK_EXPECTED if context_packs else CONTEXT_EXPECTED if context_assembly else EXPECTED
+    expected_train=(CLI_SANDBOX_EXPECTED if cli_sandbox else CONTEXT_PACK_EXPECTED if context_packs
+                    else CONTEXT_EXPECTED if context_assembly else EXPECTED)
     evidence=[];artifacts=[];sources={};seen=set()
     for repository,run_id,commit,directory in candidates:
         if repository not in EXPECTED or repository in seen or not re.fullmatch('[1-9][0-9]*',run_id):
@@ -440,6 +446,7 @@ def main(argv=None):
     parser.add_argument('--harness-artifacts',type=Path)
     features.add_argument('--tool-contracts',action='store_true',help='curate only qualified safe-event/citation candidate workflows')
     features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
+    features.add_argument('--cli-sandbox',action='store_true',help='curate the exact CLI sandbox SDK candidates')
     args=parser.parse_args(argv)
     if args.catalogue_ontology:
         if any((args.profile, args.runtime_artifacts, args.runtime_run_id, args.runtime_source)):
@@ -486,7 +493,8 @@ def main(argv=None):
                 if args.tool_contracts and repository!='B3Cognition/prosaic':
                     (directory/'tool-contract-run.json').write_bytes(serialized(json.loads(result.stdout)))
                 candidates.append((repository,run_id,commit,directory))
-            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,context_packs=args.context_packs,tool_contracts=args.tool_contracts)
+            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,
+                        context_packs=args.context_packs,tool_contracts=args.tool_contracts,cli_sandbox=args.cli_sandbox)
         print(json.dumps({'event':'candidate_sdk_bytes_verified','candidate_manifest_sha256':digest(args.manifest.read_bytes()),
             'candidate_lineage_sha256':digest(serialized(data['candidate_lineage'])),'wheel_count':5}))
         return 0

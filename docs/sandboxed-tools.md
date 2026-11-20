@@ -57,6 +57,32 @@ never fall back to off mode. Backend presence alone is insufficient. CI builds
 a pinned Bubblewrap commit and grants user-namespace creation only to its
 broker on disposable Ubuntu runners; host-wide restrictions remain enabled.
 
+## Qualify the Linux image
+
+The released and candidate Lab Dockerfiles build Bubblewrap from the same
+pinned source commit as SDK CI. Run the installed-image smoke test as the Lab
+service user under its read-only Docker policy:
+
+```sh
+docker run --rm --pull never --network none --user 10001:10001 --read-only \
+  --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 2 --pids-limit 128 \
+  --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777 --entrypoint python \
+  prosaic-integration-lab:candidate -I /srv/lab/scripts/cli_sandbox_image_smoke.py
+```
+
+Use `--explicit-required` with a released image whose Runtime still uses opt-in
+isolation. The script requires a confined version probe and a confined CLI
+call through a synthetic loopback provider. It checks allowed evidence,
+private scratch, denied outside reads and writes, and denied network access.
+`cli_sandbox_unavailable` means the image or outer kernel policy cannot
+enforce confinement.
+
+The **Required integration acceptance** workflow's `cli_sandbox_images` input
+runs this gate on native AMD64 and ARM64. Select `candidate` and supply the
+qualified Core, Runtime and Harness run IDs and exact commits to test the
+unpublished wheels. Both image jobs must pass before promoting the default
+policy for CLI-enabled Lab deployments.
+
 Successful CLI results come from public `TurnEvidence`, never the final model
 text. With bounded recovery enabled, timeout/output failures stop as
 `toolEffectUncertain`, with no completed tool outcome. This SDK version does
