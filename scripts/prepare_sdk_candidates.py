@@ -15,7 +15,8 @@ import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
-from prosaic_integration_lab.dependencies import cache_directory,file_digest,sdk_manifest,verified_wheel_paths
+from prosaic_integration_lab.dependencies import (
+    CLI_SANDBOX_CANDIDATES, cache_directory, file_digest, sdk_manifest, verified_wheel_paths)
 
 EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0'},
@@ -27,10 +28,6 @@ CONTEXT_PACK_EXPECTED={
     'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.19','b3-prosaic-runtime-postgres':'0.3.0'},
     'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}}
-CLI_SANDBOX_EXPECTED={
-    'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
-    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.27','b3-prosaic-runtime-postgres':'0.3.0'},
-    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.20','b3-prosaic-harness-postgres':'0.4.5'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
@@ -77,7 +74,7 @@ def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs
     if tool_contracts:
         return curate_tool_contracts(candidates,manifest,cache_root)
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
-    expected_train=(CLI_SANDBOX_EXPECTED if cli_sandbox else CONTEXT_PACK_EXPECTED if context_packs
+    expected_train=(CLI_SANDBOX_CANDIDATES if cli_sandbox else CONTEXT_PACK_EXPECTED if context_packs
                     else CONTEXT_EXPECTED if context_assembly else EXPECTED)
     evidence=[];artifacts=[];sources={};seen=set()
     for repository,run_id,commit,directory in candidates:

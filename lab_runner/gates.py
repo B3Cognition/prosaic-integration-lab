@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from prosaic_integration_lab.catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
+from prosaic_integration_lab.dependencies import CLI_SANDBOX_CANDIDATES
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
 ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32,'mcp-client':24,'sub-agents':24}
@@ -40,6 +41,11 @@ MCP_CASES = (
 from prosaic_integration_lab.sub_agents import (CASES as SUB_AGENT_CASES,
     RELEASE_TRAIN as SUB_AGENT_RELEASE_TRAIN, TRAIN as SUB_AGENT_TRAIN)
 
+CLI_SANDBOX_TRAIN = {
+    name: version for candidate in CLI_SANDBOX_CANDIDATES.values()
+    for name, version in candidate.items()
+}
+
 
 def supports_sub_agents(manifest):
     artifacts = manifest.get('artifacts', ())
@@ -62,6 +68,10 @@ def supports_sub_agents(manifest):
                        for item in artifacts if item['distribution'] in RETAINED_WHEELS)):
             raise ValueError('invalid released delegation SDK family')
         return True
+    if (len(artifacts) == len(CLI_SANDBOX_TRAIN) and actual == CLI_SANDBOX_TRAIN
+            and 'candidate_lineage' in manifest):
+        # This candidate reuses the PostgreSQL adapter from the delegation release.
+        return False
     if any(actual.get(name) in (SUB_AGENT_TRAIN[name], SUB_AGENT_RELEASE_TRAIN[name])
            for name in ('b3-prosaic-runtime', 'b3-prosaic-harness', 'b3-prosaic-harness-postgres')):
         raise ValueError('mixed delegation SDK family')

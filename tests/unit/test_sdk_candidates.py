@@ -109,6 +109,7 @@ def test_candidates_curate_only_exact_five_verified_wheels(candidate_set,tmp_pat
 
 @pytest.mark.parametrize('candidate_set',['cli-sandbox'],indirect=True)
 def test_cli_sandbox_image_curation_requires_the_exact_candidate_chain(candidate_set,tmp_path):
+    from lab_runner.gates import supports_mcp_client
     from scripts.prepare_sdk_candidates import curate
     from prosaic_integration_lab.dependencies import cache_directory,verified_wheel_paths
     directories,candidates=candidate_set
@@ -118,6 +119,9 @@ def test_cli_sandbox_image_curation_requires_the_exact_candidate_chain(candidate
     data=curate(arguments,manifest,cache,cli_sandbox=True)
     assert len(verified_wheel_paths(manifest,cache_directory(manifest,cache)))==5
     assert data['candidate_lineage']['candidates']==candidates
+    assert not supports_mcp_client(data)
+    with pytest.raises(ValueError,match='mixed delegation SDK family'):
+        supports_mcp_client({'artifacts':data['artifacts']})
     with pytest.raises(ValueError,match='distribution'):
         curate(arguments,tmp_path/'wrong-train.json',cache)
 
