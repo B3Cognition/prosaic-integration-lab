@@ -14,4 +14,3 @@ meson compile -C /tmp/bubblewrap/build
 DESTDIR=/out meson install -C /tmp/bubblewrap/build --no-rebuild
 test -x /out/usr/bin/bwrap
 test ! -u /out/usr/bin/bwrap
-
