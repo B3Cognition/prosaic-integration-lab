@@ -88,11 +88,30 @@ pool controls; the chat/workflow browser remains a separate service.
 Your application owns identity, authorization, tools, endpoints and billing
 attribution. A Markdown instruction is not permission to access a tool or file.
 
+## Public Linux images
+
+The public GHCR image includes **Runtime 0.9.27**, **Harness 0.9.20**, and
+Bubblewrap 0.12.0. The same index digest pulls the correct platform image on
+AMD64 and ARM64 without a registry login.
+
+```sh
+docker pull ghcr.io/b3cognition/prosaic-integration-lab@sha256:b79a80ab94cb10c35be0b093890d29fbc6d69f6bc6d6a0d39d1936b53f87a222
+```
+
+| Platform | Verified manifest digest |
+| --- | --- |
+| `linux/amd64` | `sha256:f4c871c934752f67bdacc8a79442b069093bba825e2e089fd34bd1779eaf2ad5` |
+| `linux/arm64` | `sha256:2e74b16cde92101e2aa46b69d180cacc43f9dae2efd5aae41bba6f274443e141` |
+
+Runtime requires CLI sandboxing by default. On a native Linux Docker host,
+load `containers/cli-sandbox.apparmor` for the dedicated CLI worker and run
+`scripts/qualify_cli_sandbox_image.py` with the local image ID and the
+checksum-pinned Moby seccomp baseline. The witness verifies confinement and
+the setup removes the AppArmor profile afterwards.
+[Bubblewrap setup commands](docs/releases.md#bubblewrap-policy-setup)
+
 ## Current releases and what is new
 
-The Linux images built from this checkout use the published **Runtime 0.9.27**
-and **Harness 0.9.20** wheels. Runtime requires sandboxing for CLI tools by
-default. CLI-enabled Linux workers use the [Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image).
 The [feature-to-blueprint map](docs/feature-blueprints.md) links to the copyable examples. Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact

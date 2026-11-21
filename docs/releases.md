@@ -1,8 +1,59 @@
 # Releases and compatibility
 
-The [Bubblewrap deployment guide](sandboxed-tools.md#qualify-the-linux-image)
-covers image qualification for Runtime 0.9.27 and Harness 0.9.20. Lab's
-published SDK profiles are tracked by their own release manifests.
+## Public Linux images
+
+The Lab images on GHCR include Runtime 0.9.27, Harness 0.9.20, Core 0.5.1,
+Runtime recorder 0.3.0, Harness store 0.4.5, and Bubblewrap 0.12.0.
+Pull the shared index digest without signing in. Docker selects the local
+architecture.
+
+```sh
+docker pull ghcr.io/b3cognition/prosaic-integration-lab@sha256:b79a80ab94cb10c35be0b093890d29fbc6d69f6bc6d6a0d39d1936b53f87a222
+```
+
+| Platform | Verified manifest digest |
+| --- | --- |
+| `linux/amd64` | `sha256:f4c871c934752f67bdacc8a79442b069093bba825e2e089fd34bd1779eaf2ad5` |
+| `linux/arm64` | `sha256:2e74b16cde92101e2aa46b69d180cacc43f9dae2efd5aae41bba6f274443e141` |
+
+Native AMD64 and ARM64 runners pulled the published index by digest, matched
+the qualified image configurations, audited the installed SDK wheels, and
+passed the Bubblewrap CLI and version-probe witness. Both platforms also
+passed an anonymous Docker pull with an empty credential configuration after
+the package became public.
+[Publication and qualification run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44923400420)
+
+### Bubblewrap policy setup
+
+After pulling the image above, use a native Linux host with a local Docker
+Engine, AppArmor enforcement, and seccomp. Run from the Lab source checkout
+used to publish this image. Set `arch` to `arm64` on a native ARM64 host.
+[Image source commit](https://github.com/B3Cognition/prosaic-integration-lab/tree/2f5e1b10034fdbaab11f9f7181a443412f42ce95)
+
+```bash
+(
+  set -eu
+  arch=amd64
+  image=$(docker image inspect --format '{{.Id}}' \
+    ghcr.io/b3cognition/prosaic-integration-lab@sha256:b79a80ab94cb10c35be0b093890d29fbc6d69f6bc6d6a0d39d1936b53f87a222)
+  seccomp=$(mktemp)
+  trap 'rm -f "$seccomp"' EXIT
+  profile_url=$(python3 -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+  curl --fail --silent --show-error --location "$profile_url" -o "$seccomp"
+  sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
+  trap 'rm -f "$seccomp"; sudo apparmor_parser -R containers/cli-sandbox.apparmor' EXIT
+  python3 scripts/qualify_cli_sandbox_image.py "$image" "$seccomp" --architecture "$arch"
+)
+```
+
+The witness checks Runtime's required default and validates the checksum of
+the seccomp baseline. The approved policy applies to the dedicated CLI
+worker with a read-only root, zero outer capabilities, `no-new-privileges`,
+and no external network. The witness uses synthetic fixtures and the setup
+unloads the temporary AppArmor profile on exit.
+[Bubblewrap deployment guide](sandboxed-tools.md#qualify-the-linux-image)
+
+## Lab package release notes
 
 Lab 0.9.19 adds [constrained Nemotron lookup correction](release-0.9.19.md) with a dedicated SDK profile.
 
