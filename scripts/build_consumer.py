@@ -34,8 +34,10 @@ def build(manifest: Path, wheel_dir: Path, tag: str, dependency_mode: str) -> st
     digest = hashlib.sha256(content).hexdigest()
     data = sdk_manifest(manifest)
     sys.path.insert(0, str(ROOT))
-    from lab_runner.gates import ONTOLOGY_TRAIN, supports_mcp_client
+    from lab_runner.gates import ONTOLOGY_TRAIN, SANDBOX_RELEASE_TRAIN, supports_mcp_client
     versions = {item['distribution']: item['version'] for item in data['artifacts']}
+    if versions == SANDBOX_RELEASE_TRAIN and dependency_mode != 'released':
+        raise ValueError('sandbox SDK release requires released build mode')
     if versions == ONTOLOGY_TRAIN and ('candidate_lineage' in data) != (dependency_mode == 'candidate'):
         mode = 'candidate' if 'candidate_lineage' in data else 'released'
         raise ValueError(f'ontology handoff requires {mode} mode')

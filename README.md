@@ -59,7 +59,7 @@ account, API key, local model or Docker.
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
 | Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.23; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Core 0.5.1, Runtime 0.9.23 and Harness 0.9.18. Both synthetic provider wires |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Core 0.5.1, Runtime 0.9.27 and Harness 0.9.20. Both synthetic provider wires |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
@@ -90,13 +90,16 @@ attribution. A Markdown instruction is not permission to access a tool or file.
 
 ## Current releases and what is new
 
-Lab **[0.9.17](docs/release-0.9.17.md)** supplies the current SDK train with
-a [feature-to-blueprint map](docs/feature-blueprints.md). Use
+The Linux images built from this checkout use the published **Runtime 0.9.27**
+and **Harness 0.9.20** wheels. Runtime requires sandboxing for CLI tools by
+default. CLI-enabled Linux workers use the [Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image).
+The [feature-to-blueprint map](docs/feature-blueprints.md) links to the copyable examples. Use
 `python -m lab_runner.blueprints list` and `copy NAME DESTINATION` to obtain
 complete examples from an installed wheel. Both active manifests retain exact
 public URLs, SHA256 hashes and source commits. Prior manifests, provenance and
 freezes are archived unchanged; partial mixtures still refuse admission.
-The full ordinary, guarded/feature and reasoning matrix remains mandatory.
+The full ordinary, guarded/feature and reasoning matrix remains mandatory. The
+reasoning control lane keeps its separate frozen SDK manifest.
 Historical release artifacts and live evidence keep their original bytes.
 
 After the [quickstart installation](docs/quickstart.md#setup-once), open the

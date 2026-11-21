@@ -27,10 +27,10 @@ def test_current_manifest_pins_the_exact_released_guarded_train():
             for name, item in released.items()} == {
         ('b3-prosaic', '0.5.1', '921d828ea6bdafee46380212fc16f41d1f3faabc',
          'c7f7a3292952d70513da485bd87360e0bf94a3cc50d49b3deadb85a0e7d29a76'),
-        ('b3-prosaic-runtime', '0.9.23', '48c10ac9aeb18bd06f53015df0624b35d5254646',
-         '5caab59f6d0ffd14299ee0840dd5f9b58b4e4f4a1b724ff6e3e2fa1699f08fd8'),
-        ('b3-prosaic-harness', '0.9.18', 'ceb2888f924686a417d7d9d72c57cb9163cd284b',
-         'a583999d65e7e707a410ef2bc6e67787101d80c9c39c44a9bd3cbcb4f372c7bf'),
+        ('b3-prosaic-runtime', '0.9.27', '9b7a285acd50a18a992c5ebb6bef409cb5a40345',
+         '7889545eeaef8a92e08fc5669d07b72c33fdea7c191158a0d150e9798a0bf5df'),
+        ('b3-prosaic-harness', '0.9.20', '432ab7b45dc6ae16704c48652aa3dbcb99c08158',
+         'cc6fb7275ee491a07499c7ebaec12f98341c0477fd5940f468a8a5180301358d'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
         ('b3-prosaic-harness-postgres', '0.4.5', '5cf6b08e3f181bfb368b24afbe1eadf9911b4504',
@@ -42,7 +42,9 @@ def test_current_manifest_pins_the_exact_released_guarded_train():
         assert url.scheme == 'https' and url.netloc == 'files.pythonhosted.org'
         assert not url.query and not url.fragment and url.path.endswith('/' + item['filename'])
         assert item['filename'] == item['distribution'].replace('-', '_') + '-' + item['version'] + '-py3-none-any.whl'
-    assert released == artifacts('dependencies/releases-reasoning.json')
+    reasoning = artifacts('dependencies/releases-reasoning.json')
+    for name in ('b3-prosaic', 'b3-prosaic-runtime-postgres', 'b3-prosaic-harness-postgres'):
+        assert released[name] == reasoning[name]
 
 
 def test_historical_manifest_retains_the_exact_candidate_bytes():

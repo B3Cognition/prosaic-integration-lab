@@ -1,5 +1,13 @@
 # Codex handoff
 
+## Published sandbox SDKs in the Linux images
+
+The ordinary Linux image and rule-admission manifest now selects the published
+Runtime 0.9.27 and Harness 0.9.20 wheels. The full required matrix runs the
+[approved Bubblewrap policy](sandboxed-tools.md#qualify-the-linux-image) in a
+dedicated CLI worker using the same immutable image as the stack. The separate
+reasoning control manifest retains its original release pins.
+
 ## Nemotron lookup correction and Lab 0.9.19
 
 The [Nemotron blueprint](nemotron-correction.md) qualifies the Runtime 0.9.26

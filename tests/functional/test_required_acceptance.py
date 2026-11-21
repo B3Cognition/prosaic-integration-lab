@@ -1,4 +1,5 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -22,6 +23,8 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     spec = importlib.util.spec_from_file_location('required_acceptance',source)
     runner = importlib.util.module_from_spec(spec); spec.loader.exec_module(runner)
     monkeypatch.setattr(runner,'resolve_image',lambda candidate:'sha256:'+'1'*64)
+    manifest = source.parents[1] / 'dependencies/releases.json'
+    manifest_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
     seen = []
     def fake(command,**kwargs):
         mode=command[command.index('--mode')+1]; seen.append(mode)
@@ -29,10 +32,13 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
             assert kwargs['timeout']==900
         assert command[command.index('--consumer-image')+1] == 'sha256:'+'1'*64
         item={'mode':mode,'passed':mode != 'audit','cleanup':'verified','dependency_mode':'released',
-            'test_returncode':1 if mode == 'audit' else 0,'test_count':COUNTS[mode],'skipped':0,
+            'test_returncode':1 if mode == 'audit' else 0,
+            'test_count':COUNTS[mode] + (6 if mode == 'conversation' else 0),'skipped':0,
             'failed_tests':['PRIVATE'] if mode == 'audit' else [],'host_architecture':'arm64',
-            'payload_audit':'verified','released_manifest_sha256':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
+            'payload_audit':'verified','released_manifest_sha256':manifest_sha,
             'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64},'secret':'PRIVATE'}
+        if mode == 'conversation':
+            item['context_assembly'] = True
         if mode=='lago':
             item['images']['lago']=json.loads((source.parents[1]/'dependencies/lago.json').read_text())['image']
         return SimpleNamespace(returncode=item['test_returncode'],stdout=json.dumps(item)+'\nEvidence: PRIVATE',stderr='PRIVATE')
@@ -40,7 +46,7 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     target=tmp_path/'safe.json'
     monkeypatch.setattr(sys,'argv',['required_acceptance','--postgres-version','16','--export',str(target)])
     assert runner.main() == 1
-    released=json.loads((source.parents[1]/'dependencies/releases.json').read_text())
+    released=json.loads(manifest.read_text())
     assert seen == list(required_modes(candidate=False,manifest=released))
     assert 'PRIVATE' not in target.read_text()
     assert json.loads(target.read_text())['passed'] is False
@@ -71,8 +77,26 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary_and_archives():
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
 
+def test_released_ci_uses_the_witness_image_for_real_stack_gates():
+    import yaml
+
+    root = Path(__file__).resolve().parents[2]
+    workflow = yaml.safe_load((root / '.github/workflows/required-acceptance.yml').read_text())
+    steps = workflow['jobs']['acceptance']['steps']
+    build = next(step for step in steps if step.get('id') == 'consumer-image')
+    witness = next(step for step in steps if step.get('id') == 'cli-sandbox-witness')
+    stack = next(step for step in steps if step.get('name') == 'Required real-stack gates')
+    assert steps.index(build) < steps.index(witness) < steps.index(stack)
+    assert build['if'] == witness['if'] == stack['if'] == '${{ !inputs.candidate }}'
+    assert witness['env']['CONSUMER_IMAGE'] == stack['env']['CONSUMER_IMAGE'] == (
+        '${{ steps.consumer-image.outputs.image }}'
+    )
+    assert 'scripts/qualify_cli_sandbox_image.py' in witness['run']
+    assert '--explicit-required' not in witness['run']
+    assert '--consumer-image "${CONSUMER_IMAGE:?}"' in stack['run']
+
+
 def test_required_conversation_wrapper_allows_suite_and_owned_stack_cleanup(monkeypatch,tmp_path):
-    import hashlib
     source=Path(__file__).resolve().parents[2]/'scripts/required_acceptance.py'
     spec=importlib.util.spec_from_file_location('required_conversation_deadline',source)
     runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)

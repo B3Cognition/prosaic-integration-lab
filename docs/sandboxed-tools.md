@@ -69,7 +69,7 @@ operator runs the installed-image witness with a local Docker Engine:
 sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
 profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
 curl --fail --silent --show-error --location "$profile_url" -o moby-seccomp.json
-image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:candidate)
+image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:dev)
 python scripts/qualify_cli_sandbox_image.py "$image" moby-seccomp.json --architecture amd64
 ```
 
@@ -96,11 +96,12 @@ It checks allowed evidence, private scratch, denied outside reads and writes,
 denied network access, and denied nested user namespaces.
 `cli_sandbox_unavailable` means the image or outer policy blocks confinement.
 
-The **Required integration acceptance** workflow's `cli_sandbox_images` input
-runs this gate on native AMD64 and ARM64. Select `candidate` and supply the
-qualified Core, Runtime and Harness run IDs and exact commits to test the
-unpublished wheels. Both image jobs must pass before promoting the default
-policy for CLI-enabled Lab deployments.
+The released **Required integration acceptance** matrix runs this gate with
+Runtime 0.9.27 and Harness 0.9.20 on native AMD64 and ARM64 in every PostgreSQL
+cell. Its dedicated CLI worker checks the same immutable image ID used by the
+stack tests. The `cli_sandbox_images` input runs only the image gate on both
+architectures. To qualify unpublished wheels in that mode, select `candidate`
+and supply the qualified Core, Runtime and Harness run IDs and exact commits.
 
 Successful CLI results come from public `TurnEvidence`, never the final model
 text. With bounded recovery enabled, timeout/output failures stop as

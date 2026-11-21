@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Qualify the Linux consumer images with the [scoped Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image).
+- Pin the Linux consumer images to the published Runtime 0.9.27 and Harness 0.9.20 wheels.
+- Require default CLI confinement under the [scoped Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image) on the exact image used by each released stack job.
 
 ## 0.9.19
 

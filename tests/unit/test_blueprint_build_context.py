@@ -52,7 +52,7 @@ else:
     assert 'Core 0.5.1rc1 and Harness 0.9.17rc1' in explicit.stderr
 '''
     pair = (version('b3-prosaic'), version('b3-prosaic-harness'))
-    profile = 'released-ontology' if pair == ('0.5.1','0.9.18') else 'historical'
+    profile = 'released-ontology' if pair in {('0.5.1','0.9.18'), ('0.5.1','0.9.20')} else 'historical'
     result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot),str(tmp_path/'copied'),profile],
         cwd=tmp_path,capture_output=True,text=True,timeout=30)
     assert result.returncode==0,result.stderr

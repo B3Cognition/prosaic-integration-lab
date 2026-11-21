@@ -1,8 +1,15 @@
 # Current delivery status
 
+## Linux images with the published sandbox SDKs
+
+The Linux image manifest pins Runtime 0.9.27 and Harness 0.9.20 with Core
+0.5.1, recorder 0.3.0 and store 0.4.5. Released CI exercises Runtime's required
+CLI sandbox default under the [reviewed Bubblewrap policy](sandboxed-tools.md#qualify-the-linux-image)
+on native AMD64 and ARM64.
+
 ## Catalogue ontology and Lab 0.9.17 — 2026-11-13
 
-The active manifests use Core 0.5.1 and Harness 0.9.18 with Runtime 0.9.23
+Lab 0.9.17 shipped Core 0.5.1 and Harness 0.9.18 with Runtime 0.9.23
 and the original PostgreSQL adapter wheels. The copyable receipt workflow
 shows how to request ontology metadata through policy-scoped discovery.
 See the [user guide](catalogue-ontology.md) and [release notes](release-0.9.17.md).

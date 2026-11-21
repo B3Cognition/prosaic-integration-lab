@@ -1,9 +1,10 @@
 # Required release gates
 
-Before promoting the SDK's required CLI sandbox default in Lab containers,
-run the [Bubblewrap image qualification](sandboxed-tools.md#qualify-the-linux-image)
-with the exact SDK wheels and the dedicated Docker policy on native AMD64 and
-ARM64. Passing a native host SDK lane does not qualify the container policy.
+Released integration acceptance requires the [Bubblewrap image qualification](sandboxed-tools.md#qualify-the-linux-image)
+on native AMD64 and ARM64 with PostgreSQL 16 and 18. Each job runs a dedicated
+CLI worker under the reviewed Docker policy and then uses the same immutable
+image for the required real-stack gates. The witness exercises Runtime 0.9.27's
+required default with the published Harness 0.9.20 wheels.
 
 Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
 to pass all four synthetic cases from the installed Lab wheel and rebuilt

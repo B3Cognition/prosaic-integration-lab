@@ -229,7 +229,40 @@ jobs:
           .venv/bin/python scripts/conversation_distribution_smoke.py --wheel dist/prosaic_integration_lab-*-py3-none-any.whl --sdist dist/prosaic_integration_lab-*.tar.gz "${flags[@]}" --postgres-version "$POSTGRES_CELL" --export reports/conversation-distribution-pg${{ matrix.postgres }}.json
       - name: Build immutable consumer
         if: ${{ !inputs.candidate }}
-        run: .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json --dependency-mode released --tag prosaic-integration-lab:dev
+        id: consumer-image
+        shell: bash
+        run: |
+          .venv/bin/python scripts/build_consumer.py --manifest dependencies/releases.json \
+            --dependency-mode released --tag prosaic-integration-lab:dev | tee "$RUNNER_TEMP/consumer-build.log"
+          image=$(tail -n 1 "$RUNNER_TEMP/consumer-build.log")
+          [[ "$image" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
+      - name: Load the dedicated AppArmor policy
+        if: ${{ !inputs.candidate }}
+        id: load-cli-sandbox-policy
+        run: &load_cli_sandbox_policy sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
+      - name: Require the deployed image to confine CLI tools and version probes
+        if: ${{ !inputs.candidate }}
+        id: cli-sandbox-witness
+        env: &cli_sandbox_environment
+          CONSUMER_IMAGE: ${{ steps.consumer-image.outputs.image }}
+          NATIVE_ARCHITECTURE: ${{ endsWith(matrix.runner, '-arm') && 'arm64' || 'amd64' }}
+        run: &qualify_cli_sandbox |
+          profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+          curl --fail --silent --show-error --location "$profile_url" -o "$RUNNER_TEMP/moby-seccomp.json"
+          python scripts/qualify_cli_sandbox_image.py "${CONSUMER_IMAGE:?}" "$RUNNER_TEMP/moby-seccomp.json" \
+            --architecture "$NATIVE_ARCHITECTURE"
+      - &report_cli_sandbox_denials
+        name: Report sandbox AppArmor denials
+        if: failure() && steps.cli-sandbox-witness.outcome == 'failure'
+        run: sudo journalctl -k -q --no-pager --grep 'apparmor="DENIED".*profile="prosaic-lab-cli-sandbox"' -n 30
+      - &unload_cli_sandbox_policy
+        name: Unload the dedicated AppArmor policy
+        if: always() && steps.load-cli-sandbox-policy.outcome == 'success'
+        run: |
+          sudo apparmor_parser -R containers/cli-sandbox.apparmor
+          profiles=$(sudo cat /sys/kernel/security/apparmor/profiles)
+          if grep -q '^prosaic-lab-cli-sandbox ' <<< "$profiles"; then exit 1; fi
       - name: Build isolated immutable candidate consumer
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python scripts/build_consumer.py --manifest .cache/sdk-hardening/manifest.json --dependency-mode candidate --tag prosaic-integration-lab:candidate
@@ -239,19 +272,27 @@ jobs:
           .venv/bin/python -c "from lab_runner.legacy_upgrade import build_baseline; build_baseline()"
       - name: Required real-stack gates
         if: ${{ !inputs.candidate }}
-        run: .venv/bin/python scripts/required_acceptance.py --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
+        env:
+          CONSUMER_IMAGE: ${{ steps.consumer-image.outputs.image }}
+        run: |
+          .venv/bin/python scripts/required_acceptance.py --consumer-image "${CONSUMER_IMAGE:?}" \
+            --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
       - name: Required exact candidate real-stack gates
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python scripts/required_acceptance.py --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }} --export reports/required-pg${{ matrix.postgres }}.json
       - name: Run documented native adoption demo with released SDKs
         if: ${{ !inputs.candidate }}
-        run: .venv/bin/python -m lab_runner demo --mode native --postgres-version ${{ matrix.postgres }}
+        env:
+          CONSUMER_IMAGE: ${{ steps.consumer-image.outputs.image }}
+        run: .venv/bin/python -m lab_runner demo --mode native --consumer-image "${CONSUMER_IMAGE:?}" --postgres-version ${{ matrix.postgres }}
       - name: Run documented native adoption demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode native --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
       - name: Run documented conversation demo with released SDKs
         if: ${{ !inputs.candidate && steps.conversation-sdk.outputs.enabled == 'true' }}
-        run: .venv/bin/python -m lab_runner demo --mode conversation --postgres-version ${{ matrix.postgres }}
+        env:
+          CONSUMER_IMAGE: ${{ steps.consumer-image.outputs.image }}
+        run: .venv/bin/python -m lab_runner demo --mode conversation --consumer-image "${CONSUMER_IMAGE:?}" --postgres-version ${{ matrix.postgres }}
       - name: Run documented conversation demo with exact candidate SDKs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate }}
         run: .venv/bin/python -m lab_runner demo --mode conversation --candidate --candidate-manifest .cache/sdk-hardening/manifest.json --postgres-version ${{ matrix.postgres }}
@@ -321,35 +362,26 @@ jobs:
         run: |
           python scripts/build_consumer.py --manifest .cache/cli-sandbox/manifest.json \
             --dependency-mode candidate --tag prosaic-integration-lab:cli-sandbox-qualification
-      - name: Build the released baseline image from the verified wheels
+      - name: Build the released image from the verified wheels
         if: ${{ !inputs.candidate }}
         run: |
           python scripts/prepare_dependencies.py
           python scripts/build_consumer.py --dependency-mode released --tag prosaic-integration-lab:cli-sandbox-qualification
+      - name: Select immutable consumer image
+        id: consumer-image
+        run: |
+          image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:cli-sandbox-qualification)
+          [[ "$image" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'image=%s\n' "$image" >> "$GITHUB_OUTPUT"
       - name: Load the dedicated AppArmor policy
         id: load-cli-sandbox-policy
-        run: sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
+        run: *load_cli_sandbox_policy
       - name: Require the deployed image to confine CLI tools and version probes
-        env:
-          CANDIDATE: ${{ inputs.candidate }}
-          NATIVE_ARCHITECTURE: ${{ endsWith(matrix.runner, '-arm') && 'arm64' || 'amd64' }}
-        run: |
-          args=()
-          if [ "$CANDIDATE" != true ]; then args+=(--explicit-required); fi
-          profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
-          curl --fail --silent --show-error --location "$profile_url" -o "$RUNNER_TEMP/moby-seccomp.json"
-          image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:cli-sandbox-qualification)
-          python scripts/qualify_cli_sandbox_image.py "$image" "$RUNNER_TEMP/moby-seccomp.json" \
-            --architecture "$NATIVE_ARCHITECTURE" "${args[@]}"
-      - name: Report sandbox AppArmor denials
-        if: failure()
-        run: sudo journalctl -k -q --no-pager --grep 'apparmor="DENIED".*profile="prosaic-lab-cli-sandbox"' -n 30
-      - name: Unload the dedicated AppArmor policy
-        if: always() && steps.load-cli-sandbox-policy.outcome == 'success'
-        run: |
-          sudo apparmor_parser -R containers/cli-sandbox.apparmor
-          profiles=$(sudo cat /sys/kernel/security/apparmor/profiles)
-          if grep -q '^prosaic-lab-cli-sandbox ' <<< "$profiles"; then exit 1; fi
+        id: cli-sandbox-witness
+        env: *cli_sandbox_environment
+        run: *qualify_cli_sandbox
+      - *report_cli_sandbox_denials
+      - *unload_cli_sandbox_policy
 
   context-packs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.context_packs && !inputs.cli_sandbox_images }}

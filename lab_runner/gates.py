@@ -3,6 +3,7 @@ import re
 import hashlib
 import json
 from pathlib import Path
+from prosaic_integration_lab.catalogue_ontology import ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN
 from prosaic_integration_lab.catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
 from prosaic_integration_lab.dependencies import CLI_SANDBOX_CANDIDATES
 
@@ -45,11 +46,17 @@ CLI_SANDBOX_TRAIN = {
     name: version for candidate in CLI_SANDBOX_CANDIDATES.values()
     for name, version in candidate.items()
 }
+SANDBOX_RELEASE_MANIFEST_SHA256 = '9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59'
 
 
 def supports_sub_agents(manifest):
     artifacts = manifest.get('artifacts', ())
     actual = {item.get('distribution'): item.get('version') for item in artifacts}
+    if actual == SANDBOX_RELEASE_TRAIN:
+        canonical = json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + '\n'
+        if hashlib.sha256(canonical.encode()).hexdigest() != SANDBOX_RELEASE_MANIFEST_SHA256:
+            raise ValueError('invalid released sandbox SDK family')
+        return True
     if actual == ONTOLOGY_TRAIN:
         from .catalogue_ontology import validate_manifest, validate_released_manifest
         if 'candidate_lineage' in manifest:
@@ -124,12 +131,12 @@ def supports_parallel_tools(manifest):
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 
 def expected_test_count(mode,context_assembly=False):
@@ -148,7 +155,7 @@ def supports_conversation(manifest):
     if supports_mcp_client(manifest):return True
     if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -157,6 +164,8 @@ def supports_conversation(manifest):
 
 def required_modes(*,candidate,manifest):
     versions = {item['distribution']: item['version'] for item in manifest['artifacts']}
+    if versions == SANDBOX_RELEASE_TRAIN and candidate:
+        raise ValueError('sandbox SDK release requires released acceptance mode')
     if versions == ONTOLOGY_TRAIN and ('candidate_lineage' in manifest) != candidate:
         raise ValueError('ontology manifest provenance must match acceptance mode')
     # Coherent context-pack trains qualify the lane for public and candidate bytes.
@@ -167,11 +176,11 @@ def required_modes(*,candidate,manifest):
 
 def supports_context_packs(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 def supports_tool_evidence(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,ONTOLOGY_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.

@@ -7,8 +7,8 @@
     },
     {
       "distribution": "b3-prosaic-runtime",
-      "sha256": "5caab59f6d0ffd14299ee0840dd5f9b58b4e4f4a1b724ff6e3e2fa1699f08fd8",
-      "version": "0.9.23"
+      "sha256": "7889545eeaef8a92e08fc5669d07b72c33fdea7c191158a0d150e9798a0bf5df",
+      "version": "0.9.27"
     },
     {
       "distribution": "b3-prosaic-runtime-postgres",
@@ -17,8 +17,8 @@
     },
     {
       "distribution": "b3-prosaic-harness",
-      "sha256": "a583999d65e7e707a410ef2bc6e67787101d80c9c39c44a9bd3cbcb4f372c7bf",
-      "version": "0.9.18"
+      "sha256": "cc6fb7275ee491a07499c7ebaec12f98341c0477fd5940f468a8a5180301358d",
+      "version": "0.9.20"
     },
     {
       "distribution": "b3-prosaic-harness-postgres",
@@ -26,6 +26,6 @@
       "version": "0.4.5"
     }
   ],
-  "manifestDigest": "26456e44fa17a04ff63b2ed8b3d7390254f763d1d6dc431bd5babc058ac03116",
+  "manifestDigest": "9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59",
   "version": 1
 }

@@ -304,7 +304,7 @@ def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_roo
 def curate_catalogue_ontology(core_dir, harness_dir, manifest, cache_root, *, hosted=None):
     """Bind the separate ontology proof and stage two candidates plus three public wheels."""
     from xml.etree import ElementTree
-    from lab_runner.catalogue_ontology import CASES, KIND, PACKAGES, RETAINED, TRAIN, validate_manifest
+    from lab_runner.catalogue_ontology import CASES, KIND, PACKAGES, PUBLIC_PROFILE, RETAINED, TRAIN, validate_manifest
     from scripts.prepare_dependencies import prepare
 
     core_dir, harness_dir, manifest, cache_root = map(Path, (core_dir, harness_dir, manifest, cache_root))
@@ -328,7 +328,7 @@ def curate_catalogue_ontology(core_dir, harness_dir, manifest, cache_root, *, ho
                 or harness['source_commit'] != harness_commit):
             raise ValueError('ontology candidate run binding differs')
 
-    released_manifest = ROOT / 'dependencies/releases.json'
+    released_manifest = PUBLIC_PROFILE
     retained = [item for item in sdk_manifest(released_manifest)['artifacts']
                 if item['distribution'] in RETAINED]
     artifacts = retained.copy()
