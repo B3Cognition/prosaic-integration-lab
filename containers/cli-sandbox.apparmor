@@ -39,7 +39,7 @@ profile prosaic-lab-cli-sandbox flags=(attach_disconnected,mediate_deleted) {
   mount fstype=tmpfs options in (rw,nodev,nosuid) -> /tmp/,
   mount options in (bind,rbind,silent) /tmp/newroot/ -> /tmp/newroot/,
   mount options in (bind,rbind,silent) /oldroot/proc/ -> /proc/,
-  mount options in (bind,rbind,silent) -> /newroot/**,
+  mount options in (bind,rbind,silent) /oldroot/{tmp/**,srv/lab/**,usr/bin/**,usr/lib{,64}/**,usr/local/**,etc/ld.so.cache,dev/null,dev/urandom} -> /newroot/**,
   remount options in (bind,ro,nosuid,nodev,noexec,noatime,nodiratime,relatime,silent) /newroot/**,
   mount options in (private,rprivate,silent) -> /oldroot/,
   umount /{oldroot/,},

@@ -83,7 +83,9 @@ proc rules to every discovered sysctl subtree except
 its own user namespace to prevent the tool from creating nested namespaces.
 These changes apply to the dedicated container. Its service UID stays 10001,
 with a read-only root, zero outer capabilities, `no-new-privileges`, and a
-bounded tmpfs. The AppArmor profile restricts where the worker can mount.
+bounded tmpfs. The AppArmor profile restricts bind sources to the Lab tree,
+private scratch, system executables and libraries, the loader cache, and two
+runtime devices.
 The namespace permission applies to trusted code in that worker as well as
 Bubblewrap. Review this policy again when changing the kernel, Docker,
 Bubblewrap, or the worker's mounts.
