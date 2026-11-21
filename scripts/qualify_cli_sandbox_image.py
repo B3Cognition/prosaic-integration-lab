@@ -1,5 +1,7 @@
 """Run the Linux image witness with the reviewed Docker deployment policy."""
 import argparse
+from contextlib import contextmanager
+from functools import partial
 import hashlib
 import json
 import os
@@ -68,39 +70,61 @@ def extend_seccomp(baseline):
     return {**baseline, 'syscalls': [*baseline['syscalls'], *rules]}
 
 
-def docker(*args, capture=False):
-    return subprocess.run(['docker', *args], check=True, capture_output=capture, text=True, timeout=120).stdout
+def docker(*args, host=None, capture=False):
+    argv = ['docker']
+    env = None
+    if host is not None:
+        argv.extend(['--host', host])
+        env = {key: value for key, value in os.environ.items() if key not in ('DOCKER_CONTEXT', 'DOCKER_HOST')}
+    return subprocess.run([*argv, *args], env=env, check=True, capture_output=capture,
+                          text=True, timeout=120).stdout
 
 
-def inspect_container(container, owner):
-    entry, = json.loads(docker('container', 'inspect', container, capture=True))
+def inspect_container(cli, container, owner):
+    entry, = json.loads(cli('container', 'inspect', container, capture=True))
     if entry['Id'] != container or entry['Config']['Labels'].get(OWNER_LABEL) != owner:
         raise RuntimeError('Docker returned an unrelated container')
     return entry
 
 
-def remove_container(container, owner):
-    inspect_container(container, owner)
-    docker('container', 'rm', '--force', container, capture=True)
+@contextmanager
+def owned_containers(cli, owner):
+    selector = ('container', 'ls', '--all', '--no-trunc', '--quiet', '--filter', f'label={OWNER_LABEL}={owner}')
+    try:
+        yield
+    finally:
+        for container in cli(*selector, capture=True).splitlines():
+            inspect_container(cli, container, owner)
+            cli('container', 'rm', '--force', container, capture=True)
+        if cli(*selector, capture=True).strip():
+            raise RuntimeError('owned qualification container remains')
 
 
-def qualify(image, seccomp, *, explicit_required=False):
+def qualify(image, seccomp, architecture, *, explicit_required=False):
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', image):
         raise ValueError('qualification requires a local immutable image ID')
-    host = os.environ.get('DOCKER_HOST') or docker(
-        'context', 'inspect', '--format', '{{.Endpoints.docker.Host}}', capture=True).strip()
+    context = os.environ.get('DOCKER_CONTEXT')
+    host = None if context else os.environ.get('DOCKER_HOST')
+    if not host:
+        host = docker('context', 'inspect', *([context] if context else []),
+                      '--format', '{{.Endpoints.docker.Host}}', capture=True).strip()
     if not host.startswith('unix:///'):
         raise ValueError('qualification requires a local Docker Unix socket')
+    cli = partial(docker, host=host)
+    engine_arch = cli('info', '--format', '{{.Architecture}}', capture=True).strip()
+    image_arch = cli('image', 'inspect', '--format', '{{.Os}}/{{.Architecture}}', image, capture=True).strip()
+    if ({'amd64': 'x86_64', 'arm64': 'aarch64'}[architecture] != engine_arch
+            or image_arch != f'linux/{architecture}'):
+        raise ValueError(f'required native {architecture}, found engine {engine_arch} and image {image_arch}')
+
     owner = uuid.uuid4().hex
-    probe = docker('create', '--pull', 'never', '--label', f'{OWNER_LABEL}={owner}',
-                   '--network', 'none', '--user', '10001:10001', '--read-only', '--cap-drop', 'ALL',
-                   '--security-opt', 'no-new-privileges', '--entrypoint', 'python', image,
-                   '-I', '-c', PROC_INVENTORY, capture=True).strip()
-    try:
-        defaults = inspect_container(probe, owner)['HostConfig']
-        inventory = json.loads(docker('start', '--attach', probe, capture=True))
-    finally:
-        remove_container(probe, owner)
+    with owned_containers(cli, owner):
+        probe = cli('create', '--pull', 'never', '--label', f'{OWNER_LABEL}={owner}',
+                    '--network', 'none', '--user', '10001:10001', '--read-only', '--cap-drop', 'ALL',
+                    '--security-opt', 'no-new-privileges', '--entrypoint', 'python', image,
+                    '-I', '-c', PROC_INVENTORY, capture=True).strip()
+        defaults = inspect_container(cli, probe, owner)['HostConfig']
+        inventory = json.loads(cli('start', '--attach', probe, capture=True))
 
     cmd = ['-I', '/srv/lab/scripts/cli_sandbox_image_smoke.py', '--container-policy']
     if explicit_required:
@@ -118,38 +142,40 @@ def qualify(image, seccomp, *, explicit_required=False):
         },
     }
     # The Docker CLI cannot set individual OCI ReadonlyPaths.
-    response = subprocess.run(
-        ['curl', '--silent', '--show-error', '--fail-with-body', '--max-time', '30',
-         '--unix-socket', host.removeprefix('unix://'), '--header', 'Content-Type: application/json',
-         '--data-binary', '@-', 'http://localhost/containers/create'],
-        input=json.dumps(config), capture_output=True, text=True, check=True,
-    )
-    result = json.loads(response.stdout)
-    container = result['Id']
-    try:
-        actual = inspect_container(container, owner)
-        if (actual['Image'] != image or actual['HostConfig']['MaskedPaths'] != defaults['MaskedPaths']
-                or actual['HostConfig']['ReadonlyPaths'] != paths):
-            raise RuntimeError('Docker changed the requested image or protected paths')
+    with owned_containers(cli, owner):
+        response = subprocess.run(
+            ['curl', '--silent', '--show-error', '--fail-with-body', '--max-time', '30',
+             '--unix-socket', host.removeprefix('unix://'), '--header', 'Content-Type: application/json',
+             '--data-binary', '@-', 'http://localhost/containers/create'],
+            input=json.dumps(config), capture_output=True, text=True, check=True,
+        )
+        result = json.loads(response.stdout)
+        container = result['Id']
+        actual = inspect_container(cli, container, owner)
+        if actual['Image'] != image or actual['Config']['User'] != config['User']:
+            raise RuntimeError('Docker changed the requested image or service user')
+        for name, value in config['HostConfig'].items():
+            if actual['HostConfig'][name] != value:
+                raise RuntimeError(f'Docker changed the requested {name} policy')
         if result.get('Warnings'):
             raise RuntimeError(f"Docker policy warnings: {result['Warnings']}")
-        docker('start', '--attach', container)
-        if inspect_container(container, owner)['State']['ExitCode'] != 0:
+        cli('start', '--attach', container)
+        if inspect_container(cli, container, owner)['State']['ExitCode'] != 0:
             raise RuntimeError('installed image witness failed')
-    finally:
-        remove_container(container, owner)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('image', help='Immutable local image ID')
     parser.add_argument('baseline', type=Path, help=f'Pinned upstream profile from {SECCOMP_URL}')
+    parser.add_argument('--architecture', choices=('amd64', 'arm64'), required=True)
     parser.add_argument('--explicit-required', action='store_true')
     args = parser.parse_args()
     content = args.baseline.read_bytes()
     if hashlib.sha256(content).hexdigest() != SECCOMP_SHA256:
         parser.error('upstream Docker seccomp checksum differs')
-    qualify(args.image, extend_seccomp(json.loads(content)), explicit_required=args.explicit_required)
+    qualify(args.image, extend_seccomp(json.loads(content)), args.architecture,
+            explicit_required=args.explicit_required)
 
 
 if __name__ == '__main__':

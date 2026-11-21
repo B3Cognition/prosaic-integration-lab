@@ -66,15 +66,16 @@ seccomp. An administrator loads the worker profile on that host, then an
 operator runs the installed-image witness with a local Docker Engine:
 
 ```sh
-sudo apparmor_parser -r containers/cli-sandbox.apparmor
+sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
 profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
 curl --fail --silent --show-error --location "$profile_url" -o moby-seccomp.json
 image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:candidate)
-python scripts/qualify_cli_sandbox_image.py "$image" moby-seccomp.json
+python scripts/qualify_cli_sandbox_image.py "$image" moby-seccomp.json --architecture amd64
 ```
 
 Use `--explicit-required` with a released image whose Runtime still uses opt-in
-isolation. The [policy runner](../scripts/qualify_cli_sandbox_image.py) uses a
+isolation and `--architecture arm64` on native ARM64. The
+[policy runner](../scripts/qualify_cli_sandbox_image.py) uses a
 checksum-pinned Moby seccomp baseline and adds Bubblewrap's observed namespace
 and mount operations. It keeps Docker's masked paths and applies the read-only
 proc rules to every discovered sysctl subtree except

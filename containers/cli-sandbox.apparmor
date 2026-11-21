@@ -37,8 +37,10 @@ profile prosaic-lab-cli-sandbox flags=(attach_disconnected,mediate_deleted) {
   # Seccomp independently filters the flag sets on both architectures.
   mount options in (slave,rslave,silent) -> /,
   mount fstype=tmpfs options in (rw,nodev,nosuid) -> /tmp/,
-  mount options in (bind,rbind,silent) -> /{tmp/newroot/,proc/,newroot/**},
-  mount options in (bind,remount,ro,rw,nosuid,nodev,noexec,noatime,nodiratime,relatime,silent) -> /newroot/**,
+  mount options in (bind,rbind,silent) /tmp/newroot/ -> /tmp/newroot/,
+  mount options in (bind,rbind,silent) /oldroot/proc/ -> /proc/,
+  mount options in (bind,rbind,silent) -> /newroot/**,
+  remount options in (bind,ro,nosuid,nodev,noexec,noatime,nodiratime,relatime,silent) /newroot/**,
   mount options in (private,rprivate,silent) -> /oldroot/,
   umount /{oldroot/,},
   pivot_root oldroot=/tmp/oldroot/ /tmp/,

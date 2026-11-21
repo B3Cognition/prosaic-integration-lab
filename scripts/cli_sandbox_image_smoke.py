@@ -15,7 +15,7 @@ from prosaic_runtime import ProsaicArtifact, ProsaicRuntime, RunPolicy, RuntimeC
 
 CANARY = 'image-sandbox-canary'
 WITNESS = """
-import json, os, socket, sys
+import errno, json, os, socket, sys
 from pathlib import Path
 evidence, secret, marker, port = sys.argv[1:]
 if Path(evidence).read_text() != 'owned evidence':
@@ -42,7 +42,7 @@ if sys.platform == 'linux':
     try:
         os.unshare(os.CLONE_NEWUSER)
     except OSError as exc:
-        if exc.errno not in (1, 13, 28, 87):
+        if exc.errno not in (errno.EPERM, errno.EACCES, errno.ENOSPC, errno.EUSERS):
             raise
     else:
         raise RuntimeError('sandbox permitted a nested user namespace')
@@ -159,6 +159,8 @@ def main():
         raise RuntimeError('Linux image qualification requires the Lab service UID')
     backend = subprocess.check_output(['/usr/bin/bwrap', '--version'], text=True, timeout=5).strip()
     print(json.dumps({'architecture': platform.machine(), 'backend': backend, 'uid': os.getuid()}), flush=True)
+    if backend != 'bubblewrap 0.12.0':
+        raise RuntimeError('qualification requires the pinned Bubblewrap 0.12.0')
     if args.container_policy:
         require_container_policy()
     with TemporaryDirectory(prefix='cli-sandbox-image-') as directory:
