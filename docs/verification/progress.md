@@ -1,5 +1,34 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Bubblewrap container policy qualification — 2026-11-21
+
+The default Docker policy blocked Bubblewrap on both native architectures.
+The scoped [container policy](../sandboxed-tools.md#qualify-the-linux-image)
+passed with Bubblewrap 0.12.0 on the exact Lab source
+`c08b67dc636b62f6677b6df84b74b188c92a54b9`.
+
+| Image | SDK wheels | Native AMD64 and ARM64 |
+| --- | --- | --- |
+| Candidate | Core 0.5.0, Runtime 0.9.27, Harness 0.9.20, recorder 0.3.0, store 0.4.5 | [Both passed](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44884094681) |
+| Released baseline | Core 0.5.1, Runtime 0.9.23, Harness 0.9.18, recorder 0.3.0, store 0.4.5 | [Both passed](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44884224182) |
+
+The workflow ran `python scripts/qualify_cli_sandbox_image.py "$image" "$profile" --architecture "$arch"`
+with `--explicit-required` for the released baseline. Both runs verified
+AppArmor enforcement, active seccomp, zero outer capabilities, the single
+namespaced proc exception, confined version and CLI calls, and cleanup. The
+candidate used the original qualified [Runtime](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44804449338)
+and [Harness](https://github.com/B3Cognition/prosaic-harness/actions/runs/44815883152)
+wheels. The ordinary Docker configuration failed the
+[earlier candidate gate](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44826391079).
+
+Local Python 3.12 verification during policy development ran
+`python -m pytest -q` against the released SDK family and passed 2,343 tests.
+The released consumer image built with `python scripts/build_consumer.py`.
+On ARM64 Docker Desktop, `python -m lab_runner test --mode deterministic --postgres-version 16 --consumer-image "$image"`
+passed 21 synthetic stack tests with verified cleanup. The enforcing AppArmor
+evidence comes from the native Linux runners. These jobs used synthetic
+inference and left the stable packages unpublished.
+
 ## PR #69 post-merge verification — 2026-11-17
 
 Lab [PR #69](https://github.com/B3Cognition/prosaic-integration-lab/pull/69)
