@@ -18,10 +18,20 @@ docker pull ghcr.io/b3cognition/prosaic-integration-lab@sha256:b79a80ab94cb10c35
 
 Native AMD64 and ARM64 runners pulled the published index by digest, matched
 the qualified image configurations, audited the installed SDK wheels, and
-passed the Bubblewrap CLI and version-probe witness. Both platforms also
-passed an anonymous Docker pull with an empty credential configuration after
-the package became public.
+passed the Bubblewrap CLI and version-probe witness.
 [Publication and qualification run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44923400420)
+
+### Anonymous pull and Bubblewrap verification
+
+On 2026-11-21, fresh native Ubuntu 24.04 runners followed the documented pull
+and policy setup. Both pulled the same qualified index without GHCR
+credentials, matched their expected platform images, and passed CLI and
+version-probe confinement with Bubblewrap 0.12.0.
+
+Both jobs verified that the temporary AppArmor profile was unloaded, the
+seccomp file was removed, and no witness containers remained.
+[AMD64 runner job](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44934358311/job/136937640058)
+[ARM64 runner job](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44934358311/job/136937640344)
 
 ### Bubblewrap policy setup
 
