@@ -6,6 +6,13 @@ CLI worker under the reviewed Docker policy and then uses the same immutable
 image for the required real-stack gates. The witness exercises Runtime 0.9.27's
 required default with the published Harness 0.9.20 wheels.
 
+After the four required cells pass, dispatch **Publish Lab Linux images** on
+`main`. It builds native AMD64 and ARM64 images from the checksummed manifest.
+Each architecture passes the Bubblewrap witness before upload. The workflow
+publishes a GHCR index under `sha-<main-commit>`, then verifies the installed
+wheels and default confinement on fresh native runners that pull by index
+digest. Use the digest reported by the workflow for deployment.
+
 Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
 to pass all four synthetic cases from the installed Lab wheel and rebuilt
 source, using the checksum-pinned Runtime 0.9.26 profile.
