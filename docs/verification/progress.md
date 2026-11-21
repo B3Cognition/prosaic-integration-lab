@@ -1,5 +1,42 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Published sandbox SDKs in Linux images — 2026-11-21
+
+Commit `efbb857ca43ee64403834f0f1d9cd4a4af859110` selects Core 0.5.1,
+Runtime 0.9.27, Harness 0.9.20, Runtime recorder 0.3.0, and Harness store
+0.4.5. The release manifest SHA-256 is
+`9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59`.
+`scripts/prepare_dependencies.py`, `scripts/install_dependencies.py` and
+`scripts/audit_install.py` matched the installed payloads to all five verified
+wheels. The macOS ARM64 Python 3.12 suite passed 2,344 unit and functional
+cases, with the final CI-wiring regression also passing in a targeted run.
+`scripts/conversation_distribution_smoke.py` passed for both isolated Lab
+package paths on macOS, including 11 ontology cases per path and public-index
+verification. Locally, `python -m lab_runner test --mode qualification
+--postgres-version 16 --consumer-image <image-id>` passed three cases against
+the Docker Desktop Linux ARM64 image, with no skips and verified cleanup.
+
+The [standalone Linux image run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44917333114)
+passed on native AMD64 and ARM64. Bubblewrap 0.12.0 confined the version probe
+and CLI call using Runtime's default mode. Both jobs verified the enforcing
+worker policy and removed the temporary AppArmor profile. The witness ran in
+an isolated worker with synthetic fixtures.
+
+The [full required Lab matrix](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916797145)
+passed on native AMD64 and ARM64 with PostgreSQL 16 and 18. Each job passed
+2,345 unit and functional tests and all 14 real-stack lanes, totaling 450
+stack cases per cell with zero skips and verified cleanup. The legacy
+upgrade lane passed in all four jobs. The consumer image ID in every stack
+receipt matched the Bubblewrap witness for that job. The matrix also
+verified the PyPI wheel bytes and both isolated Lab distribution paths.
+The ARM64 PostgreSQL 16 job ran the additional rebuilt-source stack check.
+
+The [rule-admission matrix](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916797495),
+[reasoning controls](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916795142),
+[guarded recovery and Nemotron checks](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916798782),
+and [experimental ontology checks](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916798159)
+all passed.
+
 ## Runtime 0.9.27 and Harness 0.9.20 release handoff — 2026-11-21
 
 The final SDK qualification passed for [Runtime 0.9.27](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44887831725)
