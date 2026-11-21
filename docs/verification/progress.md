@@ -1,5 +1,30 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Runtime 0.9.27 and Harness 0.9.20 release handoff — 2026-11-21
+
+The final SDK qualification passed for [Runtime 0.9.27](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44887831725)
+and [Harness 0.9.20](https://github.com/B3Cognition/prosaic-harness/actions/runs/44891665583).
+The Intel macOS Python 3.12 Harness job passed its exact-source retry after
+a context-pack capacity test timed out on the first attempt.
+[Native AMD64 and ARM64 image CI](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44897206002)
+passed on Lab source `a540273505b297689b747ec338593c02efb156be`, with
+Bubblewrap 0.12.0 and the enforcing [worker policy](../sandboxed-tools.md#qualify-the-linux-image).
+
+The stable [Runtime publish workflow](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44897392612)
+and [Harness publish workflow](https://github.com/B3Cognition/prosaic-harness/actions/runs/44897767495)
+promoted the original qualified archives. For both releases, public PyPI
+and GitHub wheel and source downloads matched the candidate SHA-256 hashes.
+The publication jobs retried public verification after the PyPI index cached
+the version as missing immediately after upload.
+
+Separate Python 3.12 environments installed the PyPI wheels with Core 0.5.0
+and rebuilt the public source archives with Core 0.5.1 using
+`python -m pip install`. Both passed `python -m pip check` and opened
+synthetic records written by Runtime 0.9.26 and Harness 0.9.19. The replay
+resumed paused workflows, reopened file sessions, reconstructed native
+bundles and restored frozen turns. It included implicit and explicit sandbox
+settings and the explicit off-mode path for retained CLI approvals.
+
 ## Bubblewrap container policy qualification — 2026-11-21
 
 The default Docker policy blocked Bubblewrap on both native architectures.
