@@ -1,5 +1,9 @@
 # Releases and compatibility
 
+The [Bubblewrap deployment guide](sandboxed-tools.md#qualify-the-linux-image)
+covers image qualification for Runtime 0.9.27 and Harness 0.9.20. Lab's
+published SDK profiles are tracked by their own release manifests.
+
 Lab 0.9.19 adds [constrained Nemotron lookup correction](release-0.9.19.md) with a dedicated SDK profile.
 
 Lab 0.9.18 adds [guarded workflow recovery](release-0.9.18.md) with a separate installed profile.

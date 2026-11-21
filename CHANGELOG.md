@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Qualify the Linux consumer images with the [scoped Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image).
+
 ## 0.9.19
 
 - Add the [Nemotron lookup correction blueprint](docs/nemotron-correction.md) and installed acceptance.

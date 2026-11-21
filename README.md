@@ -64,6 +64,7 @@ account, API key, local model or Docker.
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |
 | See a workflow execute, pause and resume | [Service demo](docs/quickstart.md#3-run-the-service-or-open-the-browser) | Docker, owned PostgreSQL and synthetic model responses |
+| Qualify sandboxed CLI tools in a Linux worker | [Bubblewrap deployment guide](docs/sandboxed-tools.md#qualify-the-linux-image) | Native AMD64 or ARM64 Docker with the scoped AppArmor and seccomp policy |
 | Chat and approve a workflow in a browser | [Browser demo](docs/quickstart.md#3-run-the-service-or-open-the-browser) | Docker; scripted by default, local Qwen optional |
 | Run my Markdown through real providers | [Connect models](docs/quickstart.md#4-connect-real-models-explicit-opt-in) | Authenticate your profiles, choose permissions and set budgets |
 | Compare providers on the same work | [Benchmark](docs/quickstart.md#5-compare-your-models) | Explicit live opt-in; same tasks/inputs; default 180s or explicit 240s local deadline |
