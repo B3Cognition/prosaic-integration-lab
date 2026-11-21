@@ -38,6 +38,14 @@ except OSError:
 else:
     raise RuntimeError('sandbox permitted network delivery')
 Path(os.environ['TMPDIR'], 'private-scratch').write_text('scratch works')
+if sys.platform == 'linux':
+    try:
+        os.unshare(os.CLONE_NEWUSER)
+    except OSError as exc:
+        if exc.errno not in (1, 13, 28, 87):
+            raise
+    else:
+        raise RuntimeError('sandbox permitted a nested user namespace')
 print(json.dumps('image-sandbox-canary'))
 """
 
@@ -123,14 +131,36 @@ def verify(root, expect_default):
             raise RuntimeError('sandboxed CLI result was not observed')
 
 
+def require_container_policy():
+    label = Path('/proc/self/attr/current').read_text().strip()
+    if label != 'prosaic-lab-cli-sandbox (enforce)':
+        raise RuntimeError(f'unexpected AppArmor mode: {label}')
+    status = dict(line.split(':', 1) for line in Path('/proc/self/status').read_text().splitlines() if ':' in line)
+    if (status['NoNewPrivs'].strip() != '1' or status['Seccomp'].strip() != '2'
+            or any(int(status[name], 16) for name in ('CapEff', 'CapBnd'))):
+        raise RuntimeError('missing privilege or syscall restrictions')
+    root = Path('/proc/sys')
+    sysctls = [path for path in root.iterdir() if path.name != 'user']
+    sysctls.extend((root / 'user').iterdir())
+    exception = root / 'user/max_user_namespaces'
+    for path in [Path('/'), *sysctls]:
+        readonly = bool(os.statvfs(path).f_flag & os.ST_RDONLY)
+        if readonly == (path == exception):
+            raise RuntimeError(f'unexpected mount permissions on {path}')
+    print('AppArmor enforcing, seccomp active, zero capabilities, scoped proc exception.', flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--explicit-required', action='store_true', help='Qualify an older Runtime with explicit policy.')
+    parser.add_argument('--container-policy', action='store_true', help='Check the deployed outer policy.')
     args = parser.parse_args()
     if platform.system() != 'Linux' or os.getuid() != 10001:
         raise RuntimeError('Linux image qualification requires the Lab service UID')
     backend = subprocess.check_output(['/usr/bin/bwrap', '--version'], text=True, timeout=5).strip()
     print(json.dumps({'architecture': platform.machine(), 'backend': backend, 'uid': os.getuid()}), flush=True)
+    if args.container_policy:
+        require_container_policy()
     with TemporaryDirectory(prefix='cli-sandbox-image-') as directory:
         verify(Path(directory), expect_default=not args.explicit_required)
     print('Installed image passed CLI and version-probe containment.')

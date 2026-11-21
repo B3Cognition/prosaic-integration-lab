@@ -88,7 +88,8 @@ follow-up, sub-agents. [Cerebro backlog](https://github.com/B3Cognition/prosaic-
 - [Native and unified profile pools](unified-runtime-pools.md), including bounded synthetic fallback and no replay after partial work.
 - [Guarded conversations and catalogue tools](rule-admission.md), with file/PG recovery and explicit host guard registration.
 - [Conversation, interpretation and recovery](conversations.md), with trusted host identity and explicit uncertain-call handling.
-- [Sandboxed tools](sandboxed-tools.md), [typed evidence](typed-handoffs.md) and [scoped memory](scoped-memory-context.md), each retaining its own verification limits.
+- [Sandboxed tools](sandboxed-tools.md), including the [Linux image policy and installed CLI witness](sandboxed-tools.md#qualify-the-linux-image).
+- [Typed evidence](typed-handoffs.md) and [scoped memory](scoped-memory-context.md), each retaining its own verification limits.
 
 Use each feature's guide and installed acceptance lane. New SDK versions do not
 retroactively qualify historical snapshots or permit a partial upgrade of an

@@ -1,5 +1,10 @@
 # Required release gates
 
+Before promoting the SDK's required CLI sandbox default in Lab containers,
+run the [Bubblewrap image qualification](sandboxed-tools.md#qualify-the-linux-image)
+with the exact SDK wheels and the dedicated Docker policy on native AMD64 and
+ARM64. Passing a native host SDK lane does not qualify the container policy.
+
 Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
 to pass all four synthetic cases from the installed Lab wheel and rebuilt
 source, using the checksum-pinned Runtime 0.9.26 profile.

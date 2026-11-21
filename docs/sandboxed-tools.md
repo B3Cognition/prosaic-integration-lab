@@ -60,22 +60,38 @@ broker on disposable Ubuntu runners; host-wide restrictions remain enabled.
 ## Qualify the Linux image
 
 The released and candidate Lab Dockerfiles build Bubblewrap from the same
-pinned source commit as SDK CI. Run the installed-image smoke test as the Lab
-service user under its read-only Docker policy:
+pinned source commit as SDK CI. The Docker default policy blocks its namespace
+setup. Use a dedicated Lab worker on Linux with AppArmor enforcement and
+seccomp. An administrator loads the worker profile on that host, then an
+operator runs the installed-image witness with a local Docker Engine:
 
 ```sh
-docker run --rm --pull never --network none --user 10001:10001 --read-only \
-  --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 2 --pids-limit 128 \
-  --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777 --entrypoint python \
-  prosaic-integration-lab:candidate -I /srv/lab/scripts/cli_sandbox_image_smoke.py
+sudo apparmor_parser -r containers/cli-sandbox.apparmor
+profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+curl --fail --silent --show-error --location "$profile_url" -o moby-seccomp.json
+image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:candidate)
+python scripts/qualify_cli_sandbox_image.py "$image" moby-seccomp.json
 ```
 
 Use `--explicit-required` with a released image whose Runtime still uses opt-in
-isolation. The script requires a confined version probe and a confined CLI
-call through a synthetic loopback provider. It checks allowed evidence,
-private scratch, denied outside reads and writes, and denied network access.
-`cli_sandbox_unavailable` means the image or outer kernel policy cannot
-enforce confinement.
+isolation. The [policy runner](../scripts/qualify_cli_sandbox_image.py) uses a
+checksum-pinned Moby seccomp baseline and adds Bubblewrap's observed namespace
+and mount operations. It keeps Docker's masked paths and applies the read-only
+proc rules to every discovered sysctl subtree except
+`/proc/sys/user/max_user_namespaces`. Bubblewrap writes that one setting inside
+its own user namespace to prevent the tool from creating nested namespaces.
+These changes apply to the dedicated container. Its service UID stays 10001,
+with a read-only root, zero outer capabilities, `no-new-privileges`, and a
+bounded tmpfs. The AppArmor profile restricts where the worker can mount.
+The namespace permission applies to trusted code in that worker as well as
+Bubblewrap. Review this policy again when changing the kernel, Docker,
+Bubblewrap, or the worker's mounts.
+
+The witness verifies enforcement and actual mount flags before running a
+confined version probe and CLI call through a synthetic loopback provider.
+It checks allowed evidence, private scratch, denied outside reads and writes,
+denied network access, and denied nested user namespaces.
+`cli_sandbox_unavailable` means the image or outer policy blocks confinement.
 
 The **Required integration acceptance** workflow's `cli_sandbox_images` input
 runs this gate on native AMD64 and ARM64. Select `candidate` and supply the

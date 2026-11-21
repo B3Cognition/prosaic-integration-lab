@@ -326,16 +326,27 @@ jobs:
         run: |
           python scripts/prepare_dependencies.py
           python scripts/build_consumer.py --dependency-mode released --tag prosaic-integration-lab:cli-sandbox-qualification
+      - name: Load the dedicated AppArmor policy
+        run: sudo apparmor_parser -r containers/cli-sandbox.apparmor
       - name: Require the deployed image to confine CLI tools and version probes
         env:
           CANDIDATE: ${{ inputs.candidate }}
         run: |
           args=()
           if [ "$CANDIDATE" != true ]; then args+=(--explicit-required); fi
-          docker run --rm --pull never --network none --user 10001:10001 --read-only \
-            --cap-drop ALL --security-opt no-new-privileges --memory 512m --cpus 2 --pids-limit 128 \
-            --tmpfs /tmp:rw,noexec,nosuid,size=64m,mode=1777 --entrypoint python \
-            prosaic-integration-lab:cli-sandbox-qualification -I /srv/lab/scripts/cli_sandbox_image_smoke.py "${args[@]}"
+          profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+          curl --fail --silent --show-error --location "$profile_url" -o "$RUNNER_TEMP/moby-seccomp.json"
+          image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:cli-sandbox-qualification)
+          python scripts/qualify_cli_sandbox_image.py "$image" "$RUNNER_TEMP/moby-seccomp.json" "${args[@]}"
+      - name: Report sandbox AppArmor denials
+        if: failure()
+        run: sudo journalctl -k -q --no-pager --grep 'apparmor="DENIED".*profile="prosaic-lab-cli-sandbox"' -n 30
+      - name: Unload the dedicated AppArmor policy
+        if: always()
+        run: |
+          if sudo grep -q '^prosaic-lab-cli-sandbox ' /sys/kernel/security/apparmor/profiles; then
+            sudo apparmor_parser -R containers/cli-sandbox.apparmor
+          fi
 
   context-packs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.context_packs && !inputs.cli_sandbox_images }}
