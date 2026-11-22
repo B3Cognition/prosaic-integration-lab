@@ -81,6 +81,10 @@ the client before offering aliases, accepting proposals or reading a run.
 Tool registrations and business operation keys are host-owned; client prose
 does not grant permission to invoke a registered tool.
 
+For a candidate read-only performance pattern and its explicit receipt tradeoff,
+see the [host-composed read blueprint](host-composed-read-blueprint.md). It is a
+design for future synthetic qualification, not an existing Lab acceptance lane.
+
 Admission and binding are separate from execution. Building a factory or
 preparing a proposal validates and seals the supplied graph without model or
 product callback execution. Execution uses the admitted workflow and current
