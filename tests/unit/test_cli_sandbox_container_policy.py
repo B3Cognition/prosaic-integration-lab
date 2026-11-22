@@ -65,3 +65,51 @@ def test_image_publication_qualifies_native_builds_and_fresh_registry_pulls():
         assert (steps.index(operators[0]) > steps.index(witness)) == (job is build)
         assert any("always()" in step.get('if', '') and 'apparmor_parser -R' in step.get('run', '')
                    for step in steps)
+
+
+@pytest.mark.parametrize('arch,runner', [('amd64', 'ubuntu-24.04'), ('arm64', 'ubuntu-24.04-arm')])
+def test_public_image_ci_uses_the_release_notes_without_registry_credentials(tmp_path, arch, runner):
+    import os
+    from pathlib import Path
+    import re
+    import subprocess
+
+    import yaml
+
+    root = Path(__file__).resolve().parents[2]
+    workflow = yaml.safe_load((root / '.github/workflows/verify-public-linux-images.yml').read_bytes())
+    assert workflow[True] == {'push': {'branches': ['main']}, 'workflow_dispatch': None}
+    assert workflow['permissions'] == {'contents': 'read'}
+    job = workflow['jobs']['documented-setup']
+    assert 'permissions' not in job
+    assert job['if'] == "github.ref == 'refs/heads/main'"
+    assert job['runs-on'] == '${{ matrix.runner }}'
+    matrix = job['strategy']['matrix']['include']
+    assert {entry['arch']: entry['runner'] for entry in matrix} == {
+        'amd64': 'ubuntu-24.04', 'arm64': 'ubuntu-24.04-arm',
+    }
+    assert any(entry['arch'] == arch and entry['runner'] == runner for entry in matrix)
+
+    steps = job['steps']
+    assert all('docker login' not in step.get('run', '') and 'packages:' not in str(step) for step in steps)
+    extract = next(step for step in steps if step.get('id') == 'recipe')
+    output = tmp_path / 'outputs'
+    env = {**os.environ, 'TARGET_ARCH': arch, 'RUNNER_TEMP': str(tmp_path), 'GITHUB_OUTPUT': str(output)}
+    subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', extract['run']], cwd=root, env=env, check=True)
+    notes = (root / 'docs/releases.md').read_text()
+    assert (tmp_path / 'documented-pull.sh').read_text().strip() == re.search(
+        r'^```sh\n(docker pull .*?)\n```', notes, re.M,
+    )[1]
+    setup = re.search(r'^```bash\n(.*?)\n```', notes, re.M | re.S)[1]
+    assert (tmp_path / 'documented-policy.sh').read_text().strip() == setup.replace(
+        '  arch=amd64\n', f'  arch={arch}\n', 1,
+    )
+    assert 'image_source=' in output.read_text()
+    cleanup = next(step for step in steps if step.get('name', '').startswith('Verify cleanup'))
+    assert cleanup['if'] == "always() && steps.prepare.outcome == 'success'"
+    assert all(item in cleanup['run'] for item in (
+        '/sys/kernel/security/apparmor/profiles',
+        'io.prosaic.lab.cli-sandbox-qualification',
+        'rmdir "$WITNESS_SCRATCH"',
+        '"$DOCKER_CONFIG/config.json"',
+    ))

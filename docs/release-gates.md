@@ -13,6 +13,12 @@ publishes a GHCR index under `sha-<main-commit>`, then verifies the installed
 wheels and default confinement on fresh native runners that pull by index
 digest. Use the digest reported by the workflow for deployment.
 
+**Verify public Linux image setup** runs on every push to `main` and can also
+be dispatched manually on `main`. Both native jobs use the [release-note pull
+and Bubblewrap commands](releases.md#public-linux-images) with an empty GHCR
+credential entry. Each checks its published platform digest and verifies that
+the AppArmor profile, witness containers, and temporary seccomp file are gone.
+
 Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
 to pass all four synthetic cases from the installed Lab wheel and rebuilt
 source, using the checksum-pinned Runtime 0.9.26 profile.

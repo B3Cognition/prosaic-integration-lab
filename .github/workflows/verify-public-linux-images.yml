@@ -1,0 +1,126 @@
+name: Verify public Linux image setup
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  documented-setup:
+    if: github.ref == 'refs/heads/main'
+    name: Anonymous pull and Bubblewrap (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+            machine: x86_64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+            machine: aarch64
+    env:
+      TARGET_ARCH: ${{ matrix.arch }}
+      TARGET_MACHINE: ${{ matrix.machine }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Extract the documented pull, policy setup, and image provenance
+        id: recipe
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          notes = Path('docs/releases.md').read_text(encoding='utf-8')
+          images = notes.split('\n## Public Linux images\n', 1)[1].split('\n## ', 1)[0]
+          setup = images.split('\n### Bubblewrap policy setup\n', 1)[1].split('\n### ', 1)[0]
+          pull, = re.findall(r'^```sh\n([^\n]+)\n```$', images, re.M)
+          policy, = re.findall(r'^```bash\n(.*?)\n```$', setup, re.M | re.S)
+          arch = os.environ['TARGET_ARCH']
+          ref = re.fullmatch(
+              r'docker pull (ghcr\.io/b3cognition/prosaic-integration-lab@sha256:[a-f0-9]{64})', pull,
+          )
+          manifest, = re.findall(rf'^\| `linux/{arch}` \| `(sha256:[a-f0-9]{{64}})` \|$', images, re.M)
+          source, = re.findall(
+              r'^\[Image source commit\]\(https://github\.com/B3Cognition/prosaic-integration-lab/tree/([a-f0-9]{40})\)$',
+              setup, re.M,
+          )
+          if not ref or ref[1] not in policy or policy.count('  arch=amd64\n') != 1:
+              raise SystemExit('The release notes must bind the pull and policy setup to the same image index')
+          temp = Path(os.environ['RUNNER_TEMP'])
+          (temp / 'documented-pull.sh').write_text(pull + '\n', encoding='utf-8')
+          (temp / 'documented-policy.sh').write_text(
+              policy.replace('  arch=amd64\n', f'  arch={arch}\n', 1) + '\n', encoding='utf-8',
+          )
+          with Path(os.environ['GITHUB_OUTPUT']).open('a', encoding='utf-8') as output:
+              print(f'image_ref={ref[1]}\nmanifest={manifest}\nimage_source={source}', file=output)
+          PY
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ steps.recipe.outputs.image_source }}
+          path: image-source
+          persist-credentials: false
+      - name: Confirm a fresh native host and isolate Docker credentials
+        id: prepare
+        run: |
+          test "$(uname -m)" = "$TARGET_MACHINE"
+          test "$(docker info --format '{{.OSType}}/{{.Architecture}}')" = "linux/$TARGET_MACHINE"
+          profiles=$(sudo cat /sys/kernel/security/apparmor/profiles)
+          if grep -Eq '^prosaic-lab-cli-sandbox[[:space:]]' <<< "$profiles"; then
+            echo 'The Lab witness AppArmor profile was already loaded'
+            exit 1
+          fi
+          members=$(docker container ls --all --quiet --filter label=io.prosaic.lab.cli-sandbox-qualification)
+          test -z "$members"
+          config_dir=$(mktemp -d "$RUNNER_TEMP/anonymous-docker.XXXXXX")
+          scratch=$(mktemp -d "$RUNNER_TEMP/witness-scratch.XXXXXX")
+          printf '%s\n' '{"auths":{"ghcr.io":{}}}' > "$config_dir/config.json"
+          printf 'DOCKER_CONFIG=%s\nWITNESS_SCRATCH=%s\n' "$config_dir" "$scratch" >> "$GITHUB_ENV"
+      - name: Pull the documented index without GHCR credentials
+        env:
+          IMAGE_REF: ${{ steps.recipe.outputs.image_ref }}
+          DOCUMENTED_MANIFEST: ${{ steps.recipe.outputs.manifest }}
+        run: |
+          unset DOCKER_AUTH_CONFIG DOCKER_DEFAULT_PLATFORM
+          if docker image inspect "$IMAGE_REF" > /dev/null 2>&1; then
+            echo 'The runner already has the published image'
+            exit 1
+          fi
+          bash "$RUNNER_TEMP/documented-pull.sh" | tee "$RUNNER_TEMP/lab-pull.log"
+          grep -Fx "Digest: ${IMAGE_REF##*@}" "$RUNNER_TEMP/lab-pull.log"
+          manifest=$(docker buildx imagetools inspect --raw "$IMAGE_REF" |
+            jq -er --arg arch "$TARGET_ARCH" '.manifests[] | select(.platform.os == "linux" and .platform.architecture == $arch) | .digest')
+          test "$manifest" = "$DOCUMENTED_MANIFEST"
+          config=$(docker buildx imagetools inspect --raw "${IMAGE_REF%@*}@$manifest" | jq -er .config.digest)
+          platform=$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$IMAGE_REF")
+          test "$platform" = "linux/$TARGET_ARCH"
+          image=$(docker image inspect --format '{{.Id}}' "$IMAGE_REF")
+          [[ "$image" == "$config" || "$image" == "$manifest" ]]
+          printf 'Anonymous pull matched %s and manifest %s on %s\n' "$IMAGE_REF" "$manifest" "$platform"
+      - name: Run the documented Bubblewrap setup
+        working-directory: image-source
+        run: TMPDIR="$WITNESS_SCRATCH" bash "$RUNNER_TEMP/documented-policy.sh"
+      - name: Verify cleanup of the AppArmor profile, witness containers, and seccomp file
+        if: always() && steps.prepare.outcome == 'success'
+        run: |
+          profiles=$(sudo cat /sys/kernel/security/apparmor/profiles)
+          if grep -Eq '^prosaic-lab-cli-sandbox[[:space:]]' <<< "$profiles"; then
+            echo 'The Lab witness AppArmor profile is still loaded'
+            exit 1
+          fi
+          members=$(docker container ls --all --quiet --filter label=io.prosaic.lab.cli-sandbox-qualification)
+          test -z "$members"
+          rmdir "$WITNESS_SCRATCH"
+          cmp -s "$DOCKER_CONFIG/config.json" <(printf '%s\n' '{"auths":{"ghcr.io":{}}}')
+          echo 'Cleanup verified: AppArmor profile unloaded, no witness containers, temporary seccomp file removed, no registry credentials.'
