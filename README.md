@@ -59,7 +59,7 @@ account, API key, local model or Docker.
 | Copy accounting labels, headers, cross-step review and cap hosts | [Feature blueprints](docs/feature-blueprints.md) | Published SDKs, offline copy and synthetic acceptance; live calls require opt-in |
 | Check reasoning effort and copy provider/workflow blueprints | [Reasoning-effort lab](docs/reasoning-effort.md) | Separate control-test lane on Runtime 0.9.23; fixtures need no key; bounded live calls require opt-in |
 | Enforce workflow tags over accepted first-review/revision outputs | [Workflow enforcement](docs/workflow-enforcement.md) | Content-versioned Guard, bounded repair, human acceptance and no-call recovery |
-| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Core 0.5.1, Runtime 0.9.27 and Harness 0.9.20. Both synthetic provider wires |
+| Enforce tagged prose rules directly or through Harness and copy the blueprint | [Rule-admission blueprint](docs/rule-admission.md) | Core 0.5.1, Runtime 0.9.28 and Harness 0.9.20. Both synthetic provider wires |
 | Explore the ecosystem visually | [Prosaic Explorer](docs/explorer.md) | Interactive component maps, user/developer explanations and eight offline playback scenarios; bounded live runs opt-in |
 | Understand how an agent becomes a workflow | [First workflow](docs/quickstart.md#1-build-your-first-workflow) | Public SDKs validate a workflow and prepare inputs; no execution |
 | See Claude → Codex → local fallback | [Fallback walkthrough](docs/quickstart.md#2-see-safe-fallback-without-model-accounts) | Owned fake CLIs and loopback HTTP fixtures; no real providers or Docker |

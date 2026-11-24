@@ -14,11 +14,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [guarded-recovery, nemotron-correction]
+        profile: [guarded-recovery, bounded-tool-recovery, nemotron-correction]
         origin: [wheel, sdist]
         include:
           - profile: guarded-recovery
             title: Guarded recovery
+          - profile: bounded-tool-recovery
+            title: Guarded bounded tool recovery
           - profile: nemotron-correction
             title: Nemotron correction
     steps:

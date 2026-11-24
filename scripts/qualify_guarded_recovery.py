@@ -12,9 +12,12 @@ from conversation_distribution_smoke import extract_sdist
 from qualify_catalogue_ontology import run
 
 ROOT = Path(__file__).resolve().parents[1]
+PROVIDER_PROTOCOLS = ('anthropic', 'openai-compatible')
 CASES = {
     'guarded-recovery': ('guarded_recovery_acceptance/test_guarded_recovery.py',
-        'test_copied_guarded_recovery', ('anthropic', 'openai-compatible')),
+        'test_copied_guarded_recovery', PROVIDER_PROTOCOLS),
+    'bounded-tool-recovery': ('guarded_recovery_acceptance/test_guarded_recovery.py',
+        'test_guarded_bounded_tool_recovery', PROVIDER_PROTOCOLS),
     'nemotron-correction': ('nemotron_correction_acceptance/test_nemotron_correction.py',
         'test_copied_nemotron_correction', ('ignored', 'optional', 'required', 'ungrounded')),
 }
@@ -36,7 +39,8 @@ def qualify(origin, export, archive=None, profile="guarded-recovery"):
         else:
             run(*build, '--wheel', '-o', work / 'wheel', source)
             wheel, = (work / 'wheel').glob('*.whl')
-        manifest = source / f'dependencies/releases-{profile}.json'
+        manifest_name = 'releases.json' if profile == 'bounded-tool-recovery' else f'releases-{profile}.json'
+        manifest = source / 'dependencies' / manifest_name
         run(sys.executable, '-m', 'venv', work / 'consumer')
         python = work / 'consumer/bin/python'
         run(python, '-m', 'pip', 'install', '--require-hashes',
@@ -52,7 +56,7 @@ def qualify(origin, export, archive=None, profile="guarded-recovery"):
         run(python, '-m', 'pip', 'check')
         report = work / 'report.xml'
         run(python, '-I', '-m', 'pytest', '-o', 'pythonpath=', '-q',
-            source / 'tests' / test_path,
+            f'{source / "tests" / test_path}::{test_name}',
             '--junitxml', report, cwd=work,
             env={**os.environ, 'PROSAIC_BLUEPRINT_INSTALLED': '1', 'NO_PROXY': '*', 'no_proxy': '*'})
         suite, = ElementTree.parse(report).getroot().iter('testsuite')

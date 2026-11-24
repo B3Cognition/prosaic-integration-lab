@@ -3,7 +3,9 @@ import re
 import hashlib
 import json
 from pathlib import Path
-from prosaic_integration_lab.catalogue_ontology import ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN
+from prosaic_integration_lab.catalogue_ontology import (
+    CURRENT_RELEASE_TRAIN, ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN, SANDBOX_RELEASE_TRAINS,
+)
 from prosaic_integration_lab.catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
 from prosaic_integration_lab.dependencies import CLI_SANDBOX_CANDIDATES
 
@@ -46,15 +48,19 @@ CLI_SANDBOX_TRAIN = {
     name: version for candidate in CLI_SANDBOX_CANDIDATES.values()
     for name, version in candidate.items()
 }
-SANDBOX_RELEASE_MANIFEST_SHA256 = '9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59'
+SANDBOX_RELEASE_MANIFEST_SHA256 = {
+    SANDBOX_RELEASE_TRAIN['b3-prosaic-runtime']: '9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59',
+    CURRENT_RELEASE_TRAIN['b3-prosaic-runtime']: 'fa44a7c79b2176044828e8ed55c237f7603098086b049f8361e0ec8359fd0734',
+}
 
 
 def supports_sub_agents(manifest):
     artifacts = manifest.get('artifacts', ())
     actual = {item.get('distribution'): item.get('version') for item in artifacts}
-    if actual == SANDBOX_RELEASE_TRAIN:
+    if actual in SANDBOX_RELEASE_TRAINS:
         canonical = json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + '\n'
-        if hashlib.sha256(canonical.encode()).hexdigest() != SANDBOX_RELEASE_MANIFEST_SHA256:
+        expected = SANDBOX_RELEASE_MANIFEST_SHA256[actual['b3-prosaic-runtime']]
+        if hashlib.sha256(canonical.encode()).hexdigest() != expected:
             raise ValueError('invalid released sandbox SDK family')
         return True
     if actual == ONTOLOGY_TRAIN:
@@ -164,7 +170,7 @@ def supports_conversation(manifest):
 
 def required_modes(*,candidate,manifest):
     versions = {item['distribution']: item['version'] for item in manifest['artifacts']}
-    if versions == SANDBOX_RELEASE_TRAIN and candidate:
+    if versions in SANDBOX_RELEASE_TRAINS and candidate:
         raise ValueError('sandbox SDK release requires released acceptance mode')
     if versions == ONTOLOGY_TRAIN and ('candidate_lineage' in manifest) != candidate:
         raise ValueError('ontology manifest provenance must match acceptance mode')

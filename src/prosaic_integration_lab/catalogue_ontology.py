@@ -13,4 +13,10 @@ SANDBOX_RELEASE_TRAIN = {
     'b3-prosaic-runtime': '0.9.27',
     'b3-prosaic-harness': '0.9.20',
 }
-ONTOLOGY_TRAINS = (TRAIN, SANDBOX_RELEASE_TRAIN)
+CURRENT_RELEASE_TRAIN = {
+    **SANDBOX_RELEASE_TRAIN,
+    'b3-prosaic-runtime': '0.9.28',
+    'b3-prosaic-harness-postgres': '0.4.6',
+}
+SANDBOX_RELEASE_TRAINS = (SANDBOX_RELEASE_TRAIN, CURRENT_RELEASE_TRAIN)
+ONTOLOGY_TRAINS = (TRAIN, *SANDBOX_RELEASE_TRAINS)

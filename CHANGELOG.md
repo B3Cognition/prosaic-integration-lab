@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- Pin the Linux consumer images to the published Runtime 0.9.27 and Harness 0.9.20 wheels.
+- Pin Lab source builds to the published Runtime 0.9.28 and Harness PostgreSQL 0.4.6 wheels.
+- Qualify guarded workflows with bounded tool recovery on both synthetic provider protocols, including the required tool receipt and resume without redispatch.
 - Require default CLI confinement under the [scoped Bubblewrap deployment policy](docs/sandboxed-tools.md#qualify-the-linux-image) on the exact image used by each released stack job.
 
 ## 0.9.19
