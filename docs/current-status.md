@@ -1,8 +1,15 @@
 # Current delivery status
 
+## Published SDK pins for Lab source builds
+
+The active manifest selects Runtime 0.9.28 and Harness PostgreSQL 0.4.6 alongside
+Core 0.5.1, Harness 0.9.20, and the Runtime recorder 0.3.0. The
+[guarded recovery blueprint](guarded-recovery.md) covers the required-tool
+repro on both synthetic provider protocols.
+
 ## Linux images with the published sandbox SDKs
 
-The Linux image manifest pins Runtime 0.9.27 and Harness 0.9.20 with Core
+The documented GHCR image digest contains Runtime 0.9.27 and Harness 0.9.20 with Core
 0.5.1, recorder 0.3.0 and store 0.4.5. Released CI exercises Runtime's required
 CLI sandbox default under the [reviewed Bubblewrap policy](sandboxed-tools.md#qualify-the-linux-image)
 on native AMD64 and ARM64.

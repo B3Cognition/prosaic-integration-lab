@@ -26,7 +26,10 @@ ADAPTERS = {
 
 def test_exact_installed_sdk_payloads():
     profile = os.environ.get("PROSAIC_LAB_ONTOLOGY_PROFILE", "rc")
-    assert profile in {"rc", "candidate", "released", "released-sandbox"}
+    from prosaic_integration_lab.catalogue_ontology import CURRENT_RELEASE_TRAIN, SANDBOX_RELEASE_TRAIN, TRAIN
+
+    published_trains = {"released-current": CURRENT_RELEASE_TRAIN, "released-sandbox": SANDBOX_RELEASE_TRAIN}
+    assert profile in {"rc", "candidate", "released", *published_trains}
     modules = {name: module for name, (_, module) in SDK.items()}
     if profile == "released":
         from lab_runner.catalogue_ontology import PUBLIC_PROFILE, validate_released_manifest
@@ -36,14 +39,12 @@ def test_exact_installed_sdk_payloads():
         assert any(Path(file.locate()).resolve() == PUBLIC_PROFILE.resolve() for file in lab.files)
         released = validate_released_manifest(json.loads(PUBLIC_PROFILE.read_bytes()))
         assert {item["distribution"] for item in released["artifacts"]} == set(modules)
-    if profile == "released-sandbox":
+    if profile in published_trains:
         modules.update(ADAPTERS)
     if profile == "rc":
         expected = {name: version for name, (version, _) in SDK.items()}
     else:
-        from prosaic_integration_lab.catalogue_ontology import SANDBOX_RELEASE_TRAIN, TRAIN
-
-        train = SANDBOX_RELEASE_TRAIN if profile == "released-sandbox" else TRAIN
+        train = published_trains.get(profile, TRAIN)
         expected = {name: train[name] for name in modules}
     assert {name: metadata.version(name) for name in modules} == expected
 

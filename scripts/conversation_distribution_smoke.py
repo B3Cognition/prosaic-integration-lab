@@ -175,7 +175,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     pip=[python,'-I','-m','pip','--isolated','--no-input','--keyring-provider','disabled']
     run([*pip,'install','--index-url',public.INDEX,'--require-hashes','-r',lock],
         directory=directory,environment=environment)
-    from lab_runner.gates import ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN, supports_mcp_client
+    from lab_runner.gates import CURRENT_RELEASE_TRAIN, ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN, supports_mcp_client
     selected=json.loads(manifest.read_bytes())
     versions = {item['distribution']: item['version'] for item in selected['artifacts']}
     released_ontology = versions in ONTOLOGY_TRAINS and 'candidate_lineage' not in selected
@@ -251,7 +251,10 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
         from scripts.qualify_catalogue_ontology import validate_report
 
         report = directory / 'catalogue-ontology.xml'
-        ontology_profile = 'released-sandbox' if versions == SANDBOX_RELEASE_TRAIN else 'released'
+        ontology_profile = {
+            CURRENT_RELEASE_TRAIN['b3-prosaic-runtime']: 'released-current',
+            SANDBOX_RELEASE_TRAIN['b3-prosaic-runtime']: 'released-sandbox',
+        }.get(versions['b3-prosaic-runtime'], 'released')
         run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=', '-q',
              ROOT / 'tests/catalogue_ontology_acceptance', f'--junitxml={report}'],
             directory=directory, environment={**environment, 'PROSAIC_LAB_ONTOLOGY_PROFILE': ontology_profile})

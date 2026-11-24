@@ -3,7 +3,7 @@
 Released integration acceptance requires the [Bubblewrap image qualification](sandboxed-tools.md#qualify-the-linux-image)
 on native AMD64 and ARM64 with PostgreSQL 16 and 18. Each job runs a dedicated
 CLI worker under the reviewed Docker policy and then uses the same immutable
-image for the required real-stack gates. The witness exercises Runtime 0.9.27's
+image for the required real-stack gates. The witness exercises Runtime 0.9.28's
 required default with the published Harness 0.9.20 wheels.
 
 After the four required cells pass, dispatch **Publish Lab Linux images** on
@@ -24,6 +24,9 @@ to pass all four synthetic cases from the installed Lab wheel and rebuilt
 source, using the checksum-pinned Runtime 0.9.26 profile.
 
 Lab 0.9.18 requires the [guarded recovery blueprint](guarded-recovery.md) to pass both synthetic provider wires from the Lab wheel and the wheel rebuilt from source. Its separate SDK profile is checksum-pinned.
+
+The same workflow qualifies guarded bounded tool recovery from both archive
+origins with the active published SDK manifest.
 
 Lab 0.9.17 verifies catalogue ontology in both installed package paths with
 the exact released SDK profile. Each Linux architecture and PostgreSQL

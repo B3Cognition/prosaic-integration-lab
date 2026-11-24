@@ -8,7 +8,7 @@ from prosaic_runtime import CustomTool, EndpointConfig, Guard, ProsaicArtifact, 
 
 
 def build_workflow(base_url, *, provider, lookup, authorize_lookup, rule_retries=2,
-                   correct_malformed_tool_calls=True):
+                   correct_malformed_tool_calls=True, bounded_tool_recovery=False):
     root = Path(__file__).resolve().parent
     inspected = inspect_artifact(root, 'subagents/reviewer.md')
     if not inspected['ok']:
@@ -35,6 +35,7 @@ def build_workflow(base_url, *, provider, lookup, authorize_lookup, rule_retries
             rule_retries=rule_retries, correct_malformed_tool_calls=correct_malformed_tool_calls),
         policy=WorkflowPolicy(allowed_agents={'reviewer'}, allowed_schemas={'result'},
             allowed_guards={'verified_record'}, allowed_tools={'lookup'}, max_calls=1,
+            bounded_tool_recovery=bounded_tool_recovery,
             timeout_s=10, max_provider_requests_per_invocation=5, max_tool_calls_per_invocation=1),
     )
     return factory.build({'version': 1, 'name': 'guarded-recovery', 'start': 'review', 'steps': {

@@ -2,7 +2,7 @@
 
 The `catalogue-ontology` blueprint shows how a host attaches public concepts
 and relationships to the aliases it already registers. The current released
-SDK manifest uses Core 0.5.1, Harness 0.9.20 and Runtime 0.9.27.
+SDK manifest uses Core 0.5.1, Harness 0.9.20 and Runtime 0.9.28.
 The experimental RC lock remains available for reproducing the original example.
 
 ## Install and copy

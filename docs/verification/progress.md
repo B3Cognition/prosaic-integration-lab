@@ -1,5 +1,51 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Consumer repros on Runtime 0.9.28 and Harness PostgreSQL 0.4.6 — 2026-11-24
+
+The active manifest SHA-256 is
+`fa44a7c79b2176044828e8ed55c237f7603098086b049f8361e0ec8359fd0734`.
+`prepare_dependencies.py`, `install_dependencies.py` and `audit_install.py`
+verified the installed payloads for all five wheels. The two updated wheels
+match both the PyPI digests and the GitHub release checksum files.
+
+On macOS ARM64 with Python 3.12.15, the required lookup and accepting final
+guard reproduced `tool_recovery_blocked` on both synthetic protocols with
+Runtime 0.9.27. The following installed-Lab command passed with both
+`--origin wheel` and `--origin sdist` on Runtime 0.9.28. It verifies matching tool
+versions on the start and completion events and no redispatch on resume.
+
+```sh
+.venv/bin/python scripts/qualify_guarded_recovery.py --origin wheel \
+  --profile bounded-tool-recovery --export /tmp/lab-bounded-tool-recovery.json
+```
+
+The installed adapter's [transport tests](https://github.com/B3Cognition/prosaic-harness/blob/postgres-v0.4.6/adapters/postgres/tests/test_transport.py)
+ran through `python -I -m pytest --require-postgres -q` against disposable
+Linux ARM64 PostgreSQL containers. The idle-connection blackhole case
+reproduced `StoreUnavailable` on adapter 0.4.5 with PostgreSQL 16. On 0.4.6,
+all 19 transport tests passed on each of PostgreSQL 16 and 18, and the owned
+fixtures were removed. The installed Lab wheel also passed all 12
+`tests/rule_admission_postgres` cases on each major with
+`PROSAIC_RULE_POSTGRES_DSN` set to the owned instance. These runs used synthetic
+provider and database faults.
+
+The full source suite (`.venv/bin/python -m pytest -q`) passed 2,348 tests.
+The installed Lab wheel passed 322 rule-admission, blueprint and catalogue
+ontology tests. `scripts/conversation_distribution_smoke.py` verified the
+public-index bytes and isolated wheel and sdist installs, with 11 ontology
+cases on each archive path.
+
+A local Linux ARM64 image built by `scripts/build_consumer.py`
+from the same manifest passed all 103 real-stack conversation cases on each
+PostgreSQL major, with no skips and verified cleanup:
+
+```sh
+.venv/bin/python -m lab_runner test --mode conversation --context-assembly \
+  --postgres-version 16 --consumer-image <image-id>
+```
+
+The PostgreSQL 18 run used `--postgres-version 18`.
+
 ## Published sandbox SDKs in Linux images — 2026-11-21
 
 Commit `efbb857ca43ee64403834f0f1d9cd4a4af859110` selects Core 0.5.1,

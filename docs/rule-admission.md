@@ -12,9 +12,9 @@ URLs, source commits and checksums for this complete family:
 | SDK | Release | Purpose |
 | --- | --- | --- |
 | Core | 0.5.1 | `parse_rules`, `strip_tags` and composed inspection rules |
-| Runtime | 0.9.27 | Guard admission/enforcement, retained private guard facts and optional trusted accounting labels |
+| Runtime | 0.9.28 | Guard admission/enforcement, retained private guard facts and optional trusted accounting labels |
 | Harness | 0.9.20 | Host policy/guard preservation and durable rule receipts |
-| Runtime recorder / Harness store | 0.3.0 / 0.4.5 | Published persistence adapters |
+| Runtime recorder / Harness store | 0.3.0 / 0.4.6 | Published persistence adapters |
 
 Runtime 0.9.13 and Harness 0.9.8 do not provide these guarded-conversation
 contracts. Upgrade every worker sharing guarded sessions together. Historical

@@ -5,7 +5,7 @@ from pathlib import Path
 import hashlib
 
 
-def test_active_manifest_selects_only_the_verified_sandbox_sdk_family():
+def test_active_manifest_selects_the_exact_current_sdk_family():
     from prosaic_integration_lab.dependencies import sdk_manifest
     manifest = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'
     data = sdk_manifest(manifest)
@@ -13,14 +13,14 @@ def test_active_manifest_selects_only_the_verified_sandbox_sdk_family():
             for item in data['artifacts']} == {
         ('b3-prosaic', '0.5.1', '921d828ea6bdafee46380212fc16f41d1f3faabc',
          'c7f7a3292952d70513da485bd87360e0bf94a3cc50d49b3deadb85a0e7d29a76'),
-        ('b3-prosaic-runtime', '0.9.27', '9b7a285acd50a18a992c5ebb6bef409cb5a40345',
-         '7889545eeaef8a92e08fc5669d07b72c33fdea7c191158a0d150e9798a0bf5df'),
+        ('b3-prosaic-runtime', '0.9.28', '83f45bb6fc613a6332012adb893b42d06b899284',
+         '9889522ad47ccb3a34dbea9a05c4d3bb97049da5e3e767ff1a79eaf930b06c4f'),
         ('b3-prosaic-runtime-postgres', '0.3.0', 'a59621c5f30d766d1217b37df777d3876075dc34',
          '5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca'),
         ('b3-prosaic-harness', '0.9.20', '432ab7b45dc6ae16704c48652aa3dbcb99c08158',
          'cc6fb7275ee491a07499c7ebaec12f98341c0477fd5940f468a8a5180301358d'),
-        ('b3-prosaic-harness-postgres', '0.4.5', '5cf6b08e3f181bfb368b24afbe1eadf9911b4504',
-         '6a64d3276850582fbf24d6a6698d83bd0adb861bd9189f096733a3f1d28b03cc'),
+        ('b3-prosaic-harness-postgres', '0.4.6', '0630669927138a9c3e7cd001214de44d3b538e1c',
+         '1927ce1481aa8985c7a5aefe762c507fd38a277211ebd64f33192fe93879f9e2'),
     }
 
 
