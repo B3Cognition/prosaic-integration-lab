@@ -10,7 +10,7 @@ The release source includes `dependencies/releases-guarded-recovery.json`.
 Use `scripts/prepare_dependencies.py` and `scripts/install_dependencies.py`
 with that manifest to install the exact SDKs used by the acceptance lane.
 
-For the bounded tool recovery case, use the current Lab checkout and its
+For the bounded tool recovery case, use Lab 0.9.20 and its
 `dependencies/releases.json` manifest with Runtime 0.9.28 and Harness 0.9.20.
 Pass `bounded_tool_recovery=True` to the copied host's `build_workflow`.
 The installed test checks that the required lookup starts and completes with

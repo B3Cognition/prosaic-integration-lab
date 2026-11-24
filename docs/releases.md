@@ -65,6 +65,10 @@ unloads the temporary AppArmor profile on exit.
 
 ## Lab package release notes
 
+Lab 0.9.20 adopts Runtime 0.9.28 and Harness PostgreSQL 0.4.6 and qualifies
+the bounded guarded-recovery example on both provider protocols.
+[Release notes](release-0.9.20.md) · [Release downloads and qualified image digests](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.20)
+
 Lab 0.9.19 adds [constrained Nemotron lookup correction](release-0.9.19.md) with a dedicated SDK profile.
 
 Lab 0.9.18 adds [guarded workflow recovery](release-0.9.18.md) with a separate installed profile.
