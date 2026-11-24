@@ -5,6 +5,12 @@ installed-SDK acceptance test and a linked guide. The release checklist and
 branch review must cover all three before publication. Blueprints use public
 installed APIs; the Lab never supplies a second workflow or model engine.
 
+## Lab 0.9.20 feature map
+
+| Capability | Copyable blueprint | What the installed test proves |
+| --- | --- | --- |
+| Guarded recovery with bounded tool recovery | `guarded-recovery` | Both provider protocols preserve one required lookup, matching tool versions and resume without further dispatch. [Guide](guarded-recovery.md) |
+
 ## Lab 0.9.19 feature map
 
 | Capability | Copyable blueprint | What the installed test proves |
