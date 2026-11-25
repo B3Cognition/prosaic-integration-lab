@@ -1,10 +1,12 @@
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import subprocess
 import sys
 from types import SimpleNamespace
-from lab_runner.gates import COUNTS,required_modes
+import pytest
+from lab_runner.gates import ALL_COUNTS as COUNTS,required_modes
 
 
 def test_native_persistence_candidate_requires_manifest_before_stack_allocation(monkeypatch):
@@ -21,6 +23,8 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     spec = importlib.util.spec_from_file_location('required_acceptance',source)
     runner = importlib.util.module_from_spec(spec); spec.loader.exec_module(runner)
     monkeypatch.setattr(runner,'resolve_image',lambda candidate:'sha256:'+'1'*64)
+    manifest = source.parents[1] / 'dependencies/releases.json'
+    manifest_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
     seen = []
     def fake(command,**kwargs):
         mode=command[command.index('--mode')+1]; seen.append(mode)
@@ -28,10 +32,13 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
             assert kwargs['timeout']==900
         assert command[command.index('--consumer-image')+1] == 'sha256:'+'1'*64
         item={'mode':mode,'passed':mode != 'audit','cleanup':'verified','dependency_mode':'released',
-            'test_returncode':1 if mode == 'audit' else 0,'test_count':COUNTS[mode],'skipped':0,
+            'test_returncode':1 if mode == 'audit' else 0,
+            'test_count':COUNTS[mode] + (6 if mode == 'conversation' else 0),'skipped':0,
             'failed_tests':['PRIVATE'] if mode == 'audit' else [],'host_architecture':'arm64',
-            'payload_audit':'verified','released_manifest_sha256':'f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472',
+            'payload_audit':'verified','released_manifest_sha256':manifest_sha,
             'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:16@sha256:'+'2'*64},'secret':'PRIVATE'}
+        if mode == 'conversation':
+            item['context_assembly'] = True
         if mode=='lago':
             item['images']['lago']=json.loads((source.parents[1]/'dependencies/lago.json').read_text())['image']
         return SimpleNamespace(returncode=item['test_returncode'],stdout=json.dumps(item)+'\nEvidence: PRIVATE',stderr='PRIVATE')
@@ -39,7 +46,7 @@ def test_required_cli_runs_remaining_lanes_after_failure_and_exports_no_raw_outp
     target=tmp_path/'safe.json'
     monkeypatch.setattr(sys,'argv',['required_acceptance','--postgres-version','16','--export',str(target)])
     assert runner.main() == 1
-    released=json.loads((source.parents[1]/'dependencies/releases.json').read_text())
+    released=json.loads(manifest.read_text())
     assert seen == list(required_modes(candidate=False,manifest=released))
     assert 'PRIVATE' not in target.read_text()
     assert json.loads(target.read_text())['passed'] is False
@@ -70,6 +77,49 @@ def test_ci_requires_native_matrix_and_exports_only_safe_summary_and_archives():
     assert any('scripts/required_acceptance.py' in step.get('run','') for step in steps)
 
 
+def test_released_ci_uses_the_witness_image_for_real_stack_gates():
+    import yaml
+
+    root = Path(__file__).resolve().parents[2]
+    workflow = yaml.safe_load((root / '.github/workflows/required-acceptance.yml').read_text())
+    steps = workflow['jobs']['acceptance']['steps']
+    build = next(step for step in steps if step.get('id') == 'consumer-image')
+    witness = next(step for step in steps if step.get('id') == 'cli-sandbox-witness')
+    stack = next(step for step in steps if step.get('name') == 'Required real-stack gates')
+    assert steps.index(build) < steps.index(witness) < steps.index(stack)
+    assert build['if'] == witness['if'] == stack['if'] == '${{ !inputs.candidate }}'
+    assert witness['env']['CONSUMER_IMAGE'] == stack['env']['CONSUMER_IMAGE'] == (
+        '${{ steps.consumer-image.outputs.image }}'
+    )
+    assert 'scripts/qualify_cli_sandbox_image.py' in witness['run']
+    assert '--explicit-required' not in witness['run']
+    assert '--consumer-image "${CONSUMER_IMAGE:?}"' in stack['run']
+
+
+def test_required_conversation_wrapper_allows_suite_and_owned_stack_cleanup(monkeypatch,tmp_path):
+    source=Path(__file__).resolve().parents[2]/'scripts/required_acceptance.py'
+    spec=importlib.util.spec_from_file_location('required_conversation_deadline',source)
+    runner=importlib.util.module_from_spec(spec);spec.loader.exec_module(runner)
+    monkeypatch.setattr(runner,'resolve_image',lambda candidate:'sha256:'+'1'*64)
+    monkeypatch.setattr(runner,'required_modes',lambda **kwargs:('conversation',))
+    def lane(command,**kwargs):
+        if kwargs['timeout']<950:
+            raise subprocess.TimeoutExpired(command,kwargs['timeout'],output='PRIVATE_TOKEN')
+        item={'mode':'conversation','context_assembly':True,'passed':True,'cleanup':'verified',
+            'dependency_mode':'released','test_returncode':0,'test_count':103,'skipped':0,'failed_tests':[],
+            'host_architecture':'x86_64','payload_audit':'verified',
+            'released_manifest_sha256':hashlib.sha256((source.parents[1]/'dependencies/releases.json').read_bytes()).hexdigest(),
+            'images':{'consumer':'sha256:'+'1'*64,'postgres':'postgres:18@sha256:'+'2'*64}}
+        return SimpleNamespace(returncode=0,stdout=json.dumps(item),stderr='PRIVATE_TOKEN')
+    monkeypatch.setattr(runner.subprocess,'run',lane)
+    target=tmp_path/'safe.json'
+    monkeypatch.setattr(sys,'argv',['required_acceptance','--postgres-version','18','--export',str(target)])
+    assert runner.main()==0
+    result=json.loads(target.read_text())
+    assert result['passed'] is True and result['lanes'][0]['test_count']==103
+    assert result['lanes'][0]['cleanup']=='verified' and 'PRIVATE' not in target.read_text()
+
+
 def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_path):
     import os,shlex,yaml
     root=Path(__file__).resolve().parents[2]
@@ -84,10 +134,10 @@ def test_ci_capability_selection_bootstraps_host_source_without_lab_install(tmp_
     command=selected['run'].replace('.venv/bin/python',shlex.quote(sys.executable))
     result=subprocess.run(['/bin/bash','-e','-c',command],cwd=root,env=environment,capture_output=True,timeout=15)
     assert result.returncode==0,result.stderr.decode()
-    from lab_runner.gates import supports_context_assembly
+    from lab_runner.gates import supports_context_assembly,supports_tool_evidence,supports_parallel_tools
     import json
     manifest=json.loads((root/'dependencies/releases.json').read_text())
-    assert output.read_text()=='enabled=true\ncontext='+str(supports_context_assembly(manifest)).lower()+'\n'
+    assert output.read_text()=='enabled=true\ncontext='+str(supports_context_assembly(manifest)).lower()+'\ntools='+str(supports_tool_evidence(manifest)).lower()+'\nparallel='+str(supports_parallel_tools(manifest)).lower()+'\n'
 
 
 def test_ci_selects_installed_cli_for_trusted_workflow_preflight(tmp_path):
@@ -127,7 +177,8 @@ def test_missing_image_fails_gate_with_safe_summary_before_owned_resources(monke
         'event':'required_image_unavailable'}
     assert 'PRIVATE' not in capsys.readouterr().out
 
-def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path):
+@pytest.mark.parametrize('advertise_branch', [True, False], ids=['branch', 'detached-only'])
+def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path, advertise_branch):
     import hashlib
     import io
     import tarfile
@@ -142,6 +193,20 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         # requires the original repository, supplied explicitly by the caller.
         import os
         root=Path(os.environ['LAB_HISTORY_TEST_REPOSITORY'])
+    baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
+    def contains_baseline(directory):
+        return subprocess.run(['git','cat-file','-e',baseline+'^{tree}'],
+            cwd=directory,capture_output=True,timeout=10).returncode==0
+    def require_full_origin(stage):
+        import os
+        shallow=subprocess.check_output(['git','rev-parse','--is-shallow-repository'],
+            cwd=root,text=True).strip()
+        assert shallow=='false', (stage, shallow,
+            subprocess.check_output(['git','rev-parse','--absolute-git-dir'],cwd=root,text=True).strip(),
+            subprocess.check_output(['git','rev-parse','--git-path','shallow'],cwd=root,text=True).strip(),
+            sorted(key for key in os.environ if key.startswith('GIT_')))
+    assert contains_baseline(root), 'workflow checkout lacks released baseline tree'
+    require_full_origin('before full clone')
     # Actions checks out a detached exact commit. Exercise that state too,
     # without touching the caller's branch or assuming a named current branch.
     detached=tmp_path/'detached-origin'
@@ -150,19 +215,37 @@ def test_candidate_checkout_history_can_archive_exact_released_baseline(tmp_path
         check=True,capture_output=True,timeout=30)
     subprocess.run(['git','checkout','--detach',commit],cwd=detached,
         check=True,capture_output=True,timeout=30)
+    require_full_origin('after full clone')
+    assert contains_baseline(detached), 'full detached fixture clone lost baseline tree'
+    if not advertise_branch:
+        # Actions initializes/fetches a detached checkout without local branches.
+        # Remove only refs in this owned fixture, never in the caller's checkout.
+        refs=subprocess.check_output(['git','for-each-ref','--format=%(refname)',
+            'refs/heads/'],cwd=detached,text=True).splitlines()
+        for ref in refs:
+            subprocess.run(['git','update-ref','-d',ref],cwd=detached,
+                check=True,capture_output=True,timeout=10)
     subprocess.run(['git','clone','--depth=1','--single-branch','--no-tags',
         detached.as_uri(),str(source)],check=True,capture_output=True,timeout=30)
-    baseline='59752bef3e6b3ffde0ecbf38f34815d184043e20'
+    require_full_origin('after shallow clone')
     missing=subprocess.run(['git','cat-file','-e',baseline+'^{commit}'],cwd=source,capture_output=True)
     assert missing.returncode!=0,'regression must start with the historical object absent'
     if depth==0:
-        subprocess.run(['git','fetch','--unshallow','--no-tags','origin'],cwd=source,
+        # An origin with detached HEAD need not configure a branch fetch refspec.
+        # Fetch the candidate explicitly, as checkout does; do not fetch the
+        # baseline directly, which would bypass the workflow's depth guard.
+        subprocess.run(['git','fetch','--unshallow','--no-tags','origin',commit],cwd=source,
             check=True,capture_output=True,timeout=30)
     elif depth!=1:
-        subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin'],cwd=source,
+        subprocess.run(['git','fetch','--depth='+str(depth),'--no-tags','origin',commit],cwd=source,
             check=True,capture_output=True,timeout=30)
     result=subprocess.run(['git','archive',baseline],cwd=source,capture_output=True,timeout=30)
-    assert result.returncode==0,result.stderr.decode()
+    state={name:subprocess.check_output(['git','rev-parse','--is-shallow-repository'],
+        cwd=directory,text=True).strip() for name,directory in (
+            ('root',root),('detached',detached),('source',source))}
+    assert result.returncode==0, (result.stderr.decode(), depth, state,
+        subprocess.check_output(['git','--version'],text=True).strip(),
+        contains_baseline(source))
     with tarfile.open(fileobj=io.BytesIO(result.stdout)) as archive:
         manifest=archive.extractfile('dependencies/releases.json').read()
         assert hashlib.sha256(manifest).hexdigest()=='f972db9d828b6ab0ffcf6ca210082e5cbc3b7678f5a1b8f42bbc482b9aafb472'

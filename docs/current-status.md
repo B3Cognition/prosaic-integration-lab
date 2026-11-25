@@ -1,16 +1,309 @@
 # Current delivery status
 
-## Bounded coordination local milestone — 2026-10-20
+## Published SDK pins for Lab source builds
 
-The experimental [two-worker blueprint](bounded-coordination.md) composes
-public SDKs with shared limits, typed host assignments and durable inspection.
-Its48scripted lanes include a sequential baseline and independently witnessed
-parallel overlap. No live model-benefit or production claim is made. The
-[qualification ledger](verification/bounded-coordination-2026-10-20.md) records
-1930passing source tests, installed wheel/rebuilt-sdist consumers,144payload
-matches and one Important review fix with16RED→GREEN cases. Local gates pass;
-later new-branch PR/platform CI remains. No push/release/SDK change; all caps
-and historic charges persist; memory/correction remain experimental.
+The active manifest selects Runtime 0.9.28 and Harness PostgreSQL 0.4.6 alongside
+Core 0.5.1, Harness 0.9.20, and the Runtime recorder 0.3.0. The
+[guarded recovery blueprint](guarded-recovery.md) covers the required-tool
+repro on both synthetic provider protocols.
+
+## Bounded coordination
+
+The [two-worker blueprint](bounded-coordination.md) demonstrates typed host
+assignments, shared execution limits, and receipt-only inspection. The
+[October 20 qualification ledger](verification/bounded-coordination-2026-10-20.md)
+records the original 48 scripted cases and their tested SDK versions.
+
+## Linux images with the published sandbox SDKs
+
+The documented GHCR image digest contains Runtime 0.9.27 and Harness 0.9.20 with Core
+0.5.1, recorder 0.3.0 and store 0.4.5. Released CI exercises Runtime's required
+CLI sandbox default under the [reviewed Bubblewrap policy](sandboxed-tools.md#qualify-the-linux-image)
+on native AMD64 and ARM64.
+
+## Catalogue ontology and Lab 0.9.17 — 2026-11-13
+
+Lab 0.9.17 shipped Core 0.5.1 and Harness 0.9.18 with Runtime 0.9.23
+and the original PostgreSQL adapter wheels. The copyable receipt workflow
+shows how to request ontology metadata through policy-scoped discovery.
+See the [user guide](catalogue-ontology.md) and [release notes](release-0.9.17.md).
+
+## Bounded delegation and Lab 0.9.16 — 2026-11-12
+
+The active manifest selects Runtime 0.9.23, Harness 0.9.17 and Harness PostgreSQL
+0.4.5, with the existing Core 0.5.0 and Runtime recorder 0.3.0. The copyable
+blueprint runs an analyst and reviewer in an authored YAML workflow or a
+conversation. Each required architecture and PostgreSQL cell includes 24
+delegation cases. See the [user guide](sub-agents.md) and [release notes](release-0.9.16.md).
+
+## MCP read tools and Lab 0.9.15 — 2026-11-11
+
+Lab 0.9.15 adds a host-approved MCP read tool blueprint and 24 required
+synthetic cases per Linux architecture and PostgreSQL cell. The installed
+manifest selects Runtime 0.9.22 and Harness 0.9.16 alongside Core 0.5.0,
+Runtime recorder 0.3.0 and Harness PostgreSQL 0.4.4.
+See the [MCP guide](mcp-client.md) and [release notes](release-0.9.15.md).
+
+## Parallel read tools and Lab 0.9.14 — 2026-11-11
+
+Lab 0.9.14 adds the parallel-read blueprint and 32 required cases per cell.
+See [configuration and verification](parallel-tools.md) and [release notes](release-0.9.14.md).
+
+## Safe tool events and Lab 0.9.13 — 2026-11-10
+
+The 0.9.13 manifest selects Runtime 0.9.20, Harness 0.9.14 and Harness PostgreSQL
+0.4.3, retaining original Core 0.5.0 and Runtime recorder 0.3.0 bytes. Safe display
+and captured citations have a complete copyable host and 24 required dual-provider
+cases in every architecture/database cell. Existing gates and archived profiles
+remain available. Parallel calls, MCP and sub-agents remain follow-ups.
+
+See the [guide](tool-evidence.md), [release scope](release-0.9.13.md) and
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.13)
+for published archives and qualification. Earlier checkpoints below describe their
+original SDK trains.
+
+## Context packs and Lab 0.9.12 — 2026-11-09
+
+The current train selects Core 0.5.0, Runtime 0.9.19, Harness 0.9.13 and
+Harness PostgreSQL 0.4.2, retaining the original Runtime recorder 0.3.0 bytes.
+All twelve context-pack cases join normal released acceptance in each Linux
+architecture/PostgreSQL cell. Agent defaults, workflow-node overrides, accepted
+records, scoped reads and recovery use owned synthetic fixtures. Applications
+retain authorization and explicit migration responsibilities.
+
+See the [context-pack guide](context-packs.md) and
+[release scope](release-0.9.12.md). The
+[release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.12)
+is the publication and qualification authority. Prior manifests, profiles,
+benchmark freezes and published artifacts retain their original bytes.
+Earlier checkpoints below describe their historical SDK trains.
+
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The current train is Core0.5.0/Runtime0.9.17/Harness0.9.12 with the original
+recorder0.3.0/store0.4.1 bytes. A separate copyable accounting-metadata host
+labels prepare-time requests from trusted run/variant context, preserves saved
+labels through resume and excludes them from provider payloads. None/empty
+retains legacy accounting hashes; present labels intentionally enter accounting
+hashes/private receipts. Labeled runs require >=0.9.17 readers; no DDL or adapter
+republish. Prior profiles and all five earlier blueprint resources stay intact.
+
+See the [guide](accounting-request-metadata.md), [release gates](release-0.9.10.md)
+and [qualification ledger](verification/accounting-request-metadata-2026-11-08.md).
+The [release page](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.10)
+is the publication/proof authority; a version/tag or development test alone is
+insufficient. No live inference. Earlier checkpoints below retain their scope.
+
+## Harness 0.9.10 SDK adoption — 2026-11-06
+
+The maintainer authorized Lab 0.9.7 with Harness 0.9.10, Runtime 0.9.14 and
+Core 0.5.0, retaining recorder 0.3.0/store 0.4.1 public bytes. Both active
+manifests and current provenance/freezes advance; previous records are archived
+verbatim. No session migration or live calls. Follow the
+[release plan](superpowers/plans/2026-11-06-harness0910-lab-release.md),
+[release guide](release-0.9.7.md) and
+[verification ledger](verification/harness0910-sdk-release-2026-11-06.md).
+Require all ten final-head hosted jobs, equal qualified/merged trees and original
+CI archive/public-consumer proof. Earlier checkpoints below retain their scope.
+
+Lab 0.9.6 preparation targets the released guarded family: Core 0.5.0, Runtime
+0.9.14 and Harness 0.9.9, with recorder 0.3.0 and store 0.4.1. Runtime is publicly
+verified, as is Harness. Both active manifests and current freezes now bind the
+verified public bytes; final Lab hosted qualification remains required. See the
+[release guide](release-0.9.6.md) and
+[current ledger](verification/guarded-sdk-release-2026-11-06.md).
+
+## Lab 0.9.5 — Core 0.5 SDK adoption
+
+The current source adopts Core 0.5.0, Runtime 0.9.13 and Harness 0.9.8 with
+recorder 0.3.0 and store 0.4.1 in both active manifests. The
+[SDK adoption ledger](verification/core050-sdk-adoption-2026-11-05.md) records
+the new source verification separately from the historical release results below.
+Lab 0.9.5 packages this SDK update. The [release guide](release-0.9.5.md)
+requires final-source hosted qualification and immutable release artifacts.
+
+## Lab 0.9.4 — separate Qwen and Gemma prompts
+
+[Release scope](release-0.9.4.md) keeps the compact Qwen/shared agents and selects
+a simpler explicit Gemma agent in the default API workflow. The retained live
+studies distinguish strict JSON, correct integers, caps and native controls.
+Gemma recovered three fenced answers without extra caps relative to fresh
+0.9.3; historical shared-prompt cap counts are not a simultaneous control.
+Both SDK manifests and Python implementation remain unchanged. Publication
+requires both reasoning architectures and all four ordinary CI cells on the
+exact versioned source; release verification assets record actual completion.
+
+## Lab 0.9.3 — reasoning prompt clarification
+
+[Release scope](release-0.9.3.md) removes the ambiguous reasoning prohibition
+from all seven effort agents. Strict JSON output, native mappings and both SDK
+manifests are unchanged. The preceding prompt comparison did not establish an
+arithmetic accuracy improvement. Final publication is gated on both reasoning
+architectures and all four ordinary service/database CI cells at the exact source;
+the release's verification assets retain the actual qualification/publication proof.
+
+## Lab 0.9.2 — reasoning controls and blueprints
+
+[Release scope](release-0.9.2.md) adds the separate reasoning lane, packaged
+blueprints and atomic bounded live receipts. Final qualification requires both
+reasoning architectures and all four ordinary service/database cells at the exact
+versioned source. The [GitHub release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.2)
+and attached run-specific verification record provide publication status and
+original archive hashes. Ordinary SDK pins and historical releases are unchanged.
+
+## Reasoning-effort integration lane — 2026-11-03
+
+The separate [reasoning lane](reasoning-effort.md) selects published Runtime
+0.9.12 with a checksum-pinned manifest. It adds installed-SDK API/native control
+fixtures, seven effort agents, profile configs, a Harness workflow and an opt-in
+live runner. It preserves the ordinary release manifest and historical live
+results. Its verification ledger distinguishes local fixtures, package checks
+and remote CI; no new live-provider certification is implied.
+
+## Lab 0.9.1 published — 2026-11-02
+
+[Lab 0.9.1](release-0.9.1.md) makes the Observatory an authenticated monitor,
+with automatic owned-run discovery, honest idle/demo/replay states and local oMLX
+usage compatibility. PR #41's implementation head passed all four Linux
+AMD64/ARM64 × PostgreSQL 16/18 cells. The
+[public release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.1)
+is available with versioned archives, checksums and provenance. Its release notes
+and verification asset retain the final merge/publication evidence.
+
+Capture stays optional, process-local and bounded to 32 recent runs. Workflow
+text is withheld, missing callback timing is explicit, and provider counts retain
+their existing accounting qualification. SDK pins and earlier releases are
+unchanged. The recorded real-model demonstration is distinct from synthetic CI.
+
+## Lab 0.7.0 published and verified — 2026-10-25
+
+[Lab 0.7.0](release-0.7.0.md) is published from qualified source `9a7542c`,
+with release PR #35 merged as `4fa6e46` and an identical file tree. Its four
+Linux AMD64/ARM64 × PostgreSQL 16/18 cells passed 1,980 source tests each and
+1,336 required stack checks in total, with cleanup verified.
+
+The [release ledger](verification/release-0.7.0-2026-10-25.md) records original
+CI artifacts, matching anonymous downloads and clean public-wheel/rebuilt-source
+installs with Runtime 0.9.8. Each consumer passed 51 standalone fixtures,
+3 deadline CLI checks and 10 browser checks. All five chapters/eight scenarios
+and separate actual synthetic Runtime CLI controls passed, including reviewed
+completion, duplicate protection, cancellation and blocked admission across
+restart. Cleanup passed; no real models were called. SDK pins and historical
+benchmarks are unchanged. Earlier checkpoints below describe their original scope.
+
+## Visual Explorer in this checkout — 2026-10-25
+
+[Explorer](explorer.md) adds bundled React Flow documentation, user/developer
+inspection, eight deterministic playback scenarios and explicit single-agent
+unified-pool controls. The default launcher uses no models or Docker. Live
+admission, durable allowance, filtered receipts and offline acknowledgment stay
+host-owned; Runtime 0.9.8 owns provider selection. The existing Harness browser
+service remains separate. This is post-0.6.2 work, not a published release or
+new live model benchmark. See the
+[implementation verification ledger](verification/explorer-2026-10-25.md) for scope.
+The [PR review ledger](verification/explorer-pr-2026-10-25.md) records the current
+review fixes and final local checks; required Linux/database CI remains a separate
+merge gate.
+
+## Lab 0.6.2 published and verified — 2026-10-25
+
+The [0.6.2 release verification](verification/release-0.6.2-2026-10-25.md)
+records four green exact-source CI cells, original CI archives and verified
+public downloads. Clean public-wheel/rebuilt-source installs with Runtime 0.9.8
+each passed 51 standalone checks plus 3 deadline checks, including default 180s and
+explicit 240s, with cleanup verified and zero live model calls. The
+[guided quickstart](quickstart.md) and standalone first-workflow example are
+post-release onboarding additions in this checkout, not changes to released bytes.
+
+## Configurable benchmark deadline and 240s study — 2026-10-25
+
+The unified benchmark now accepts a finite `--local-timeout` from 1–300s,
+defaulting to 180s. The [0.6.2 release preparation](release-0.6.2.md) includes it; native60s,
+pool300s, grants, attempt/request/tool/token caps and allowance remain fixed.
+The [recipe](realistic-runtime-benchmark.md) describes invocation and metadata.
+
+The preceding authorized [240s live study](verification/unified-cli-lab061-local240-2026-10-25.md)
+used released Lab 0.6.1 and Runtime 0.9.8 with a disclosed private deadline-only
+consumer driver. All 27 assignments passed on unchanged Markdown, inputs and
+graders. Claude/Codex/local medians were 10.86s/21.73s/62.37s; all nine local
+runs finished within 180s. It retained 27 controlled skips, zero provider
+fallbacks/timeouts and 45/243 known mixed units, with cleanup verified. The
+implementation uses credential-free tests; this follow-up makes no new live calls.
+
+## Lab 0.6.1 release and clean-install verification — 2026-10-25
+
+Lab [0.6.1 is published](release-0.6.1.md), fixing the standalone installed
+evaluation CLI by packaging the SDK payload auditor. The compatibility source
+command retains the same payload, ownership and executable-cache checks.
+
+All four Linux AMD64/ARM64 × PostgreSQL 16/18 CI cells passed 1,899 source tests
+each and 1,336 required real-stack checks across 36 lanes. Original qualified CI
+wheel/source bytes were published with checksums and exact-source verification.
+
+The [post-publication verification](verification/release-0.6.1-2026-10-25.md)
+downloaded all four assets and verified their bytes. Clean public-wheel and
+rebuilt-public-source installs on macOS ARM64/Python 3.12.15 each passed all 51
+standalone CLI checks with Runtime 0.9.8, including quota fallback, persisted
+cooldowns and no partial-work replay. Isolated imports, 176 installed Lab files
+per consumer and cleanup were verified; no repository `scripts` package was
+available and no live provider calls were made. SDK pins, earlier artifacts and
+historical model measurements remain unchanged.
+
+## Lab 0.6.0 release — 2026-10-24
+
+The [0.6.0 release notes](release-0.6.0.md) describe the unified pool examples,
+public Runtime 0.9.8 train, two successful live CLI studies and accumulated
+consumer blueprints. Publication requires the final source's four-cell
+Linux AMD64/ARM64 × PostgreSQL 16/18 acceptance matrix, including installed
+distributions and verified cleanup. The release assets' `VERIFICATION-0.6.0.json`
+and `SHA256SUMS-0.6.0.txt` bind the exact qualified CI wheel/source archive,
+SDK manifest and source. Earlier study reports and experimental boundaries
+remain unchanged; release preparation makes no new live model calls.
+
+## Released Runtime live benchmarks — 2026-10-24
+
+Two authorized [live unified CLI studies](verification/unified-cli-released-2026-10-24.md)
+used the verified public Runtime 0.9.8 wheel and unchanged neutral Markdown,
+synthetic inputs, graders and deadlines: native 60s, local 180s, pool 300s.
+Each study passed 27/27 assignments (nine per model). Latest medians were
+Claude Sonnet 11.37s, Codex gpt-6.1-sol/low 23.07s and local ThinkingCap Qwen
+27B 60.69s; the preceding released study measured 10.38s, 23.61s and 66.21s.
+
+Each study verified 27 controlled cooldown skips, zero provider-triggered
+fallbacks, zero timeouts and known allowance accounting. Output regrading and
+owned-resource cleanup passed. These are small factual/workspace studies;
+timings do not isolate Runtime effects or establish a general model ranking.
+The latest run used port 8001 because the desktop local server occupied 8000;
+only the private endpoint URL changed. Raw evidence remains private.
+
+## Released Runtime unified pools — 2026-10-24
+
+Runtime 0.9.8 is published with native Claude/Codex execution and unified
+native/API/local pools. Lab's active manifest selects the verified public wheel;
+Core 0.4.1, Harness 0.9.4 and both PostgreSQL adapter pins are unchanged.
+The [adoption ledger](verification/runtime-unified-release-2026-10-24.md)
+records public artifact verification, installed/offline acceptance and the
+mandatory exact-head Linux AMD64/ARM64 × PostgreSQL 16/18 CI gate.
+
+The previous manifest, SDK profile and memory freeze snapshots are archived
+byte-for-byte. Current memory qualification has an explicit new SDK provenance
+lineage; corpus, tasks, prose, scoring, limits and historical results are
+unchanged. Memory/correction remain experimental. No live inference or new
+model efficacy comparison is included in this release adoption.
+
+## Optional Castle integration review — 2026-10-23
+
+Castle is a disabled-by-default host memory provider with scoped FTS recall and
+frozen Harness evidence across review/resume. The [beginner guide](castle-quickstart.md)
+covers installation, use cases, a synthetic local walkthrough and real-palace
+configuration. It grants no new public HTTP operation or model memory tools;
+SUE and SOAR remain separate.
+
+On the unchanged public SDK train, [local verification](verification/castle-integration-2026-10-23.md)
+passes 1847 source tests, all 97 conversation cases on each PostgreSQL 16/18
+lane, and six installed Castle cases per version, with cleanup verified.
+The adapter/worker wheels remain explicit unpublished candidates. This is
+local ARM64 synthetic qualification, with no new package release or live claim.
 
 ## Lab 0.6.0 version and PR preparation — 2026-10-20
 

@@ -11,7 +11,7 @@ from .metadata import Metadata
 from .views import public_run, public_usage, uncertain_run
 from .admission import Admission
 from .diagnostics import stage
-from .observability import bind_run,accounting_observation,workflow_observation
+from .observability import bind_run,accounting_observation,workflow_observation,scoped_observer,scoped_output
 from .capacity import policy
 
 def validate_workflow_limits(definition):
@@ -39,6 +39,8 @@ def retained_workflows(config):
 class Execution:
     def __init__(self, config, *, metrics=None):
         self.config = config
+        from .memory_provider import MemoryProviders
+        self.memory = MemoryProviders(config.get('memory'))
         if 'conversation' in config:
             from .conversation_execution import require_conversation_sdk,validate_settings
             validate_settings(config['conversation'])
@@ -77,9 +79,16 @@ class Execution:
     def close(self):
         self.operations.close()
         self.reads.close()
-        try:self.store.close()
+        try:self.memory.close()
         finally:
-            if self.conversation is not None:self.conversation.close()
+            try:self.store.close()
+            finally:
+                if self.conversation is not None:self.conversation.close()
+
+    def memory_session(self, principal, runtime_config):
+        from .memory_workflow import MemoryWorkflowSession
+        return MemoryWorkflowSession(providers=self.memory, store=self.store, config=runtime_config,
+            principal=principal, namespace=self.config['namespace'], accounting=self.recorder)
 
     def harness(self, reservation):
         if reservation['workflow'] == 'native':
@@ -91,8 +100,9 @@ class Execution:
             actor_id=reservation['actor_id'], billing_account_id=reservation['billing_account_id'], request_id=reservation['run_id'])
         return Harness(workflows[reservation['workflow']], store=self.store,
                        run_id=reservation['run_id'], context=context, accounting=self.recorder,
-                       **({'observer':self.observer} if self.observer is not None else {}),
-                       on_event=self.fixture_event if self.config.get('fixture_events_url') else None)
+                       **({'observer':scoped_observer(self,reservation['run_id'])}
+                          if self.observer is not None or getattr(self,'observations',None) is not None else {}),
+                       on_event=scoped_output(self,reservation['run_id']))
 
     def check_scope(self, reservation):
         if any(reservation[name] != self.config[name] for name in ('namespace', 'environment')):

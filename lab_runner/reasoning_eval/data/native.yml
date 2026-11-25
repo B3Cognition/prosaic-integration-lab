@@ -1,0 +1,14 @@
+# Authenticate the installed vendor CLIs separately. Reuse the host's real
+# quota_key for profiles sharing an account; a new name does not add capacity.
+default_profile: claude
+profiles:
+  claude:
+    backend: claude-code
+    model: sonnet
+    quota_key: reasoning-claude-account
+    permission_mode: read-only
+  codex:
+    backend: codex-cli
+    model: gpt-6.1-sol
+    quota_key: reasoning-codex-account
+    permission_mode: read-only

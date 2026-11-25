@@ -5,13 +5,14 @@ graph, the service admits it against host policy, and Harness executes the
 admitted workflow. A prompt or LLM can generate the same proposal envelope.
 The host controls which specialists, schemas, tools and capabilities it offers.
 
-[Run the native demo](../README.md#try-the-native-workflow) first. It installs
+[Start with the guided quickstart](quickstart.md) for a credential-free admission
+example and optional service/browser demonstrations. The native service demo installs
 the five verified public SDK wheels, builds a clean consumer and
 exercises the actual HTTP service with synthetic inference and owned PostgreSQL.
 The active [release manifest](../dependencies/releases.json) pins actual public
 download URLs, exact versions, original wheel hashes and qualified source
-commits. The 0.5.0 release train selects Core 0.4.1, Runtime 0.9.6/recorder 0.3.0 and Harness
-0.9.0/store 0.4.0. The same
+commits. The current Lab 0.6.2 train selects Core 0.4.1, Runtime 0.9.8/recorder 0.3.0 and Harness
+0.9.4/store 0.4.0. The same
 family also supplies the [conversation API](conversations.md).
 Use a fresh `.venv-public` environment. The historical
 [earlier Lab 0.4.0 release](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.4.0)
@@ -79,6 +80,10 @@ billing account and namespace derived from authenticated host context. Authorize
 the client before offering aliases, accepting proposals or reading a run.
 Tool registrations and business operation keys are host-owned; client prose
 does not grant permission to invoke a registered tool.
+
+For a candidate read-only performance pattern and its explicit receipt tradeoff,
+see the [host-composed read blueprint](host-composed-read-blueprint.md). It is a
+design for future synthetic qualification, not an existing Lab acceptance lane.
 
 Admission and binding are separate from execution. Building a factory or
 preparing a proposal validates and seals the supplied graph without model or

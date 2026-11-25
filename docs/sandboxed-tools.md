@@ -57,6 +57,52 @@ never fall back to off mode. Backend presence alone is insufficient. CI builds
 a pinned Bubblewrap commit and grants user-namespace creation only to its
 broker on disposable Ubuntu runners; host-wide restrictions remain enabled.
 
+## Qualify the Linux image
+
+The released and candidate Lab Dockerfiles build Bubblewrap from the same
+pinned source commit as SDK CI. The Docker default policy blocks its namespace
+setup. Use a dedicated Lab worker on Linux with AppArmor enforcement and
+seccomp. An administrator loads the worker profile on that host, then an
+operator runs the installed-image witness with a local Docker Engine:
+
+```sh
+sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
+profile_url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+curl --fail --silent --show-error --location "$profile_url" -o moby-seccomp.json
+image=$(docker image inspect --format '{{.Id}}' prosaic-integration-lab:dev)
+python scripts/qualify_cli_sandbox_image.py "$image" moby-seccomp.json --architecture amd64
+```
+
+Use `--explicit-required` with a released image whose Runtime still uses opt-in
+isolation and `--architecture arm64` on native ARM64. The
+[policy runner](../scripts/qualify_cli_sandbox_image.py) uses a
+checksum-pinned Moby seccomp baseline and adds Bubblewrap's observed namespace
+and mount operations. It keeps Docker's masked paths and applies the read-only
+proc rules to every discovered sysctl subtree except
+`/proc/sys/user/max_user_namespaces`. Bubblewrap writes that one setting inside
+its own user namespace to prevent the tool from creating nested namespaces.
+These changes apply to the dedicated container. Its service UID stays 10001,
+with a read-only root, zero outer capabilities, `no-new-privileges`, and a
+bounded tmpfs. The AppArmor profile restricts bind sources to the Lab tree,
+private scratch, system executables and libraries, the loader cache, and two
+runtime devices.
+The namespace permission applies to trusted code in that worker as well as
+Bubblewrap. Review this policy again when changing the kernel, Docker,
+Bubblewrap, or the worker's mounts.
+
+The witness verifies enforcement and actual mount flags before running a
+confined version probe and CLI call through a synthetic loopback provider.
+It checks allowed evidence, private scratch, denied outside reads and writes,
+denied network access, and denied nested user namespaces.
+`cli_sandbox_unavailable` means the image or outer policy blocks confinement.
+
+The released **Required integration acceptance** matrix runs this gate with
+Runtime 0.9.27 and Harness 0.9.20 on native AMD64 and ARM64 in every PostgreSQL
+cell. Its dedicated CLI worker checks the same immutable image ID used by the
+stack tests. The `cli_sandbox_images` input runs only the image gate on both
+architectures. To qualify unpublished wheels in that mode, select `candidate`
+and supply the qualified Core, Runtime and Harness run IDs and exact commits.
+
 Successful CLI results come from public `TurnEvidence`, never the final model
 text. With bounded recovery enabled, timeout/output failures stop as
 `toolEffectUncertain`, with no completed tool outcome. This SDK version does

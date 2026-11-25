@@ -1,8 +1,18 @@
 ARG PYTHON_IMAGE=python:3.12-slim@sha256:05cda9777409a9c3ffddd94a4c476b79f0769a0b4857f0c7ed9226b6800b0d6f
+FROM ${PYTHON_IMAGE} AS bubblewrap
+COPY containers/build-bubblewrap.sh /tmp/build-bubblewrap.sh
+RUN sh /tmp/build-bubblewrap.sh
+
 FROM ${PYTHON_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends libcap2 && rm -rf /var/lib/apt/lists/*
+COPY --from=bubblewrap /out/usr/bin/bwrap /usr/bin/bwrap
 WORKDIR /srv/lab
 COPY dependencies/requirements.lock dependencies/requirements.lock
 RUN python -m pip install --require-hashes -r dependencies/requirements.lock
+COPY dependencies/mcp-client.lock dependencies/mcp-client.lock
+RUN if [ -s dependencies/mcp-client.lock ]; then \
+    python -m pip install --no-deps --require-hashes -r dependencies/mcp-client.lock; \
+    fi
 ARG SDK_MANIFEST_SHA256
 COPY .cache/wheels/${SDK_MANIFEST_SHA256}/ /srv/wheels/
 COPY dependencies/releases.json dependencies/releases.json

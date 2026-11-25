@@ -3,26 +3,150 @@ import re
 import hashlib
 import json
 from pathlib import Path
+from prosaic_integration_lab.catalogue_ontology import (
+    CURRENT_RELEASE_TRAIN, ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN, SANDBOX_RELEASE_TRAINS,
+)
+from prosaic_integration_lab.catalogue_ontology import TRAIN as ONTOLOGY_TRAIN
+from prosaic_integration_lab.dependencies import CLI_SANDBOX_CANDIDATES
 
 COUNTS = {'audit':88,'identity':20,'ingress':5,'lago':25,'native-persistence':26,'native':54,'legacy-upgrade':10,'qualification':3,'conversation':97}
+ALL_COUNTS = {**COUNTS,'context-packs':12,'tool-evidence':24,'parallel-tools':32,'mcp-client':24,'sub-agents':24}
 CONTEXT_TRAIN={'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0',
     'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
 NATIVE_TOOLS_TRAIN={**CONTEXT_TRAIN,'b3-prosaic-runtime':'0.9.6'}
 CONSUMER_BLUEPRINT_TRAIN={**NATIVE_TOOLS_TRAIN,'b3-prosaic-runtime':'0.9.7','b3-prosaic-harness':'0.9.4'}
+UNIFIED_POOL_TRAIN={**CONSUMER_BLUEPRINT_TRAIN,'b3-prosaic-runtime':'0.9.8'}
+CORE050_TRAIN={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.13','b3-prosaic-runtime-postgres':'0.3.0',
+    'b3-prosaic-harness':'0.9.8','b3-prosaic-harness-postgres':'0.4.1'}
+GUARDED_RULE_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.14','b3-prosaic-harness':'0.9.9'}
+HARNESS0910_TRAIN={**GUARDED_RULE_TRAIN,'b3-prosaic-harness':'0.9.10'}
+CEREBRO_V1_TRAIN={**CORE050_TRAIN,'b3-prosaic-runtime':'0.9.16','b3-prosaic-harness':'0.9.11'}
+WORKFLOW_RULE_TRAIN={**CEREBRO_V1_TRAIN,'b3-prosaic-harness':'0.9.12'}
+ACCOUNTING_METADATA_TRAIN={**WORKFLOW_RULE_TRAIN,'b3-prosaic-runtime':'0.9.17'}
+SENT_EFFORT_TRAIN={**ACCOUNTING_METADATA_TRAIN,'b3-prosaic-runtime':'0.9.18'}
+CONTEXT_PACK_TRAIN={**SENT_EFFORT_TRAIN,'b3-prosaic-runtime':'0.9.19',
+    'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}
+
+from prosaic_integration_lab.tool_evidence import RELEASE_TRAIN as TOOL_EVIDENCE_TRAIN
+from prosaic_integration_lab.parallel_tools import TRAIN as PARALLEL_TOOL_TRAIN, RELEASE_TRAIN as PARALLEL_RELEASE_TRAIN
+
+MCP_CLIENT_TRAIN = {**PARALLEL_RELEASE_TRAIN, "b3-prosaic-runtime": "0.9.22.dev1",
+                    "b3-prosaic-harness": "0.9.16.dev1"}
+MCP_CLIENT_RELEASE_TRAIN = {**MCP_CLIENT_TRAIN, "b3-prosaic-runtime": "0.9.22",
+                            "b3-prosaic-harness": "0.9.16"}
+MCP_CASES = (
+    "approved-structured", "approved-text", "legacy-negotiation", "scope-denial",
+    "revocation-during-listing", "catalogue-drift", "citation-retained-read", "parallel-barrier",
+    "budget-exhaustion", "uncertain-dispatch", "completed-replay", "receipt-adoption",
+)
+
+
+from prosaic_integration_lab.sub_agents import (CASES as SUB_AGENT_CASES,
+    RELEASE_TRAIN as SUB_AGENT_RELEASE_TRAIN, TRAIN as SUB_AGENT_TRAIN)
+
+CLI_SANDBOX_TRAIN = {
+    name: version for candidate in CLI_SANDBOX_CANDIDATES.values()
+    for name, version in candidate.items()
+}
+SANDBOX_RELEASE_MANIFEST_SHA256 = {
+    SANDBOX_RELEASE_TRAIN['b3-prosaic-runtime']: '9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59',
+    CURRENT_RELEASE_TRAIN['b3-prosaic-runtime']: 'fa44a7c79b2176044828e8ed55c237f7603098086b049f8361e0ec8359fd0734',
+}
+
+
+def supports_sub_agents(manifest):
+    artifacts = manifest.get('artifacts', ())
+    actual = {item.get('distribution'): item.get('version') for item in artifacts}
+    if actual in SANDBOX_RELEASE_TRAINS:
+        canonical = json.dumps(manifest, sort_keys=True, indent=2, allow_nan=False) + '\n'
+        expected = SANDBOX_RELEASE_MANIFEST_SHA256[actual['b3-prosaic-runtime']]
+        if hashlib.sha256(canonical.encode()).hexdigest() != expected:
+            raise ValueError('invalid released sandbox SDK family')
+        return True
+    if actual == ONTOLOGY_TRAIN:
+        from .catalogue_ontology import validate_manifest, validate_released_manifest
+        if 'candidate_lineage' in manifest:
+            validate_manifest(manifest)
+        else:
+            validate_released_manifest(manifest)
+        return True
+    if actual == SUB_AGENT_TRAIN:
+        from .sub_agents import validate_sub_agent_manifest
+        validate_sub_agent_manifest(manifest)
+        return True
+    if actual == SUB_AGENT_RELEASE_TRAIN:
+        from .parallel_tools import RETAINED_WHEELS
+        if (len(artifacts) != len(actual) or 'candidate_lineage' in manifest
+                or any(item.get('sha256') != RETAINED_WHEELS[item['distribution']]
+                       for item in artifacts if item['distribution'] in RETAINED_WHEELS)):
+            raise ValueError('invalid released delegation SDK family')
+        return True
+    if (len(artifacts) == len(CLI_SANDBOX_TRAIN) and actual == CLI_SANDBOX_TRAIN
+            and 'candidate_lineage' in manifest):
+        # This candidate reuses the PostgreSQL adapter from the delegation release.
+        return False
+    if any(actual.get(name) in (SUB_AGENT_TRAIN[name], SUB_AGENT_RELEASE_TRAIN[name])
+           for name in ('b3-prosaic-runtime', 'b3-prosaic-harness', 'b3-prosaic-harness-postgres')):
+        raise ValueError('mixed delegation SDK family')
+    return False
+
+
+def supports_mcp_client(manifest):
+    if supports_sub_agents(manifest):
+        return True
+    actual = {item.get('distribution'): item.get('version') for item in manifest.get('artifacts', ())}
+    if actual == MCP_CLIENT_TRAIN:
+        from .mcp_client import validate_mcp_manifest
+        validate_mcp_manifest(manifest)
+        return True
+    if actual == MCP_CLIENT_RELEASE_TRAIN:
+        from .mcp_client import RETAINED_WHEELS
+        if (len(manifest['artifacts']) != len(actual) or 'candidate_lineage' in manifest
+                or any(a.get('sha256') != RETAINED_WHEELS[a['distribution']]
+                       for a in manifest['artifacts'] if a['distribution'] in RETAINED_WHEELS)):
+            raise ValueError('invalid released MCP SDK family')
+        return True
+    if any(actual.get(name) in (MCP_CLIENT_TRAIN[name], MCP_CLIENT_RELEASE_TRAIN[name]) for name in
+           ('b3-prosaic-runtime', 'b3-prosaic-harness')):
+        raise ValueError('mixed MCP SDK family')
+    return False
+
+
+def supports_parallel_tools(manifest):
+    if supports_mcp_client(manifest):
+        return True
+    artifacts = manifest.get('artifacts', ())
+    actual = {item.get('distribution'): item.get('version') for item in artifacts}
+    if actual == PARALLEL_RELEASE_TRAIN:
+        from .parallel_tools import RETAINED_WHEELS
+        if (len(artifacts) != 5 or 'candidate_lineage' in manifest or
+                any(item.get('sha256') != RETAINED_WHEELS[item['distribution']]
+                    for item in artifacts if item['distribution'] in RETAINED_WHEELS)):
+            raise ValueError('invalid released parallel SDK family')
+        return True
+    if actual == PARALLEL_TOOL_TRAIN:
+        from .parallel_tools import validate_parallel_manifest
+        validate_parallel_manifest(manifest)
+        return True
+    retained = {'b3-prosaic', 'b3-prosaic-runtime-postgres'}
+    if any(version in (PARALLEL_TOOL_TRAIN.get(name), PARALLEL_RELEASE_TRAIN.get(name))
+           for name, version in actual.items() if name in PARALLEL_TOOL_TRAIN and name not in retained):
+        raise ValueError('mixed parallel SDK family')
+    return False
 
 
 def supports_consumer_blueprints(manifest):
     supports_conversation(manifest)
-    return {item['distribution']:item['version'] for item in manifest['artifacts']}==CONSUMER_BLUEPRINT_TRAIN
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 
 def supports_context_assembly(manifest):
     supports_conversation(manifest)  # validate a complete coherent SDK train
-    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']} in (CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 
 def expected_test_count(mode,context_assembly=False):
-    return COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
+    return ALL_COUNTS[mode]+(6 if mode=='conversation' and context_assembly is True else 0)
 
 
 def supports_conversation(manifest):
@@ -34,8 +158,10 @@ def supports_conversation(manifest):
         all(type(item.get('distribution')) is str and type(item.get('version')) is str for item in manifest['artifacts'])):
         raise ValueError('invalid SDK train')
     actual={item['distribution']:item['version'] for item in manifest['artifacts']}
+    if supports_mcp_client(manifest):return True
+    if actual in (PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN):supports_parallel_tools(manifest)
     previous={**expected,'b3-prosaic-runtime':'0.9.0','b3-prosaic-harness':'0.8.0'}
-    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN):return True
+    if actual in (expected,previous,CONTEXT_TRAIN,NATIVE_TOOLS_TRAIN,CONSUMER_BLUEPRINT_TRAIN,UNIFIED_POOL_TRAIN,CORE050_TRAIN,GUARDED_RULE_TRAIN,HARNESS0910_TRAIN,CEREBRO_V1_TRAIN,WORKFLOW_RULE_TRAIN,ACCOUNTING_METADATA_TRAIN,SENT_EFFORT_TRAIN,CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS):return True
     legacy={**expected,'b3-prosaic-runtime':'0.8.1','b3-prosaic-runtime-postgres':'0.2.1',
         'b3-prosaic-harness':'0.7.1','b3-prosaic-harness-postgres':'0.2.1'}
     if actual==legacy:return False
@@ -43,13 +169,48 @@ def supports_conversation(manifest):
 
 
 def required_modes(*,candidate,manifest):
-    # Every explicit candidate must qualify the new lane. An unchanged released
-    # baseline retains its original gates and makes no conversation claim.
-    return tuple(mode for mode in COUNTS if mode!='conversation' or candidate or supports_conversation(manifest))
+    versions = {item['distribution']: item['version'] for item in manifest['artifacts']}
+    if versions in SANDBOX_RELEASE_TRAINS and candidate:
+        raise ValueError('sandbox SDK release requires released acceptance mode')
+    if versions == ONTOLOGY_TRAIN and ('candidate_lineage' in manifest) != candidate:
+        raise ValueError('ontology manifest provenance must match acceptance mode')
+    # Coherent context-pack trains qualify the lane for public and candidate bytes.
+    # Historical published trains retain their original gates.
+    return tuple(mode for mode in ALL_COUNTS if (mode!='sub-agents' or supports_sub_agents(manifest)) and (mode!='mcp-client' or supports_mcp_client(manifest)) and (mode!='parallel-tools' or supports_parallel_tools(manifest)) and (mode!='tool-evidence' or supports_tool_evidence(manifest)) and (mode!='context-packs' or supports_context_packs(manifest)) and
+        (mode!='conversation' or candidate or supports_conversation(manifest)))
+
+
+def supports_context_packs(manifest):
+    supports_conversation(manifest)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (CONTEXT_PACK_TRAIN,TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
+
+def supports_tool_evidence(manifest):
+    supports_conversation(manifest)
+    return {item['distribution']:item['version'] for item in manifest['artifacts']}in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN,MCP_CLIENT_RELEASE_TRAIN,SUB_AGENT_TRAIN,SUB_AGENT_RELEASE_TRAIN,*ONTOLOGY_TRAINS)
 
 # Fixed identities from the owned acceptance fixtures. Arbitrary names and
 # parameter values never become exported strings or dynamic code labels.
+from prosaic_integration_lab.tool_evidence import CASES as TOOL_EVIDENCE_CASES
+from prosaic_integration_lab.parallel_tools import CASES as PARALLEL_CASES
 FAILURE_CASES={
+    'sub-agents':{'test_sub_agents['+case+'-'+provider+']':case.replace('-','_') for case in SUB_AGENT_CASES for provider in ('openai-compatible','anthropic')},
+    'mcp-client':{'test_mcp_client['+case+'-'+provider+']':case.replace('-','_') for case in MCP_CASES for provider in ('openai-compatible','anthropic')},
+    'parallel-tools':{'test_parallel_tools['+case+'-'+provider+']':case.replace('-','_') for case in PARALLEL_CASES for provider in ('openai-compatible','anthropic')},
+    'tool-evidence':{'test_tool_evidence['+case+'-'+provider+']':case.replace('-','_') for case in TOOL_EVIDENCE_CASES for provider in ('openai-compatible','anthropic')},
+    'context-packs':{
+        'test_markdown_nodes_select_independent_contexts':'node_context',
+        'test_service_context_reopens_and_replays_without_provider_work':'accepted_records',
+        'test_reader_returns_only_declared_capture_and_records_citation':'reader',
+        'test_allowed_partial_context_retains_domain_completeness':'partial',
+        'test_required_partial_context_is_refused_without_provider':'partial_refusal',
+        'test_required_missing_context_is_refused_without_provider':'missing_refusal',
+        'test_contradictory_observations_are_preserved':'conflicts',
+        'test_retained_view_rechecks_current_permission':'retained_permission',
+        'test_foreign_scope_is_refused_before_dispatch':'scope',
+        'test_saved_receipt_is_adopted_by_fresh_controller':'recovery',
+        'test_large_captured_context_obeys_default_record_capacity':'capacity',
+        'test_runtime_role_cannot_migrate':'restricted_role',
+    },
     'conversation':{
         'test_context_quality_exposes_lost_history_and_preserves_current_authority':'context_quality',
         'test_context_report_replays_on_other_replica_without_provider_dispatch[context-full]':'context_replay',
@@ -165,11 +326,42 @@ for name,parameters,code in (
      ('oversize','nonfinite','unserializable'),'invalid_effect_result')):
     FAILURE_CASES['native-persistence'].update({name+'['+parameter+']':code for parameter in parameters})
 
+# Diagnostic export is independent of the existing candidate-lineage gates.
+EXPORT_FAILURE_CASES={
+    'sub-agents':{'test_sub_agents['+case+'-'+provider+']':case.replace('-','_') for case in SUB_AGENT_CASES for provider in ('openai-compatible','anthropic')},
+    **FAILURE_CASES,'lago':{
+    'test_released_adapters_ready_with_restricted_credentials':'adapter_ready',
+    'test_runtime_roles_cannot_create_schema[harness_dsn]':'harness_role',
+    'test_runtime_roles_cannot_create_schema[accounting_dsn]':'accounting_role',
+    'test_runtime_roles_cannot_create_schema[app_dsn]':'app_role',
+    'test_app_schema_and_primary_durability':'primary_durability',
+    'test_receipts_and_accounting_observations_are_not_amendable':'immutable_evidence',
+    'test_multiuser_usage_replay_and_exact_charges':'billing_charges',
+    'test_lago_outage_retains_usage_and_recovers_without_model_retry':'billing_outage',
+    'test_lost_ack_replays_identical_remote_event':'billing_lost_ack',
+    'test_pagination_delayed_observation_and_exclusions':'billing_pagination',
+    'test_actual_exporter_process_crash_at_delivery_barrier[before-send]':'billing_crash_before_send',
+    'test_actual_exporter_process_crash_at_delivery_barrier[after-send]':'billing_crash_after_send',
+    'test_same_account_name_in_distinct_tenants_and_known_zero_cache':'billing_tenant_scope',
+    'test_out_of_period_evidence_is_not_sent_or_acknowledged':'billing_period',
+    'test_atomic_enqueue_and_conflict':'outbox_atomic',
+    'test_concurrent_enqueue_and_claim_fencing':'outbox_fencing',
+    'test_pending_evidence_survives_reconstruction':'outbox_reconstruction',
+    'test_role_cannot_modify_source_or_replica_billing':'outbox_role',
+    'test_readiness_rejects_missing_fencing_grant':'outbox_fencing_grant',
+    'test_readiness_rejects_missing_state_constraint':'outbox_state_constraint',
+    'test_exporter_cannot_read_application_prompt':'exporter_prompt_scope',
+    'test_exporter_cannot_change_frozen_payload':'exporter_payload_scope',
+    'test_readiness_rejects_wrong_fencing_column_type':'outbox_fencing_type',
+    'test_stale_unresolved_scan_does_not_poison_complete_evidence':'outbox_stale_scan',
+    'test_remote_conflict_blocks_all_dimensions':'outbox_remote_conflict'}}
+
+
 def validate(item,mode,postgres_major,*,candidate=False,manifest_sha=None,lineage_sha=None,context_assembly=False):
     if not isinstance(item,dict): raise ValueError('invalid acceptance receipt')
     if context_assembly and mode=='conversation' and item.get('context_assembly') is not True:
         raise ValueError('required context assembly evidence missing')
-    if (mode not in COUNTS or item.get('mode') != mode or
+    if (mode not in ALL_COUNTS or item.get('mode') != mode or
         item.get('passed') is not True or item.get('cleanup') != 'verified' or
         type(item.get('test_returncode')) is not int or item['test_returncode'] != 0 or type(item.get('test_count')) is not int or
         item['test_count'] != expected_test_count(mode,item.get('context_assembly')) or type(item.get('skipped')) is not int or item['skipped'] != 0 or
@@ -210,10 +402,11 @@ def export(item):
     if not isinstance(item,dict): item = {}
     result = {'passed':item.get('passed') is True and 'error' not in item and
         item.get('cleanup') == 'verified' and item.get('failed_tests') == [] and item.get('skipped') == 0 and
-        type(item.get('test_count')) is int and item.get('mode') in COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
+        type(item.get('test_count')) is int and item.get('mode') in ALL_COUNTS and item['test_count'] == expected_test_count(item['mode'],item.get('context_assembly')) and
         type(item.get('test_returncode')) is int and item['test_returncode'] == 0 and item.get('payload_audit') == 'verified'}
     if item.get('context_assembly') is True:result['context_assembly']=True
-    for key,choices in {'mode':set(COUNTS),'cleanup':{'verified','failed','pending'},
+    if item.get('error')=='TimeoutExpired':result['failure_code']='execution_timeout'
+    for key,choices in {'mode':set(ALL_COUNTS),'cleanup':{'verified','failed','pending'},
         'dependency_mode':{'released','candidate'},'host_architecture':{'arm64','aarch64','x86_64','AMD64'}}.items():
         value = item.get(key)
         result[key] = value if isinstance(value,str) and value in choices else 'unknown'
@@ -221,15 +414,18 @@ def export(item):
         value = item.get(key)
         result[key] = value if type(value) is int and 0 <= value <= 100000 else None
     result['failed_count'] = len(item.get('failed_tests',[])) if isinstance(item.get('failed_tests'),list) else None
-    if item.get('mode') in FAILURE_CASES and type(item.get('failed_tests')) is list:
+    if item.get('mode') in EXPORT_FAILURE_CASES and type(item.get('failed_tests')) is list:
         # Fixed public phase codes identify owned cases. Never copy a
         # testcase name, parameter, error message or captured private output.
-        cases=FAILURE_CASES[item['mode']]
+        cases=EXPORT_FAILURE_CASES[item['mode']]
         result['failed_cases']=sorted({cases.get(name,'unknown') if type(name) is str else 'unknown'
             for name in item['failed_tests']})
     if item.get('mode')=='qualification' and 'capacity_diagnostic' in item:
         from .capacity_diagnostics import sanitize
         result['capacity_diagnostic']=sanitize(item['capacity_diagnostic'])
+    if item.get('mode')=='context-packs' and 'context_pack_diagnostic' in item:
+        from .context_packs import sanitize_capacity_diagnostic
+        result['context_pack_diagnostic']=sanitize_capacity_diagnostic(item['context_pack_diagnostic'])
     result['payload_audit'] = 'verified' if item.get('payload_audit') == 'verified' else 'unverified'
     owner = item.get('owner')
     if isinstance(owner,str) and re.fullmatch('[0-9a-f]{32}',owner): result['owner'] = owner

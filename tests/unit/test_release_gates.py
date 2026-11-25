@@ -6,6 +6,22 @@ import pytest
 from lab_runner.gates import validate,export
 
 
+def test_core050_train_retains_all_required_capabilities_and_rejects_mixtures():
+    from lab_runner.gates import supports_conversation, supports_context_assembly, supports_consumer_blueprints, required_modes
+    versions={'b3-prosaic':'0.5.0','b3-prosaic-runtime':'0.9.13',
+        'b3-prosaic-runtime-postgres':'0.3.0','b3-prosaic-harness':'0.9.8',
+        'b3-prosaic-harness-postgres':'0.4.1'}
+    train={'artifacts':[{'distribution':name,'version':version} for name,version in versions.items()]}
+    assert supports_conversation(train) and supports_context_assembly(train) and supports_consumer_blueprints(train)
+    assert set(required_modes(candidate=False,manifest=train))=={
+        'audit','identity','ingress','lago','native-persistence','native','legacy-upgrade','qualification','conversation'}
+    for name,old in [('b3-prosaic','0.4.1'),('b3-prosaic-runtime','0.9.12'),
+                     ('b3-prosaic-harness','0.9.7'),('b3-prosaic-harness-postgres','0.4.0')]:
+        mixed=copy.deepcopy(train)
+        next(item for item in mixed['artifacts'] if item['distribution']==name)['version']=old
+        with pytest.raises(ValueError):required_modes(candidate=False,manifest=mixed)
+
+
 def test_context_train_requires_context_cases_and_preserves_archived_baseline():
     from lab_runner.gates import supports_context_assembly, supports_conversation
     root=Path(__file__).resolve().parents[2]
@@ -19,6 +35,17 @@ def test_context_train_requires_context_cases_and_preserves_archived_baseline():
     with pytest.raises(ValueError):validate(item,'conversation',16,context_assembly=True)
     item.update(context_assembly=True,test_count=103)
     validate(item,'conversation',16,context_assembly=True)
+
+
+def test_unified_release_keeps_every_existing_consumer_and_context_gate():
+    from lab_runner.gates import supports_consumer_blueprints, supports_context_assembly, required_modes
+    train=json.loads((Path(__file__).resolve().parents[2]/'dependencies/releases-pre-core050-2026-11-05.json').read_text())
+    next(a for a in train['artifacts'] if a['distribution']=='b3-prosaic-runtime')['version']='0.9.8'
+    assert supports_consumer_blueprints(train) and supports_context_assembly(train)
+    assert set(required_modes(candidate=False,manifest=train))=={
+        'audit','identity','ingress','lago','native-persistence','native','legacy-upgrade','qualification','conversation'}
+    next(a for a in train['artifacts'] if a['distribution']=='b3-prosaic-harness')['version']='0.9.0'
+    with pytest.raises(ValueError):supports_consumer_blueprints(train)
 
 
 def test_old_public_train_keeps_baseline_gates_without_claiming_conversation():
@@ -60,12 +87,40 @@ def test_conversation_failures_export_only_fixed_phase_codes():
     assert 'PRIVATE' not in str(safe)
 
 
+@pytest.mark.parametrize('error,code', [('TimeoutExpired','execution_timeout'),('PRIVATE_TOKEN',None)])
+def test_execution_timeout_is_diagnostic_and_cannot_pass_or_leak_errors(error,code):
+    item=receipt();item.update(error=error)
+    safe=export(item)
+    assert safe['passed'] is False and safe.get('failure_code')==code
+    assert 'PRIVATE' not in json.dumps(safe)
+
+
 def test_conversation_effect_and_lease_failures_have_fixed_public_codes():
     item=receipt();item.update(mode='conversation',passed=False,test_returncode=1,failed_tests=[
         'test_approval_handoff_loss_preserves_effect_journal_without_resume[after-committed-effect]',
         'test_two_workers_admit_one_duplicate_and_one_competing_revision',
         'test_live_session_partition_takeover_fences_late_worker_and_adopts_receipt'])
     assert export(item)['failed_cases']==['approval_effect_recovery','session_fence','session_race']
+
+
+def test_lago_failure_export_identifies_phases_without_private_test_names():
+    item=receipt();item.update(mode='lago',passed=False,test_returncode=1,failed_tests=[
+        'test_lost_ack_replays_identical_remote_event',
+        'test_actual_exporter_process_crash_at_delivery_barrier[before-send]',
+        'test_actual_exporter_process_crash_at_delivery_barrier[after-send]',
+        'test_actual_exporter_process_crash_at_delivery_barrier[PRIVATE_DSN]',
+        'PRIVATE_DSN',{'PRIVATE_DSN':'secret'}])
+    safe=export(item)
+    assert safe['failed_cases']==['billing_crash_after_send','billing_crash_before_send','billing_lost_ack','unknown']
+    assert safe['failed_count']==6 and safe['passed'] is False
+    assert 'PRIVATE' not in json.dumps(safe) and 'test_actual' not in json.dumps(safe)
+
+
+def test_lago_candidate_diagnostics_do_not_add_a_lineage_gate():
+    item=receipt();item.update(mode='lago',test_count=25,dependency_mode='candidate',candidate_manifest_sha256='3'*64)
+    item['images']['lago']=json.loads((Path(__file__).resolve().parents[2]/'dependencies/lago.json').read_text())['image']
+    validate(item,'lago',16,candidate=True,manifest_sha='3'*64)
+    assert 'candidate_lineage_sha256' not in item
 
 def receipt(mode='audit'):
     active = Path(__file__).resolve().parents[2] / 'dependencies/releases.json'

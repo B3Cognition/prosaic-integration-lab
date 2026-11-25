@@ -8,6 +8,11 @@ MAX_MANIFEST_BYTES = 256 * 1024
 MAX_ARTIFACT_BYTES = 64 * 1024 * 1024
 SDK_NAMES = frozenset({'prosaic', 'prosaic-runtime', 'prosaic-runtime-postgres',
                        'prosaic-harness', 'prosaic-harness-postgres'})
+CLI_SANDBOX_CANDIDATES = {
+    'B3Cognition/prosaic': {'b3-prosaic': '0.5.0'},
+    'B3Cognition/prosaic-runtime': {'b3-prosaic-runtime': '0.9.27', 'b3-prosaic-runtime-postgres': '0.3.0'},
+    'B3Cognition/prosaic-harness': {'b3-prosaic-harness': '0.9.20', 'b3-prosaic-harness-postgres': '0.4.5'},
+}
 
 
 def normalize_name(name: str) -> str:

@@ -1,0 +1,22 @@
+{
+  "owner": "cfecf04b424c4cf38fccc77ccec0c129",
+  "mode": "conversation",
+  "host_architecture": "arm64",
+  "python": "3.12.15",
+  "passed": true,
+  "cleanup": "verified",
+  "dependency_mode": "released",
+  "qualification": "qualified",
+  "test_returncode": 0,
+  "test_count": 97,
+  "skipped": 0,
+  "failed_tests": [],
+  "seconds": 453.07,
+  "images": {
+    "consumer": "sha256:21a60cc7742ca334bede985c733811417bb20c0a8b20c5b80f65803469cbd6d2",
+    "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+  },
+  "released_manifest_sha256": "87862e1d37fd2f2cc1b8c6cd9965289887b0c056b26e81781dad4929a70a36c6",
+  "payload_audit": "verified",
+  "source_commit": "67dbc2458fd09b1442b0d4279838a7c561fe7724"
+}

@@ -156,6 +156,41 @@ def test_proposal_only_body_ceiling_exact_path_and_authentication(native_client)
     assert client.post('/workflow-proposals',content=raw).status_code == 401
 
 
+@pytest.mark.parametrize('review_outputs',[False,True])
+def test_workflow_generation_never_discloses_raw_agent_output(native_client,review_outputs):
+    from prosaic_integration_lab.identity import Principal
+    from prosaic_integration_lab.observability import scoped_output
+    from prosaic_integration_lab.run_observations import RunObservations,install_observation_routes
+    client,native,counters=native_client
+    principal=Principal('a','alice','payer')
+    native.host.config['native']['tenants']['a']['review_outputs']=review_outputs
+    sink=RunObservations()
+    native.host.observations=sink
+    client.app.state.execution.conversation=None
+    install_observation_routes(client.app,sink)
+    saved=proposal(client)
+    row,workflow=native.workflow(principal,saved['proposal_id'])
+    reservation=native.host.metadata.reserve_native(principal,'private-output-observation',row,
+        workflow.prepare_inputs({'task':'synthetic'}),namespace='host-scope',environment='sandbox')
+    run_id=reservation['run_id']
+    sink.observe(run_id,{'source':'runtime','event':'provider_request_started',
+        'invocation_id':'synthetic-workflow-call'})
+    private=json.dumps({'entity_id':'public-entity','internal_note':'PRIVATE_WORKFLOW_OUTPUT'})
+    # Public Harness workflow callbacks include raw, provisional agent output.
+    # The output grant and existing field projection must not be bypassed by
+    # exposing that text through the separately authenticated monitor route.
+    scoped_output(native.host,run_id)({'event':'text_delta','provisional':True,
+        'step':'find','text':private})
+    response=client.get('/observations/runs/'+run_id,headers=HEADERS)
+    assert response.status_code==200,response.text
+    assert 'PRIVATE_WORKFLOW_OUTPUT' not in response.text
+    captured=response.json()['generation']['calls'][0]
+    assert captured['characters']==len(private) and captured['chunks']==1
+    assert captured['preview']==''
+    assert sink.snapshot(run_id)['generation']['calls'][0]['preview']==''
+    assert counters['models']==0
+
+
 def test_two_specialists_check_gate_pause_use_actual_runtime_transport(native_client,monkeypatch):
     import io
     import urllib.request
@@ -165,6 +200,11 @@ def test_two_specialists_check_gate_pause_use_actual_runtime_transport(native_cl
     observed = []
     observations = []
     native.host.observer = observations.append
+    from prosaic_integration_lab.run_observations import RunObservations, install_observation_routes
+    sink=RunObservations()
+    native.host.observations=sink
+    client.app.state.execution.conversation=None
+    install_observation_routes(client.app,sink)
     with TestClient(model.app) as fixture:
         fixture.post('/control',json={'scenario':'normal'})
         def transport(request, *, timeout):
@@ -188,6 +228,21 @@ def test_two_specialists_check_gate_pause_use_actual_runtime_transport(native_cl
         assert run['interaction']['reviewOutputs'] == {'review':{'entity_id':'synthetic-entity','approved':True}}
         assert counters['models'] == 2
         assert counters['validators'] == 1
+        captured=client.get('/observations/runs',headers=HEADERS)
+        assert captured.status_code==200, captured.text
+        assert captured.json()['runs'][0]['runId']==run['run_id']
+        assert captured.json()['runs'][0]['kind']=='workflow'
+        detail=client.get('/observations/runs/'+run['run_id'],headers=HEADERS)
+        assert detail.status_code==200, detail.text
+        assert detail.json()['waiting'] is True
+        assert sum(e['event']=='invocation_started' for e in detail.json()['events'])==2
+        assert 'PRIVATE_HOST_NAMESPACE' not in detail.text
+        assert detail.json()['usage']['available'] is False
+        for token in ('tenant-b-token','stranger-token'):
+            headers={'Authorization':'Bearer '+token}
+            assert client.get('/observations/runs',headers=headers).json()['runs']==[]
+            assert client.get('/observations/runs/'+run['run_id'],headers=headers).status_code==404
+        assert counters['models']==2
         scopes = [record for record in observations if record['event']=='invocation_started' and record['source']=='runtime']
         assert len(scopes)==2
         assert {record['run_id'] for record in scopes} == {run['run_id']}

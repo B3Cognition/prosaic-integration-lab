@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "executed": true,
+  "data": "synthetic notes only",
+  "model": "local fixture response, not an LLM",
+  "status_before_review": "waiting",
+  "status_after_resume": "completed",
+  "memory_status": "available",
+  "remembered_text": [
+    "Atlas chose SQLite for offline persistence. 🙂\r\nExact original evidence.\r\n"
+  ],
+  "source_changed_after_pause": true,
+  "resumed_with_memory_disabled": true,
+  "frozen_snapshot_preserved": true,
+  "model_calls": 1,
+  "run_id": "28a5fc1c757c45f089e2d4c2c293cf8f"
+}

@@ -1,0 +1,107 @@
+"""Installed acceptance for the isolated catalogue ontology SDK family."""
+
+from importlib import import_module, metadata
+import json
+import os
+from pathlib import Path
+import runpy
+import subprocess
+import sys
+
+from packaging.utils import canonicalize_name
+
+
+SDK = {
+    "b3-prosaic": ("0.5.1rc1", "prosaic"),
+    "b3-prosaic-harness": ("0.9.17rc1", "prosaic_harness"),
+    "b3-prosaic-runtime": ("0.9.23", "prosaic_runtime"),
+}
+
+
+ADAPTERS = {
+    "b3-prosaic-harness-postgres": "prosaic_harness_postgres",
+    "b3-prosaic-runtime-postgres": "prosaic_runtime_postgres",
+}
+
+
+def test_exact_installed_sdk_payloads():
+    profile = os.environ.get("PROSAIC_LAB_ONTOLOGY_PROFILE", "rc")
+    from prosaic_integration_lab.catalogue_ontology import CURRENT_RELEASE_TRAIN, SANDBOX_RELEASE_TRAIN, TRAIN
+
+    published_trains = {"released-current": CURRENT_RELEASE_TRAIN, "released-sandbox": SANDBOX_RELEASE_TRAIN}
+    assert profile in {"rc", "candidate", "released", *published_trains}
+    modules = {name: module for name, (_, module) in SDK.items()}
+    if profile == "released":
+        from lab_runner.catalogue_ontology import PUBLIC_PROFILE, validate_released_manifest
+
+        modules.update(ADAPTERS)
+        lab = metadata.distribution("prosaic-integration-lab")
+        assert any(Path(file.locate()).resolve() == PUBLIC_PROFILE.resolve() for file in lab.files)
+        released = validate_released_manifest(json.loads(PUBLIC_PROFILE.read_bytes()))
+        assert {item["distribution"] for item in released["artifacts"]} == set(modules)
+    if profile in published_trains:
+        modules.update(ADAPTERS)
+    if profile == "rc":
+        expected = {name: version for name, (version, _) in SDK.items()}
+    else:
+        train = published_trains.get(profile, TRAIN)
+        expected = {name: train[name] for name in modules}
+    assert {name: metadata.version(name) for name in modules} == expected
+
+    names = set(SDK) | set(ADAPTERS)
+    sdk_names = names | {name.removeprefix("b3-") for name in names}
+    installed = [
+        canonicalize_name(dist.metadata["Name"])
+        for dist in metadata.distributions()
+        if canonicalize_name(dist.metadata["Name"]) in sdk_names
+    ]
+    assert sorted(installed) == sorted(modules)
+
+    assert sys.prefix != sys.base_prefix
+    prefix = Path(sys.prefix).resolve()
+    for name, module in modules.items():
+        distribution = metadata.distribution(name)
+        origin = Path(import_module(module).__file__).resolve()
+        assert origin.is_relative_to(prefix)
+        assert any(Path(file.locate()).resolve() == origin for file in distribution.files)
+    ontology = Path(import_module("prosaic.ontology").__file__).resolve()
+    assert ontology == metadata.distribution("b3-prosaic").locate_file("prosaic/ontology.py").resolve()
+
+
+def test_copied_catalogue_and_workflow(copied_blueprint, copy_command):
+    project = copied_blueprint
+    assert {"README.md", "LICENSE", "NOTICE", "workflow.yml", "receipt.schema.json"} <= {
+        path.name for path in project.iterdir()
+    }
+    listed = copy_command("list")
+    assert listed.returncode == 0, listed.stderr
+    assert "catalogue-ontology" in listed.stdout.splitlines()
+
+    def command(*args):
+        result = subprocess.run(
+            [sys.executable, "-I", str(project / "host.py"), *args],
+            cwd=project.parent, capture_output=True, text=True, timeout=15,
+        )
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
+
+    ordinary = command("discover")
+    enriched = command("discover", "--ontology")
+    assert enriched.pop("ontology") == json.loads((project / "fixtures/visible.json").read_bytes())
+    assert enriched == ordinary
+    assert command("run", "--ontology") == command("run") == {
+        "status": "completed",
+        "receipt": {"candidateId": "fixture-17", "receiptId": "receipt-17", "check": "passed"},
+    }
+
+    host = runpy.run_path(str(project / "host.py"))
+    baseline = host["build_factory"](project)
+    attached = host["build_factory"](project, attach_ontology=True)
+    assert host["build_workflow"](project, baseline).fingerprint == host["build_workflow"](
+        project, attached,
+    ).fingerprint
+
+    original = (project / "workflow.yml").read_bytes()
+    duplicate = copy_command("copy", "catalogue-ontology", str(project))
+    assert duplicate.returncode != 0
+    assert (project / "workflow.yml").read_bytes() == original

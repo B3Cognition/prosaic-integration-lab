@@ -132,6 +132,10 @@ def wheel_identity(path):
         return {'name':info['Name'],'version':info['Version'],'files':files}
 
 
+def verify_observatory_source(source):
+    return _helper('observatory_source_smoke').verify(source)
+
+
 PUBLIC_CONVERSATION='''
 from prosaic_harness import Conversation, ConversationBindings, ConversationPolicy, ConversationScope, MemorySessionStore
 from prosaic_runtime import RunPolicy, ProsaicRuntime
@@ -171,6 +175,13 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     pip=[python,'-I','-m','pip','--isolated','--no-input','--keyring-provider','disabled']
     run([*pip,'install','--index-url',public.INDEX,'--require-hashes','-r',lock],
         directory=directory,environment=environment)
+    from lab_runner.gates import CURRENT_RELEASE_TRAIN, ONTOLOGY_TRAINS, SANDBOX_RELEASE_TRAIN, supports_mcp_client
+    selected=json.loads(manifest.read_bytes())
+    versions = {item['distribution']: item['version'] for item in selected['artifacts']}
+    released_ontology = versions in ONTOLOGY_TRAINS and 'candidate_lineage' not in selected
+    if supports_mcp_client(selected):
+        run([*pip,'install','--index-url',public.INDEX,'--no-deps','--require-hashes',
+             '-r',lock.with_name('mcp-client.lock')],directory=directory,environment=environment)
     run([*pip,'install','--no-deps',*verified_wheel_paths(manifest,wheels),wheel],
         directory=directory,environment=environment)
     expected=directory/'lab-wheel.json';expected.write_text(json.dumps(wheel_identity(wheel)))
@@ -178,6 +189,7 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     (helper/'scripts').mkdir(parents=True);(helper/'src/prosaic_integration_lab').mkdir(parents=True)
     shutil.copyfile(ROOT/'scripts/audit_install.py',helper/'scripts/audit_install.py')
     shutil.copyfile(ROOT/'src/prosaic_integration_lab/dependencies.py',helper/'src/prosaic_integration_lab/dependencies.py')
+    shutil.copyfile(ROOT/'src/prosaic_integration_lab/sdk_audit.py',helper/'src/prosaic_integration_lab/sdk_audit.py')
     (helper/'src/prosaic_integration_lab/__init__.py').write_text('')
     def audit():
         run([python,'-I','-B','-c',public.AUDIT_LAUNCH,helper/'scripts/audit_install.py',
@@ -188,10 +200,12 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
     example=directory/'example.py';example.write_text(public.PUBLIC_EXAMPLE+PUBLIC_CONVERSATION)
     run([python,'-I','-B',example,manifest],directory=directory,environment=environment)
     version=run([python,'-I','-B','-m','prosaic_integration_lab','--version'],directory=directory,environment=environment)
-    verify_cli_versions(version,json.loads(manifest.read_bytes()))
+    verify_cli_versions(version,selected)
     run([python,'-I','-B','-m','lab_runner','--help'],directory=directory,environment=environment)
-    from lab_runner.gates import supports_consumer_blueprints
-    if supports_consumer_blueprints(json.loads(manifest.read_bytes())):
+    run([python,'-I','-B',ROOT/'scripts/explorer_smoke.py'],
+        directory=directory,environment=environment)
+    from lab_runner.gates import supports_consumer_blueprints, UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN
+    if supports_consumer_blueprints(selected):
         for name in ('agent_quality_smoke.py', 'retrieval_memory_smoke.py'):
             run([python, '-I', '-B', ROOT/'scripts'/name, '--source-root', ROOT],
                 directory=directory, environment=environment)
@@ -203,6 +217,54 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/coordination_smoke.py','--output',directory/'coordination-proof','--replay'],
             directory=directory,environment=environment)
+    from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, supports_sub_agents
+    if versions in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+        for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):
+            raw=run([python,'-I','-B','-m','lab_runner.native_eval',command,
+                '--manifest',manifest,'--wheel-dir',wheels],directory=directory,environment=environment)
+            receipt=json.loads(raw)
+            if not (receipt.get('passed') is True and receipt.get('caseCount')==count
+                    and receipt.get('liveInvocations')==0 and receipt.get('cleanup')=='verified'):
+                raise ValueError('installed evaluation qualification incomplete')
+    if versions in (CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+        # The same external installed consumers execute every newly introduced blueprint.
+        feature_environment = {**environment, 'PROSAIC_BLUEPRINT_INSTALLED': '1'}
+        feature_paths = [ROOT/'tests/blueprint_acceptance/test_blueprints.py']
+        if versions in (WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_workflow_enforcement.py')
+        if versions in (ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_accounting_metadata.py')
+        if versions in (SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sent_effort.py')
+        if versions in (TOOL_EVIDENCE_TRAIN,PARALLEL_TOOL_TRAIN,PARALLEL_RELEASE_TRAIN,MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_tool_evidence.py')
+            feature_environment['PROSAIC_TOOL_EVIDENCE_REQUIRED']='1'
+        if versions in (PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_parallel_tools.py')
+            feature_environment['PROSAIC_PARALLEL_TOOLS_REQUIRED']='1'
+        if supports_sub_agents(selected):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_sub_agents.py')
+            feature_environment['PROSAIC_SUB_AGENTS_REQUIRED']='1'
+        if supports_mcp_client(selected):
+            feature_paths.append(ROOT/'tests/blueprint_acceptance/test_mcp_client.py')
+            feature_environment['PROSAIC_MCP_CLIENT_REQUIRED']='1'
+        run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=',
+             *feature_paths, '-q'],
+            directory=directory, environment=feature_environment)
+    if released_ontology:
+        from scripts.qualify_catalogue_ontology import validate_report
+
+        report = directory / 'catalogue-ontology.xml'
+        ontology_profile = {
+            CURRENT_RELEASE_TRAIN['b3-prosaic-runtime']: 'released-current',
+            SANDBOX_RELEASE_TRAIN['b3-prosaic-runtime']: 'released-sandbox',
+        }.get(versions['b3-prosaic-runtime'], 'released')
+        run([python, '-I', '-B', '-m', 'pytest', '-o', 'pythonpath=', '-q',
+             ROOT / 'tests/catalogue_ontology_acceptance', f'--junitxml={report}'],
+            directory=directory, environment={**environment, 'PROSAIC_LAB_ONTOLOGY_PROFILE': ontology_profile})
+        raw_report = report.read_bytes()
+        evidence = {**validate_report(raw_report), 'junit_sha256': hashlib.sha256(raw_report).hexdigest()}
+        (directory / 'catalogue-ontology.json').write_text(json.dumps(evidence, sort_keys=True))
     audit()
     return python
 
@@ -233,6 +295,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
         original_wheel=directory/wheel.name;original_sdist=directory/sdist.name
         shutil.copyfile(wheel,original_wheel);shutil.copyfile(sdist,original_sdist)
         lock=directory/'requirements.lock';shutil.copyfile(ROOT/'dependencies/requirements.lock',lock)
+        shutil.copyfile(ROOT/'dependencies/mcp-client.lock',directory/'mcp-client.lock')
         stage='wheel_consumer';consumer=directory/'wheel';consumer.mkdir()
         python=consume(original_wheel,directory=consumer,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
         stage='sdist_inventory';source=extract_sdist(original_sdist,directory/'source')
@@ -240,6 +303,7 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                      'assets/conversation/agents/assistant.md','scripts/conversation_conformance.py',
                      'tests/acceptance/test_conversation_journey.py','dependencies/public-build-inputs.json'):
             if not (source/name).is_file():raise ValueError('incomplete conversation source distribution')
+        verify_observatory_source(source)
         stage='sdist_build';built=directory/'rebuilt';built.mkdir()
         run([python,'-I','-m','build','--wheel','--outdir',built,source],directory=directory,environment=environment)
         choices=list(built.glob('*.whl'))
@@ -247,6 +311,9 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             raise ValueError('source build differs from Lab version')
         stage='sdist_consumer';second=directory/'sdist-consumer';second.mkdir()
         source_python=consume(choices[0],directory=second,manifest=snapshot,wheels=wheels,lock=lock,environment=environment)
+        stage='sdist_observatory'
+        run([source_python,'-m','pytest','-q','-p','no:cacheprovider',
+            'tests/unit/test_observatory_launcher.py'],directory=source,environment=environment)
         if run_stack:
             stage='sdist_image_build'
             image=run([source_python,source/'scripts/build_consumer.py','--manifest',snapshot,
@@ -260,7 +327,8 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
                 stage='sdist_demo' if command=='demo' else 'sdist_acceptance'
                 raw=None
                 raw=run([source_python,'-m','lab_runner',command,'--mode','conversation','--postgres-version',str(postgres_version),
-                    '--consumer-image',image_id,*flags],directory=source,environment=environment,timeout=900)
+                    '--consumer-image',image_id,*flags],directory=source,environment=environment,
+                    timeout=1200 if command=='test' else 900)
                 receipt=execution_receipt(raw,command=command)
                 if receipt.get('images',{}).get('consumer')!=image_id:
                     raise ValueError('source consumer image changed between build and qualification')
@@ -279,9 +347,15 @@ def verify(wheel,sdist,manifest,*,wheel_dir=None,candidate=False,run_stack=False
             wheel_sha256=hashlib.sha256(original_wheel.read_bytes()).hexdigest(),
             sdist_sha256=hashlib.sha256(original_sdist.read_bytes()).hexdigest(),
             installed_payloads_verified=True,isolated_imports_verified=True,pip_check_passed=True,
-            public_construction_verified=True,sdist_assets_verified=True)
+            public_construction_verified=True,sdist_assets_verified=True,observatory_source_verified=True)
+        from lab_runner.gates import ONTOLOGY_TRAINS
+        if not candidate and {item['distribution']: item['version'] for item in data['artifacts']} in ONTOLOGY_TRAINS:
+            result['catalogue_ontology'] = {
+                origin: json.loads((folder / 'catalogue-ontology.json').read_bytes())
+                for origin, folder in (('wheel', consumer), ('sdist', second))
+            }
     except Exception as error:
-        result.update(failure='distribution_failed',failure_stage=stage)
+        result.update(passed=False,failure='distribution_failed',failure_stage=stage)
         if stage in {'sdist_demo','sdist_acceptance'}:
             output=error.output if isinstance(error,DistributionCommandError) else raw
             if output is not None:result.update(safe_stack_failure(output))

@@ -56,7 +56,7 @@ def test_example_retains_fast_and_defines_distinct_balanced_strong_secret_files(
     assert config.profiles[config.routes['balanced']].model == 'mlx-community--Qwen2.5-Coder-7B-Instruct-4bit'
     assert config.profiles[config.routes['strong']].model == 'ThinkingCap-Qwen3.8-27B-MLX-4bit-DWQ'
     assert all(p.api_key_file == '~/.omlx_token' for p in config.profiles.values())
-    assert all(p.max_tokens <= 512 and p.features['streaming'] is False for p in config.profiles.values())
+    assert all(p.max_tokens <= 512 and p.features['streaming'] is True for p in config.profiles.values())
 
 
 @pytest.mark.parametrize('field', ['api_key_env', 'tools', 'tokens'])

@@ -1,5 +1,416 @@
 # Implementation ledger — 2026-10-09 integration lab plan
 
+## Consumer repros on Runtime 0.9.28 and Harness PostgreSQL 0.4.6 — 2026-11-24
+
+The active manifest SHA-256 is
+`fa44a7c79b2176044828e8ed55c237f7603098086b049f8361e0ec8359fd0734`.
+`prepare_dependencies.py`, `install_dependencies.py` and `audit_install.py`
+verified the installed payloads for all five wheels. The two updated wheels
+match both the PyPI digests and the GitHub release checksum files.
+
+On macOS ARM64 with Python 3.12.15, the required lookup and accepting final
+guard reproduced `tool_recovery_blocked` on both synthetic protocols with
+Runtime 0.9.27. The following installed-Lab command passed with both
+`--origin wheel` and `--origin sdist` on Runtime 0.9.28. It verifies matching tool
+versions on the start and completion events and no redispatch on resume.
+
+```sh
+.venv/bin/python scripts/qualify_guarded_recovery.py --origin wheel \
+  --profile bounded-tool-recovery --export /tmp/lab-bounded-tool-recovery.json
+```
+
+The installed adapter's [transport tests](https://github.com/B3Cognition/prosaic-harness/blob/postgres-v0.4.6/adapters/postgres/tests/test_transport.py)
+ran through `python -I -m pytest --require-postgres -q` against disposable
+Linux ARM64 PostgreSQL containers. The idle-connection blackhole case
+reproduced `StoreUnavailable` on adapter 0.4.5 with PostgreSQL 16. On 0.4.6,
+all 19 transport tests passed on each of PostgreSQL 16 and 18, and the owned
+fixtures were removed. The installed Lab wheel also passed all 12
+`tests/rule_admission_postgres` cases on each major with
+`PROSAIC_RULE_POSTGRES_DSN` set to the owned instance. These runs used synthetic
+provider and database faults.
+
+The full source suite (`.venv/bin/python -m pytest -q`) passed 2,348 tests.
+The installed Lab wheel passed 322 rule-admission, blueprint and catalogue
+ontology tests. `scripts/conversation_distribution_smoke.py` verified the
+public-index bytes and isolated wheel and sdist installs, with 11 ontology
+cases on each archive path.
+
+A local Linux ARM64 image built by `scripts/build_consumer.py`
+from the same manifest passed all 103 real-stack conversation cases on each
+PostgreSQL major, with no skips and verified cleanup:
+
+```sh
+.venv/bin/python -m lab_runner test --mode conversation --context-assembly \
+  --postgres-version 16 --consumer-image <image-id>
+```
+
+The PostgreSQL 18 run used `--postgres-version 18`.
+
+## Published sandbox SDKs in Linux images — 2026-11-21
+
+Commit `efbb857ca43ee64403834f0f1d9cd4a4af859110` selects Core 0.5.1,
+Runtime 0.9.27, Harness 0.9.20, Runtime recorder 0.3.0, and Harness store
+0.4.5. The release manifest SHA-256 is
+`9baed907f7f0be4cf80aed1cb7995564f6dd0d21cdaffef6ba00c7c6ca25eb59`.
+`scripts/prepare_dependencies.py`, `scripts/install_dependencies.py` and
+`scripts/audit_install.py` matched the installed payloads to all five verified
+wheels. The macOS ARM64 Python 3.12 suite passed 2,344 unit and functional
+cases, with the final CI-wiring regression also passing in a targeted run.
+`scripts/conversation_distribution_smoke.py` passed for both isolated Lab
+package paths on macOS, including 11 ontology cases per path and public-index
+verification. Locally, `python -m lab_runner test --mode qualification
+--postgres-version 16 --consumer-image <image-id>` passed three cases against
+the Docker Desktop Linux ARM64 image, with no skips and verified cleanup.
+
+The [standalone Linux image run](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44917333114)
+passed on native AMD64 and ARM64. Bubblewrap 0.12.0 confined the version probe
+and CLI call using Runtime's default mode. Both jobs verified the enforcing
+worker policy and removed the temporary AppArmor profile. The witness ran in
+an isolated worker with synthetic fixtures.
+
+The [full required Lab matrix](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916797145)
+passed on native AMD64 and ARM64 with PostgreSQL 16 and 18. Each job passed
+2,345 unit and functional tests and all 14 real-stack lanes, totaling 450
+stack cases per cell with zero skips and verified cleanup. The legacy
+upgrade lane passed in all four jobs. The consumer image ID in every stack
+receipt matched the Bubblewrap witness for that job. The matrix also
+verified the PyPI wheel bytes and both isolated Lab distribution paths.
+The ARM64 PostgreSQL 16 job ran the additional rebuilt-source stack check.
+
+The [rule-admission matrix](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916797495),
+[reasoning controls](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916795142),
+[guarded recovery and Nemotron checks](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916798782),
+and [experimental ontology checks](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44916798159)
+all passed.
+
+## Runtime 0.9.27 and Harness 0.9.20 release handoff — 2026-11-21
+
+The final SDK qualification passed for [Runtime 0.9.27](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44887831725)
+and [Harness 0.9.20](https://github.com/B3Cognition/prosaic-harness/actions/runs/44891665583).
+The Intel macOS Python 3.12 Harness job passed its exact-source retry after
+a context-pack capacity test timed out on the first attempt.
+[Native AMD64 and ARM64 image CI](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44897206002)
+passed on Lab source `a540273505b297689b747ec338593c02efb156be`, with
+Bubblewrap 0.12.0 and the enforcing [worker policy](../sandboxed-tools.md#qualify-the-linux-image).
+
+The stable [Runtime publish workflow](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44897392612)
+and [Harness publish workflow](https://github.com/B3Cognition/prosaic-harness/actions/runs/44897767495)
+promoted the original qualified archives. For both releases, public PyPI
+and GitHub wheel and source downloads matched the candidate SHA-256 hashes.
+The publication jobs retried public verification after the PyPI index cached
+the version as missing immediately after upload.
+
+Separate Python 3.12 environments installed the PyPI wheels with Core 0.5.0
+and rebuilt the public source archives with Core 0.5.1 using
+`python -m pip install`. Both passed `python -m pip check` and opened
+synthetic records written by Runtime 0.9.26 and Harness 0.9.19. The replay
+resumed paused workflows, reopened file sessions, reconstructed native
+bundles and restored frozen turns. It included implicit and explicit sandbox
+settings and the explicit off-mode path for retained CLI approvals.
+
+## Bubblewrap container policy qualification — 2026-11-21
+
+The default Docker policy blocked Bubblewrap on both native architectures.
+The scoped [container policy](../sandboxed-tools.md#qualify-the-linux-image)
+passed with Bubblewrap 0.12.0 on the exact Lab source
+`c08b67dc636b62f6677b6df84b74b188c92a54b9`.
+
+| Image | SDK wheels | Native AMD64 and ARM64 |
+| --- | --- | --- |
+| Candidate | Core 0.5.0, Runtime 0.9.27, Harness 0.9.20, recorder 0.3.0, store 0.4.5 | [Both passed](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44884094681) |
+| Released baseline | Core 0.5.1, Runtime 0.9.23, Harness 0.9.18, recorder 0.3.0, store 0.4.5 | [Both passed](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44884224182) |
+
+The workflow ran `python scripts/qualify_cli_sandbox_image.py "$image" "$profile" --architecture "$arch"`
+with `--explicit-required` for the released baseline. Both runs verified
+AppArmor enforcement, active seccomp, zero outer capabilities, the single
+namespaced proc exception, confined version and CLI calls, and cleanup. The
+candidate used the original qualified [Runtime](https://github.com/B3Cognition/prosaic-runtime/actions/runs/44804449338)
+and [Harness](https://github.com/B3Cognition/prosaic-harness/actions/runs/44815883152)
+wheels. The ordinary Docker configuration failed the
+[earlier candidate gate](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/44826391079).
+
+Local Python 3.12 verification during policy development ran
+`python -m pytest -q` against the released SDK family and passed 2,343 tests.
+The released consumer image built with `python scripts/build_consumer.py`.
+On ARM64 Docker Desktop, `python -m lab_runner test --mode deterministic --postgres-version 16 --consumer-image "$image"`
+passed 21 synthetic stack tests with verified cleanup. The enforcing AppArmor
+evidence comes from the native Linux runners. These jobs used synthetic
+inference and left the stable packages unpublished.
+
+## PR #69 post-merge verification — 2026-11-17
+
+Lab [PR #69](https://github.com/B3Cognition/prosaic-integration-lab/pull/69)
+merged to `main` as `21b9fa4ee794975317a269687af45d33aaf9ed8b` and added
+the #68 verification record below. All four post-merge workflows passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122260) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122266) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122131) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43973122091) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
+## PR #68 post-merge verification — 2026-11-15
+
+Lab [PR #68](https://github.com/B3Cognition/prosaic-integration-lab/pull/68)
+merged to `main` as `8a4cf98ca28c64afa3ce6c265eafe3b062058124` and added
+the #67 verification record below. All four post-merge workflows passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43756129787) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43756129680) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43756129645) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43756129758) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
+## PR #67 post-merge verification — 2026-11-15
+
+Lab [PR #67](https://github.com/B3Cognition/prosaic-integration-lab/pull/67)
+merged to `main` as `16da55b318439897d3fa1815f125eed46ed675d5`. It added
+the #66 verification record below. All four post-merge workflows passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43734480307) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43734480336) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43734480375) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43734480331) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
+## Handoff and verification ledger post-merge — 2026-11-15
+
+Lab [PR #66](https://github.com/B3Cognition/prosaic-integration-lab/pull/66)
+merged to `main` as `4a7bf914b4d432c63edc2c7ad53c6ac8cef485f9`. It recorded
+the ontology documentation merge and its CI evidence in the handoff and
+this ledger. All four workflows triggered by the merge passed.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629881) | All four cells passed on the first attempt. Linux x64 and ARM64 each passed on PostgreSQL 16 and 18. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629922) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629880) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43701629932) | Passed. |
+
+The dispatch-only context-packs job was skipped on the push to `main`.
+
+## Catalogue ontology docs post-merge — 2026-11-14
+
+Lab [PR #63](https://github.com/B3Cognition/prosaic-integration-lab/pull/63)
+merged to `main` as `dd97cc62523a29c0dd7f55f0b78c31439ace864d`.
+The [ontology guide](../catalogue-ontology.md) distinguishes the stable SDK
+qualification from the frozen RC workflow and links the stable Core and
+Harness guides. The [feature map](../feature-blueprints.md#lab-0917-feature-map)
+lists catalogue ontology under Lab 0.9.17.
+
+| Post-merge workflow | Result |
+| --- | --- |
+| [Required integration acceptance](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924) | All four Linux x64/ARM64 and PostgreSQL 16/18 cells passed after the single-cell retry. |
+| [Rule admission integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734956) | Passed. |
+| [Reasoning effort integration](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734960) | Passed. |
+| [Guarded recovery blueprint](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734955) | Passed. |
+
+The acceptance workflow used Python 3.12 and the released Core 0.5.1,
+Runtime 0.9.23, Harness 0.9.18, recorder 0.3.0 and store 0.4.5 wheels.
+The four checksum-verified reports from `scripts/required_acceptance.py`
+record 450 synthetic stack cases per cell, zero skips and verified cleanup.
+The distribution smoke reports record 11 installed ontology tests from
+the Lab wheel and 11 from a wheel rebuilt from the source archive in each
+cell, for 88 tests with zero failures, errors or skips.
+
+GitHub reported that the [original ARM64/PostgreSQL 16 runner](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/job/132482882788)
+lost communication during package qualification. The [retry attempt](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/attempts/2)
+reran only that failed cell on the same commit. The
+[retried job](https://github.com/B3Cognition/prosaic-integration-lab/actions/runs/43606734924/job/132508334742)
+passed package qualification, including the rebuilt-source stack check,
+and the full acceptance suite. These results qualify the documentation merge.
+
+## Stable catalogue ontology candidate — 2026-11-12
+
+On macOS ARM64 with Python 3.12.15, `scripts/qualify_catalogue_ontology.py`
+passed the 11 installed cases on both the Lab wheel and the wheel rebuilt
+from the sdist with the Core 0.5.1 and Harness 0.9.18 candidate SDKs. The
+published Runtime 0.9.23 wheel was used in both environments. The same
+installed cases also passed under the frozen RC profile.
+
+The [candidate workflow](../../.github/workflows/catalogue-ontology-candidate.yml)
+curates the pair through the Harness compatibility receipt and reuses the
+three public Runtime and PostgreSQL adapter wheels for stack tests. The
+separate `scripts/qualify_catalogue_ontology_upgrade.py` check recovered a
+run written by the current released SDKs with the candidate SDKs and an
+attached ontology. The file and owned PostgreSQL 16/18 witnesses passed
+with verified fixture cleanup.
+
+The locally audited candidate image also passed the tool evidence,
+parallel calls, MCP and sub-agent lanes on owned PostgreSQL 18. All
+104 cases passed without skips, and each fixture verified cleanup.
+
+The ordinary SDK-only Lab suite passed 2,330 tests before the final
+candidate-mode build check was added. The focused candidate, blueprint and
+curation tests passed with the released wheels. The active stable manifests
+and the RC lock match their pre-change bytes. The hosted Linux architecture
+matrix and Windows Core qualification still need hosted runs.
+
+## Experimental catalogue ontology — 2026-11-12
+
+On ARM64 macOS with Python 3.12.15, the [experimental workflow](../catalogue-ontology.md)
+qualification commands built the checkout wheel and a wheel rebuilt from a
+clean sdist. Each fresh consumer installed the hash-locked Core 0.5.1rc1,
+Harness 0.9.17rc1 and Runtime 0.9.23 wheels, passed `pip check`, and ran
+`python -I -m pytest -o pythonpath= -q tests/catalogue_ontology_acceptance`
+with an absolute test path from outside the checkout. Both runs passed all
+11 tests with zero skips. A temporary lock with an altered Core hash failed
+at installation.
+
+The Lab wheel also copied and ran the ordinary example with the stable SDKs.
+The stable pair and each mixed Core/Harness pair returned the RC installation
+message when asked for ontology. The attached and unattached workflows use
+temporary local storage and make zero provider requests. The experimental
+workflow was exercised locally.
+
+With the stable SDKs installed in a fresh SDK-only environment, the source
+command `python -m pytest -q` passed all 2,323 tests. The owned stable
+consumer image built with `scripts/build_consumer.py --manifest
+dependencies/releases.json` passed the 54-case `python -m lab_runner test
+--mode native --postgres-version 16 --consumer-image IMAGE` lane on ARM64.
+The runner verified cleanup. Both stable manifests and the 450-case released
+stack contract match Lab 0.9.16.
+
+## Bounded delegation candidate — 2026-11-12
+
+The [bounded delegation guide](../sub-agents.md) documents the analyst and reviewer
+blueprint, the exact candidate handoff and the required stack lane. Local
+qualification used Python 3.12.15 on ARM64 with Runtime 0.9.23.dev1, Harness
+0.9.17.dev1 and its PostgreSQL adapter 0.4.5.dev1. The candidate retained the
+published Core and Runtime recorder wheels.
+
+- The installed Runtime and Harness SDK witness suites passed 2 and 5 cases
+  respectively. The installed Lab blueprint passed 4 cases.
+- `python -m lab_runner test --mode sub-agents --candidate --candidate-manifest PATH
+  --postgres-version 16` passed 24 synthetic cases. The same command with
+  PostgreSQL 18 passed 24. Both runs verified owned cleanup and had zero skips.
+- The Harness PostgreSQL adapter migration tests passed 2 cases on each major,
+  covering owner-only migration and active writer fencing.
+- The Lab 0.9.15 manifest selected 13 lanes and 426 cases. Lab 0.9.16
+  selects 14 lanes and 450 cases. The local qualification used synthetic
+  endpoints. Hosted results are recorded with the [Lab 0.9.16 release assets](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.16).
+
+## MCP read tools and Lab 0.9.15 — 2026-11-11
+
+The [MCP client blueprint](../mcp-client.md) uses an approved remote read alias
+with host-owned authorization and receipts. All four released Linux architecture
+and PostgreSQL cells require 13 lanes and 426 cases each, including 24 synthetic
+MCP cases across the two provider wires. The rule-admission matrix also requires
+the installed MCP blueprint.
+
+The local ARM64 pin rehearsal used locally built Runtime 0.9.22 and Harness
+0.9.16 wheels. Python 3.12 passed `python -m pytest -q` (2,315 source tests)
+and `python -I -m pytest -o pythonpath= tests/blueprint_acceptance -q`
+(164 blueprint tests, with `PROSAIC_MCP_CLIENT_REQUIRED=1`). The focused
+released-mode MCP lane passed 24 cases each on PostgreSQL 16 and 18 with owned
+cleanup verified. This evidence is synthetic and local. The published
+[release assets](https://github.com/B3Cognition/prosaic-integration-lab/releases/tag/v0.9.15)
+record the hosted checks, actual package hashes and archive provenance.
+
+## Sent reasoning-effort and Lab0.9.11 — 2026-11-08
+
+Runtime0.9.18 is published and publicly verified from source
+`d440d8664e0f307e01c62706976e485993b2e0a2`. The active manifests pin its exact
+public wheel hash with Core0.5.0/Harness0.9.12 and unchanged recorder0.3.0/store0.4.1.
+Fresh public installation passed132 sent-effort/metadata/durable cases, six smoke
+gates and pipcheck; no live inference. Lab0.9.11 final qualification is in progress.
+Previous active profiles/manifests/freezes are preserved as pre-sent-effort.
+Sent controls describe attempts, never provider receipt/compliance or retry consent.
+Old receipt absence stays unavailable; input identities and accounting/PG schemas
+stay unchanged. No live inference. Follow the guide, release0.9.11 gates and
+verification ledger; all ten final-head jobs, original CI archives/equal merge,
+public consumers and independent post-merge CI are mandatory before completion.
+
+## Accounting request metadata and Lab0.9.10 — 2026-11-08
+
+The maintainer authorized Runtime accounting labels and a Lab blueprint, tests,
+merge/release and notes. Develop against an explicitly labeled candidate; advance
+active pins/freezes only after actual Runtime0.9.17 publication/public-byte proof.
+Core0.5.0/Harness0.9.12 and recorder0.3.0/store0.4.1 keep released bytes. Previous
+active profiles/manifests/freezes are preserved as pre-accounting-metadata; all
+five earlier blueprint resources/corpus/prompts/scoring remain unchanged.
+Trusted benchmark labels never replace actual run/tenant/payer authority. Saved
+Harness labels win on resume; same-call relabeling conflicts. Labeled contexts
+need >=0.9.17 readers; no DDL or adapter republish. No live calls.
+Follow the [guide](../accounting-request-metadata.md),
+[release gates](../release-0.9.10.md) and
+[ledger](accounting-request-metadata-2026-11-08.md).
+Require all ten final-head hosted jobs, exact merge/tree and original qualified
+archives, public consumers and all post-merge CI before marking complete.
+
+
+## Workflow enforcement V2 and Lab0.9.9 — 2026-11-07
+
+The maintainer authorized workflow enforcement tags with accepted earlier outputs,
+implementation/testing/merge/release and a new Lab blueprint/release notes.
+Harness0.9.12 PR16 is published and its public bytes are verified; retain released Runtime0.9.16/Core0.5.0 and
+both adapters. Adopt only actually published/verified Harness bytes. Existing
+V1 resources and all historical manifests/profile/freezes stay unchanged; prior
+active records are preserved as pre-workflow-enforcement. No live calls.
+Follow the [release guide](../release-0.9.9.md), [feature map](../feature-blueprints.md) and [current ledger](workflow-enforcement-2026-11-07.md).
+Require the complete four native ordinary cells, four rule/feature cells and
+both reasoning jobs, final review, exact merge tree, original archives, public
+wheel/rebuilt-source consumers and all post-merge checks. Older checkpoints
+below retain their historical limits.
+
+
+## Latest SDK blueprints and Lab 0.9.8 — 2026-11-07
+
+The maintainer authorized a new Lab release adopting Runtime 0.9.16 and Harness
+0.9.11, with a copyable blueprint, installed acceptance and guide per added
+capability. Core 0.5.0/recorder 0.3.0/store 0.4.1 retain their public bytes.
+Previous active records are archived as pre-cerebro; benchmark inputs are unchanged.
+Follow the [feature map](../feature-blueprints.md) and
+[qualification ledger](cerebro-sdk-blueprints-2026-11-07.md). Full source,
+installed consumers, final native matrix, review, merge equality and original
+archive/public-consumer proof remain required before publication. No live calls
+or upstream SDK publication. Older checkpoints retain their historical scope.
+
+
+## Released guarded SDK adoption — 2026-11-06
+
+Lab 0.9.6 combines the blueprint/guarded companion with released Core 0.5.0,
+Runtime 0.9.14 and Harness 0.9.9. Both SDK publications and public verification
+are complete; final Lab qualification remains in progress. Preserve
+the preceding manifests, SDK provenance and memory freezes as named snapshots.
+The [current ledger](guarded-sdk-release-2026-11-06.md) records the observed
+red/green host checks and pending final train, ten hosted jobs, merge equality
+and public-consumer proof. Historical candidate results below remain unchanged.
+
+## Guarded Harness integration follow-up — 2026-11-05
+
+Exact candidate train: Core 0.5.0 / Runtime #16 `498ffc7` / Harness `5b3f0f2`.
+The copyable Harness host and acceptance close registration, floor/composed-rule
+preservation and receipt/recovery gaps. Both provider wires are synthetic.
+Ordinary/reasoning manifests remain unchanged; candidate provenance, installed
+payload audits and PostgreSQL 16/18 checks are separate qualification gates.
+See [the companion ledger](guarded-harness-2026-11-05.md). Historical checkpoints
+below retain the limitations that existed at those commits.
+
+## Rule-admission blueprint candidate lane — 2026-11-05
+
+[Verification](rule-admission-2026-11-05.md): a copyable catalogue-desk
+blueprint on candidate Core `9d5a02f` and Runtime PR #16 `65ba15d`, both rebuilt
+reproducibly from exact commits. 123 synthetic acceptance tests pin tagged
+prose, guard registration, both `required_guards` forms, fix, retry and fail,
+the fingerprint, coverage and the byte-identical untagged guarantee. They
+include regressions for 9 defects an adversarial review found and for every
+PR #45 review comment across two rounds, all fixed; the worst was a float loan-period policy
+bypass. Three strict expected failures track fee formats Runtime does not read
+yet. The tests pass from source and from the installed Lab wheel on macOS
+arm64, and CI rebuilds the candidates byte-identically on Linux AMD64 and
+ARM64. The lane is not a required check. It is a draft until #16
+merges. There is no Harness workflow and no live-model qualification.
+
 ## Sandboxed CLI consumer blueprint — 2026-10-20
 
 Final sandbox.3 passes1824source/55focused tests,12installed both-wire lanes

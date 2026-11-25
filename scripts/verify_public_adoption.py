@@ -182,6 +182,8 @@ def verify(manifest, *, export=None):
         shutil.copyfile(ROOT / 'scripts/audit_install.py', helper / 'scripts/audit_install.py')
         shutil.copyfile(ROOT / 'src/prosaic_integration_lab/dependencies.py',
             helper / 'src/prosaic_integration_lab/dependencies.py')
+        shutil.copyfile(ROOT / 'src/prosaic_integration_lab/sdk_audit.py',
+            helper / 'src/prosaic_integration_lab/sdk_audit.py')
         (helper / 'src/prosaic_integration_lab/__init__.py').write_text('')
         stage = 'installed_payloads'
         run([python, '-I', '-B', '-c', AUDIT_LAUNCH, helper / 'scripts/audit_install.py',

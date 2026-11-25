@@ -1,0 +1,8 @@
+{
+  "namespace": "memory-synthetic",
+  "principal": {"tenant_id": "tenant-a", "actor_id": "alice", "billing_account_id": "payer-a"},
+  "store": {"kind": "file", "path": "/absolute/private/memory-runs"},
+  "runtime": {"base_url": "http://127.0.0.1:8000/v1", "model": "memory-fixture"},
+  "memory": {"enabled": false},
+  "memory_required": false
+}

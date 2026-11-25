@@ -17,7 +17,7 @@ let token='',session=null,busy=false,lastRequest=null,createKey=null;
 const uuid=()=>crypto.randomUUID();
 function notice(text){$('notice').textContent=text;}
 function updateControls(){
- $('send').disabled=busy||!session||session.status==='needsResolution';
+ $('send').disabled=busy||!token||!session||session.status==='needsResolution';
  $('new').disabled=busy||!token;
  $('refresh').disabled=busy||!session;
  $('recover').disabled=busy||!session;
@@ -30,7 +30,7 @@ async function api(path,options={}){
  try{response=await fetch(path,{...options,credentials:'same-origin',cache:'no-store',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json',...options.headers}});}
  catch(error){throw new Error('Connection lost. Refresh status or retry the same request; do not assume it failed.');}
  const data=await response.json().catch(()=>({}));
- if(!response.ok){const detail=data.detail;const code=typeof detail==='string'?detail:detail?.code;const error=new Error(code||'Request failed ('+response.status+').');error.definitiveRejection=[400,401,403,404,413,422].includes(response.status)||(response.status===409&&['revision_conflict','interactionStale','interaction_stale','idempotency_conflict','session_busy','run_busy'].includes(code));throw error;}
+ if(!response.ok){if(response.status===401){token='';$('connect').classList.remove('hidden');updateControls();}const detail=data.detail;const code=typeof detail==='string'?detail:detail?.code;const error=new Error(response.status===401?'Connection rejected. Reconnect with a valid Lab API token or a fresh launcher link.':code||'Request failed ('+response.status+').');error.definitiveRejection=[400,401,403,404,413,422].includes(response.status)||(response.status===409&&['revision_conflict','interactionStale','interaction_stale','idempotency_conflict','session_busy','run_busy'].includes(code));throw error;}
  return data;
 }
 function renderHistory(messages){
@@ -97,9 +97,8 @@ $('recover').addEventListener('click',async()=>{state(true);try{session=await ap
 $('connect').addEventListener('submit',event=>{event.preventDefault();token=$('token').value.trim();$('token').value='';$('connect').classList.add('hidden');newConversation();});
 async function bootstrap(){
  const code=new URLSearchParams(location.hash.slice(1)).get('connect');history.replaceState(null,'',location.pathname);
- if(!code){updateControls();return;}
- try{const response=await fetch('/chat/bootstrap',{method:'POST',credentials:'same-origin',headers:{'X-Chat-Launch':code}});if(!response.ok)throw new Error('Launch link expired. Restart the local launcher or connect with an API token.');const data=await response.json();token=data.token;$('model').textContent=data.label;$('connect').classList.add('hidden');await newConversation();}
- catch(error){notice(error.message);}
+ try{const response=await fetch(code?'/chat/bootstrap':'/chat/session',{method:'POST',credentials:'same-origin',headers:code?{'X-Chat-Launch':code}:{'X-Chat-Session':'restore'}});if(!response.ok){if(!code){updateControls();return;}throw new Error('Launch link expired. Restart the local launcher or connect with an API token.');}const data=await response.json();token=data.token;$('model').textContent=data.label;$('connect').classList.add('hidden');await newConversation();}
+ catch(error){notice(error.message);updateControls();}
 }
 bootstrap();
 '''

@@ -26,8 +26,11 @@ def _private(fd):
 
 
 class SharedLiveAllowance:
-    def __init__(self,path,*,max_calls):
-        _integer(max_calls,1,12)
+    def __init__(self,path,*,max_calls,ceiling=12):
+        # Larger experiments require an explicit trusted-host ceiling; ordinary
+        # pilots retain their existing twelve-unit boundary and on-disk format.
+        _integer(ceiling,1,256)
+        _integer(max_calls,1,ceiling)
         self.path=Path(path)
         if not self.path.is_absolute() or self.path.is_symlink():
             raise ValueError('live allowance requires an explicit private path')

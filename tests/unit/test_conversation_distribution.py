@@ -1,7 +1,37 @@
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import sys
 
 import pytest
+
+
+def test_public_build_snapshot_can_capture_and_serve_generation_without_checkout_imports(tmp_path):
+    root=Path(__file__).resolve().parents[2]
+    snapshot=tmp_path/'public-build';snapshot.mkdir()
+    inventory=json.loads((root/'dependencies/public-build-inputs.json').read_bytes())['files']
+    for name in inventory:
+        target=snapshot/name;target.parent.mkdir(parents=True,exist_ok=True)
+        shutil.copyfile(root/name,target)
+    script='''
+import asyncio,sys
+from pathlib import Path
+root=Path(sys.argv[1]);sys.path[:0]=[str(root),str(root/'src')]
+from prosaic_integration_lab.run_observations import RunObservations
+assert RunObservations().snapshot('missing')['generation']['calls']==[]
+from lab_runner import model
+model.scenario='conversation'
+response=model.completions({'model':'test-model-balanced','stream':True,'messages':[]})
+async def consume():
+    frames=[part async for part in response.body_iterator]
+    assert frames[-1]=='data: [DONE]\\n\\n'
+    assert len(frames)>4
+asyncio.run(consume())
+'''
+    result=subprocess.run([sys.executable,'-I','-c',script,str(snapshot)],cwd=tmp_path,
+        capture_output=True,text=True,timeout=20)
+    assert result.returncode==0,result.stderr
 
 
 def test_public_build_accepts_complete_conversation_inventory():

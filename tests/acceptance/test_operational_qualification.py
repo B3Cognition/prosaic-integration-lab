@@ -19,7 +19,9 @@ def test_real_fairness_reads_growth_and_usage_are_measured(lab):
     profile=short_profile()
     # Each fairness window must permit the existing two-second latency SLO
     # and include several arrivals per identity. Keep two complete windows.
-    profile.update(duration_s=6,window_s=3,maximum_calls=20)
+    # Three arrivals/s can occupy six slots at that SLO. Keep two more slots
+    # for the usage/isolation reads that follow measured request completion.
+    profile.update(duration_s=6,window_s=3,maximum_calls=20,concurrency=8)
     result=run(lab,profile,Events(directory))
     from lab_runner.capacity_diagnostics import write
     write(directory,result)

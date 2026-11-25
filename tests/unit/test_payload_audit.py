@@ -26,10 +26,27 @@ def test_payload_audit_checks_original_wheel_hash_before_package_payload(tmp_pat
         implementation()(manifest,tmp_path,expected_sha=hashlib.sha256(manifest.read_bytes()).hexdigest())
 
 
+def test_source_audit_cli_resolves_default_cache_for_explicit_manifest(tmp_path, monkeypatch):
+    import sys
+    path = Path(__file__).resolve().parents[2] / 'scripts/audit_install.py'
+    spec = importlib.util.spec_from_file_location('audit_install_cli', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    manifest = tmp_path / 'manifest.json'
+    manifest.write_text('{"artifacts": []}')
+    observed = []
+    monkeypatch.setattr(module, 'ROOT', tmp_path)
+    monkeypatch.setattr(module, 'audit', lambda selected, wheels, **kwargs:
+        observed.append((selected, wheels, kwargs)))
+    monkeypatch.setattr(sys, 'argv', ['audit_install.py', '--manifest', str(manifest)])
+    module.main()
+    expected = tmp_path / '.cache/wheels' / hashlib.sha256(manifest.read_bytes()).hexdigest()
+    assert observed == [(manifest, expected, {'expected_sha': None})]
+
+
 def audit_fixture(tmp_path, monkeypatch):
     manifest, cache, site = wheel_family(tmp_path, install=True)
-    spec=importlib.util.spec_from_file_location('audit_install',Path(__file__).resolve().parents[2]/'scripts/audit_install.py')
-    module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    from prosaic_integration_lab import sdk_audit as module
     found = list(metadata.distributions(path=[str(site)]))
     monkeypatch.setattr(module, 'distributions', lambda: iter(found), raising=False)
     monkeypatch.syspath_prepend(str(site))

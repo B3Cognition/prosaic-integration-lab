@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "mode": "conversation",
+  "cleanup": "verified",
+  "dependency_mode": "released",
+  "host_architecture": "arm64",
+  "test_count": 97,
+  "skipped": 0,
+  "test_returncode": 0,
+  "failed_count": 0,
+  "failed_cases": [],
+  "payload_audit": "verified",
+  "owner": "3ca9115e914541519ac2a30caee2441b",
+  "released_manifest_sha256": "fc4eef2c3d32b641a9c6e12cc7b012464132e0cfbf5e87bbc4e848c72b71b95b",
+  "images": {
+    "consumer": "sha256:2c60831266858858514a32335b6e2b0afd40e1debb5730f46077a0d4f0aac44a",
+    "postgres": "postgres:16@sha256:ca0bd484cb98bf4b24eb1010e73fb3fcbd6714d240fbc1a10eea5b7dbecb641d"
+  }
+}

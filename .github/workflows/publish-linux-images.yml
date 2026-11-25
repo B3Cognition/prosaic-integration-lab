@@ -1,0 +1,180 @@
+name: Publish Lab Linux images
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: lab-linux-images-${{ github.sha }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY_IMAGE: ghcr.io/b3cognition/prosaic-integration-lab
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' && github.repository == 'B3Cognition/prosaic-integration-lab'
+    name: Build and qualify (${{ matrix.architecture }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: &native_matrix
+        include:
+          - runner: ubuntu-24.04
+            architecture: amd64
+          - runner: ubuntu-24.04-arm
+            architecture: arm64
+    steps:
+      - &checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - &python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Prepare verified public wheels
+        run: |
+          python -m pip install --require-hashes -r dependencies/requirements.lock
+          python scripts/prepare_dependencies.py
+      - name: Build the released consumer
+        id: image
+        run: |
+          python scripts/build_consumer.py --dependency-mode released --tag prosaic-integration-lab:publish | tee "$RUNNER_TEMP/consumer-build.log"
+          id=$(tail -n 1 "$RUNNER_TEMP/consumer-build.log")
+          [[ "$id" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'id=%s\n' "$id" >> "$GITHUB_OUTPUT"
+      - &load_policy
+        name: Load the dedicated AppArmor policy
+        id: load-policy
+        run: sudo apparmor_parser -a -T containers/cli-sandbox.apparmor
+      - &witness
+        name: Qualify default CLI confinement
+        env:
+          IMAGE_ID: ${{ steps.image.outputs.id }}
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          url=$(python -c 'from scripts.qualify_cli_sandbox_image import SECCOMP_URL; print(SECCOMP_URL)')
+          curl --fail --silent --show-error --location "$url" -o "$RUNNER_TEMP/moby-seccomp.json"
+          python scripts/qualify_cli_sandbox_image.py "$IMAGE_ID" "$RUNNER_TEMP/moby-seccomp.json" --architecture "$ARCHITECTURE"
+      - &unload_policy
+        name: Verify AppArmor profile cleanup
+        if: always() && steps.load-policy.outcome == 'success'
+        run: |
+          sudo apparmor_parser -R containers/cli-sandbox.apparmor
+          profiles=$(sudo cat /sys/kernel/security/apparmor/profiles)
+          if grep -q '^prosaic-lab-cli-sandbox ' <<< "$profiles"; then exit 1; fi
+      - &login
+        name: Authenticate to GHCR
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Upload the qualified native image
+        env:
+          IMAGE_ID: ${{ steps.image.outputs.id }}
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          ref="$REGISTRY_IMAGE:sha-$GITHUB_SHA-$ARCHITECTURE-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          docker tag "$IMAGE_ID" "$ref"
+          docker push --platform "linux/$ARCHITECTURE" "$ref" | tee "$RUNNER_TEMP/push.log"
+          digest=$(sed -nE 's/.*digest: (sha256:[0-9a-f]{64}).*/\1/p' "$RUNNER_TEMP/push.log")
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          docker buildx imagetools inspect --raw "$REGISTRY_IMAGE@$digest" |
+            jq -e --arg id "$IMAGE_ID" '.config.digest == $id'
+          jq -n --arg digest "$digest" --arg id "$IMAGE_ID" '{digest:$digest,id:$id}' > image.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: linux-image-${{ matrix.architecture }}
+          path: image.json
+          if-no-files-found: error
+
+  index:
+    name: Publish the digest-pinned image index
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      digest: ${{ steps.publish.outputs.digest }}
+      ids: ${{ steps.publish.outputs.ids }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: linux-image-*
+          path: images
+      - *login
+      - name: Publish exactly the qualified native manifests
+        id: publish
+        run: |
+          amd64=$(jq -er .digest images/linux-image-amd64/image.json)
+          arm64=$(jq -er .digest images/linux-image-arm64/image.json)
+          amd64_id=$(jq -er .id images/linux-image-amd64/image.json)
+          arm64_id=$(jq -er .id images/linux-image-arm64/image.json)
+          for digest in "$amd64" "$arm64" "$amd64_id" "$arm64_id"; do
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          done
+          ref="$REGISTRY_IMAGE:sha-$GITHUB_SHA"
+          if docker buildx imagetools inspect "$ref" > "$RUNNER_TEMP/tag-check.log" 2>&1; then
+            digest=$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$ref" | jq -er .digest)
+          else
+            grep -Ei 'not found|manifest unknown' "$RUNNER_TEMP/tag-check.log"
+            docker buildx imagetools create --tag "$ref" --metadata-file "$RUNNER_TEMP/index.json" \
+              "$REGISTRY_IMAGE@$amd64" "$REGISTRY_IMAGE@$arm64"
+            digest=$(jq -er '."containerimage.descriptor".digest' "$RUNNER_TEMP/index.json")
+          fi
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          docker buildx imagetools inspect --raw "$REGISTRY_IMAGE@$digest" |
+            jq -e --arg amd64 "$amd64" --arg arm64 "$arm64" '
+              ([.manifests[] | select(.platform.os == "linux") | {key:.platform.architecture,value:.digest}]
+                | from_entries) == {amd64:$amd64,arm64:$arm64} and (.manifests | length == 2)'
+          ids=$(jq -cn --arg amd64 "$amd64_id" --arg arm64 "$arm64_id" '{amd64:$amd64,arm64:$arm64}')
+          printf 'digest=%s\nids=%s\n' "$digest" "$ids" >> "$GITHUB_OUTPUT"
+          printf 'Published %s@%s from %s\n' "$REGISTRY_IMAGE" "$digest" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+  verify:
+    name: Verify fresh registry pull (${{ matrix.architecture }})
+    needs: index
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix: *native_matrix
+    steps:
+      - *checkout
+      - *python
+      - *login
+      - name: Pull the published index by digest and audit the installed wheels
+        id: image
+        env:
+          PUBLISHED_DIGEST: ${{ needs.index.outputs.digest }}
+          QUALIFIED_ID: ${{ fromJSON(needs.index.outputs.ids)[matrix.architecture] }}
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          [[ "$PUBLISHED_DIGEST" =~ ^sha256:[0-9a-f]{64}$ && "$QUALIFIED_ID" =~ ^sha256:[0-9a-f]{64}$ ]]
+          ref="$REGISTRY_IMAGE@$PUBLISHED_DIGEST"
+          docker pull --platform "linux/$ARCHITECTURE" "$ref"
+          id=$(docker image inspect --format '{{.Id}}' "$ref")
+          test "$id" = "$QUALIFIED_ID"
+          checksum=$(sha256sum dependencies/releases.json | cut -d ' ' -f1)
+          docker run --rm --pull never --network none --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --entrypoint python "$id" \
+            -B scripts/audit_install.py --manifest dependencies/releases.json --wheel-dir /srv/wheels --expected-sha "$checksum"
+          printf 'id=%s\n' "$id" >> "$GITHUB_OUTPUT"
+          printf 'Pulled %s for linux/%s with qualified config %s\n' \
+            "$ref" "$ARCHITECTURE" "$id" >> "$GITHUB_STEP_SUMMARY"
+      - *load_policy
+      - *witness
+      - *unload_policy

@@ -60,8 +60,8 @@ def preflight(path, *, live_local, max_calls):
                 not profile.api_key_file.strip()):
             raise ValueError('local routing requires a secret-managed api_key_file')
         if (type(profile.max_tokens) is not int or not 0 < profile.max_tokens <= 512 or
-                profile.features.get('streaming') is not False):
-            raise ValueError('local routing requires finite output tokens and non-streaming profiles')
+                type(profile.features.get('streaming',True)) is not bool):
+            raise ValueError('local routing requires finite output tokens and boolean streaming configuration')
     if config.profiles[config.routes['balanced']].model == config.profiles[config.routes['strong']].model:
         raise ValueError('balanced and strong routes must select distinct models')
     return config

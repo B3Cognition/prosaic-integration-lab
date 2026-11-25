@@ -1,0 +1,17 @@
+version: 1
+name: One admitted reasoning task
+source: .
+runtime: api.yml
+start: solve
+limits: {max_calls: 1, max_visits: 1, timeout_s: 240}
+steps:
+  solve:
+    kind: agent
+    agent: subagents/gemma-medium.md
+    schema: answer.json
+    tools: []
+    max_attempts: 1
+    next: done
+  done:
+    kind: finish
+    requires: [solve]

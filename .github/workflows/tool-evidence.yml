@@ -1,0 +1,71 @@
+name: Tool evidence candidate acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      core_run:
+        description: Original Core artifact run
+        required: true
+      core_source:
+        description: Exact original Core source
+        required: true
+      runtime_run:
+        description: Successful Runtime Tool contract candidate run
+        required: true
+      runtime_source:
+        description: Exact Runtime candidate source
+        required: true
+      harness_run:
+        description: Successful Harness Tool contract candidate run
+        required: true
+      harness_source:
+        description: Exact Harness candidate source
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  focused-consumer:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+        postgres: ['16', '18']
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Curate original candidate bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CORE_RUN: ${{ inputs.core_run }}
+          CORE_SOURCE: ${{ inputs.core_source }}
+          RUNTIME_RUN: ${{ inputs.runtime_run }}
+          RUNTIME_SOURCE: ${{ inputs.runtime_source }}
+          HARNESS_RUN: ${{ inputs.harness_run }}
+          HARNESS_SOURCE: ${{ inputs.harness_source }}
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --require-hashes -r dependencies/requirements.lock
+          .venv/bin/python scripts/prepare_sdk_candidates.py --tool-contracts --core-run-id "$CORE_RUN" --core-source "$CORE_SOURCE" --runtime-run-id "$RUNTIME_RUN" --runtime-source "$RUNTIME_SOURCE" --harness-run-id "$HARNESS_RUN" --harness-source "$HARNESS_SOURCE" --manifest .lab/tool-candidates.json
+          .venv/bin/python scripts/install_dependencies.py --manifest .lab/tool-candidates.json
+          .venv/bin/python scripts/audit_install.py --manifest .lab/tool-candidates.json
+      - name: Verify installed copyable blueprint
+        run: |
+          .venv/bin/python -m build --wheel
+          .venv/bin/python -m pip install --no-deps dist/*.whl
+          PROSAIC_TOOL_EVIDENCE_REQUIRED=1 .venv/bin/python -I -m pytest -o pythonpath= -q tests/blueprint_acceptance/test_tool_evidence.py
+      - name: Build one immutable consumer
+        run: .venv/bin/python scripts/build_consumer.py --manifest .lab/tool-candidates.json --dependency-mode candidate --tag prosaic-tool-evidence:focused > /tmp/consumer-image.txt
+      - name: Run only the focused 24-case owned lane
+        run: |
+          IMAGE=$(tail -n 1 /tmp/consumer-image.txt)
+          .venv/bin/python -m lab_runner test --mode tool-evidence --candidate --candidate-manifest .lab/tool-candidates.json --consumer-image "$IMAGE" --postgres-version '${{ matrix.postgres }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tool-evidence-${{ matrix.runner }}-pg${{ matrix.postgres }}
+          path: .lab/*/result.json
+          if-no-files-found: warn

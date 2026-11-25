@@ -1,0 +1,10 @@
+{
+  "base_image_id": "sha256:2c60831266858858514a32335b6e2b0afd40e1debb5730f46077a0d4f0aac44a",
+  "image_id": "sha256:a4a5a7b6db3e308ab847786684c5147c98cf6375e45b6bbe55dfc1c85c67a8c2",
+  "tag": "prosaic-integration-lab-memory:556dc123937349c0951bff9ef9b97a9f",
+  "architecture": "arm64",
+  "candidate_only": true,
+  "offline_build": true,
+  "default_disabled_smoke": true,
+  "lab_wheel_sha256": "b28c8572e21b50762721893ab36b0b32c794aa3dd17722e873885fbb82fcb1cb"
+}

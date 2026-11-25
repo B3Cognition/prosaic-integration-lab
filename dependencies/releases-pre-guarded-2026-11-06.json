@@ -1,0 +1,49 @@
+{
+  "artifacts": [
+    {
+      "checksum_url": "https://github.com/B3Cognition/prosaic/releases/download/v0.5.0/SHA256SUMS",
+      "distribution": "b3-prosaic",
+      "filename": "b3_prosaic-0.5.0-py3-none-any.whl",
+      "sha256": "e858a853595746c6930fbe062e84bd8ece1a366aa3b126f2fe11bfb7cb2ceb81",
+      "source_commit": "67b3807281ed0cdfd345fff84c56b236ec82cfb1",
+      "url": "https://files.pythonhosted.org/packages/15/28/be27f03fa86b5936fc1810b75b09e57bb40727b48c72a1f46664dd8493ae/b3_prosaic-0.5.0-py3-none-any.whl",
+      "version": "0.5.0"
+    },
+    {
+      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.13/SHA256SUMS",
+      "distribution": "b3-prosaic-runtime",
+      "filename": "b3_prosaic_runtime-0.9.13-py3-none-any.whl",
+      "sha256": "1f726443eafc0afba9257629aca28f4705f174e5db672e51c1c7bf69cb0d2470",
+      "source_commit": "9882ab6756e905874951e6b74953ef6a49adfb4e",
+      "url": "https://files.pythonhosted.org/packages/4c/f0/fc3d6ae06cc220f849344a6cfcb8ff11afffd2eff3f6b4ac81820383ec1a/b3_prosaic_runtime-0.9.13-py3-none-any.whl",
+      "version": "0.9.13"
+    },
+    {
+      "checksum_url": "https://github.com/B3Cognition/prosaic-runtime/releases/download/v0.9.0/SHA256SUMS",
+      "distribution": "b3-prosaic-runtime-postgres",
+      "filename": "b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl",
+      "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca",
+      "source_commit": "a59621c5f30d766d1217b37df777d3876075dc34",
+      "url": "https://files.pythonhosted.org/packages/4f/95/39d4602749df2e83a8d7afc4f9f68819e0dea48c2f688d824f8a07ed1aae/b3_prosaic_runtime_postgres-0.3.0-py3-none-any.whl",
+      "version": "0.3.0"
+    },
+    {
+      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/v0.9.8/SHA256SUMS",
+      "distribution": "b3-prosaic-harness",
+      "filename": "b3_prosaic_harness-0.9.8-py3-none-any.whl",
+      "sha256": "e8f5dd4eee4f934574719f2a90849b69180bafcc4236b89af7894188699e58fa",
+      "source_commit": "0f18ae9b5c7aad2f9e889e9cda69ad4512f1ddaf",
+      "url": "https://files.pythonhosted.org/packages/91/a7/474c3ea83b080bb3c23c1a37457dc52933b7ee23ee76de422ed40ab9d8db/b3_prosaic_harness-0.9.8-py3-none-any.whl",
+      "version": "0.9.8"
+    },
+    {
+      "checksum_url": "https://github.com/B3Cognition/prosaic-harness/releases/download/postgres-v0.4.1/SHA256SUMS",
+      "distribution": "b3-prosaic-harness-postgres",
+      "filename": "b3_prosaic_harness_postgres-0.4.1-py3-none-any.whl",
+      "sha256": "d33936fe82b41d5154c4527cc4aee82c190b787e27da04bbce3e1e34dd8f0beb",
+      "source_commit": "a3fa45027509c2b5a75a9ed174cca51c77a42912",
+      "url": "https://files.pythonhosted.org/packages/96/4b/126634b9a0d333cb7e4eb2cc86805b6f28ba99ebada5365350869732732f/b3_prosaic_harness_postgres-0.4.1-py3-none-any.whl",
+      "version": "0.4.1"
+    }
+  ]
+}

@@ -34,6 +34,14 @@ def candidate_set(tmp_path,request):
     if getattr(request,'param',None)=='context':
         expected_versions['B3Cognition/prosaic-runtime']['b3-prosaic-runtime']='0.9.4'
         expected_versions['B3Cognition/prosaic-harness']={'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}
+    if getattr(request,'param',None)=='packs':
+        from scripts.prepare_sdk_candidates import CONTEXT_PACK_EXPECTED
+        expected_versions=CONTEXT_PACK_EXPECTED
+    if getattr(request,'param',None)=='cli-sandbox':
+        expected_versions={
+            'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
+            'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.27','b3-prosaic-runtime-postgres':'0.3.0'},
+            'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.20','b3-prosaic-harness-postgres':'0.4.5'}}
     candidates=[]
     for index,(repository,expected) in enumerate(expected_versions.items()):
         directory=tmp_path/str(index);directory.mkdir()
@@ -58,7 +66,7 @@ def candidate_set(tmp_path,request):
     return [tmp_path/str(index) for index in range(3)],candidates
 
 
-@pytest.mark.parametrize('candidate_set',['context'],indirect=True)
+@pytest.mark.parametrize('candidate_set',['context','packs'],indirect=True)
 @pytest.mark.parametrize('corrupt',[False,True])
 def test_context_train_keeps_original_adapter_bytes(candidate_set,tmp_path,monkeypatch,corrupt):
     import scripts.prepare_sdk_candidates as cli
@@ -70,12 +78,14 @@ def test_context_train_keeps_original_adapter_bytes(candidate_set,tmp_path,monke
     monkeypatch.setattr(cli,'retained_runtime_postgres',lambda cache:(retained,original))
     if corrupt:original.write_bytes(b'changed original')
     arguments=[(c['repository'],c['run_id'],c['source_commit'],d) for c,d in zip(candidates,directories)]
+    features=({'context_packs':True} if candidates[0]['receipt']['distributions'][0]['version']=='0.5.0'
+        else {'context_assembly':True})
     manifest=tmp_path/'context.json'
     if corrupt:
-        with pytest.raises(ValueError,match='bytes differ'):cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        with pytest.raises(ValueError,match='bytes differ'):cli.curate(arguments,manifest,tmp_path/'cache',**features)
         assert not manifest.exists()
     else:
-        data=cli.curate(arguments,manifest,tmp_path/'cache',context_assembly=True)
+        data=cli.curate(arguments,manifest,tmp_path/'cache',**features)
         assert next(a for a in data['artifacts'] if a['distribution']==retained['distribution'])==retained
         assert data['candidate_lineage']['retained_artifacts']==[retained]
         from prosaic_integration_lab.dependencies import cache_directory
@@ -95,6 +105,25 @@ def test_candidates_curate_only_exact_five_verified_wheels(candidate_set,tmp_pat
     assert {item['distribution']:item['version'] for item in data['artifacts']}=={
         'b3-prosaic':'0.4.1','b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0',
         'b3-prosaic-harness':'0.8.0','b3-prosaic-harness-postgres':'0.3.0'}
+
+
+@pytest.mark.parametrize('candidate_set',['cli-sandbox'],indirect=True)
+def test_cli_sandbox_image_curation_requires_the_exact_candidate_chain(candidate_set,tmp_path):
+    from lab_runner.gates import supports_mcp_client
+    from scripts.prepare_sdk_candidates import curate
+    from prosaic_integration_lab.dependencies import cache_directory,verified_wheel_paths
+    directories,candidates=candidate_set
+    arguments=[(c['repository'],c['run_id'],c['source_commit'],d) for c,d in zip(candidates,directories)]
+    manifest=tmp_path/'sandbox.json'
+    cache=tmp_path/'cache'
+    data=curate(arguments,manifest,cache,cli_sandbox=True)
+    assert len(verified_wheel_paths(manifest,cache_directory(manifest,cache)))==5
+    assert data['candidate_lineage']['candidates']==candidates
+    assert not supports_mcp_client(data)
+    with pytest.raises(ValueError,match='mixed delegation SDK family'):
+        supports_mcp_client({'artifacts':data['artifacts']})
+    with pytest.raises(ValueError,match='distribution'):
+        curate(arguments,tmp_path/'wrong-train.json',cache)
 
 
 @pytest.mark.parametrize('version',['0.8.1','0.10.0'])
@@ -182,3 +211,37 @@ def test_profile_cannot_be_partially_overridden_with_manual_sources(tmp_path,mon
         cli.main(['--profile',str(tmp_path/'profile.json'),'--core-run-id','999',
                   '--manifest',str(tmp_path/'manifest.json')])
     assert error.value.code==2
+
+
+@pytest.mark.parametrize('active_matches', [True, False])
+def test_mcp_candidate_preserves_original_adapter_after_public_store_upgrade(tmp_path, monkeypatch, active_matches):
+    from scripts import prepare_dependencies, prepare_sdk_candidates as cli
+    from prosaic_integration_lab.dependencies import cache_directory, sdk_manifest
+
+    name = 'b3-prosaic-harness-postgres'
+    original = cli.ROOT/'dependencies/releases-pre-mcp-client-2026-11-11.json'
+    dependencies = tmp_path/'dependencies'
+    dependencies.mkdir()
+    archived = dependencies/original.name
+    archived.write_bytes(original.read_bytes())
+    active = dependencies/'releases.json'
+    old_manifest = sdk_manifest(archived)
+    old = next(item for item in old_manifest['artifacts'] if item['distribution'] == name)
+    if not active_matches:
+        replacement = dict(old, version='0.4.5', sha256='a'*64,
+                           filename='b3_prosaic_harness_postgres-0.4.5-py3-none-any.whl')
+        old_manifest['artifacts'][old_manifest['artifacts'].index(old)] = replacement
+    active.write_text(json.dumps(old_manifest))
+    monkeypatch.setattr(cli, 'ROOT', tmp_path)
+    prepared = []
+
+    def prepare(manifest, cache_root):
+        prepared.append(manifest)
+        return cache_directory(manifest, cache_root)
+
+    monkeypatch.setattr(prepare_dependencies, 'prepare', prepare)
+    cache_root = tmp_path/'wheels'
+    item, source = cli.retained_mcp_store(cache_root)
+    assert item == old
+    assert source == cache_directory(active if active_matches else archived, cache_root)/old['filename']
+    assert prepared == ([] if active_matches else [archived])

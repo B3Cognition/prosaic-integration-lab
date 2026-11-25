@@ -15,7 +15,8 @@ import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT/'src'),str(ROOT)]
-from prosaic_integration_lab.dependencies import cache_directory,file_digest,sdk_manifest,verified_wheel_paths
+from prosaic_integration_lab.dependencies import (
+    CLI_SANDBOX_CANDIDATES, cache_directory, file_digest, sdk_manifest, verified_wheel_paths)
 
 EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.0','b3-prosaic-runtime-postgres':'0.3.0'},
@@ -23,6 +24,10 @@ EXPECTED={'B3Cognition/prosaic':{'b3-prosaic':'0.4.1'},
 CONTEXT_EXPECTED={**EXPECTED,
     'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.4','b3-prosaic-runtime-postgres':'0.3.0'},
     'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.0','b3-prosaic-harness-postgres':'0.4.0'}}
+CONTEXT_PACK_EXPECTED={
+    'B3Cognition/prosaic':{'b3-prosaic':'0.5.0'},
+    'B3Cognition/prosaic-runtime':{'b3-prosaic-runtime':'0.9.19','b3-prosaic-runtime-postgres':'0.3.0'},
+    'B3Cognition/prosaic-harness':{'b3-prosaic-harness':'0.9.13','b3-prosaic-harness-postgres':'0.4.2'}}
 
 
 def serialized(value):return (json.dumps(value,sort_keys=True,indent=2,allow_nan=False)+'\n').encode()
@@ -36,10 +41,12 @@ def read(path):
     return json.loads(content),content
 
 
-def validate_run(run,commit):
+def validate_run(run,commit,*,tool_contracts=False):
+    name="Tool contract candidate" if tool_contracts else "Publish SDK"
+    path=".github/workflows/tool-contract-candidate.yml" if tool_contracts else ".github/workflows/publish.yml"
     if (not re.fullmatch('[0-9a-f]{40}',commit) or run.get('head_sha')!=commit or
-        run.get('conclusion')!='success' or run.get('name')!='Publish SDK' or
-        run.get('path')!='.github/workflows/publish.yml' or run.get('event') not in {'push','workflow_dispatch'}):
+        run.get('conclusion')!='success' or run.get('name')!=name or
+        run.get('path')!=path or run.get('event') not in {'push','workflow_dispatch'}):
         raise ValueError('candidate requires successful exact-source qualification')
 
 
@@ -58,9 +65,17 @@ def retained_runtime_postgres(cache_root):
     return dict(item),cache/item['filename']
 
 
-def curate(candidates,manifest,cache_root,*,context_assembly=False):
+def curate(candidates,manifest,cache_root,*,context_assembly=False,context_packs=False,tool_contracts=False,
+           parallel_tools=False,cli_sandbox=False):
+    if sum((context_assembly,context_packs,tool_contracts,parallel_tools,cli_sandbox))>1:
+        raise ValueError('candidate feature modes are mutually exclusive')
+    if parallel_tools:
+        return curate_parallel_tools(candidates[0],candidates[1],manifest,cache_root)
+    if tool_contracts:
+        return curate_tool_contracts(candidates,manifest,cache_root)
     if len(candidates)!=3:raise ValueError('three explicit SDK candidates required')
-    expected_train=CONTEXT_EXPECTED if context_assembly else EXPECTED
+    expected_train=(CLI_SANDBOX_CANDIDATES if cli_sandbox else CONTEXT_PACK_EXPECTED if context_packs
+                    else CONTEXT_EXPECTED if context_assembly else EXPECTED)
     evidence=[];artifacts=[];sources={};seen=set()
     for repository,run_id,commit,directory in candidates:
         if repository not in EXPECTED or repository in seen or not re.fullmatch('[1-9][0-9]*',run_id):
@@ -101,7 +116,7 @@ def curate(candidates,manifest,cache_root,*,context_assembly=False):
                               'qualified_run_id':run_id,'release_receipt_sha256':candidate['receipt_sha256']})
             sources[filename]=directory/filename
     lineage={'version':1,'candidates':evidence}
-    if context_assembly:
+    if context_assembly or context_packs:
         retained,path=retained_runtime_postgres(cache_root)
         if path.is_symlink() or not path.is_file() or file_digest(path)!=retained['sha256']:
             raise ValueError('retained Runtime PostgreSQL bytes differ')
@@ -128,6 +143,61 @@ def curate(candidates,manifest,cache_root,*,context_assembly=False):
     return data
 
 
+
+def curate_tool_contracts(candidates,manifest,cache_root):
+    from lab_runner.tool_evidence import validate_tool_manifest
+    from prosaic_integration_lab.tool_evidence import TRAIN
+    manifest=Path(manifest);cache_root=Path(cache_root)
+    if manifest.resolve().is_relative_to((ROOT/'dependencies').resolve()):
+        raise ValueError('tool candidates must not replace published dependency manifests')
+    if len(candidates)!=3:raise ValueError('three explicit original SDK runs required')
+    artifacts=[];sources={};paired=[];retained=[]
+    released=sdk_manifest(ROOT/'dependencies/releases-pre-ontology-2026-11-13.json')
+    for (repository,run_id,commit,directory),expected_repository in zip(candidates,EXPECTED):
+        if repository!=expected_repository or not re.fullmatch('[1-9][0-9]*',run_id):raise ValueError('candidate order or run identity differs')
+        directory=Path(directory);receipt,raw=read(directory/'release-receipt.json')
+        if receipt.get('source_commit')!=commit or raw!=serialized(receipt):raise ValueError('candidate source differs')
+        if repository=='B3Cognition/prosaic':
+            original=next(item for item in released['artifacts'] if item['distribution']=='b3-prosaic')
+            entry=next(item for item in receipt['artifacts'] if item['filename']==original['filename'])
+            if entry['sha256']!=original['sha256'] or commit!=original['source_commit']:raise ValueError('original Core differs')
+            artifacts.append(dict(original));retained.append(dict(original));sources[original['filename']]=directory/original['filename']
+            continue
+        sdk='runtime' if repository.endswith('runtime') else 'harness'
+        qualification,_=read(directory/'qualification-tool-contract-consumer.json')
+        run,_=read(directory/'tool-contract-run.json');validate_run(run,commit,tool_contracts=True)
+        if str(run.get('id'))!=run_id:raise ValueError('candidate run ID differs')
+        candidate=dict(sdk=sdk,receipt=receipt,qualification=qualification,run=run)
+        paired.append(candidate)
+        for distribution in receipt['distributions']:
+            name,version=distribution['name'],distribution['version']
+            if TRAIN.get(name)!=version:raise ValueError('unexpected tool candidate distribution')
+            filename=name.replace('-','_')+'-'+version+'-py3-none-any.whl'
+            entry=next(item for item in receipt['artifacts'] if item['filename']==filename)
+            artifacts.append(dict(distribution=name,version=version,source_commit=commit,**entry));sources[filename]=directory/filename
+    recorder,path=retained_runtime_postgres(cache_root);retained.append(recorder);artifacts.append(recorder);sources[path.name]=path
+    if paired[1]['sdk']!='harness' or paired[0]['sdk']!='runtime':raise ValueError('paired candidate order differs')
+    harness_directory=Path(candidates[2][3])
+    if read(harness_directory/'tool-contract-runtime-receipt.json')[0]!=paired[0]['receipt'] or read(harness_directory/'tool-contract-runtime-qualification.json')[0]!=paired[0]['qualification']:
+        raise ValueError('Harness used different Runtime bytes')
+    upstream_run=read(harness_directory/'tool-contract-runtime-run.json')[0]
+    if upstream_run!=paired[0]['run']:raise ValueError('Harness used a different Runtime candidate run')
+    data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind='hosted-tool-contract-handoff',candidates=paired,retained_artifacts=retained))
+    validate_tool_manifest(data);payload=serialized(data)
+    if manifest.exists() and manifest.read_bytes()!=payload:raise ValueError('candidate manifest is immutable')
+    with tempfile.TemporaryDirectory() as temporary:
+        selected=Path(temporary)/'manifest.json';selected.write_bytes(payload);sdk_manifest(selected)
+        cache=cache_directory(selected,cache_root);cache.mkdir(parents=True,exist_ok=True)
+        for item in artifacts:
+            source=sources[item['filename']]
+            if source.is_symlink() or file_digest(source)!=item['sha256']:raise ValueError('candidate payload differs')
+            target=cache/item['filename']
+            if target.exists() and file_digest(target)!=item['sha256']:raise ValueError('candidate cache conflict')
+            shutil.copyfile(source,target)
+        verified_wheel_paths(selected,cache)
+    manifest.parent.mkdir(parents=True,exist_ok=True);manifest.write_bytes(payload)
+    return data
+
 def load_profile(path):
     """Host-owned convenience recipe; every selected run is still reverified."""
     value,_=read(Path(path))
@@ -148,6 +218,212 @@ def load_profile(path):
     return selected
 
 
+
+def retained_mcp_store(cache_root):
+    """Resolve MCP's unchanged adapter from the active or historical release."""
+    from lab_runner.mcp_client import RETAINED_WHEELS
+    from scripts.prepare_dependencies import prepare
+
+    name = 'b3-prosaic-harness-postgres'
+    released = ROOT/'dependencies/releases.json'
+    item = next(entry for entry in sdk_manifest(released)['artifacts'] if entry['distribution'] == name)
+    if item['sha256'] == RETAINED_WHEELS[name]:
+        return item, cache_directory(released, cache_root)/item['filename']
+
+    archived = ROOT/'dependencies/releases-pre-mcp-client-2026-11-11.json'
+    item = next(entry for entry in sdk_manifest(archived)['artifacts'] if entry['distribution'] == name)
+    if item['sha256'] != RETAINED_WHEELS[name]:
+        raise ValueError('historical MCP adapter differs from released bytes')
+    return item, prepare(archived, cache_root)/item['filename']
+
+
+def curate_parallel_tools(runtime_directory,harness_directory,manifest,cache_root,*,mcp_client=False,sub_agents=False):
+    """Consume local build-once receipts; never invoke a hosted release workflow."""
+    from lab_runner.parallel_tools import validate_parallel_manifest
+    from prosaic_integration_lab.parallel_tools import TRAIN
+    validate = validate_parallel_manifest
+    kind, label, prefix = 'local-parallel-tool-handoff', 'parallel-tool-consumer', 'parallel'
+    retained_names = ['b3-prosaic', 'b3-prosaic-runtime-postgres']
+    harness_names = {'b3-prosaic-harness', 'b3-prosaic-harness-postgres'}
+    if mcp_client:
+        from lab_runner.mcp_client import validate_mcp_manifest
+        from prosaic_integration_lab.mcp_client import TRAIN
+        validate = validate_mcp_manifest
+        kind, label, prefix = 'local-mcp-client-handoff', 'mcp-client-consumer', 'mcp'
+        retained_names.append('b3-prosaic-harness-postgres')
+        harness_names.remove('b3-prosaic-harness-postgres')
+    if sub_agents:
+        from lab_runner.sub_agents import validate_sub_agent_manifest
+        from prosaic_integration_lab.sub_agents import TRAIN
+        validate = validate_sub_agent_manifest
+        kind, label, prefix = 'local-sub-agent-handoff', 'sub-agent-consumer', 'sub-agents'
+    manifest=Path(manifest);cache_root=Path(cache_root)
+    if manifest.resolve().is_relative_to((ROOT/'dependencies').resolve()):raise ValueError('candidate cannot replace public manifests')
+    released_manifest=ROOT/'dependencies/releases.json'
+    released=sdk_manifest(released_manifest);artifacts=[];sources={};paired=[];retained=[]
+    for sdk,directory,names in [('runtime',Path(runtime_directory),{'b3-prosaic-runtime'}),('harness',Path(harness_directory),harness_names)]:
+        receipt,_=read(directory/'release-receipt.json');qualification,_=read(directory/f'qualification-{label}.json')
+        candidate=dict(sdk=sdk,receipt=receipt,qualification=qualification)
+        if sdk=='harness':
+            candidate.update(runtime_receipt=read(directory/f'{prefix}-runtime-receipt.json')[0],runtime_qualification=read(directory/f'{prefix}-runtime-qualification.json')[0])
+        paired.append(candidate)
+        for name in sorted(names):
+            filename=name.replace('-','_')+'-'+TRAIN[name]+'-py3-none-any.whl'
+            item=next(item for item in receipt['artifacts'] if item['filename']==filename)
+            artifacts.append(dict(distribution=name,version=TRAIN[name],source_commit=receipt['source_commit'],**item));sources[filename]=directory/filename
+    # Retain the original audited Core/recorder payloads and provenance.
+    for name in retained_names:
+        if mcp_client and name == 'b3-prosaic-harness-postgres':
+            item, source = retained_mcp_store(cache_root)
+        elif name == 'b3-prosaic':
+            from scripts.prepare_dependencies import prepare
+
+            archived = ROOT/'dependencies/releases-pre-ontology-2026-11-13.json'
+            item = next(entry for entry in sdk_manifest(archived)['artifacts'] if entry['distribution'] == name)
+            source = prepare(archived, cache_root)/item['filename']
+        else:
+            item=next(item for item in released['artifacts'] if item['distribution']==name)
+            source=cache_directory(released_manifest,cache_root)/item['filename']
+        if not source.is_file():raise ValueError('original released wheel cache required')
+        artifacts.append(dict(item));retained.append(dict(item));sources[item['filename']]=source
+    data=dict(artifacts=artifacts,candidate_lineage=dict(version=1,kind=kind,candidates=paired,retained_artifacts=retained))
+    validate(data);payload=serialized(data)
+    if manifest.exists() and manifest.read_bytes()!=payload:raise ValueError('candidate manifest is immutable')
+    with tempfile.TemporaryDirectory() as temporary:
+        probe=Path(temporary)/'manifest.json';probe.write_bytes(payload);sdk_manifest(probe)
+        cache=cache_directory(probe,cache_root);cache.mkdir(parents=True,exist_ok=True)
+        for item in artifacts:
+            source=sources[item['filename']];target=cache/item['filename']
+            if source.is_symlink() or file_digest(source)!=item['sha256']:raise ValueError('candidate payload differs')
+            if target.exists() and file_digest(target)!=item['sha256']:raise ValueError('candidate cache conflict')
+            shutil.copyfile(source,target)
+        verified_wheel_paths(probe,cache)
+    manifest.parent.mkdir(parents=True,exist_ok=True);manifest.write_bytes(payload)
+    return data
+
+def curate_catalogue_ontology(core_dir, harness_dir, manifest, cache_root, *, hosted=None):
+    """Bind the separate ontology proof and stage two candidates plus three public wheels."""
+    from xml.etree import ElementTree
+    from lab_runner.catalogue_ontology import CASES, KIND, PACKAGES, PUBLIC_PROFILE, RETAINED, TRAIN, validate_manifest
+    from scripts.prepare_dependencies import prepare
+
+    core_dir, harness_dir, manifest, cache_root = map(Path, (core_dir, harness_dir, manifest, cache_root))
+    if manifest.is_symlink() or manifest.resolve().is_relative_to((ROOT / 'dependencies').resolve()):
+        raise ValueError('candidate cannot replace public manifests')
+    core, core_bytes = read(core_dir / 'release-receipt.json')
+    harness, harness_bytes = read(harness_dir / 'release-receipt.json')
+    proof, proof_bytes = read(harness_dir / 'catalogue-ontology-compatibility.json')
+    upstream, upstream_bytes = read(harness_dir / 'upstream-receipt.json')
+    for document, content in ((core, core_bytes), (harness, harness_bytes),
+                              (proof, proof_bytes), (upstream, upstream_bytes)):
+        if serialized(document) != content:
+            raise ValueError('candidate receipts must retain their canonical bytes')
+    if hosted is None:
+        if proof['core']['run_id'] is not None:
+            raise ValueError('hosted evidence requires verified run identities')
+        harness_run = None
+    else:
+        core_run, core_commit, harness_run, harness_commit = hosted
+        if (proof['core']['run_id'] != core_run or core['source_commit'] != core_commit
+                or harness['source_commit'] != harness_commit):
+            raise ValueError('ontology candidate run binding differs')
+
+    released_manifest = PUBLIC_PROFILE
+    retained = [item for item in sdk_manifest(released_manifest)['artifacts']
+                if item['distribution'] in RETAINED]
+    artifacts = retained.copy()
+    sources = {}
+    for sdk, directory, receipt in (('core', core_dir, core), ('harness', harness_dir, harness)):
+        name = PACKAGES[sdk]
+        filename = name.replace('-', '_') + '-' + TRAIN[name] + '-py3-none-any.whl'
+        selected, = [item for item in receipt['artifacts'] if item['filename'] == filename]
+        artifacts.append({'distribution': name, 'version': TRAIN[name],
+                          'source_commit': receipt['source_commit'], **selected})
+        sources[filename] = directory / filename
+    lineage = {'version': 1, 'kind': KIND, 'core_receipt': core, 'harness_receipt': harness,
+               'harness_upstream': upstream, 'compatibility': proof,
+               'compatibility_sha256': digest(proof_bytes), 'harness_run_id': harness_run,
+               'retained_artifacts': retained}
+    data = validate_manifest({'artifacts': artifacts, 'candidate_lineage': lineage}, hosted=hosted is not None)
+    for directory, receipt in ((core_dir, core), (harness_dir, harness)):
+        inventory = {item['filename']: item['sha256'] for item in receipt['artifacts']}
+        if {path.name for path in directory.iterdir() if path.name.endswith(('.whl', '.tar.gz'))} != set(inventory):
+            raise ValueError('ontology candidate artifact inventory differs')
+        for name, sha in inventory.items():
+            path = directory / name
+            if path.is_symlink() or not path.is_file() or file_digest(path) != sha:
+                raise ValueError('ontology candidate payload differs')
+    for origin, result in proof['results'].items():
+        path = harness_dir / f'catalogue-ontology-{origin}.xml'
+        if path.is_symlink():
+            raise ValueError('unsafe ontology qualification result')
+        with path.open('rb') as stream:
+            raw = stream.read(262145)
+        if len(raw) > 262144 or digest(raw) != result['junit_sha256']:
+            raise ValueError('ontology qualification result digest differs')
+        suite, = ElementTree.fromstring(raw).iter('testsuite')
+        cases = list(suite.iter('testcase'))
+        if (sorted(case.attrib['name'] for case in cases) != CASES
+                or [int(suite.attrib[key]) for key in ('tests', 'failures', 'errors', 'skipped')]
+                != [len(CASES), 0, 0, 0]
+                or any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))):
+            raise ValueError('incomplete ontology qualification result')
+
+    payload = serialized(data)
+    if manifest.exists() and manifest.read_bytes() != payload:
+        raise ValueError('candidate manifest is immutable')
+    released_cache = prepare(released_manifest, cache_root)
+    sources.update({item['filename']: released_cache / item['filename'] for item in retained})
+    with tempfile.TemporaryDirectory(prefix='ontology-manifest-') as temporary:
+        probe = Path(temporary) / 'manifest.json'
+        probe.write_bytes(payload)
+        sdk_manifest(probe)
+        cache = cache_directory(probe, cache_root)
+        if cache.is_symlink():
+            raise ValueError('unsafe ontology candidate cache')
+        cache.mkdir(parents=True, exist_ok=True)
+        for item in artifacts:
+            name, sha = item['filename'], item['sha256']
+            source, target = sources[name], cache / name
+            if source.is_symlink() or file_digest(source) != sha:
+                raise ValueError('ontology candidate payload differs')
+            if target.is_symlink() or (target.exists() and file_digest(target) != sha):
+                raise ValueError('ontology candidate cache conflict')
+            if not target.exists():
+                shutil.copyfile(source, target)
+        verified_wheel_paths(probe, cache)
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with manifest.open('xb') as stream:
+            stream.write(payload)
+    except FileExistsError:
+        if manifest.is_symlink() or manifest.read_bytes() != payload:
+            raise ValueError('candidate manifest is immutable')
+    return data
+
+
+def _hosted_ontology(args):
+    identities = (args.core_run_id, args.core_source, args.harness_run_id, args.harness_source)
+    if not all(identities):
+        raise ValueError('ontology requires two explicit run and source pairs')
+    with tempfile.TemporaryDirectory(prefix='lab-ontology-candidates-') as temporary:
+        root = Path(temporary)
+        for sdk, repository, run, commit in (
+                ('core', 'B3Cognition/prosaic', *identities[:2]),
+                ('harness', 'B3Cognition/prosaic-harness', *identities[2:])):
+            if not re.fullmatch('[1-9][0-9]*', run):
+                raise ValueError('invalid ontology qualification run')
+            result = subprocess.check_output(['gh', 'api', f'repos/{repository}/actions/runs/{run}'], timeout=60)
+            run_record = json.loads(result)
+            validate_run(run_record, commit)
+            if run_record['id'] != int(run) or run_record['repository']['full_name'] != repository:
+                raise ValueError('ontology qualification run identity differs')
+            subprocess.run(['gh', 'run', 'download', run, '--repo', repository, '--name', 'qualified-release',
+                            '--dir', str(root / sdk)], check=True, timeout=120)
+        return curate_catalogue_ontology(root / 'core', root / 'harness', args.manifest,
+                                        args.cache_root, hosted=identities)
+
+
 def main(argv=None):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile',type=Path,help='pinned Core/Runtime/Harness run and source recipe')
@@ -156,8 +432,39 @@ def main(argv=None):
         parser.add_argument('--'+prefix+'-source')
     parser.add_argument('--manifest',type=Path,required=True)
     parser.add_argument('--cache-root',type=Path,default=ROOT/'.cache/wheels')
-    parser.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
+    features=parser.add_mutually_exclusive_group()
+    features.add_argument('--context-assembly',action='store_true',help='qualify the context SDK train and retain original Runtime PostgreSQL bytes')
+    features.add_argument('--parallel-tools',action='store_true',help='curate explicit local parallel candidate archives without publication')
+    features.add_argument('--mcp-client',action='store_true',help='curate exact qualified local MCP candidate wheels')
+    features.add_argument('--sub-agents',action='store_true',help='curate exact local delegation candidate wheels')
+    features.add_argument('--catalogue-ontology',action='store_true',help='curate the exact qualified ontology pair')
+    parser.add_argument('--core-artifacts',type=Path)
+    parser.add_argument('--runtime-artifacts',type=Path)
+    parser.add_argument('--harness-artifacts',type=Path)
+    features.add_argument('--tool-contracts',action='store_true',help='curate only qualified safe-event/citation candidate workflows')
+    features.add_argument('--context-packs',action='store_true',help='qualify the exact context-pack SDK train and retain original Runtime PostgreSQL bytes')
+    features.add_argument('--cli-sandbox',action='store_true',help='curate the exact CLI sandbox SDK candidates')
     args=parser.parse_args(argv)
+    if args.catalogue_ontology:
+        if any((args.profile, args.runtime_artifacts, args.runtime_run_id, args.runtime_source)):
+            parser.error('ontology retains the published Runtime and requires an explicit Core/Harness pair')
+        if args.core_artifacts is not None or args.harness_artifacts is not None:
+            if not all((args.core_artifacts, args.harness_artifacts)):
+                parser.error('local ontology handoff requires Core and Harness artifact directories')
+            if any((args.core_run_id, args.core_source, args.harness_run_id, args.harness_source)):
+                parser.error('local artifact paths cannot be combined with hosted run identities')
+            data = curate_catalogue_ontology(args.core_artifacts, args.harness_artifacts, args.manifest,
+                                            args.cache_root)
+        else:
+            data = _hosted_ontology(args)
+        print(json.dumps({'manifest': str(args.manifest), 'kind': data['candidate_lineage']['kind']}))
+        return 0
+    if args.parallel_tools or args.mcp_client or args.sub_agents:
+        if args.runtime_artifacts is None or args.harness_artifacts is None:parser.error("local handoff requires both artifact directories")
+        result=curate_parallel_tools(args.runtime_artifacts,args.harness_artifacts,args.manifest,args.cache_root,
+                                     mcp_client=args.mcp_client,sub_agents=args.sub_agents)
+        print(json.dumps({"manifest":str(args.manifest),"kind":result["candidate_lineage"]["kind"]}))
+        return 0
     manual=[getattr(args,prefix+'_'+field) for prefix in ('core','runtime','harness')
             for field in ('run_id','source')]
     if args.profile is not None and any(value is not None for value in manual):
@@ -176,12 +483,15 @@ def main(argv=None):
             for prefix,(repository,run_id,commit) in zip(('core','runtime','harness'),selected):
                 result=subprocess.run(['gh','api','repos/'+repository+'/actions/runs/'+run_id],
                     capture_output=True,text=True,check=True,timeout=60)
-                validate_run(json.loads(result.stdout),commit)
+                validate_run(json.loads(result.stdout),commit,tool_contracts=args.tool_contracts and repository!='B3Cognition/prosaic')
                 directory=Path(temporary)/prefix
                 subprocess.run(['gh','run','download',run_id,'--repo',repository,'--name','qualified-release',
                     '--dir',str(directory)],capture_output=True,check=True,timeout=120)
+                if args.tool_contracts and repository!='B3Cognition/prosaic':
+                    (directory/'tool-contract-run.json').write_bytes(serialized(json.loads(result.stdout)))
                 candidates.append((repository,run_id,commit,directory))
-            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly)
+            data=curate(candidates,args.manifest,args.cache_root,context_assembly=args.context_assembly,
+                        context_packs=args.context_packs,tool_contracts=args.tool_contracts,cli_sandbox=args.cli_sandbox)
         print(json.dumps({'event':'candidate_sdk_bytes_verified','candidate_manifest_sha256':digest(args.manifest.read_bytes()),
             'candidate_lineage_sha256':digest(serialized(data['candidate_lineage'])),'wheel_count':5}))
         return 0

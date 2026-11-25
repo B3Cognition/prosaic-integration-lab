@@ -1,5 +1,66 @@
 # Required release gates
 
+Released integration acceptance requires the [Bubblewrap image qualification](sandboxed-tools.md#qualify-the-linux-image)
+on native AMD64 and ARM64 with PostgreSQL 16 and 18. Each job runs a dedicated
+CLI worker under the reviewed Docker policy and then uses the same immutable
+image for the required real-stack gates. The witness exercises Runtime 0.9.28's
+required default with the published Harness 0.9.20 wheels.
+
+After the four required cells pass, dispatch **Publish Lab Linux images** on
+`main`. It builds native AMD64 and ARM64 images from the checksummed manifest.
+Each architecture passes the Bubblewrap witness before upload. The workflow
+publishes a GHCR index under `sha-<main-commit>`, then verifies the installed
+wheels and default confinement on fresh native runners that pull by index
+digest. Use the digest reported by the workflow for deployment.
+
+**Verify public Linux image setup** runs on every push to `main` and can also
+be dispatched manually on `main`. Both native jobs use the [release-note pull
+and Bubblewrap commands](releases.md#public-linux-images) with an empty GHCR
+credential entry. Each checks its published platform digest and verifies that
+the AppArmor profile, witness containers, and temporary seccomp file are gone.
+
+Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
+to pass all four synthetic cases from the installed Lab wheel and rebuilt
+source, using the checksum-pinned Runtime 0.9.26 profile.
+
+Lab 0.9.18 requires the [guarded recovery blueprint](guarded-recovery.md) to pass both synthetic provider wires from the Lab wheel and the wheel rebuilt from source. Its separate SDK profile is checksum-pinned.
+
+The same workflow qualifies guarded bounded tool recovery from both archive
+origins with the active published SDK manifest.
+
+Lab 0.9.17 verifies catalogue ontology in both installed package paths with
+the exact released SDK profile. Each Linux architecture and PostgreSQL
+cell also runs the existing 14 lanes and 450 real-stack cases.
+
+The [catalogue ontology candidate check](catalogue-ontology.md#qualify-the-candidate-sdks)
+requires exact build-only Core and Harness artifacts and Harness's separate
+compatibility receipt for the released Runtime 0.9.23 wheel. It requires
+both installed Lab distribution paths, cross-version file and PostgreSQL
+recovery, and the existing 14-lane, 450-case matrix. The candidate uses a
+separate manifest with the original released Runtime and adapter bytes.
+
+The [experimental catalogue ontology check](catalogue-ontology.md) runs on
+manual dispatch and ontology-specific pull requests with its own RC lock.
+The released matrix uses the stable SDK manifests.
+
+Lab 0.9.16 adds the [bounded delegation lane](sub-agents.md) to the released architecture and PostgreSQL matrix. Each cell requires 450 cases across 14 lanes, including 24 delegation cases on the two synthetic provider protocols.
+
+Lab 0.9.15 adds the MCP client lane to the released architecture and PostgreSQL matrix. Each 0.9.15 cell ran 13 lanes and 426 required cases with the checksum-pinned MCP SDK family and optional dependency lock. See the [MCP release notes](release-0.9.15.md).
+
+Each added capability requires a [feature map](feature-blueprints.md) entry,
+copyable blueprint, installed acceptance and user guide before release. The
+installed feature suite runs in all four rule cells and both wheel/rebuilt-source
+distribution consumers.
+
+The 0.9.8 release family is Core 0.5.0, Runtime 0.9.16, Harness 0.9.11,
+Runtime recorder 0.3.0 and Harness store 0.4.1. It retains all nine required
+lanes and all 103 conversation/context cases. Prior exact trains and their
+receipts remain preserved; unknown mixtures still fail admission.
+Four additional installed rule-admission cells on Linux AMD64/ARM64 × PostgreSQL
+16/18 and both installed-reasoning jobs are mandatory for Lab 0.9.8 release.
+The rule lane installs only the active released SDK manifest and uses the same
+immutable PostgreSQL image digests as the ordinary acceptance inventory.
+
 CI runs unit/functional tests and owned `audit`, `identity`, `ingress`, `lago`,
 `native-persistence`, `native`, `legacy-upgrade`, `qualification` and `conversation` lanes
 on PostgreSQL 16/18 and native AMD64/ARM64 Linux runners. Actions and container
@@ -48,15 +109,13 @@ The HTTP surface uses saved JSON views; transient SDK streaming deltas are not a
 Lab client protocol in this MVP. Every new case joins the exact count contract;
 the historical eight-lane receipts remain unchanged.
 
-Staged activation is explicit. The exact currently published SDK train has no
-Conversation capability and retains the original eight released gates. Its
-source job excludes only the three new installed conversation functional files;
-all older functional tests and new pure host units still run. Explicit candidate
-dispatch requires the coherent new five-package train, public capability, all
-nine lanes, full source tests and distribution/demo checks. Once active released
-pins point at that exact new train, released CI automatically requires the same
-nine lanes and full conversation checks. Unknown/mixed versions fail admission;
-the old train never emits a passing conversation receipt.
+Staged activation remains explicit for historical reproduction. Earlier trains
+without Conversation capability retain their original eight gates; their source
+job excludes only the three installed conversation functional files. The active
+released five-package train requires all 14 lanes, full source tests and
+distribution/demo checks. Explicit candidate dispatch requires equally complete
+lineage and capability evidence. Unknown/mixed versions fail admission; an old
+train never emits a passing conversation receipt.
 
 The separate distribution smoke installs both the Lab wheel and a wheel rebuilt
 from its exact sdist in neutral environments, audits all five SDK payloads and
@@ -74,7 +133,7 @@ import ownership, CLI startup, `pip check` and public workflow construction. Its
 sanitized receipt is exported separately; unpublished candidates cannot pass a
 public-index adoption check by substituting their local artifacts.
 
-The current collection contracts are audit88, identity20, ingress5, Lago25,
+The historical eight-lane collection contracts were audit88, identity20, ingress5, Lago25,
 native-persistence26, native53, legacy-upgrade10 and qualification3 (230 per cell).
 The Lab 0.3.0 released evidence below retains its original 216-case contract;
 the added cases require fresh qualification of this source. Counts must
@@ -154,3 +213,5 @@ the upstream fixes first, update provenance deliberately, run the required nativ
 matrix, then require all four checks in branch protection. Preserve failing
 historical receipts and the prior pinned images for compatible pending-run
 recovery. Runner process/daemon failure cannot be called verified cleanup.
+
+The [bounded delegation candidate lane](sub-agents.md) requires 24 cases in each PostgreSQL and architecture cell. The exact candidate family also runs the 13 existing lanes for a total of 450 cases per cell.

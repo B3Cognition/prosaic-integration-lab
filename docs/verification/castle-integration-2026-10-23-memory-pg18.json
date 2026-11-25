@@ -1,0 +1,57 @@
+{
+  "enabled": true,
+  "qualified": true,
+  "manifest_sha256": "c93c82347f2b9cfb143b8fff5c53b5b868056048a86445693d841c233c98363d",
+  "artifacts": [
+    {
+      "distribution": "b3-prosaic",
+      "version": "0.4.1",
+      "sha256": "07710a5b9c94e3f3877241a4f5138d9b777d724098eb8e24b9738fb3cea28c51"
+    },
+    {
+      "distribution": "b3-prosaic-runtime",
+      "version": "0.9.7",
+      "sha256": "3caebab8602d0a55d0a119be9cbbb2b0d24c922979d9f7ab0a5839defd4674bb"
+    },
+    {
+      "distribution": "b3-prosaic-runtime-postgres",
+      "version": "0.3.0",
+      "sha256": "5f29ce5b0a1cb3ce4ee41f44c50e322b5b1af73cbe186ecadc428f81ccc7b5ca"
+    },
+    {
+      "distribution": "b3-prosaic-harness",
+      "version": "0.9.4",
+      "sha256": "4fcb1f4f0b8cb0d5c273aadbc28dd9bc5d3a7b7e2f4dddd5e1bab357706eb52b"
+    },
+    {
+      "distribution": "b3-prosaic-harness-postgres",
+      "version": "0.4.0",
+      "sha256": "35b6b9c4493b13187eed070403a45abe1f47522e5e0fd563b4514b492bd1703a"
+    },
+    {
+      "distribution": "b3-prosaic-memory-castle",
+      "version": "0.1.0",
+      "sha256": "7cb839563436c8105fad08deee128bbe108d44ac40eb09dd00d53285315d11fd"
+    },
+    {
+      "distribution": "cognitive-castle",
+      "version": "3.4.1",
+      "sha256": "565b2a13d6dc45dd56a4b3aaaed4ece9282218c92297a36643fd59a554f025ac"
+    }
+  ],
+  "synthetic_only": true,
+  "private_state_exported": false,
+  "tests": 6,
+  "failures": 0,
+  "skipped": 0,
+  "postgres": {
+    "owner": "6c2088be49cf4f53a0cde90e67ac8fac",
+    "kind": "optional-memory",
+    "cleanup_verified": true,
+    "image_id": "sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+    "architecture": "arm64",
+    "container_id": "90c2446d1ade585c0fa44277021398eadc9aa4f97968957a38632c1de407bf54",
+    "server_version": "18.6 (Debian 18.6-1.pgdg13+2)",
+    "separate_runtime_role": true
+  }
+}

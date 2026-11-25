@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "supported": {"type": "boolean"},
+    "summary": {"type": "string", "maxLength": 2048}
+  },
+  "required": ["supported", "summary"],
+  "additionalProperties": false
+}

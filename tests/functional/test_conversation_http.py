@@ -115,14 +115,82 @@ def test_public_approval_phase_failure_retains_real_journal_and_never_resumes(ch
     assert len(domain)==effects and len(journal)==effects
     if effects:assert journal[0][4]=='completed'
     assert run.state['status']==('completed' if effects else 'waiting')
+    from prosaic_harness import ConversationScope
+    scope=ConversationScope('owned-chat','sandbox','integration-lab-chat','tenant-a','alice','payer')
+    consumer=chat.client.app.state.execution.conversation
+    pending=consumer.store.load_session(session['sessionId'],scope=scope).state['pending']
+    assert pending['phase']=='workflowCommand'
+    command=pending['command']
+    assert command['sourceMessageId']=='approve' and command['choice']=='approve'
+    assert command['response']=={'confirmed':True}
+    assert command['revision']==session['pendingInteraction']['revision']
+    assert command['runId']==session['sessionId']
+    matches=[event for event in run.state['history'] if event.get('decision_id')==command['decisionId']]
+    assert len(matches)==effects
+    if effects:
+        assert matches[0]['decision_revision']==command['revision']
+        assert matches[0]['choice']==command['choice'] and matches[0]['response']==command['response']
+        assert run.state['pending'] is None
+    chat.restore()
+    recovered=None
     for _ in range(2):
         result=chat.client.post('/conversations/'+session['sessionId']+'/recover',json={},headers=HEADERS)
         assert result.status_code==200
-        recovered = result.json()
-        # A saved matching decision can now be reconciled after return without
-        # resuming the workflow; a merely prepared command remains uncertain.
-        assert recovered['status'] == ('completed' if effects else 'needsResolution')
-        assert recovered['recoveryStatus'] == (None if effects else 'needsResolution')
-        assert stats(chat)==before and chat.host.store.load_run(session['sessionId']).revision==run.revision
+        current=result.json()
+        # Only the exact committed decision can be adopted; a prepared command stays unresolved.
+        assert current['status']==('completed' if effects else 'needsResolution')
+        assert current['recoveryStatus']==(None if effects else 'needsResolution')
+        assert current['failureCode']==(None if effects else 'interrupted')
+        if effects:assert current['answer']=='Workflow completed.' and current['pendingInteraction'] is None
+        if recovered is not None:assert current==recovered
+        recovered=current
+        assert stats(chat)==before and chat.host.store.load_run(session['sessionId'])==run
+        with sqlite3.connect(chat.effects_path) as connection:assert connection.execute('SELECT * FROM effects').fetchall()==domain
+        with sqlite3.connect(chat.journal_path) as connection:assert connection.execute('SELECT * FROM tool_operations').fetchall()==journal
+
+
+@pytest.mark.parametrize('decision_id',[None,'f'*32],ids=['missing-id','different-id'])
+def test_recovery_does_not_adopt_an_unrelated_completed_approval(chat_client,monkeypatch,decision_id):
+    """Terminal state and matching choice/response cannot establish this command's completion."""
+    from prosaic_harness import Harness
+    from prosaic_runtime import ExecutionContext
+    import sqlite3
+    import prosaic_integration_lab.conversation_execution as api
+
+    chat=chat_client;session=send(chat,create(chat),'find','Find players')
+    session=send(chat,session,'second','the second result',reference=session['pendingInteraction']['reference'])
+    original=api.phase_observer
+    def lose_ack(config,on_event=None):
+        callback=original(config,on_event)
+        def observed(event):
+            callback(event)
+            if event['event']=='workflowCommandPrepared':raise RuntimeError('host acknowledgement lost')
+        return observed
+    monkeypatch.setattr(api,'phase_observer',lose_ack)
+    send(chat,session,'approve','approve',reference=session['pendingInteraction']['reference'],status=503)
+    workflow,_=chat.client.app.state.execution.conversation.workflow_materials['balanced-v1']
+    sid=session['sessionId']
+    harness=Harness(workflow,store=chat.host.store,run_id=sid,context=ExecutionContext(
+        application_id='integration-lab-chat',tenant_id='tenant-a',actor_id='alice',billing_account_id='payer',
+        request_id='workflow-'+sid,run_id=sid))
+    harness.resume(choice='approve',response={'confirmed':True},expected_revision=session['pendingInteraction']['revision'],
+        decision_id=decision_id)
+    saved=chat.host.store.load_run(sid)
+    assert saved.state['status']=='completed' and saved.state['pending'] is None
+    before=stats(chat)
+    with sqlite3.connect(chat.effects_path) as connection:domain=connection.execute('SELECT * FROM effects').fetchall()
+    with sqlite3.connect(chat.journal_path) as connection:journal=connection.execute('SELECT * FROM tool_operations').fetchall()
+    assert len(domain)==len(journal)==1 and journal[0][4]=='completed'
+    chat.restore()
+    recovered=None
+    for _ in range(2):
+        result=chat.client.post('/conversations/'+sid+'/recover',json={},headers=HEADERS)
+        assert result.status_code==200
+        current=result.json()
+        assert current['status']=='needsResolution' and current['recoveryStatus']=='needsResolution'
+        assert current['failureCode']=='interrupted' and 'answer' not in current
+        if recovered is not None:assert current==recovered
+        recovered=current
+        assert stats(chat)==before and chat.host.store.load_run(sid)==saved
         with sqlite3.connect(chat.effects_path) as connection:assert connection.execute('SELECT * FROM effects').fetchall()==domain
         with sqlite3.connect(chat.journal_path) as connection:assert connection.execute('SELECT * FROM tool_operations').fetchall()==journal

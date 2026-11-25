@@ -17,7 +17,7 @@ profiles:
     api_key_file: ~/.omlx_token
     max_tokens: 512
     features:
-      streaming: false
+      streaming: true
       finalize_after_tool_rounds: 1
       omlx_tool_call_envelope: true
       json_mode: true
@@ -27,5 +27,5 @@ profiles:
     api_key_file: ~/.omlx_token
     max_tokens: 512
     features:
-      streaming: false
+      streaming: true
       finalize_after_tool_rounds: 1
