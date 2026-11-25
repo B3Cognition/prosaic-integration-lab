@@ -1,5 +1,13 @@
 # Codex handoff
 
+## Bounded coordination blueprint
+
+The [two-worker example](bounded-coordination.md) uses public Runtime budgets
+and independent Harness stores. Its installed-distribution smoke exercises both
+provider formats, sequential and concurrent runs, and no-network replay. See the
+[original qualification ledger](verification/bounded-coordination-2026-10-20.md)
+for the historical source and SDK train.
+
 ## Published sandbox SDKs in the Linux images
 
 The ordinary Linux image and rule-admission manifest now selects the published

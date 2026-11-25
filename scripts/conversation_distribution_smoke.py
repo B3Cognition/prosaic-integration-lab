@@ -213,6 +213,10 @@ def consume(wheel,*,directory,manifest,wheels,lock,environment):
             directory=directory,environment=environment)
         run([python,'-I','-B',ROOT/'scripts/sandboxed_tools_smoke.py','--output',directory/'sandbox-proof','--replay'],
             directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/coordination_smoke.py','--output',directory/'coordination-proof'],
+            directory=directory,environment=environment)
+        run([python,'-I','-B',ROOT/'scripts/coordination_smoke.py','--output',directory/'coordination-proof','--replay'],
+            directory=directory,environment=environment)
     from lab_runner.gates import MCP_CLIENT_RELEASE_TRAIN, MCP_CLIENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, supports_sub_agents
     if versions in (UNIFIED_POOL_TRAIN, CORE050_TRAIN, GUARDED_RULE_TRAIN, HARNESS0910_TRAIN, CEREBRO_V1_TRAIN, WORKFLOW_RULE_TRAIN, ACCOUNTING_METADATA_TRAIN, SENT_EFFORT_TRAIN, CONTEXT_PACK_TRAIN, TOOL_EVIDENCE_TRAIN, PARALLEL_TOOL_TRAIN, PARALLEL_RELEASE_TRAIN, MCP_CLIENT_TRAIN, MCP_CLIENT_RELEASE_TRAIN, SUB_AGENT_TRAIN, SUB_AGENT_RELEASE_TRAIN, *ONTOLOGY_TRAINS):
         for command,count in (('test',9),('unified-test',11),('unified-cli-test',13),('unified-fallback-test',18)):

@@ -7,6 +7,13 @@ Core 0.5.1, Harness 0.9.20, and the Runtime recorder 0.3.0. The
 [guarded recovery blueprint](guarded-recovery.md) covers the required-tool
 repro on both synthetic provider protocols.
 
+## Bounded coordination
+
+The [two-worker blueprint](bounded-coordination.md) demonstrates typed host
+assignments, shared execution limits, and receipt-only inspection. The
+[October 20 qualification ledger](verification/bounded-coordination-2026-10-20.md)
+records the original 48 scripted cases and their tested SDK versions.
+
 ## Linux images with the published sandbox SDKs
 
 The documented GHCR image digest contains Runtime 0.9.27 and Harness 0.9.20 with Core
