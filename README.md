@@ -1,13 +1,13 @@
 # Prosaic integration lab
 
+Lab **0.9.21** adds the experimental [bounded coordination blueprint](docs/bounded-coordination.md)
+for two independent Harness runs with a shared Runtime budget, scoped evidence,
+and receipt-only recovery. See the [0.9.21 release notes](docs/release-0.9.21.md).
+
 Lab **0.9.20** uses Runtime **0.9.28** and Harness PostgreSQL **0.4.6**. The
 [guarded recovery blueprint](docs/guarded-recovery.md) covers both synthetic
 provider protocols with bounded tool recovery enabled. See the
 [0.9.20 release notes](docs/release-0.9.20.md).
-
-The experimental [bounded coordination blueprint](docs/bounded-coordination.md)
-composes two public Harness runs with a shared Runtime budget, scoped evidence,
-and receipt-only recovery.
 
 Lab **0.9.19** ships the [Nemotron lookup correction blueprint](docs/nemotron-correction.md) using Runtime 0.9.26. See the [release notes](docs/release-0.9.19.md).
 

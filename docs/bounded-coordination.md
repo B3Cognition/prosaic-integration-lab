@@ -99,7 +99,8 @@ FailureIsolation fences journal writes, not arbitrary running processes.
 
 ## Qualify adoption
 
-With the public SDK train installed, source execution is:
+Use Lab 0.9.21 and the published wheels pinned in `dependencies/releases.json`.
+With that SDK train installed, run the source example with these commands.
 
 ```sh
 python scripts/coordination_smoke.py --source-root . --output /absolute/private/fresh-proof
