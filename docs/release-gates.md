@@ -19,6 +19,11 @@ and Bubblewrap commands](releases.md#public-linux-images) with an empty GHCR
 credential entry. Each checks its published platform digest and verifies that
 the AppArmor profile, witness containers, and temporary seccomp file are gone.
 
+Lab 0.9.21 requires the [bounded coordination blueprint](bounded-coordination.md)
+to pass 48 synthetic cases and network-disabled replay from both the installed
+Lab wheel and the wheel rebuilt from source. Both origins use the active
+published SDK manifest.
+
 Lab 0.9.19 requires the [Nemotron correction blueprint](nemotron-correction.md)
 to pass all four synthetic cases from the installed Lab wheel and rebuilt
 source, using the checksum-pinned Runtime 0.9.26 profile.

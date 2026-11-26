@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.21
+
+- Add the experimental [bounded coordination blueprint](docs/bounded-coordination.md) for two independent Harness runs under one shared Runtime budget, with scoped evidence and receipt-only recovery.
+- Exercise 48 synthetic cases and network-disabled replay from both the installed Lab wheel and the rebuilt source distribution. See the [0.9.21 release notes](docs/release-0.9.21.md).
+
 ## 0.9.20
 
 - Pin Lab source builds to the published Runtime 0.9.28 and Harness PostgreSQL 0.4.6 wheels.
